@@ -1,5 +1,7 @@
-import { Bell, Search, Settings, User } from 'lucide-react';
+// src/components/Header.js
+import { Bell, Search, Settings, User, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import LanguageSwitcher from '../LanguageSwitcher.jsx';
 
 const Header = ({ isSidebarCollapsed = false }) => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -14,22 +16,7 @@ const Header = ({ isSidebarCollapsed = false }) => {
             time: '11:30 AM',
             read: false
         },
-        {
-            id: 2,
-            type: 'error',
-            title: 'Booking Cancelled',
-            message: "Naaman Zaki's booking at Zayed Sport City was canceled.",
-            time: '2:45 PM',
-            read: false
-        },
-        {
-            id: 3,
-            type: 'warning',
-            title: 'Booking Cancellation Requested',
-            message: 'Rahman Saeed has submitted a new request to list the venue Rawdhat in the app.',
-            time: '4:20 PM',
-            read: false
-        }
+        // ... other notifications
     ];
 
     // Close dropdowns when clicking outside
@@ -69,6 +56,9 @@ const Header = ({ isSidebarCollapsed = false }) => {
                                 className="pl-10 pr-4 py-2 w-64 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             />
                         </div>
+
+                        {/* Language Selector */}
+                        <LanguageSwitcher />
 
                         {/* Notifications */}
                         <div className="relative">

@@ -1,0 +1,14 @@
+{
+  "welcome": "مرحباً بك في تطبيقنا",
+  "description": "هذا تطبيق React متعدد اللغات",
+  "buttons": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "about": "من نحن",
+    "contact": "اتصل بنا"
+  }
+}

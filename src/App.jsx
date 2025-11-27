@@ -1,14 +1,15 @@
+
 // src/App.jsx
 import { RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import router from './routes';
-import AppContent from './AppContent';
+import './i18n/i18n.js';
 
 function App() {
     return (
         <Provider store={store}>
-            <AppContent />
+            <RouterProvider router={router} />
         </Provider>
     );
 }
