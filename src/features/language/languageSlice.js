@@ -1,5 +1,6 @@
 // src/store/languageSlice.js
 import { createSlice } from '@reduxjs/toolkit';
+import { changeI18nLanguage } from '../../i18n/i18n.js';
 
 const getInitialLanguage = () => {
     const savedLang = localStorage.getItem('appLanguage');
@@ -43,6 +44,9 @@ const languageSlice = createSlice({
 
                 // Update document attributes when language changes
                 updateDocumentAttributes(state.direction, newLang);
+
+                // Sync with i18n
+                changeI18nLanguage(newLang);
             }
         }
     }

@@ -1,17 +1,19 @@
 // src/components/LanguageSwitcher.jsx
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setLanguage } from '../store/languageSlice';
+import { useTranslation } from 'react-i18next';
+import { setLanguage } from '../features/language/languageSlice.js';
 import { Globe, ChevronDown } from 'lucide-react';
 
 const LanguageSwitcher = () => {
     const dispatch = useDispatch();
     const { currentLanguage } = useSelector((state) => state.language);
+    const { t } = useTranslation('common');
     const [showDropdown, setShowDropdown] = React.useState(false);
 
     const languages = [
-        { code: 'en', name: 'English', flag: '🇺🇸' },
-        { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+        { code: 'en', name: t('languages.english'), flag: '🇺🇸' },
+        { code: 'ar', name: t('languages.arabic'), flag: '🇸🇦' },
     ];
 
     const currentLang = languages.find(lang => lang.code === currentLanguage) || languages[0];
@@ -37,6 +39,7 @@ const LanguageSwitcher = () => {
             <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label={t('common:selectLanguage')}
             >
                 <Globe className="w-5 h-5 text-gray-600" />
                 <span className="text-sm font-medium text-gray-700 uppercase">
@@ -49,7 +52,7 @@ const LanguageSwitcher = () => {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="p-2">
                         <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                            Select Language
+                            {t('common:selectLanguage')}
                         </div>
                         {languages.map((language) => (
                             <button

@@ -1,14 +1,8 @@
 {
-  "welcome": "مرحباً بك في تطبيقنا",
-  "description": "هذا تطبيق React متعدد اللغات",
-  "buttons": {
-    "save": "حفظ",
-    "cancel": "إلغاء",
-    "delete": "حذف"
+  "languages": {
+    "english": "الإنجليزية",
+    "arabic": "العربية"
   },
-  "navigation": {
-    "home": "الرئيسية",
-    "about": "من نحن",
-    "contact": "اتصل بنا"
-  }
+  "selectLanguage": "اختر اللغة",
+  "search": "بحث"
 }

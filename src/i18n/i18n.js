@@ -21,16 +21,22 @@ const resources = {
     },
 };
 
+// Get initial language from localStorage
+const getInitialLanguage = () => {
+    const savedLang = localStorage.getItem('appLanguage');
+    return (savedLang && ['en', 'ar'].includes(savedLang)) ? savedLang : 'en';
+};
+
 // Initialize i18n
 i18n
     .use(LanguageDetector)
     .use(initReactI18next)
     .init({
         resources,
-        lng: localStorage.getItem('appLanguage') || 'en',
+        lng: getInitialLanguage(),
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common'],
+        ns: ['common', 'sidebar'],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {
             escapeValue: false,
@@ -45,5 +51,12 @@ i18n
         },
         supportedLngs: ['en', 'ar'],
     });
+
+// Export a function to change language that can be called from Redux
+export const changeI18nLanguage = (lng) => {
+    if (['en', 'ar'].includes(lng)) {
+        i18n.changeLanguage(lng);
+    }
+};
 
 export default i18n;

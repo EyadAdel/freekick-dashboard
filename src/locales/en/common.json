@@ -1,14 +1,9 @@
 {
-  "welcome": "Welcome to our application",
-  "description": "This is a multilingual React application",
-  "buttons": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete"
+  "languages": {
+    "english": "English",
+    "arabic": "Arabic"
   },
-  "navigation": {
-    "home": "Home",
-    "about": "About",
-    "contact": "Contact"
-  }
+  "selectLanguage": "Select Language",
+  "search": "Search"
+
 }

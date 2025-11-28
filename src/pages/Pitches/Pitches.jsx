@@ -1,11 +1,22 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useDispatch } from 'react-redux'; // 1. Import useDispatch
+
 import MainTable from './../../components/MainTable';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { pitchesService } from '../../services/pitches/pitchesService.js';
+import { setPageTitle } from '../../features/pageTitle/pageTitleSlice'; // 2. Import Action
 
 const Pitches = () => {
     // --- Configuration ---
     const rowsPerPage = 10;
+    // --- Redux Title Setter ---
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(setPageTitle('Pitches')); // 3. Set the title when component mounts
+    }, [dispatch]);
+
 
     // --- State Management ---
     const [pitchesData, setPitchesData] = useState([]); // Raw data from API
