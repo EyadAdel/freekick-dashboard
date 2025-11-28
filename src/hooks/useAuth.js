@@ -6,22 +6,17 @@ import { loginUser, logoutUser, clearError, getCurrentUser, checkAuth } from '..
 export const useAuth = () => {
     const dispatch = useDispatch();
     const { user, token, isAuthenticated, isLoading, error } = useSelector((state) => state.auth);
-
-    console.log('🔍 useAuth Hook: Component rendered', { isLoading, isAuthenticated });
-
-
-
     const login = (phone, password) => {
         let cleanPhone = phone.replace(/[^\d+]/g, '');
         if (!cleanPhone.startsWith('+')) {
             cleanPhone = `+${cleanPhone}`;
         }
-        console.log('🔧 Final phone:', cleanPhone);
         dispatch(loginUser({ phone: cleanPhone, password }));
     };
 
     const logout = () => {
         dispatch(logoutUser());
+
     };
 
     const resetError = () => {

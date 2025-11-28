@@ -1,37 +1,44 @@
 // src/pages/Login.jsx
 import { useState, useEffect } from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
-import { Eye, EyeOff, Smartphone, Lock } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { MdPhoneInTalk } from "react-icons/md";
+import { TbLockPassword } from "react-icons/tb";
+import LogoText from "../components/common/LogoText.jsx";
+import LogoLoader from "../components/common/LogoLoader.jsx";
 
 const Login = () => {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { login, isAuthenticated, isLoading, error } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-
-    console.log('🔐 Login Component - Auth State:', {
-        isAuthenticated,
-        isLoading,
-        error
-    });
 
     // Get the intended destination or default to dashboard
     const from = location.state?.from?.pathname || '/';
 
     useEffect(() => {
         if (isAuthenticated) {
-            console.log('🎯 Login successful, redirecting to:', from);
+            // Keep showing loader during navigation
+            setIsSubmitting(true);
             navigate(from, { replace: true });
         }
     }, [isAuthenticated, navigate, from]);
 
+    // Reset submitting state if there's an error
+    useEffect(() => {
+        if (error && !isLoading) {
+            setIsSubmitting(false);
+        }
+    }, [error, isLoading]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('🔄 Login form submitted');
+        setIsSubmitting(true);
         login(phone, password);
     };
 
@@ -61,29 +68,46 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-            <div className="max-w-md w-full space-y-8">
-                {/* Header */}
-                <div className="text-center">
-                    <div className="flex items-center justify-center mb-6">
-                        <div className="bg-blue-600 text-white rounded-xl p-3 mr-3">
-                            <span className="text-xl font-bold">FREE KCK</span>
-                        </div>
+        <div className="min-h-screen bg-gradient-to-t from-primary-300 via-primary-500 to-primary-600 flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Logo Loader Overlay */}
+            {isSubmitting && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+                    <div className="bg-white/10 backdrop-blur-md rounded-full p-5 shadow-2xl">
+                        <LogoLoader />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Admin Panel</h1>
+                </div>
+            )}
+
+            {/* Animated Background Circles */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -top-24 -left-24 w-48 h-48 bg-white/10 rounded-full animate-float-slow"></div>
+                <div className="absolute top-1/4 -right-16 w-32 h-32 bg-white/15 rounded-full animate-float-slower"></div>
+                <div className="absolute bottom-1/3 left-1/4 w-40 h-40 bg-white/5 rounded-full animate-float-slowest"></div>
+            </div>
+
+            {/* Login Form Container - Apply blur when submitting */}
+            <div className={`max-w-md w-full space-y-8 relative z-10 transition-all duration-300 ${
+                isSubmitting ? 'blur-sm scale-95 opacity-80' : 'blur-0 scale-100 opacity-100'
+            }`}>
+                {/* Header with Logo */}
+                <div className="text-center">
+                    <div className="flex items-center justify-center mb-8">
+                        <LogoText/>
+                    </div>
                 </div>
 
-                {/* Login Form */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Login Form Card */}
+                <div className="bg-white bg-opacity-50 backdrop-blur-sm rounded-3xl shadow-2xl p-8">
+                    <h1 className="text-2xl font-bold text-slate-700 mb-8 text-center">
+                        Welcome to Admin Panel
+                    </h1>
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Phone Number Field */}
                         <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                                Your phone number
-                            </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Smartphone className="h-5 w-5 text-gray-400" />
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <MdPhoneInTalk className="h-5 w-5 text-slate-400" />
                                 </div>
                                 <input
                                     id="phone"
@@ -92,20 +116,18 @@ const Login = () => {
                                     required
                                     value={phone}
                                     onChange={handlePhoneChange}
-                                    placeholder="+971 5X XXX XXXX"
-                                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                    placeholder="Your phone number"
+                                    className="block w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    disabled={isSubmitting}
                                 />
                             </div>
                         </div>
 
                         {/* Password Field */}
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                Your password
-                            </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-gray-400" />
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <TbLockPassword className="h-5 w-5 text-slate-400" />
                                 </div>
                                 <input
                                     id="password"
@@ -114,18 +136,20 @@ const Login = () => {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter your password"
-                                    className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                    placeholder="Your password"
+                                    className="block w-full pl-12 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    disabled={isSubmitting}
                                 />
                                 <button
                                     type="button"
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                    className="absolute inset-y-0 right-0 pr-4 flex items-center"
                                     onClick={() => setShowPassword(!showPassword)}
+                                    disabled={isSubmitting}
                                 >
                                     {showPassword ? (
-                                        <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                        <EyeOff className="h-5 w-5 text-slate-400 hover:text-slate-600" />
                                     ) : (
-                                        <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                                        <Eye className="h-5 w-5 text-slate-400 hover:text-slate-600" />
                                     )}
                                 </button>
                             </div>
@@ -141,31 +165,53 @@ const Login = () => {
                         {/* Login Button */}
                         <button
                             type="submit"
-                            disabled={isLoading}
-                            className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            disabled={isSubmitting}
+                            className="w-full bg-secondary-600 text-lg text-white py-3.5 px-4 rounded-xl font-semibold hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isLoading ? (
-                                <div className="flex items-center justify-center">
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                                    Signing in...
-                                </div>
-                            ) : (
-                                'Login'
-                            )}
+                            {isSubmitting ? 'Logging in...' : 'Login'}
                         </button>
+
+                        {/* Links Below Button */}
+                        <div className="flex items-center justify-between text-sm pt-2">
+                            <span className="text-slate-600">Don't have an account?</span>
+                            <button
+                                type="button"
+                                className="text-primary-600 hover:text-primary-700 font-medium"
+                                disabled={isSubmitting}
+                            >
+                                Reset Password
+                            </button>
+                        </div>
                     </form>
 
-                    {/* Footer Note */}
-                    <div className="mt-8 pt-6 border-t border-gray-200">
-                        <p className="text-center text-sm text-gray-600 mb-4">
-                            Don't have an account?
-                        </p>
-                        <div className="text-center text-xs text-gray-500 space-y-1">
+                    {/* Footer Info Box */}
+                    <div className="mt-6 bg-white rounded-2xl p-5 flex items-center justify-between">
+                        <div className="text-xs text-slate-600 leading-relaxed">
                             <p>This platform is for</p>
                             <p>administrators only. If you're</p>
-                            <p>not an administrator, please contact support.</p>
+                            <p>looking for the user</p>
+                            <p>application, please visit our</p>
+                            <p className="text-primary-600 font-medium">User App.</p>
+                        </div>
+                        <div className="flex -space-x-1">
+                            <div className="w-5 h-5 rounded-full bg-primary-300 border-2 border-white animate-avatar-float-slow"></div>
+                            <div className="w-5 h-5 rounded-full bg-primary-700 border-2 border-white animate-avatar-float-slowest"></div>
+                            <div className="w-5 h-5 rounded-full bg-secondary-600 border-2 border-white animate-avatar-float-slower"></div>
                         </div>
                     </div>
+                </div>
+
+                {/* Bottom Contact Link */}
+                <div className="text-center">
+                    <p className="text-white text-sm">
+                        Can't access your account?{' '}
+                        <button
+                            className="font-semibold underline hover:text-primary-100 transition-colors"
+                            disabled={isSubmitting}
+                        >
+                            Contact us
+                        </button>
+                    </p>
                 </div>
             </div>
         </div>
