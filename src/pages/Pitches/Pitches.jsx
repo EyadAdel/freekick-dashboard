@@ -4,7 +4,8 @@ import { useDispatch } from 'react-redux'; // 1. Import useDispatch
 import MainTable from './../../components/MainTable';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { pitchesService } from '../../services/pitches/pitchesService.js';
-import { setPageTitle } from '../../features/pageTitle/pageTitleSlice'; // 2. Import Action
+import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
+import PitchesForm from "../../components/pitches/PitchesForm.jsx"; // 2. Import Action
 
 const Pitches = () => {
     // --- Configuration ---
@@ -171,6 +172,7 @@ const Pitches = () => {
 
     return (
         <div className="w-full">
+            {/*<PitchesForm/>*/}
             {isLoading && pitchesData.length === 0 ? (
                 <div className="p-10 text-center text-gray-500">Loading...</div>
             ) : (
