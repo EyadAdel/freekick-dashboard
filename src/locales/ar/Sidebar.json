@@ -1,0 +1,37 @@
+{
+  "sections": {
+    "dashboard": "لوحة التحكم",
+    "sales_control": "التحكم بالمبيعات",
+    "display": "العرض",
+    "finance": "الماليات",
+    "users_control": "تحكم المستخدمين",
+    "support": "الدعم"
+  },
+  "menu_items": {
+    "dashboard": "لوحة التحكم",
+    "booking": "الحجوزات",
+    "calendar": "التقويم",
+    "venues": "الملاعب",
+    "pitches": "الميادين",
+    "amenities": "المرافق",
+    "addons": "الإضافات",
+    "categories": "الفئات",
+    "tournaments": "البطولات",
+    "tickets": "التذاكر",
+    "banners_ads": "اللافتات / الإعلانات",
+    "notifications": "إشعارات التطبيق",
+    "revenue": "نظرة عامة على الإيرادات",
+    "reports": "التقارير",
+    "vouchers": "القسائم",
+    "players": "اللاعبين",
+    "pitch_owners": "أصحاب الميادين",
+    "venue_requests": "طلبات تعديل الملاعب",
+    "support": "الدعم"
+  },
+  "tooltips": {
+    "toggle_collapse": "تبديل الشريط الجانبي",
+    "expand_sidebar": "توسيع الشريط الجانبي",
+    "collapse_sidebar": "طي الشريط الجانبي"
+  },
+  "app_name": "فريكيك"
+}

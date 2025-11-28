@@ -1,0 +1,37 @@
+{
+  "sections": {
+    "dashboard": "Dashboard",
+    "sales_control": "SALES CONTROL",
+    "display": "Display",
+    "finance": "Finance",
+    "users_control": "Users Control",
+    "support": "Support"
+  },
+  "menu_items": {
+    "dashboard": "Dashboard",
+    "booking": "Booking",
+    "calendar": "Calendar",
+    "venues": "Venues",
+    "pitches": "Pitches",
+    "amenities": "Amenities",
+    "addons": "Add-ons",
+    "categories": "Categories",
+    "tournaments": "Tournaments",
+    "tickets": "Tickets",
+    "banners_ads": "Banners / Ads",
+    "notifications": "Apps Notification",
+    "revenue": "Revenue Overview",
+    "reports": "Reports",
+    "vouchers": "Vouchers",
+    "players": "Players",
+    "pitch_owners": "Pitch owners",
+    "venue_requests": "Venues edit requests",
+    "support": "Support"
+  },
+  "tooltips": {
+    "toggle_collapse": "Toggle sidebar",
+    "expand_sidebar": "Expand sidebar",
+    "collapse_sidebar": "Collapse sidebar"
+  },
+  "app_name": "FreeKick"
+}
