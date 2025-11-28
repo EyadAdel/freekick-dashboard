@@ -123,20 +123,20 @@ const Header = ({ isSidebarCollapsed = false }) => {
                     <div className="flex items-center gap-4">
 
                         {/* Search Input */}
-                        <div className="relative">
-                            <Search
-                                className={`w-5 h-5 text-gray-400 absolute top-1/2 -translate-y-1/2 ${
-                                    isRtl ? 'right-3' : 'left-3'
-                                }`}
-                            />
-                            <input
-                                type="text"
-                                placeholder={`${t('search')}....`}
-                                className={`py-2 w-64 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-start ${
-                                    isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4'
-                                }`}
-                            />
-                        </div>
+                        {/*<div className="relative">*/}
+                        {/*    <Search*/}
+                        {/*        className={`w-5 h-5 text-gray-400 absolute top-1/2 -translate-y-1/2 ${*/}
+                        {/*            isRtl ? 'right-3' : 'left-3'*/}
+                        {/*        }`}*/}
+                        {/*    />*/}
+                        {/*    <input*/}
+                        {/*        type="text"*/}
+                        {/*        placeholder={`${t('search')}....`}*/}
+                        {/*        className={`py-2 w-64 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-start ${*/}
+                        {/*            isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4'*/}
+                        {/*        }`}*/}
+                        {/*    />*/}
+                        {/*</div>*/}
 
                         {/* Language Selector */}
                         <LanguageSwitcher />

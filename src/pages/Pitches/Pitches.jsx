@@ -4,8 +4,6 @@ import MainTable from './../../components/MainTable';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import PitchesForm from "../../components/pitches/PitchesForm.jsx";
-
-// 👇 1. Import your Service and the Confirm Utility
 import { pitchesService } from '../../services/pitches/pitchesService.js';
 import { venuesService } from '../../services/venues/venuesService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
@@ -19,25 +17,29 @@ const Pitches = () => {
     }, [dispatch]);
 
     // State Management
-    // State Management
     const [pitchesData, setPitchesData] = useState([]);
-    const [venuesData, setVenuesData] = useState([]); // 👈 Added venues state
+    const [venuesData, setVenuesData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [showForm, setShowForm] = useState(false);
+
+    // Filter State
     const [activeFilters, setActiveFilters] = useState({
         status: '',
         type: '',
+        venue: '',
+        price: '',
         pitcherName: '',
         globalSearch: ''
     });
 
-    // Fetch Pitches Data
+    // Fetch Data
     const fetchPitchesData = async () => {
         setIsLoading(true);
         try {
             const response = await pitchesService.getAllPitchess(currentPage);
-            if (response) {
-                if (response.results) setPitchesData(response.results);
+            if (response && response.results) {
+                setPitchesData(response.results);
             }
         } catch (error) {
             console.error("Failed to fetch pitches:", error);
@@ -46,19 +48,21 @@ const Pitches = () => {
         }
     };
 
-    // 👇 2. Fetch Venues Data
     const fetchVenuesData = async () => {
         try {
             const response = await venuesService.getAllVenues();
             if (response && response.results) {
-                setVenuesData(response.results);
+                const formattedVenues = response.results.map((venue) => ({
+                    label: venue.translations.name,
+                    value: venue.id
+                }));
+                setVenuesData(formattedVenues);
             }
         } catch (error) {
             console.error("Failed to fetch venues:", error);
         }
     };
 
-    // 👇 3. Combined data fetching
     const fetchAllData = async () => {
         setIsLoading(true);
         try {
@@ -73,50 +77,71 @@ const Pitches = () => {
     useEffect(() => {
         fetchAllData();
     }, []);
-    // 👇 2. Updated Delete Handler
+
+    // Form Handlers
+    const handleCreatePitch = () => setShowForm(true);
+    const handleCancelForm = () => setShowForm(false);
+    const handleFormSuccess = () => {
+        setShowForm(false);
+        fetchAllData();
+    };
+
     const handleDeletePitch = async (id, pitchName) => {
-        // Call the smooth confirm popup
         const isConfirmed = await showConfirm({
             title: `Delete "${pitchName}"?`,
             text: "This action cannot be undone. The pitch will be permanently removed.",
             confirmButtonText: 'Yes, Delete it'
         });
 
-        // Stop here if user clicked "Cancel"
         if (!isConfirmed) return;
 
         try {
-            // Call API
             await pitchesService.deletePitch(id);
-
-            // Remove from UI immediately (Optimistic update)
             setPitchesData(prev => prev.filter(pitch => pitch.id !== id));
-
-            // Note: We don't need toast.success here because
-            // `pitchesService.deletePitch` already handles the Success Toast!
         } catch (error) {
             console.error("Failed to delete pitch:", error);
-            // Service handles the Error Toast too
         }
     };
 
-    // Filtering Logic
+    // 👇 Filtering Logic
     const filteredData = useMemo(() => {
+        if (!pitchesData) return [];
+
         return pitchesData.filter((item) => {
+            // 1. Status
             if (activeFilters.status && activeFilters.status !== 'all') {
                 if (String(item.is_active) !== activeFilters.status) return false;
             }
 
+            // 2. Type
             if (activeFilters.type && activeFilters.type !== 'all') {
                 if (String(item.size) !== activeFilters.type) return false;
             }
 
+            // 3. Venue
+            if (activeFilters.venue && activeFilters.venue !== 'all') {
+                if (String(item.venue) !== String(activeFilters.venue)) return false;
+            }
+
+            // 4. Price (Exact Match)
+            if (activeFilters.price) {
+                const itemPrice = parseFloat(item.price_per_hour || 0);
+                const filterPrice = parseFloat(activeFilters.price);
+
+                // Check if the number is valid, then check for EXACT equality
+                if (!isNaN(filterPrice)) {
+                    if (itemPrice !== filterPrice) return false;
+                }
+            }
+
+            // 5. Pitcher Name
             if (activeFilters.pitcherName) {
                 const name = item.translations?.name?.toLowerCase() || '';
                 const searchTerm = activeFilters.pitcherName.toLowerCase();
                 if (!name.includes(searchTerm)) return false;
             }
 
+            // 6. Global Search
             if (activeFilters.globalSearch) {
                 const search = activeFilters.globalSearch.toLowerCase();
                 const name = item.translations?.name?.toLowerCase() || '';
@@ -139,28 +164,18 @@ const Pitches = () => {
         setCurrentPage(1);
     };
 
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
+    const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Action Buttons Component
     const ActionButtons = ({ pitch }) => (
         <div className="flex justify-center items-center gap-4">
-            <button
-                className="text-gray-500 hover:text-teal-600"
-                title="View Pitch"
-            >
+            <button className="text-gray-500 hover:text-teal-600" title="View Pitch">
                 <Eye size={18} />
             </button>
-            <button
-                className="text-gray-500 hover:text-blue-600"
-                title="Edit Pitch"
-            >
+            <button className="text-gray-500 hover:text-blue-600" title="Edit Pitch">
                 <Pencil size={18} />
             </button>
             <button
                 className="text-gray-500 hover:text-red-600"
-                // 👇 Pass the specific name to the handler for the popup message
                 onClick={() => handleDeletePitch(pitch.id, pitch.translations?.name || `Pitch ${pitch.id}`)}
                 title="Delete Pitch"
             >
@@ -169,30 +184,22 @@ const Pitches = () => {
         </div>
     );
 
-    // Configuration
+    // Filter Config
     const filterConfig = [
         {
-            key: 'status',
-            label: 'Filter Status',
+            key: 'venue',
+            label: 'Filter Venues',
             type: 'select',
-            options: [
-                { label: 'Active', value: 'true' },
-                { label: 'Hidden', value: 'false' }
-            ]
+            options: venuesData || [],
+            value: activeFilters.venue
         },
         {
-            key: 'type',
-            label: 'Pitch Type',
-            type: 'select',
-            options: [
-                { label: '5 a side', value: '5' },
-                { label: '7 a side', value: '7' }
-            ]
-        },
-        {
-            key: 'pitcherName',
-            label: 'Pitcher Name...',
-            type: 'text'
+            key: 'price',
+            label: 'Price Per Hour', // Changed label
+            type: 'number',
+            placeholder: 'e.g. 200',
+            options: [],
+            value: activeFilters.price
         }
     ];
 
@@ -237,22 +244,36 @@ const Pitches = () => {
     ];
 
     const topActions = [
-        { label: 'Create Pitch', onClick: () => console.log('Create'), type: 'primary' }
+        {
+            label: 'Create Pitch',
+            onClick: handleCreatePitch,
+            type: 'primary'
+        }
     ];
 
     return (
         <div className="w-full">
+            {showForm && (
+                <div className='mt-12'>
+                    <PitchesForm
+                        venuesData={venuesData}
+                        onCancel={handleCancelForm}
+                        onSuccess={handleFormSuccess}
+                    />
+                </div>
+            )}
+
             {isLoading && pitchesData.length === 0 ? (
                 <div className="p-10 text-center text-gray-500">Loading...</div>
             ) : (
                 <MainTable
-                    data={filteredData}
+                    data={filteredData || []}
                     columns={columns}
                     filters={filterConfig}
                     searchPlaceholder="Search Name or Venue ID"
                     topActions={topActions}
                     currentPage={currentPage}
-                    totalItems={filteredData.length}
+                    totalItems={filteredData?.length || 0}
                     itemsPerPage={rowsPerPage}
                     onSearch={handleSearch}
                     onFilterChange={handleFilterChange}
