@@ -7,6 +7,7 @@ import PitchesForm from "../../components/pitches/PitchesForm.jsx";
 
 // 👇 1. Import your Service and the Confirm Utility
 import { pitchesService } from '../../services/pitches/pitchesService.js';
+import { venuesService } from '../../services/venues/venuesService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
 
 const Pitches = () => {
@@ -18,7 +19,9 @@ const Pitches = () => {
     }, [dispatch]);
 
     // State Management
+    // State Management
     const [pitchesData, setPitchesData] = useState([]);
+    const [venuesData, setVenuesData] = useState([]); // 👈 Added venues state
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [activeFilters, setActiveFilters] = useState({
@@ -28,8 +31,8 @@ const Pitches = () => {
         globalSearch: ''
     });
 
-    // Fetch Data
-    const fetchData = async () => {
+    // Fetch Pitches Data
+    const fetchPitchesData = async () => {
         setIsLoading(true);
         try {
             const response = await pitchesService.getAllPitchess(currentPage);
@@ -43,10 +46,33 @@ const Pitches = () => {
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+    // 👇 2. Fetch Venues Data
+    const fetchVenuesData = async () => {
+        try {
+            const response = await venuesService.getAllVenues();
+            if (response && response.results) {
+                setVenuesData(response.results);
+            }
+        } catch (error) {
+            console.error("Failed to fetch venues:", error);
+        }
+    };
 
+    // 👇 3. Combined data fetching
+    const fetchAllData = async () => {
+        setIsLoading(true);
+        try {
+            await Promise.all([fetchPitchesData(), fetchVenuesData()]);
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAllData();
+    }, []);
     // 👇 2. Updated Delete Handler
     const handleDeletePitch = async (id, pitchName) => {
         // Call the smooth confirm popup
