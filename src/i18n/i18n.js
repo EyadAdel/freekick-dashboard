@@ -6,14 +6,18 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 // Import translation files
 import enCommon from '../locales/en/common.json';
 import arCommon from '../locales/ar/common.json';
+import enSidebar from '../locales/en/Sidebar.json';
+import arSidebar from '../locales/ar/Sidebar.json';
 
 // Translation resources
 const resources = {
     en: {
         common: enCommon,
+        sidebar: enSidebar,
     },
     ar: {
         common: arCommon,
+        sidebar: arSidebar,
     },
 };
 

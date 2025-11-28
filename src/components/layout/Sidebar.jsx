@@ -1,5 +1,6 @@
 // src/components/layout/Sidebar/Sidebar.jsx
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     LayoutDashboard,
     Calendar,
@@ -22,69 +23,73 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import logo from '../../assets/logo.svg';
 import ScrollArea from '../common/ScrollArea.jsx';
 
-const Sidebar = ({onToggle}) => {
+const Sidebar = ({ onToggle }) => {
     const location = useLocation();
+    const { t } = useTranslation('sidebar');
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [tooltip, setTooltip] = useState({ show: false, label: '', top: 0 });
+    const { direction } = useSelector((state) => state.language);
+
     const handleToggle = () => {
         const newState = !isCollapsed;
         setIsCollapsed(newState);
-        // Notify parent component about the state change
         if (onToggle) {
             onToggle(newState);
         }
     };
+
     const menuItems = [
         {
-            title: 'Dashboard',
+            title: t('sections.dashboard'),
             items: [
-                { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+                { icon: LayoutDashboard, label: t('menu_items.dashboard'), path: '/' },
             ]
         },
         {
-            title: 'SALES CONTROL',
+            title: t('sections.sales_control'),
             items: [
-                { icon: Calendar, label: 'Booking', path: '/bookings' },
-                { icon: Calendar, label: 'Calendar', path: '/calendar' },
-                { icon: MapPin, label: 'Venues', path: '/venues' },
-                { icon: Landmark, label: 'Pitches', path: '/pitches' },
-                { icon: PlusCircle, label: 'Amenities', path: '/amenities' },
-                { icon: Layers, label: 'Add-ons', path: '/add-ons' },
-                { icon: Layers, label: 'Categories', path: '/categories' },
-                { icon: Trophy, label: 'Tournaments', path: '/tournaments' },
-                { icon: Ticket, label: 'Tickets', path: '/tickets' },
+                { icon: Calendar, label: t('menu_items.booking'), path: '/bookings' },
+                { icon: Calendar, label: t('menu_items.calendar'), path: '/calendar' },
+                { icon: MapPin, label: t('menu_items.venues'), path: '/venues' },
+                { icon: Landmark, label: t('menu_items.pitches'), path: '/pitches' },
+                { icon: PlusCircle, label: t('menu_items.amenities'), path: '/amenities' },
+                { icon: Layers, label: t('menu_items.addons'), path: '/add-ons' },
+                { icon: Layers, label: t('menu_items.categories'), path: '/categories' },
+                { icon: Trophy, label: t('menu_items.tournaments'), path: '/tournaments' },
+                { icon: Ticket, label: t('menu_items.tickets'), path: '/tickets' },
             ]
         },
         {
-            title: 'Display',
+            title: t('sections.display'),
             items: [
-                { icon: Image, label: 'Banners / Ads', path: '/banners' },
-                { icon: Bell, label: 'Apps Notification', path: '/notifications' },
+                { icon: Image, label: t('menu_items.banners_ads'), path: '/banners' },
+                { icon: Bell, label: t('menu_items.notifications'), path: '/notifications' },
             ]
         },
         {
-            title: 'Finance',
+            title: t('sections.finance'),
             items: [
-                { icon: DollarSign, label: 'Revenue Overview', path: '/revenue' },
-                { icon: FileText, label: 'Reports', path: '/reports' },
-                { icon: CreditCard, label: 'Vouchers', path: '/vouchers' },
+                { icon: DollarSign, label: t('menu_items.revenue'), path: '/revenue' },
+                { icon: FileText, label: t('menu_items.reports'), path: '/reports' },
+                { icon: CreditCard, label: t('menu_items.vouchers'), path: '/vouchers' },
             ]
         },
         {
-            title: 'Users Control',
+            title: t('sections.users_control'),
             items: [
-                { icon: Users, label: 'Players', path: '/players' },
-                { icon: UserCheck, label: 'Pitch owners', path: '/pitch-owners' },
-                { icon: FileEdit, label: 'Venues edit requests', path: '/venue-requests' },
+                { icon: Users, label: t('menu_items.players'), path: '/players' },
+                { icon: UserCheck, label: t('menu_items.pitch_owners'), path: '/pitch-owners' },
+                { icon: FileEdit, label: t('menu_items.venue_requests'), path: '/venue-requests' },
             ]
         },
         {
-            title: 'Support',
+            title: t('sections.support'),
             items: [
-                { icon: HeadphonesIcon, label: 'Support', path: '/support' },
+                { icon: HeadphonesIcon, label: t('menu_items.support'), path: '/support' },
             ]
         }
     ];
@@ -105,12 +110,21 @@ const Sidebar = ({onToggle}) => {
         setTooltip({ show: false, label: '', top: 0 });
     };
 
+    // Determine sidebar position based on direction
+    const sidebarPosition = direction === 'rtl' ? 'right-0' : 'left-0';
+    const toggleIcon = direction === 'rtl'
+        ? (isCollapsed ? ChevronLeft : ChevronRight)
+        : (isCollapsed ? ChevronRight : ChevronLeft);
+
+    const ToggleIcon = toggleIcon;
+
     return (
         <>
             <aside
-                className={`bg-white h-screen fixed left-0 top-0 border-r border-gray-200 transition-all duration-300 z-50 flex flex-col ${
+                className={`bg-white h-screen fixed top-0 border-r border-gray-200 transition-all duration-300 z-50 flex flex-col ${
                     isCollapsed ? 'w-16' : 'w-56'
-                }`}
+                } ${sidebarPosition}`}
+                dir={direction}
             >
                 {/* Logo Section with Toggle */}
                 <div className={`flex items-center ${isCollapsed ? 'justify-center px-3' : 'justify-between px-5'} h-20 border-b border-gray-100 flex-shrink-0`}>
@@ -121,24 +135,27 @@ const Sidebar = ({onToggle}) => {
                             className="w-10 h-10 object-contain flex-shrink-0"
                         />
                         {!isCollapsed && (
-                            <span className="font-bold text-xl text-gray-800 whitespace-nowrap">FreeKick</span>
+                            <span className="font-bold text-xl text-gray-800 whitespace-nowrap">
+                                {t('app_name')}
+                            </span>
                         )}
                     </div>
 
                     {/* Toggle Button */}
                     {!isCollapsed && (
                         <button
-                            onClick={handleToggle}  // Use handleToggle
+                            onClick={handleToggle}
                             className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                            title={t('tooltips.collapse_sidebar')}
                         >
-                            <ChevronLeft className="w-5 h-5 text-gray-600" />
+                            <ToggleIcon className="w-5 h-5 text-gray-600" />
                         </button>
                     )}
                 </div>
 
                 {/* Navigation with custom scrollbar */}
-                <ScrollArea className="flex-1" >
-                    <nav dir={'ltr'} className={`py-4 ${isCollapsed ? 'px-2' : 'px-3'}`}>
+                <ScrollArea className="flex-1">
+                    <nav dir={direction} className={`py-4 ${isCollapsed ? 'px-2' : 'px-3'}`}>
                         {menuItems.map((section, index) => (
                             <div key={index} className="mb-6 last:mb-0">
                                 {/* Section Title - Only show when not collapsed and if there's a title */}
@@ -171,7 +188,7 @@ const Sidebar = ({onToggle}) => {
                                                     } ${isCollapsed ? 'justify-center px-3 py-3' : 'px-3 py-2.5'}`}
                                                 >
                                                     <Icon
-                                                        className={`w-5 h-5  text-sm flex-shrink-0 transition-colors ${
+                                                        className={`w-5 h-5 text-sm flex-shrink-0 transition-colors ${
                                                             active ? 'text-white' : 'text-gray-500'
                                                         }`}
                                                     />
@@ -196,10 +213,11 @@ const Sidebar = ({onToggle}) => {
                 {isCollapsed && (
                     <div className="p-3 border-t border-gray-100 flex-shrink-0">
                         <button
-                            onClick={handleToggle}  // Use handleToggle
+                            onClick={handleToggle}
                             className="w-full p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex justify-center"
+                            title={t('tooltips.expand_sidebar')}
                         >
-                            <ChevronRight className="w-5 h-5 text-gray-600" />
+                            <ToggleIcon className="w-5 h-5 text-gray-600" />
                         </button>
                     </div>
                 )}
@@ -210,7 +228,9 @@ const Sidebar = ({onToggle}) => {
                 <div
                     className="fixed pointer-events-none z-[100] transition-opacity duration-200"
                     style={{
-                        left: isCollapsed ? '4rem' : '16.25rem',
+                        [direction === 'rtl' ? 'right' : 'left']: isCollapsed
+                            ? (direction === 'rtl' ? '4rem' : '4rem')
+                            : (direction === 'rtl' ? '14rem' : '14rem'),
                         top: `${tooltip.top}px`,
                         transform: 'translateY(-50%)'
                     }}
@@ -219,8 +239,14 @@ const Sidebar = ({onToggle}) => {
                         <div className="px-3 py-2 bg-primary-700 text-white text-xs font-medium rounded-md whitespace-nowrap shadow-lg">
                             {tooltip.label}
                         </div>
-                        {/* Arrow pointing left */}
-                        <div className="absolute right-full top-1/2 -translate-y-1/2 mr-[-1px] w-2 h-2 bg-primary-700 rotate-45"></div>
+                        {/* Arrow pointing to sidebar */}
+                        <div
+                            className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-primary-700 rotate-45 ${
+                                direction === 'rtl'
+                                    ? 'left-full ml-[-1px]'
+                                    : 'right-full mr-[-1px]'
+                            }`}
+                        ></div>
                     </div>
                 </div>
             )}
