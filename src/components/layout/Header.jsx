@@ -1,6 +1,5 @@
 import { Bell, Search, Settings, User } from 'lucide-react';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
 import LanguageSwitcher from '../LanguageSwitcher.jsx';
 import { selectPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import { useTranslation } from 'react-i18next';
@@ -115,8 +114,6 @@ const Header = ({ isSidebarCollapsed = false }) => {
                         <h1 className="text-2xl font-bold text-gray-800">
                             {pageTitle || 'Dashboard'}
                         </h1>
-                        <p className="text-sm text-gray-500">Welcome, Ali</p>
-                        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
                         <p className="text-sm text-gray-500">
                             Welcome, {getDisplayName()}
                         </p>
@@ -210,16 +207,13 @@ const Header = ({ isSidebarCollapsed = false }) => {
                                 <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
                                     <User className="w-6 h-6 text-white" />
                                 </div>
-                                <div className="text-left hidden lg:block">
+                                <div className={`hidden lg:block ${isRtl ? 'text-right' : 'text-left'}`}>
                                     <p className="text-sm font-medium text-gray-800">
                                         {getDisplayName()}
                                     </p>
                                     <p className="text-xs text-gray-500">
                                         {getUserRole()}
                                     </p>
-                                <div className={`hidden lg:block ${isRtl ? 'text-right' : 'text-left'}`}>
-                                    <p className="text-sm font-medium text-gray-800">Ali Ahmed</p>
-                                    <p className="text-xs text-gray-500">Admin</p>
                                 </div>
                             </button>
 
@@ -236,7 +230,6 @@ const Header = ({ isSidebarCollapsed = false }) => {
                                             Settings
                                         </button>
                                         <hr className="my-2" />
-                                        <button className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg text-start">
                                         <button
                                             onClick={handleLogout}
                                             className="w-full flex gap-4 items-center text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
