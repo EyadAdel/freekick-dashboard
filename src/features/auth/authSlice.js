@@ -5,35 +5,23 @@ import { authService } from '../../services/authService.js';
 // Async thunks
 export const loginUser = createAsyncThunk(
     'auth/login',
-    async ({ phone, password }, { rejectWithValue, dispatch }) => {
-        console.log('🔄 loginUser thunk started:', { phone: phone.substring(0, 5) + '***' });
+    async ({ phone, password }, { rejectWithValue }) => {
         try {
-            // Step 1: Get tokens
-            console.log('📡 Step 1: Calling authService.login...');
             const tokenResponse = await authService.login(phone, password);
-            console.log('✅ Token response received:', tokenResponse);
 
             if (!tokenResponse.data?.token) {
                 throw new Error('No token in response');
             }
-
-            // Store tokens
             localStorage.setItem('authToken', tokenResponse.data.token.access);
             localStorage.setItem('refreshToken', tokenResponse.data.token.refresh);
-            console.log('💾 Tokens stored in localStorage');
 
-            // Step 2: Get user data
-            console.log('📡 Step 2: Calling authService.getCurrentUser...');
             const userResponse = await authService.getCurrentUser();
-            console.log('✅ User data received:', userResponse);
 
             return {
                 tokens: tokenResponse.data.token,
                 user: userResponse.data
             };
         } catch (error) {
-            console.error('❌ Login error:', error);
-            console.error('❌ Error response:', error.response?.data);
             localStorage.removeItem('authToken');
             localStorage.removeItem('refreshToken');
             return rejectWithValue(error.response?.data || 'Login failed');
@@ -58,29 +46,17 @@ export const checkAuth = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         const token = localStorage.getItem('authToken');
 
-        console.log('🔍 checkAuth: Checking token existence', {
-            hasToken: !!token,
-            tokenLength: token?.length
-        });
-
         if (!token) {
-            console.log('❌ checkAuth: No token found, rejecting');
-            // ❌ OLD: throw new Error('No token found');
-            // ✅ NEW: Use rejectWithValue instead
             return rejectWithValue('No token found');
         }
 
         try {
-            console.log('🔐 checkAuth: Token found, verifying with API...');
             const userResponse = await authService.getCurrentUser();
-            console.log('✅ checkAuth: Token is valid, user data received');
             return userResponse.data;
         } catch (error) {
-            console.error('❌ checkAuth: Token verification failed', error);
             localStorage.removeItem('authToken');
             localStorage.removeItem('refreshToken');
-            // ❌ OLD: throw error;
-            // ✅ NEW: Use rejectWithValue instead
+
             return rejectWithValue(error.response?.data || 'Token verification failed');
         }
     }
@@ -108,9 +84,11 @@ const authSlice = createSlice({
         user: null,
         token: localStorage.getItem('authToken'),
         refreshToken: localStorage.getItem('refreshToken'),
-        isAuthenticated: false, // Start as false until we verify
-        isLoading: false, // Start loading to check auth status
-        error: null
+        isAuthenticated: false,
+        isLoading: true,
+        error: null,
+        // Add this flag to track initial auth check
+        authCheckCompleted: false
     },
     reducers: {
         clearError: (state) => {
@@ -134,6 +112,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = true;
                 state.user = action.payload;
                 state.error = null;
+                state.authCheckCompleted = true;
             })
             .addCase(checkAuth.rejected, (state) => {
                 state.isLoading = false;
@@ -141,6 +120,7 @@ const authSlice = createSlice({
                 state.user = null;
                 state.token = null;
                 state.refreshToken = null;
+                state.authCheckCompleted = true;
             })
             // Login
             .addCase(loginUser.pending, (state) => {
@@ -154,6 +134,8 @@ const authSlice = createSlice({
                 state.token = action.payload.tokens.access;
                 state.refreshToken = action.payload.tokens.refresh;
                 state.error = null;
+                // Mark auth check as completed after successful login
+                state.authCheckCompleted = true;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.isLoading = false;

@@ -129,16 +129,23 @@ const Sidebar = ({ onToggle }) => {
                 {/* Logo Section with Toggle */}
                 <div className={`flex items-center ${isCollapsed ? 'justify-center px-3' : 'justify-between px-5'} h-20 border-b border-gray-100 flex-shrink-0`}>
                     <div className="flex items-center gap-3">
+                        {isCollapsed &&
                         <img
                             src={logo}
                             alt="FreeKick Logo"
                             className="w-10 h-10 object-contain flex-shrink-0"
                         />
+                        }
                         {!isCollapsed && (
-                            <span className="font-bold text-xl text-gray-800 whitespace-nowrap">
-                                {t('app_name')}
-                            </span>
-                        )}
+                            <span className="text-2xl text-secondary-600 font-bold tracking-wider flex items-center">
+                                FREE K
+                                 <img
+                                    src={logo}
+                                    alt="Logo"
+                                    className="h-6 w-6 -mx-1 animate-avatar-float-slowest"
+                                />
+                                ICK
+                                </span>                     )}
                     </div>
 
                     {/* Toggle Button */}

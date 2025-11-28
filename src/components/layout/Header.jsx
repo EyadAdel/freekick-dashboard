@@ -1,9 +1,11 @@
 import { Bell, Search, Settings, User } from 'lucide-react';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
 import LanguageSwitcher from '../LanguageSwitcher.jsx';
 import { selectPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '../../hooks/useAuth';
+import { MdLogout } from "react-icons/md";
 
 const Header = ({ isSidebarCollapsed = false }) => {
     // 1. Get direction from Redux to determine layout mode
@@ -15,8 +17,9 @@ const Header = ({ isSidebarCollapsed = false }) => {
 
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
+    const { user } = useSelector((state) => state.auth);
+    const { logout } = useAuth();
 
-    // Mock Notifications Data
     const notifications = [
         {
             id: 1,
@@ -35,6 +38,45 @@ const Header = ({ isSidebarCollapsed = false }) => {
             read: true
         }
     ];
+
+    // Helper function to get user role as string
+    const getUserRole = () => {
+        if (!user?.role) return 'User';
+
+        if (typeof user.role === 'object') {
+            const roleObj = user.role;
+            if (roleObj.is_admin) return 'Admin';
+            if (roleObj.is_sub_admin) return 'Sub Admin';
+            if (roleObj.is_pitch_owner) return 'Pitch Owner';
+            if (roleObj.is_sub_pitch_owner) return 'Sub Pitch Owner';
+            if (roleObj.is_staff) return 'Staff';
+            return 'User';
+        }
+
+        return user.role;
+    };
+
+    // Helper function to get display name
+    const getDisplayName = () => {
+        if (user?.first_name && user?.last_name) {
+            return `${user.first_name} ${user.last_name}`;
+        }
+        return user?.username || 'User';
+    };
+
+    const handleLogout = async () => {
+        try {
+            // Use the logout function from useAuth hook
+            logout();
+            setShowProfile(false);
+            // No need to redirect here - your auth flow should handle this
+        } catch (error) {
+            // Fallback: clear storage and redirect
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '/login';
+        }
+    };
 
     const handleClickOutside = () => {
         setShowNotifications(false);
@@ -72,7 +114,9 @@ const Header = ({ isSidebarCollapsed = false }) => {
                         <h1 className="text-2xl font-bold text-gray-800">
                             {pageTitle || 'Dashboard'}
                         </h1>
-                        <p className="text-sm text-gray-500">Welcome, Ali</p>
+                        <p className="text-sm text-gray-500">
+                            Welcome, {getDisplayName()}
+                        </p>
                     </div>
 
                     {/* Right side - Actions */}
@@ -164,8 +208,12 @@ const Header = ({ isSidebarCollapsed = false }) => {
                                     <User className="w-6 h-6 text-white" />
                                 </div>
                                 <div className={`hidden lg:block ${isRtl ? 'text-right' : 'text-left'}`}>
-                                    <p className="text-sm font-medium text-gray-800">Ali Ahmed</p>
-                                    <p className="text-xs text-gray-500">Admin</p>
+                                    <p className="text-sm font-medium text-gray-800">
+                                        {getDisplayName()}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        {getUserRole()}
+                                    </p>
                                 </div>
                             </button>
 
@@ -182,7 +230,11 @@ const Header = ({ isSidebarCollapsed = false }) => {
                                             Settings
                                         </button>
                                         <hr className="my-2" />
-                                        <button className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg text-start">
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full flex gap-4 items-center text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                                        >
+                                            <MdLogout />
                                             Logout
                                         </button>
                                     </div>
