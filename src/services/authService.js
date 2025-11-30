@@ -10,7 +10,6 @@ export const authService = {
             });
             return response.data;
         } catch (error) {
-            // Handle the specific API error structure
             const errorMessage = error.response?.data?.message
                 || error.response?.data?.details?.[0]?.message
                 || error.response?.data?.detail
@@ -35,7 +34,6 @@ export const authService = {
     },
 
     logout: async () => {
-        // Token clearing happens in Redux action
         return Promise.resolve({ success: true });
     },
 
@@ -50,6 +48,59 @@ export const authService = {
                 || error.response?.data?.details?.[0]?.message
                 || error.response?.data?.detail
                 || 'Token refresh failed.';
+
+            throw new Error(errorMessage);
+        }
+    },
+
+    checkOtp: async (phone, otp) => {
+        try {
+            const response = await api.post('/auth/users/check-otp/', {
+                phone,
+                otp
+            });
+            return response.data;
+        } catch (error) {
+            const errorMessage = error.response?.data?.message
+                || error.response?.data?.details?.[0]?.message
+                || error.response?.data?.detail
+                || 'Failed to verify OTP. Please try again.';
+
+            throw new Error(errorMessage);
+        }
+    },
+
+    // NEW: Reset password with OTP
+    resetPasswordConfirm: async (phone, otp, newPassword) => {
+        try {
+            const response = await api.post('/auth/users/reset_password_confirm/', {
+                phone,
+                otp,
+                new_password: newPassword
+            });
+            return response.data;
+        } catch (error) {
+            const errorMessage = error.response?.data?.message
+                || error.response?.data?.details?.[0]?.message
+                || error.response?.data?.detail
+                || 'Failed to reset password. Please try again.';
+
+            throw new Error(errorMessage);
+        }
+    },
+
+    // NEW: Request new OTP (for resend functionality)
+    checkOtpResetPassword: async (phone) => {
+        try {
+            const response = await api.post('/auth/users/reset_password/', {
+                phone
+            });
+            return response.data;
+        } catch (error) {
+            const errorMessage = error.response?.data?.message
+                || error.response?.data?.details?.[0]?.message
+                || error.response?.data?.detail
+                || 'Failed to send OTP. Please try again.';
 
             throw new Error(errorMessage);
         }
