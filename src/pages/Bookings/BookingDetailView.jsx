@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
     ArrowLeft, Calendar, CheckCircle, Clock, CreditCard,
     Mail, MapPin, Phone, Printer, Send, Users, MoreVertical,
-    Shield, Globe, Trophy, Bell, Download, Share2
+    Shield, Globe, Trophy, Bell,Building, Download, Share2
 } from "lucide-react";
 import { bookingService } from "../../services/bookings/bookingService.js";
 import { useBooking } from "../../hooks/useBookings.js";
@@ -107,14 +107,9 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header Section */}
-            <div className="bg-white mx-4 border rounded-lg mt-4 border-gray-200">
+            <div className="bg-white mx-4  rounded-xl  mt-4 ">
                 <div className=" mx-auto px-4 sm:px-4 py-3 ">
                     <div className="flex flex-col  items-start  justify-between gap-2 ">
-                        {/*<div className="flex items-center gap-3 w-full sm:w-auto">*/}
-                        {/*    <h1 className="text-xl  font-bold text-gray-900">*/}
-                        {/*        {booking.user_info?.name || 'Customer'}*/}
-                        {/*    </h1>*/}
-                        {/*</div>*/}
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={onBack}
@@ -133,66 +128,12 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
             {/* Main Content */}
             <div className=" mx-auto px-4 sm:px-4 py-4 sm:py-6">
                 {/* Booking Header Card */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
-                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
-                        <div className="flex-1 w-full">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-
-                                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                                    Booking ID: <span className="font-semibold text-gray-900">#{String(booking.id).padStart(7, '0')}</span>
-                                </h1>
-                                <span className={`w-fit px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold border ${getStatusColor(booking.status)}`}>
-                                    {booking.status?.toUpperCase() || 'PENDING'}
-                                </span>
-                            </div>
-                            <div className="text-left flex gap-4 text-xs sm:text-sm text-gray-500 w-full sm:w-auto">
-                                <p>Created: {formatDate(booking.created_at)}</p>
-                                <p>Updated: {formatDate(booking.updated_at)}</p>
-                            </div>
-                        </div>
-                        <button className="flex-1 sm:flex-none px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
-                            <Printer size={18} />
-                            <span className="font-medium">Print Receipt</span>
-                        </button>
-                    </div>
-
-                    {/* Date and Time Bar */}
-                    <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-4 border border-teal-100">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-center gap-4 sm:gap-8">
-                            <div className="flex items-center gap-3 w-full sm:w-auto">
-                                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                                    <Calendar className="text-teal-600" size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-600 font-medium">Booking Date</p>
-                                    <p className="text-sm font-bold text-gray-900">
-                                        {booking.start_time ? formatDate(booking.start_time) : 'Not set'}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="hidden sm:block h-8 w-px bg-teal-200"></div>
-                            <div className="flex items-center gap-3 w-full sm:w-auto">
-                                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                                    <Clock className="text-teal-600" size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-600 font-medium">Time Slot</p>
-                                    <p className="text-sm font-bold text-gray-900">
-                                        {booking.start_time && booking.end_time
-                                            ? `${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}`
-                                            : 'Not set'}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 {/* Main Grid Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Left Column - Customer Profile */}
-                    <div className="lg:col-span-1 order-2 lg:order-1">
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:sticky lg:top-6">
+                    <div className="lg:col-span-1  order-2 lg:order-1">
+                        <div className="bg-white   rounded-xl shadow-md p-4 sm:p-6 lg:sticky lg:top-6">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="font-bold text-gray-900 text-base sm:text-lg">Customer Profile</h3>
                                 <button className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -302,109 +243,123 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                     </div>
 
                     {/* Right Column - Venue and Order Details */}
-                    <div className="lg:col-span-2 space-y-4 sm:space-y-6 order-1 lg:order-2">
+                    <div className="lg:col-span-2 bg-white rounded-xl shadow-md space-y-4 sm:space-y-2 order-1 lg:order-2">
+                        <div className="bg-white rounded-xl  p-4 sm:p-6  ">
+                            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 ">
+                                <div className="flex-1 w-full">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+
+                                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                                            Booking ID: <span className="font-semibold text-gray-900">#{String(booking.id).padStart(7, '0')}</span>
+                                        </h1>
+                                        <span className={`w-fit px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold border ${getStatusColor(booking.status)}`}>
+                                    {booking.status?.toUpperCase() || 'PENDING'}
+                                </span>
+                                    </div>
+                                    <div className="text-left flex gap-4 text-xs sm:text-sm text-gray-500 w-full sm:w-auto">
+                                        <p>Created: {formatDate(booking.created_at)}</p>
+                                        <p>Updated: {formatDate(booking.updated_at)}</p>
+                                    </div>
+                                </div>
+                                <button className="flex-1 sm:flex-none px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <Printer size={18} />
+                                    <span className="font-medium">Print Receipt</span>
+                                </button>
+                            </div>
+
+                        </div>
+
                         {/* Venue Information Card */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-white rounded-xl   overflow-hidden">
                             {/* Venue Image */}
-                            <div className="relative h-48 sm:h-64 md:h-72">
-                                <img
-                                    src={booking.pitch?.image || booking.venue_info?.images?.[0]?.image || 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800'}
-                                    alt="Venue"
-                                    className="w-full h-64 object-cover rounded-lg"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
-                                    <h3 className="font-bold text-xl sm:text-2xl mb-2">
-                                        {booking.pitch?.translations?.name || booking.venue_info?.translations?.name || 'Venue Name'}
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-xs sm:text-sm">
-                                        <MapPin size={16} />
-                                        <span>{booking.venue_info?.translations?.address || booking.venue_info?.city || 'Location'}</span>
+                            <div className=" rounded-lg  ">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-center gap-4 sm:gap-8">
+                                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                                            <Calendar className="text-teal-600" size={20} />
+                                        </div>
+                                        <div className={'flex gap-5'}>
+                                            <p className="text-xs text-gray-600 font-medium">Booking Date</p>
+                                            <p className="text-sm font-bold text-gray-900">
+                                                {booking.start_time ? formatDate(booking.start_time) : 'Not set'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="hidden sm:block h-8 w-px bg-teal-200"></div>
+                                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                                            <Clock className="text-teal-600" size={20} />
+                                        </div>
+                                        <div className={'flex gap-5'}>
+                                            <p className="text-xs text-gray-600 font-medium">Time </p>
+                                            <p className="text-sm font-bold text-gray-900">
+                                                {booking.start_time && booking.end_time
+                                                    ? `${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}`
+                                                    : 'Not set'}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Venue Details */}
-                            <div className="p-4 sm:p-6">
-                                <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 border border-teal-200 rounded-lg text-xs sm:text-sm font-semibold text-teal-700">
-                                        <Globe size={14} />
-                                        {booking.play_kind?.translations?.name || 'Sport'}
-                                    </span>
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-xs sm:text-sm font-semibold text-gray-700">
-                                        {booking.venue_info?.venue_type === 'indoor' ? '🏢 Indoor' : '🌤️ Outdoor'}
-                                    </span>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <Phone size={18} className="text-gray-600" />
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <p className="text-xs text-gray-500 font-medium">Venue Phone</p>
-                                            <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{booking.venue_info?.phone_number || 'Not provided'}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <Mail size={18} className="text-gray-600" />
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <p className="text-xs text-gray-500 font-medium">Owner Email</p>
-                                            <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{booking.venue_info?.owner_info?.email || 'Not provided'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Players Section */}
-                                {booking.users && booking.users.length > 0 && (
-                                    <div className="border-t border-gray-100 pt-4 sm:pt-6">
-                                        <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 text-sm sm:text-base">
-                                            <Users size={18} className="text-teal-600" />
-                                            Players ({booking.users.length})
-                                        </h4>
-                                        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                                            {booking.users.slice(0, 8).map((user, idx) => (
-                                                <div key={idx} className="relative group flex-shrink-0">
-                                                    {user.image ? (
-                                                        <img
-                                                            src={user.image}
-                                                            alt={user.name}
-                                                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-3 border-white shadow-md hover:scale-110 transition-transform"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 text-xs sm:text-sm font-bold border-3 border-white shadow-md hover:scale-110 transition-transform">
-                                                            {user.name?.charAt(0) || 'U'}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                            {booking.users.length > 8 && (
-                                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-bold border-3 border-white shadow-md flex-shrink-0">
-                                                    +{booking.users.length - 8}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Customer Note */}
-                                {booking.notes && (
-                                    <div className="border-t border-gray-100 pt-4 sm:pt-6 mt-4 sm:mt-6">
-                                        <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">Customer Note</h4>
-                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4">
-                                            <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                                                {booking.notes}
-                                            </p>
-                                        </div>
+                            <div className={'grid bg-primary-50 p-4 m-4 gap-5 rounded-xl grid-cols-2'}>
+                            <div className="relative rounded-lg  h-48  md:h-64">
+                                {/*booking.pitch?.image || booking.venue_info?.images?.[0]?.image ||*/}
+                                <img
+                                    src={ 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800'}
+                                    alt="Venue"
+                                    className="w-full h-64 object-cover rounded-xl"
+                                />
+                            </div>
+                                {booking.venue_info && (
+                                    <div className=" rounded-lg">
+                                        <VenueInfoCard booking={booking} />
                                     </div>
                                 )}
                             </div>
                         </div>
-
+                        {/* Players Section */}
+                        {booking.users && booking.users.length > 0 && (
+                            <div className="border-t border-gray-100 pt-4 p-4 sm:pt-6">
+                                <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 text-sm sm:text-base">
+                                    <Users size={18} className="text-teal-600" />
+                                    Players ({booking.users.length})
+                                </h4>
+                                <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                                    {booking.users.slice(0, 8).map((user, idx) => (
+                                        <div key={idx} className="relative group flex-shrink-0">
+                                            {user.image ? (
+                                                <img
+                                                    src={user.image}
+                                                    alt={user.name}
+                                                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-3 border-white shadow-md hover:scale-110 transition-transform"
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 text-xs sm:text-sm font-bold border-3 border-white shadow-md hover:scale-110 transition-transform">
+                                                    {user.name?.charAt(0) || 'U'}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    {booking.users.length > 8 && (
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xs font-bold border-3 border-white shadow-md flex-shrink-0">
+                                            +{booking.users.length - 8}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        {booking.notes && (
+                            <div className="border-t border-gray-100 pt-4 sm:pt-6 mt-4 sm:mt-6">
+                                <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">Customer Note</h4>
+                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4">
+                                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                                        {booking.notes}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                         {/* Order Summary Card */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+                        <div className="bg-white border-t border-gray-100  rounded-xl   p-4 sm:p-6">
                             <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-4 sm:mb-6">Order Summary</h3>
 
                             <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
@@ -497,3 +452,60 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
 };
 
 export default BookingDetailView;
+
+const VenueInfoCard = ({ booking }) => {
+    if (!booking?.venue_info) {
+        return (
+            <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
+                <p className="text-gray-500">No venue information available</p>
+            </div>
+        );
+    }
+
+
+    return (
+        <div className="w-full  mx-auto  rounded-xl   overflow-hidden">
+                    <div className="h-48  md:h-64">
+                        <h4 className="font-bold text-gray-900 text-lg mb-3">
+                            {booking.venue_info?.translations?.name || 'Zayed Sports Club'}
+                        </h4>
+
+                        <div className="space-y-2.5">
+                            {/* Location */}
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <MapPin size={16} className="text-gray-400 flex-shrink-0" />
+                                <span>{booking.venue_info?.translations?.address || booking.venue_info?.city || 'Bani Yas, Abu Dhabi'}</span>
+                            </div>
+
+                            {/* Sports */}
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Globe size={16} className="text-gray-400 flex-shrink-0" />
+                                <span>
+                                                    {booking.venue_info?.venue_play_type?.map(sport => sport.translations?.name).join(', ') || 'Soccer, Basketball'}
+                                                </span>
+                            </div>
+
+                            {/* Phone */}
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Phone size={16} className="text-gray-400 flex-shrink-0" />
+                                <span>{booking.venue_info?.phone_number || '+1 234 567 8901'}</span>
+                            </div>
+
+                            {/* Email */}
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Mail size={16} className="text-gray-400 flex-shrink-0" />
+                                <span>{booking.venue_info?.owner_info?.email || 'paris.milton@example.com'}</span>
+                            </div>
+
+                            {/* Type */}
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <Building size={16} className="text-gray-400 flex-shrink-0" />
+                                <span>{booking.venue_info?.venue_type === 'indoor' ? '7v7, Indoor' : '7v7, Outdoor'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+    );
+};
+

@@ -10,6 +10,7 @@ import {
 // Import your reusable components
 import MainTable from '../../components/MainTable';
 import BookingDetailView from "./BookingDetailView.jsx";
+import ArrowIcon from "../../components/common/ArrowIcon.jsx";
 
 // Main Bookings Component with Server-Side Sorting
 const Bookings = () => {
@@ -212,7 +213,9 @@ const Bookings = () => {
                     className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                     aria-label="View booking details"
                 >
-                    <ArrowLeft size={18} className="rotate-180" />
+                    {/*<ArrowLeft size={18} className="rotate-180" />*/}
+                    <ArrowIcon direction="right" size="md" />
+
                 </button>
             )
         }
@@ -374,13 +377,6 @@ const Bookings = () => {
                 onPageChange={handlePageChange}
                 sortConfig={sortConfig}
                 onSort={handleSort}
-                topActions={[
-                    {
-                        label: 'Add new booking',
-                        type: 'primary',
-                        onClick: () => alert('Add booking modal - Coming soon!')
-                    }
-                ]}
             />
         </div>
     );
