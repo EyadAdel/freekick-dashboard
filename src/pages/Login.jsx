@@ -194,6 +194,8 @@ const Login = () => {
                                 type="button"
                                 className="text-primary-600 hover:text-primary-700 font-medium"
                                 disabled={isSubmitting}
+                                onClick={() => navigate('/forgot-password')}
+
                             >
                                 Reset Password
                             </button>

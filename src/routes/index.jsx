@@ -20,12 +20,19 @@ import Login from '../pages/Login.jsx';
 
 // Protected Route Component
 import ProtectedRoute from './ProtectedRoute';
+import ForgotPassword from "../pages/ ForgotPassword.jsx";
+import OTPVerification from "../pages/OTPVerification.jsx";
+import ChangePassword from "../pages/ChangePassword.jsx";
+
 
 const router = createBrowserRouter([
     {
         path: '/login',
         element: <Login />,
     },
+    { path:"/forgot-password", element:<ForgotPassword />},
+    { path:"/verify-otp" ,element:<OTPVerification />},
+    {path:"/change-password", element:<ChangePassword />} ,
     {
         path: '/',
         element: (
