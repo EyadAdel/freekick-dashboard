@@ -122,13 +122,13 @@ const Sidebar = ({ onToggle }) => {
     return (
         <>
             <aside
-                className={`bg-white h-screen fixed top-0 border-r border-gray-200 transition-all duration-300 z-50 flex flex-col ${
+                className={`bg-white h-screen fixed top-0 transition-all duration-300 z-50 flex flex-col ${
                     isCollapsed ? 'w-16' : 'w-56'
                 } ${sidebarPosition}`}
                 dir={direction}
             >
                 {/* Logo Section with Toggle */}
-                <div className={`flex items-center ${isCollapsed ? 'justify-center px-3' : 'justify-between px-5'} h-20 border-b border-gray-100 flex-shrink-0`}>
+                <div className={`flex items-center ${isCollapsed ? 'justify-center px-3' : 'justify-between px-5'} h-[4rem] border-b border-primary-100 flex-shrink-0`}>
                     <div className="flex items-center gap-3">
                         {isCollapsed &&
                         <img

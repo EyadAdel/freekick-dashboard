@@ -21,6 +21,22 @@ export const getBookingById = createAsyncThunk(
     }
 );
 
+export const cancelBooking = createAsyncThunk(
+    'bookings/cancel',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await bookingService.cancelBooking(id);
+            return { id, data: response.data || response };
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                error.message ||
+                'Failed to cancel booking'
+            );
+        }
+    }
+);
+
 const bookingSlice = createSlice({
     name: 'bookings',
     initialState: {
@@ -28,6 +44,8 @@ const bookingSlice = createSlice({
         selectedBooking: null,
         status: 'idle',
         error: null,
+        cancelStatus: 'idle',
+        cancelError: null,
     },
     reducers: {
         clearSelectedBooking: (state) => {
@@ -35,6 +53,10 @@ const bookingSlice = createSlice({
         },
         setSelectedBooking: (state, action) => {
             state.selectedBooking = action.payload;
+        },
+        clearCancelStatus: (state) => {
+            state.cancelStatus = 'idle';
+            state.cancelError = null;
         }
     },
     extraReducers: (builder) => {
@@ -62,9 +84,45 @@ const bookingSlice = createSlice({
             .addCase(getBookingById.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
+            })
+            // Cancel booking
+            .addCase(cancelBooking.pending, (state) => {
+                state.cancelStatus = 'loading';
+                state.cancelError = null;
+            })
+            .addCase(cancelBooking.fulfilled, (state, action) => {
+                state.cancelStatus = 'succeeded';
+
+                // Update the booking in items array
+                const index = state.items.findIndex(
+                    booking => booking.id === action.payload.id
+                );
+                if (index !== -1) {
+                    state.items[index] = {
+                        ...state.items[index],
+                        status: 'cancelled'
+                    };
+                }
+
+                // Update selected booking if it's the cancelled one
+                if (state.selectedBooking?.id === action.payload.id) {
+                    state.selectedBooking = {
+                        ...state.selectedBooking,
+                        status: 'cancelled'
+                    };
+                }
+            })
+            .addCase(cancelBooking.rejected, (state, action) => {
+                state.cancelStatus = 'failed';
+                state.cancelError = action.payload;
             });
     },
 });
 
-export const { clearSelectedBooking, setSelectedBooking } = bookingSlice.actions;
+export const {
+    clearSelectedBooking,
+    setSelectedBooking,
+    clearCancelStatus
+} = bookingSlice.actions;
+
 export default bookingSlice.reducer;
