@@ -213,8 +213,8 @@ const Bookings = () => {
                     className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                     aria-label="View booking details"
                 >
-                    {/*<ArrowLeft size={18} className="rotate-180" />*/}
-                    <ArrowIcon direction="right" size="md" />
+                    <ArrowLeft size={18} className="rotate-180" />
+                    {/*<ArrowIcon direction="right" size="md" />*/}
 
                 </button>
             )
@@ -301,10 +301,9 @@ const Bookings = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Stats Cards */}
-            <div className="p-6 pb-0">
-                <p className="text-gray-600 mb-6">Manage and track all your venue bookings</p>
+            <div className="px-4 pb-0">
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 xl: gap-8 mb-6">
                     <div className="bg-white rounded-lg shadow-sm p-6">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -364,7 +363,7 @@ const Bookings = () => {
             </div>
 
 
-
+<h1 className={'px-8 text-primary-700 lg:-mb-14 lg:text-xl lg:mt-8 font-bold'}>Bookings list</h1>
             <MainTable
                 columns={columns}
                 data={bookingData}

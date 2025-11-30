@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import {
     ArrowLeft, Calendar, CheckCircle, Clock, CreditCard,
     Mail, MapPin, Phone, Printer, Send, Users, MoreVertical,
@@ -8,13 +8,34 @@ import { bookingService } from "../../services/bookings/bookingService.js";
 import { useBooking } from "../../hooks/useBookings.js";
 import logo from '../../assets/logo.svg'
 import ArrowIcon from "../../components/common/ArrowIcon.jsx";
+import {useContact} from "../../hooks/useContact.js";
+import { usePrint } from '../../hooks/usePrint';
+import PrintableReceipt from '../../components/features/Bookings/PrintableReceipt.jsx';
+import {useDispatch, useSelector} from "react-redux";
+import {  clearCancelStatus } from "../../features/bookings/bookingSlice";
+
 const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
     const bookingId = initialBooking?.id;
     const { booking: fetchedBooking, isLoading: isFetchingDetails, error: fetchError } = useBooking(bookingId);
+    const { handleEmailClick, handleWhatsAppClick } = useContact();
+    const { componentRef, handlePrint } = usePrint();
+    const dispatch = useDispatch();
 
     const booking = fetchedBooking || initialBooking;
     const [isActionLoading, setIsActionLoading] = useState(false);
+    const { cancelStatus, cancelError } = useSelector(state => state.bookings);
 
+    useEffect(() => {
+        if (cancelStatus === 'succeeded') {
+            alert('Booking cancelled successfully');
+            dispatch(clearCancelStatus());
+            if (onRefresh) onRefresh();
+            if (onBack) onBack();
+        } else if (cancelStatus === 'failed') {
+            alert('Failed to cancel booking: ' + cancelError);
+            dispatch(clearCancelStatus());
+        }
+    }, [cancelStatus, cancelError, dispatch, onRefresh, onBack]);
     if (!booking && isFetchingDetails) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -41,16 +62,21 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
         );
     }
 
-    const formatDateTime = (dateTime) => {
-        if (!dateTime) return 'N/A';
-        const date = new Date(dateTime);
-        return date.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+    const handleCustomerEmail = () => {
+        const email = booking.user_info?.email;
+        const customerName = booking.user_info?.name || 'Customer';
+        const subject = `Booking #${String(booking.id).padStart(7, '0')} - ${booking.venue_info?.translations?.name || 'Venue'}`;
+        const body = `Dear ${customerName},\n\nRegarding your booking #${String(booking.id).padStart(7, '0')} at ${booking.venue_info?.translations?.name || 'our venue'}.\n\n`;
+
+        handleEmailClick(email, subject, body);
+    };
+
+    const handleCustomerWhatsApp = () => {
+        const phone = booking.user_info?.phone;
+        const customerName = booking.user_info?.name || 'Customer';
+        const message = `Hello ${customerName}! Regarding your booking #${String(booking.id).padStart(7, '0')} at ${booking.venue_info?.translations?.name || 'our venue'}.`;
+
+        handleWhatsAppClick(phone, message);
     };
 
     const formatDate = (dateTime) => {
@@ -106,34 +132,38 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            {/* ALWAYS render PrintableReceipt but keep it hidden */}
+            <div style={{
+                position: 'fixed',
+                left: '-10000px',
+                top: 0,
+                zIndex: -1000
+            }}>
+                <PrintableReceipt ref={componentRef} booking={booking} logo={logo} />
+            </div>
+
             {/* Header Section */}
-            <div className="bg-white mx-4  rounded-xl  mt-4 ">
-                <div className=" mx-auto px-4 sm:px-4 py-3 ">
-                    <div className="flex flex-col  items-start  justify-between gap-2 ">
+            <div className="bg-white mx-4 rounded-xl">
+                <div className="mx-auto px-4 sm:px-4 lg:py-3 py-1">
+                    <div className="flex flex-col items-start justify-between gap-2">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={onBack}
                                 className="flex items-center gap-2 text-primary-700 hover:text-primary-600 transition-colors">
-                                {/*<ArrowLeft size={20} />*/}
                                 <ArrowIcon direction="left" size="lg" />
                                 <span className="font-medium">Back to Bookings</span>
                             </button>
-
                         </div>
-
                     </div>
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className=" mx-auto px-4 sm:px-4 py-4 sm:py-6">
-                {/* Booking Header Card */}
-
-                {/* Main Grid Layout */}
+            <div className="mx-auto px-4 sm:px-4 py-4 sm:py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Left Column - Customer Profile */}
-                    <div className="lg:col-span-1  order-2 lg:order-1">
-                        <div className="bg-white   rounded-xl shadow-md p-4 sm:p-6 lg:sticky lg:top-6">
+                    <div className="lg:col-span-1 order-1 lg:order-1">
+                        <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:sticky lg:top-6">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="font-bold text-gray-900 text-base sm:text-lg">Customer Profile</h3>
                                 <button className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -230,11 +260,17 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
 
                             {/* Action Buttons */}
                             <div className="grid grid-cols-2 gap-3">
-                                <button className="px-4 py-2.5 text-xs sm:text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2">
+                                <button
+                                    onClick={handleCustomerEmail}
+                                    className="px-4 py-2.5 text-xs sm:text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2"
+                                >
                                     <Mail size={16} />
                                     <span className="hidden sm:inline">Email</span>
                                 </button>
-                                <button className="px-4 py-2.5 text-xs sm:text-sm bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium flex items-center justify-center gap-2">
+                                <button
+                                    onClick={handleCustomerWhatsApp}
+                                    className="px-4 py-2.5 text-xs sm:text-sm bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium flex items-center justify-center gap-2"
+                                >
                                     <Phone size={16} />
                                     <span>WhatsApp</span>
                                 </button>
@@ -244,29 +280,29 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
 
                     {/* Right Column - Venue and Order Details */}
                     <div className="lg:col-span-2 bg-white rounded-xl shadow-md space-y-4 sm:space-y-2 order-1 lg:order-2">
-                        <div className="bg-white rounded-xl  p-4 sm:p-6  ">
-                            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 ">
+                        <div className="bg-white rounded-xl p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                                 <div className="flex-1 w-full">
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-
                                         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                                             Booking ID: <span className="font-semibold text-gray-900">#{String(booking.id).padStart(7, '0')}</span>
                                         </h1>
                                         <span className={`w-fit px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold border ${getStatusColor(booking.status)}`}>
-                                    {booking.status?.toUpperCase() || 'PENDING'}
-                                </span>
+                                            {booking.status?.toUpperCase() || 'PENDING'}
+                                        </span>
                                     </div>
                                     <div className="text-left flex gap-4 text-xs sm:text-sm text-gray-500 w-full sm:w-auto">
                                         <p>Created: {formatDate(booking.created_at)}</p>
                                         <p>Updated: {formatDate(booking.updated_at)}</p>
                                     </div>
                                 </div>
-                                <button className="flex-1 sm:flex-none px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <button
+                                    onClick={handlePrint}
+                                    className="flex-1 sm:flex-none px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
                                     <Printer size={18} />
                                     <span className="font-medium">Print Receipt</span>
                                 </button>
                             </div>
-
                         </div>
 
                         {/* Venue Information Card */}
@@ -307,7 +343,7 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                                 <img
                                     src={ 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800'}
                                     alt="Venue"
-                                    className="w-full h-64 object-cover rounded-xl"
+                                    className="w-full lg:h-64 h-48 object-cover rounded-xl"
                                 />
                             </div>
                                 {booking.venue_info && (
@@ -359,39 +395,66 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                             </div>
                         )}
                         {/* Order Summary Card */}
-                        <div className="bg-white border-t border-gray-100  rounded-xl   p-4 sm:p-6">
+                        <div className="bg-white border-t border-gray-100 rounded-xl p-4 sm:p-6">
                             <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-4 sm:mb-6">Order Summary</h3>
 
-                            <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-                                {/* Pitch Booking */}
-                                <div className="flex items-center justify-between py-2 sm:py-3 border-b border-gray-100">
-                                    <div className="flex-1 min-w-0 pr-4">
-                                        <p className="font-semibold text-gray-900 mb-1 text-sm sm:text-base truncate">
+                            {/* Table Headers */}
+                            <div className="grid grid-cols-12 gap-2 sm:gap-4 pb-3 border-b-2 border-gray-200 mb-3">
+                                <div className="col-span-5 sm:col-span-6">
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Description</span>
+                                </div>
+                                <div className="col-span-2 text-center">
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Qty</span>
+                                </div>
+                                <div className="col-span-2 sm:col-span-2 text-right">
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Price</span>
+                                </div>
+                                <div className="col-span-3 sm:col-span-2 text-right">
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Total</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2 mb-4 sm:mb-6">
+                                {/* Pitch Booking Row */}
+                                <div className="grid grid-cols-12 gap-2 sm:gap-4 py-2 border-b border-gray-100">
+                                    <div className="col-span-5 sm:col-span-6">
+                                        <p className="text-sm font-medium text-gray-900 truncate">
                                             {booking.pitch?.translations?.name || 'Pitch Booking'}
                                         </p>
                                         <p className="text-xs text-gray-500 truncate">
                                             {booking.venue_info?.translations?.name || 'Venue'}
                                         </p>
                                     </div>
-                                    <div className="text-right flex-shrink-0">
-                                        <p className="font-bold text-gray-900 text-base sm:text-lg">{pitchTotal.toFixed(0)} AED</p>
+                                    <div className="col-span-2 text-center">
+                                        <p className="text-sm text-gray-700">1</p>
+                                    </div>
+                                    <div className="col-span-2 sm:col-span-2 text-right">
+                                        <p className="text-sm text-gray-700">{pitchTotal.toFixed(0)}</p>
+                                    </div>
+                                    <div className="col-span-3 sm:col-span-2 text-right">
+                                        <p className="text-sm font-semibold text-gray-900">{pitchTotal.toFixed(0)} AED</p>
                                     </div>
                                 </div>
 
-                                {/* Addons */}
+                                {/* Addons Rows */}
                                 {booking.booking_addons?.map((addon, idx) => (
-                                    <div key={idx} className="flex items-center justify-between py-2 sm:py-3 border-b border-gray-100">
-                                        <div className="flex-1 min-w-0 pr-4">
-                                            <p className="font-semibold text-gray-900 mb-1 text-sm sm:text-base truncate">
+                                    <div key={idx} className="grid grid-cols-12 gap-2 sm:gap-4 py-2 border-b border-gray-100">
+                                        <div className="col-span-5 sm:col-span-6">
+                                            <p className="text-sm font-medium text-gray-900 truncate">
                                                 {addon.addon_info?.addon?.translations?.name || 'Add-on'}
                                             </p>
-                                            <p className="text-xs text-gray-500">
-                                                Qty: {addon.quantity} × {addon.addon_info?.price} AED
+                                        </div>
+                                        <div className="col-span-2 text-center">
+                                            <p className="text-sm text-gray-700">{addon.quantity}</p>
+                                        </div>
+                                        <div className="col-span-2 sm:col-span-2 text-right">
+                                            <p className="text-sm text-gray-700">{addon.addon_info?.price}</p>
+                                        </div>
+                                        <div className="col-span-3 sm:col-span-2 text-right">
+                                            <p className="text-sm font-semibold text-gray-900">
+                                                {(parseFloat(addon.addon_info?.price || 0) * addon.quantity).toFixed(0)} AED
                                             </p>
                                         </div>
-                                        <p className="font-bold text-gray-900 text-base sm:text-lg flex-shrink-0">
-                                            {(parseFloat(addon.addon_info?.price || 0) * addon.quantity).toFixed(0)} AED
-                                        </p>
                                     </div>
                                 ))}
                             </div>
@@ -415,7 +478,7 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <p className="text-teal-100 text-xs sm:text-sm font-medium mb-1">Total Amount</p>
-                                        <p className="text-white text-2xl sm:text-3xl font-bold">AED {totalAmount.toFixed(0)}</p>
+                                        <p className="text-white text-xl sm:text-3xl font-bold">AED {totalAmount.toFixed(0)}</p>
                                     </div>
                                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
                                         <CreditCard size={24} className="text-white sm:w-7 sm:h-7" />
@@ -424,7 +487,7 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <button
                                     onClick={handleCancel}
                                     disabled={isActionLoading}
@@ -432,21 +495,17 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                                 >
                                     Cancel
                                 </button>
-                                <button className="px-4 py-2.5 sm:py-3 border-2 border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 transition-colors text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 order-1 sm:order-2">
+                                <button   onClick={handlePrint} className="px-4 py-2.5 sm:py-3 border-2 border-primary-500 text-primary-700 rounded-lg hover:bg-teal-50 transition-colors text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 order-1 sm:order-2">
                                     <Send size={16} />
                                     <span className="hidden sm:inline">Invoice</span>
                                     <span className="sm:hidden">Send Invoice</span>
-                                </button>
-                                <button className="px-4 py-2.5 sm:py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 order-2 sm:order-3">
-                                    <Bell size={16} />
-                                    <span className="hidden sm:inline">Reminder</span>
-                                    <span className="sm:hidden">Send Reminder</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     );
 };
