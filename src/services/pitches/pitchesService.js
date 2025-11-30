@@ -1,14 +1,12 @@
 import api from '../api.js';
 import { toast } from 'react-toastify';
 
-
-// services/pitches/pitchesService.js
 export const pitchesService = {
-    // view all pitches
+    // View all pitches
     getAllPitchess: async () => {
         try {
             const response = await api.get('/venue/pitch/pitches/');
-            toast.success("Pitches loaded successfully!");
+            // toast.success("Pitches loaded successfully!");
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to load pitches";
@@ -17,7 +15,33 @@ export const pitchesService = {
         }
     },
 
-    // delete pitch
+    // Add new pitch
+    addPitch: async (pitchData) => {
+        try {
+            const response = await api.post('/venue/pitch/pitches/', pitchData);
+            toast.success("Pitch created successfully!");
+            return response.data;
+        } catch (error) {
+            const message = error.response?.data?.message || "Failed to create pitch";
+            toast.error(message);
+            throw error;
+        }
+    },
+
+    // Update existing pitch (New Function)
+    updatePitch: async (id, pitchData) => {
+        try {
+            const response = await api.patch(`/venue/pitch/pitches/${id}/`, pitchData);
+            toast.success("Pitch updated successfully!");
+            return response.data;
+        } catch (error) {
+            const message = error.response?.data?.message || "Failed to update pitch";
+            toast.error(message);
+            throw error;
+        }
+    },
+
+    // Delete pitch
     deletePitch: async (id) => {
         try {
             const response = await api.delete(`/venue/pitch/pitches/${id}/`);

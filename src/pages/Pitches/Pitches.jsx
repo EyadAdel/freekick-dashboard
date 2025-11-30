@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import MainTable from './../../components/MainTable';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import {Eye, Pencil, Trash2, CheckCircle, XCircle, TrendingUp, Clock, Filter} from 'lucide-react';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import PitchesForm from "../../components/pitches/PitchesForm.jsx";
 import { pitchesService } from '../../services/pitches/pitchesService.js';
@@ -21,7 +21,10 @@ const Pitches = () => {
     const [venuesData, setVenuesData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+
+    // Form & Edit States
     const [showForm, setShowForm] = useState(false);
+    const [selectedPitch, setSelectedPitch] = useState(null);
 
     // Filter State
     const [activeFilters, setActiveFilters] = useState({
@@ -32,6 +35,9 @@ const Pitches = () => {
         pitcherName: '',
         globalSearch: ''
     });
+
+    // View State - To switch between different pitch status views
+    const [currentView, setCurrentView] = useState('all'); // 'all', 'approved', 'rejected', 'pending'
 
     // Fetch Data
     const fetchPitchesData = async () => {
@@ -78,11 +84,69 @@ const Pitches = () => {
         fetchAllData();
     }, []);
 
-    // Form Handlers
-    const handleCreatePitch = () => setShowForm(true);
-    const handleCancelForm = () => setShowForm(false);
+    // Status Management Functions
+    const handleApprovePitch = async (pitch) => {
+        const isConfirmed = await showConfirm({
+            title: `Approve "${pitch.translations?.name || `Pitch ${pitch.id}`}"?`,
+            text: "This pitch will be set to active status and visible to users.",
+            confirmButtonText: 'Yes, Approve it'
+        });
+
+        if (!isConfirmed) return;
+
+        try {
+            await pitchesService.updatePitch(pitch.id, { is_active: true });
+            setPitchesData(prev =>
+                prev.map(p =>
+                    p.id === pitch.id ? { ...p, is_active: true } : p
+                )
+            );
+        } catch (error) {
+            console.error("Failed to approve pitch:", error);
+        }
+    };
+
+    const handleRejectPitch = async (pitch) => {
+        const isConfirmed = await showConfirm({
+            title: `Reject "${pitch.translations?.name || `Pitch ${pitch.id}`}"?`,
+            text: "This pitch will be set to inactive status and hidden from users.",
+            confirmButtonText: 'Yes, Reject it'
+        });
+
+        if (!isConfirmed) return;
+
+        try {
+            await pitchesService.updatePitch(pitch.id, { is_active: false });
+            setPitchesData(prev =>
+                prev.map(p =>
+                    p.id === pitch.id ? { ...p, is_active: false } : p
+                )
+            );
+        } catch (error) {
+            console.error("Failed to reject pitch:", error);
+        }
+    };
+
+    // --- FORM HANDLERS ---
+    const handleCreatePitch = () => {
+        setSelectedPitch(null);
+        setShowForm(true);
+    };
+
+    const handleEditPitch = (pitch) => {
+        setSelectedPitch(pitch);
+        setShowForm(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancelForm = () => {
+        setShowForm(false);
+        setSelectedPitch(null);
+    };
+
     const handleFormSuccess = () => {
         setShowForm(false);
+        setSelectedPitch(null);
         fetchAllData();
     };
 
@@ -103,55 +167,59 @@ const Pitches = () => {
         }
     };
 
-    // 👇 Filtering Logic
+    // Filter Logic
     const filteredData = useMemo(() => {
         if (!pitchesData) return [];
 
-        return pitchesData.filter((item) => {
-            // 1. Status
+        let filtered = pitchesData.filter((item) => {
             if (activeFilters.status && activeFilters.status !== 'all') {
                 if (String(item.is_active) !== activeFilters.status) return false;
             }
-
-            // 2. Type
             if (activeFilters.type && activeFilters.type !== 'all') {
                 if (String(item.size) !== activeFilters.type) return false;
             }
-
-            // 3. Venue
             if (activeFilters.venue && activeFilters.venue !== 'all') {
                 if (String(item.venue) !== String(activeFilters.venue)) return false;
             }
-
-            // 4. Price (Exact Match)
             if (activeFilters.price) {
                 const itemPrice = parseFloat(item.price_per_hour || 0);
                 const filterPrice = parseFloat(activeFilters.price);
-
-                // Check if the number is valid, then check for EXACT equality
                 if (!isNaN(filterPrice)) {
                     if (itemPrice !== filterPrice) return false;
                 }
             }
-
-            // 5. Pitcher Name
             if (activeFilters.pitcherName) {
                 const name = item.translations?.name?.toLowerCase() || '';
                 const searchTerm = activeFilters.pitcherName.toLowerCase();
                 if (!name.includes(searchTerm)) return false;
             }
-
-            // 6. Global Search
             if (activeFilters.globalSearch) {
                 const search = activeFilters.globalSearch.toLowerCase();
                 const name = item.translations?.name?.toLowerCase() || '';
                 const venue = String(item.venue);
                 if (!name.includes(search) && !venue.includes(search)) return false;
             }
-
             return true;
         });
-    }, [pitchesData, activeFilters]);
+
+        // Apply view filter
+        switch (currentView) {
+            case 'approved':
+                filtered = filtered.filter(pitch => pitch.is_active);
+                break;
+            case 'rejected':
+                filtered = filtered.filter(pitch => !pitch.is_active);
+                break;
+            case 'pending':
+                filtered = filtered.filter(pitch => !pitch.is_active);
+                break;
+            case 'all':
+            default:
+                break;
+        }
+
+        return filtered;
+    }, [pitchesData, activeFilters, currentView]);
 
     // Handlers
     const handleFilterChange = (newFilters) => {
@@ -166,16 +234,48 @@ const Pitches = () => {
 
     const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
+    const handleViewChange = (view) => {
+        setCurrentView(view);
+        setCurrentPage(1);
+    };
+
+    // Statistics
+    const stats = useMemo(() => {
+        const total = pitchesData.length;
+        const active = pitchesData.filter(pitch => pitch.is_active).length;
+        const inactive = pitchesData.filter(pitch => !pitch.is_active).length;
+        const pending = pitchesData.filter(pitch => !pitch.is_active).length;
+
+        return { total, active, inactive, pending };
+    }, [pitchesData]);
+
+    // Get pitches by status for management sections
+    const approvedPitches = useMemo(() => {
+        return pitchesData.filter(pitch => pitch.is_active);
+    }, [pitchesData]);
+
+    const rejectedPitches = useMemo(() => {
+        return pitchesData.filter(pitch => !pitch.is_active);
+    }, [pitchesData]);
+
+    // --- ACTION BUTTONS (Simplified - No status change buttons) ---
     const ActionButtons = ({ pitch }) => (
-        <div className="flex justify-center items-center gap-4">
-            <button className="text-gray-500 hover:text-teal-600" title="View Pitch">
+        <div className="flex justify-center items-center gap-2">
+            <button
+                className="text-gray-500 hover:text-teal-600 p-1 rounded transition-colors hover:bg-gray-50"
+                title="View Pitch"
+            >
                 <Eye size={18} />
             </button>
-            <button className="text-gray-500 hover:text-blue-600" title="Edit Pitch">
+            <button
+                className="text-gray-500 hover:text-blue-600 p-1 rounded transition-colors hover:bg-gray-50"
+                title="Edit Pitch"
+                onClick={() => handleEditPitch(pitch)}
+            >
                 <Pencil size={18} />
             </button>
             <button
-                className="text-gray-500 hover:text-red-600"
+                className="text-gray-500 hover:text-red-600 p-1 rounded transition-colors hover:bg-gray-50"
                 onClick={() => handleDeletePitch(pitch.id, pitch.translations?.name || `Pitch ${pitch.id}`)}
                 title="Delete Pitch"
             >
@@ -184,18 +284,155 @@ const Pitches = () => {
         </div>
     );
 
+    // Status Management Section Component
+    // Status Management Section Component
+    const StatusManagementSection = ({ title, pitches, statusType, emptyMessage }) => (
+        <div className="bg-gradient-to-br from-white to-primary-50/30 rounded-lg w-full shadow-md border border-primary-100 mb-6 overflow-hidden">
+            <div className="px-4 py-3 border-b border-primary-100 bg-gradient-to-r from-primary-50 to-white">
+                <div className="flex items-center justify-between ">
+                    <div className="flex items-center gap-2 ">
+                        <div className={`p-1.5 rounded-lg ${
+                            statusType === 'approved' ? 'bg-primary-100' :
+                                statusType === 'rejected' ? 'bg-red-50' : 'bg-orange-50'
+                        }`}>
+                            {statusType === 'approved' ? <CheckCircle className="w-4 h-4 text-primary-600" /> :
+                                statusType === 'rejected' ? <XCircle className="w-4 h-4 text-red-500" /> :
+                                    <Clock className="w-4 h-4 text-orange-500" />}
+                        </div>
+                        <div>
+                            <h2 className="text-base font-bold text-secondary-600">{title}</h2>
+                            <p className="text-xs text-gray-600">
+                                {pitches.length} {pitches.length === 1 ? 'pitch' : 'pitches'}
+                            </p>
+                        </div>
+                    </div>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                        statusType === 'approved' ? 'bg-primary-100 text-primary-700' :
+                            statusType === 'rejected' ? 'bg-red-100 text-red-600' :
+                                'bg-orange-100 text-orange-600'
+                    }`}>
+                    {statusType === 'approved' ? 'Approved' : statusType === 'rejected' ? 'Rejected' : 'Pending'}
+                </span>
+                </div>
+            </div>
+
+            {pitches.length > 0 ? (
+                <div className="px-4 py-3 max-h-64 h-auto custom-scrollbar overflow-auto">
+                    {/* Scrollable container */}
+                    <div
+                        className="space-y-2.5  h-auto overflow-y-auto pr-2"
+                        style={{
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: '#cbd5e1 transparent'
+                        }}
+                    >
+                        {pitches.map((pitch) => (
+                            <div
+                                key={pitch.id}
+                                className="bg-white rounded-lg border border-primary-100 p-3 hover:shadow-md hover:border-primary-300 transition-all duration-200"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3 flex-1">
+                                        <div className="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-sm">
+                                            <span className="text-base font-bold text-white">{pitch.size}</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                            <span className="font-semibold text-secondary-600 text-sm">
+                                                {pitch.translations?.name || `Pitch ${pitch.id}`}
+                                            </span>
+                                                <span className="px-2 py-0.5 bg-primary-50 text-primary-700 rounded text-xs font-medium">
+                                                {pitch.size} a side
+                                            </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <span className="flex items-center gap-1">
+                                                <span className="font-medium">ID:</span> #{pitch.id}
+                                            </span>
+                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                <span className="flex items-center gap-1">
+                                                <span className="font-medium">Venue:</span> #{pitch.venue}
+                                            </span>
+                                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                                <span className="flex items-center gap-1">
+                                                <span className="font-medium">Price:</span> AED {parseFloat(pitch.price_per_hour || 0).toLocaleString()}/hr
+                                            </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 ml-3">
+                                        <div className="text-right">
+                                            <StatusBadge isActive={pitch.is_active} />
+                                        </div>
+                                        <div className="flex gap-1.5">
+                                            {statusType === 'pending' && (
+                                                <button
+                                                    className="flex items-center gap-1.5 bg-primary-500 hover:bg-primary-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
+                                                    onClick={() => handleApprovePitch(pitch)}
+                                                >
+                                                    <CheckCircle size={14} />
+                                                    Approve
+                                                </button>
+                                            )}
+                                            {statusType === 'approved' && (
+                                                <button
+                                                    className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
+                                                    onClick={() => handleRejectPitch(pitch)}
+                                                >
+                                                    <XCircle size={14} />
+                                                    Reject
+                                                </button>
+                                            )}
+                                            {statusType === 'rejected' && (
+                                                <button
+                                                    className="flex items-center gap-1.5 bg-primary-500 hover:bg-primary-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
+                                                    onClick={() => handleApprovePitch(pitch)}
+                                                >
+                                                    <CheckCircle size={14} />
+                                                    Approve
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="p-6 text-center text-gray-500 text-sm">
+                    {emptyMessage}
+                </div>
+            )}
+
+           
+        </div>
+    );
+
+
     // Filter Config
     const filterConfig = [
+        {
+            key: 'status',
+            label: 'Status',
+            type: 'select',
+            options: [
+                { label: 'All Status', value: 'all' },
+                { label: 'Active', value: 'true' },
+                { label: 'Inactive', value: 'false' }
+            ],
+            value: activeFilters.status
+        },
         {
             key: 'venue',
             label: 'Filter Venues',
             type: 'select',
-            options: venuesData || [],
+            options: [{ label: 'All Venues', value: 'all' }, ...venuesData],
             value: activeFilters.venue
         },
         {
             key: 'price',
-            label: 'Price Per Hour', // Changed label
+            label: 'Price Per Hour',
             type: 'number',
             placeholder: 'e.g. 200',
             options: [],
@@ -208,17 +445,16 @@ const Pitches = () => {
             header: 'Pitch Name/ID',
             accessor: 'id',
             render: (row) => (
-                <div className="font-medium text-gray-700">
-                    {row.translations?.name || `Pitch ${row.id}`}
-                    <span className="text-gray-400 mx-1">/</span>
-                    <span className="text-gray-500">#{row.id}</span>
+                <div className="font-medium text-gray-900">
+                    <div>{row.translations?.name || `Pitch ${row.id}`}</div>
+                    <div className="text-sm text-gray-500">#{row.id}</div>
                 </div>
             )
         },
         {
-            header: 'Venue Name',
+            header: 'Venue',
             accessor: 'venue',
-            render: (row) => <a href="#" className="text-blue-600 hover:underline">Venue #{row.venue}</a>
+            render: (row) => <span className="text-gray-700">Venue #{row.venue}</span>
         },
         {
             header: 'Status',
@@ -229,12 +465,12 @@ const Pitches = () => {
         {
             header: 'Type',
             accessor: 'size',
-            render: (row) => <span>{row.size} a side</span>
+            render: (row) => <span className="text-gray-700">{row.size} a side</span>
         },
         {
             header: 'Pricing/hour',
             accessor: 'price_per_hour',
-            render: (row) => <span>AED {parseFloat(row.price_per_hour || 0).toLocaleString()}</span>
+            render: (row) => <span className="font-medium text-gray-900">AED {parseFloat(row.price_per_hour || 0).toLocaleString()}</span>
         },
         {
             header: 'Quick Actions',
@@ -251,18 +487,130 @@ const Pitches = () => {
         }
     ];
 
+    // View Tabs Component
+    const ViewTabs = () => (
+        <div className="bg-gradient-to-br from-white to-primary-50/30 rounded-lg shadow-sm border border-primary-100 p-1.5 mt-5 mb-6">
+            <div className="flex space-x-1">
+                {[
+                    { key: 'all', label: 'All Pitches', count: stats.total },
+                    { key: 'approved', label: 'Approved', count: stats.active },
+                    { key: 'rejected', label: 'Rejected', count: stats.inactive },
+                ].map((tab) => (
+                    <button
+                        key={tab.key}
+                        onClick={() => handleViewChange(tab.key)}
+                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 ${
+                            currentView === tab.key
+                                ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
+                                : 'text-gray-600 hover:text-secondary-600 hover:bg-primary-50'
+                        }`}
+                    >
+                        {tab.label}
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${
+                            currentView === tab.key
+                                ? 'bg-primary-700 text-white'
+                                : 'bg-gray-200 text-gray-600'
+                        }`}>
+                        {tab.count}
+                    </span>
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+    // PREPARE PITCHES LIST FOR DROPDOWN
+    const formattedPitchesList = useMemo(() => {
+        return pitchesData.map(pitch => ({
+            label: pitch.translations?.name || `Pitch #${pitch.id}`,
+            value: pitch.id
+        }));
+    }, [pitchesData]);
+
+    const StatCard = ({ title, value, icon, gradient, bgColor }) => (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 ${bgColor} rounded-xl`}>
+                    {icon}
+                </div>
+                <div className={`w-16 h-1 bg-gradient-to-r ${gradient} rounded-full`}></div>
+            </div>
+            <div>
+                <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">{title}</p>
+                <p className="text-4xl font-bold text-gray-900">{value}</p>
+            </div>
+        </div>
+    );
+
     return (
         <div className="w-full">
+            {/* Statistics Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
+                <StatCard
+                    title="Total Pitches"
+                    value={stats.total}
+                    icon={<TrendingUp className="w-7 h-7 text-blue-600" />}
+                    gradient="from-blue-500 to-blue-600"
+                    bgColor="bg-blue-50"
+                />
+                <StatCard
+                    title="Active Pitches"
+                    value={stats.active}
+                    icon={<CheckCircle className="w-7 h-7 text-green-600" />}
+                    gradient="from-green-500 to-green-600"
+                    bgColor="bg-green-50"
+                />
+                <StatCard
+                    title="Inactive Pitches"
+                    value={stats.inactive}
+                    icon={<XCircle className="w-7 h-7 text-red-600" />}
+                    gradient="from-red-500 to-red-600"
+                    bgColor="bg-red-50"
+                />
+                <StatCard
+                    title="Pending Approval"
+                    value={stats.pending}
+                    icon={<Clock className="w-7 h-7 text-orange-600" />}
+                    gradient="from-orange-500 to-orange-600"
+                    bgColor="bg-orange-50"
+                />
+            </div>
+
+            {/* Status Management Sections */}
+            <div className="gap-8 flex  ">
+
+
+                <StatusManagementSection
+                    title="Approved Pitches"
+                    pitches={approvedPitches}
+                    statusType="approved"
+                    emptyMessage="No approved pitches"
+                />
+
+                <StatusManagementSection
+                    title="Rejected Pitches"
+                    pitches={rejectedPitches}
+                    statusType="rejected"
+                    emptyMessage="No rejected pitches"
+                />
+            </div>
+
+            {/* Form Section */}
             {showForm && (
-                <div className='mt-12'>
+                <div className='mb-8'>
                     <PitchesForm
                         venuesData={venuesData}
+                        pitchesList={formattedPitchesList}
+                        initialData={selectedPitch}
                         onCancel={handleCancelForm}
                         onSuccess={handleFormSuccess}
                     />
                 </div>
             )}
 
+            {/* View Tabs */}
+            <ViewTabs />
+
+            {/* Main Table Section */}
             {isLoading && pitchesData.length === 0 ? (
                 <div className="p-10 text-center text-gray-500">Loading...</div>
             ) : (
@@ -270,7 +618,7 @@ const Pitches = () => {
                     data={filteredData || []}
                     columns={columns}
                     filters={filterConfig}
-                    searchPlaceholder="Search Name or Venue ID"
+                    searchPlaceholder="Search pitch"
                     topActions={topActions}
                     currentPage={currentPage}
                     totalItems={filteredData?.length || 0}
@@ -285,8 +633,14 @@ const Pitches = () => {
 };
 
 const StatusBadge = ({ isActive }) => {
-    const style = isActive ? 'bg-green-400 text-white' : 'bg-gray-500 text-white';
-    return <span className={`px-3 py-1 rounded-md text-xs font-medium ${style}`}>{isActive ? 'Active' : 'Hidden'}</span>;
+    const style = isActive
+        ? 'bg-green-100 text-green-800 border border-green-200'
+        : 'bg-red-100 text-red-800 border border-red-200';
+    return (
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${style}`}>
+            {isActive ? 'Active' : 'Inactive'}
+        </span>
+    );
 };
 
 export default Pitches;
