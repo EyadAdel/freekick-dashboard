@@ -7,11 +7,13 @@ import { MdPhoneInTalk } from "react-icons/md";
 import { ArrowLeft } from 'lucide-react';
 import LogoText from "../components/common/LogoText.jsx";
 import LogoLoader from "../components/common/LogoLoader.jsx";
+import MuiPhoneInput from "../components/common/MuiPhoneInput.jsx";
 
 const ForgotPassword = () => {
     const [phone, setPhone] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+    const [phoneError, setPhoneError] = useState('');
 
     const formatPhoneNumber = (value) => {
         const cleaned = value.replace(/[^\d+]/g, '');
@@ -39,6 +41,19 @@ const ForgotPassword = () => {
 
     const handleInputChange = (value) => {
         setPhone(formatPhoneNumber(value));
+    };
+    const handlePhoneChange = (value, country) => {
+        setPhone(formatPhoneNumber(value));
+
+        // Clear error when user starts typing
+        if (phoneError) {
+            setPhoneError('');
+        }
+
+        // Basic validation
+        if (value && value.length < 8) {
+            setPhoneError('Please enter a valid phone number');
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -130,14 +145,23 @@ const ForgotPassword = () => {
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <MdPhoneInTalk className="h-5 w-5 text-slate-400" />
                                 </div>
-                                <input
-                                    type="text"
-                                    required
+                                {/*<input*/}
+                                {/*    type="text"*/}
+                                {/*    required*/}
+                                {/*    value={phone}*/}
+                                {/*    onChange={(e) => handleInputChange(e.target.value)}*/}
+                                {/*    placeholder="Your phone number"*/}
+                                {/*    className="block w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"*/}
+                                {/*    disabled={isSubmitting}*/}
+                                {/*/>*/}
+                                <MuiPhoneInput
                                     value={phone}
-                                    onChange={(e) => handleInputChange(e.target.value)}
-                                    placeholder="Your phone number"
-                                    className="block w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    onChange={handlePhoneChange}
+                                    error={!!phoneError}
+                                    helperText={phoneError}
+                                    required
                                     disabled={isSubmitting}
+                                    size="medium"
                                 />
                             </div>
                         </div>

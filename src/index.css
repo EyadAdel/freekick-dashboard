@@ -106,3 +106,171 @@ html {
   right: auto;
   left: 0;
 }
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Professional Custom Scrollbar Styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #008c8c #008c8c;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #008c8c;
+  border-radius: 10px;
+  margin: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 0.5px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  transform: scale(1.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #64748b;
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: #f1f5f9;
+}
+
+/* Firefox specific styles */
+@supports (scrollbar-color: auto) {
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #008c8c #f1f5f9;
+  }
+
+  .custom-scrollbar:hover {
+    scrollbar-color: #008c8c #f1f5f9;
+  }
+}
+
+/* Smooth scrolling for the entire app */
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+/* src/index.css */
+/* RTL specific styles */
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* RTL layout adjustments */
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* Header specific RTL adjustments */
+[dir="rtl"] header {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .is-sidebar-collapsed header {
+  right: auto;
+  left: 4rem;
+}
+
+/* Language switcher RTL */
+[dir="rtl"] .language-switcher .absolute {
+  right: auto;
+  left: 0;
+}
+/* src/styles/phone-input.css */
+.react-tel-input .form-control {
+  font-family: inherit;
+  padding-left: 60px !important;
+  border-radius: 12px  !important;
+  border: 1px solid #e2e8f0 !important;
+  height: 48px !important;
+  width: 100% !important;
+  font-size: 16px !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.react-tel-input .form-control:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  outline: none !important;
+  border-radius: 12px  !important;
+
+}
+
+.react-tel-input .flag-dropdown {
+  border-radius: 12px   !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.react-tel-input .flag-dropdown.open {
+  width: 100% !important;
+  background: #f8fafc !important;
+  border-radius: 12px  !important;
+  padding: 0 !important;
+
+}
+
+.react-tel-input .selected-flag {
+  border-radius: 12px  !important;
+  padding-left: 16px !important;
+}
+
+.react-tel-input .country-list {
+  width: 100% !important;
+  border-radius: 12px  !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+.react-tel-input .country-list .search-box {
+  width: 90% !important;
+}
+/* Add this to your global CSS */
+input {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+/* Specifically for autofilled inputs */
+input:-webkit-autofill {
+  -webkit-text-fill-color: #000 !important;
+  -webkit-user-select: text !important;
+}

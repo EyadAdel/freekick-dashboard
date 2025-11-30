@@ -8,6 +8,7 @@ import { MdPhoneInTalk } from "react-icons/md";
 import { TbLockPassword } from "react-icons/tb";
 import LogoText from "../components/common/LogoText.jsx";
 import LogoLoader from "../components/common/LogoLoader.jsx";
+import MuiPhoneInput from "../components/common/MuiPhoneInput.jsx";
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ const Login = () => {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [phoneError, setPhoneError] = useState('');
 
     const { login, isAuthenticated, isLoading, error, resetError } = useAuth();
     const navigate = useNavigate();
@@ -47,37 +49,52 @@ const Login = () => {
         }
     }, [error, isLoading, resetError]);
 
-    const formatPhoneNumber = (value) => {
-        const cleaned = value.replace(/[^\d+]/g, '');
-        const hasPlus = cleaned.startsWith('+');
-        const digits = hasPlus ? cleaned.slice(1) : cleaned;
+    const handlePhoneChange = (value, country) => {
+        setFormData(prev => ({ ...prev, phone: value }));
 
-        if (digits.length <= 3) {
-            return hasPlus ? `+${digits}` : digits;
-        } else if (digits.length <= 5) {
-            return hasPlus ? `+${digits.slice(0, 3)} ${digits.slice(3)}` : digits;
-        } else if (digits.length <= 8) {
-            return hasPlus ? `+${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5)}` : digits;
-        } else {
-            return hasPlus ? `+${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 8)} ${digits.slice(8, 12)}` : digits;
+        // Clear error when user starts typing
+        if (phoneError) {
+            setPhoneError('');
+        }
+
+        // Basic validation
+        if (value && value.length < 8) {
+            setPhoneError('Please enter a valid phone number');
         }
     };
 
     const handleInputChange = (field, value) => {
-        if (field === 'phone') {
-            value = formatPhoneNumber(value);
-        }
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const validateForm = () => {
+        let isValid = true;
+
+        // Phone validation
+        if (!formData.phone) {
+            setPhoneError('Phone number is required');
+            isValid = false;
+        } else if (formData.phone.length < 8) {
+            setPhoneError('Please enter a valid phone number');
+            isValid = false;
+        }
+
+        // Password validation
+        if (!formData.password) {
+            toast.warning('Please enter your password', {
+                position: "top-right",
+                autoClose: 3000,
+            });
+            isValid = false;
+        }
+
+        return isValid;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!formData.phone || !formData.password) {
-            toast.warning('Please fill in all fields', {
-                position: "top-right",
-                autoClose: 3000,
-            });
+        if (!validateForm()) {
             return;
         }
 
@@ -125,28 +142,32 @@ const Login = () => {
                     </h1>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Phone Number Field */}
+                        {/* Phone Number Field with MUI Phone Input */}
                         <div>
+                            <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
+                                Phone Number
+                            </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <MdPhoneInTalk className="h-5 w-5 text-slate-400" />
-                                </div>
-                                <input
-                                    id="phone"
-                                    name="phone"
-                                    type="text"
-                                    required
+                                {/*<div className="absolute inset-y-0 left-0 -pl-4  flex items-center pointer-events-none z-10">*/}
+                                {/*    <MdPhoneInTalk className="h-5 w-5 text-slate-400" />*/}
+                                {/*</div>*/}
+                                <MuiPhoneInput
                                     value={formData.phone}
-                                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                                    placeholder="Your phone number"
-                                    className="block w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    onChange={handlePhoneChange}
+                                    error={!!phoneError}
+                                    helperText={phoneError}
+                                    required
                                     disabled={isSubmitting}
+                                    size="medium"
                                 />
                             </div>
                         </div>
 
                         {/* Password Field */}
                         <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+                                Password
+                            </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <TbLockPassword className="h-5 w-5 text-slate-400" />
@@ -195,7 +216,6 @@ const Login = () => {
                                 className="text-primary-600 hover:text-primary-700 font-medium"
                                 disabled={isSubmitting}
                                 onClick={() => navigate('/forgot-password')}
-
                             >
                                 Reset Password
                             </button>
