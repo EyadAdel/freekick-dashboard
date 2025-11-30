@@ -7,7 +7,7 @@ export const venuesService = {
     getAllVenues: async () => {
         try {
             const response = await api.get('/venue/venue/venues/');
-            toast.success("Pitches loaded successfully!");
+            // toast.success("Pitches loaded successfully!");
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to load venues";
