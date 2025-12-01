@@ -260,7 +260,7 @@ const Pitches = () => {
 
     // --- ACTION BUTTONS (Responsive) ---
     const ActionButtons = ({ pitch }) => (
-        <div className="flex justify-center items-center gap-1 sm:gap-2">
+        <div className="flex justify-end items-center gap-1 sm:gap-2">
             <button
                 className="text-gray-500 hover:text-teal-600 p-1 rounded transition-colors hover:bg-gray-50"
                 title="View Pitch"
@@ -440,8 +440,24 @@ const Pitches = () => {
 
     const columns = [
         {
+            header: 'Sr.No',
+            accessor: 'id',
+            align: 'left',
+            width: '80px',
+            render: (row, index) => {
+
+                return (
+                    <div className="text-gray-600 font-medium text-sm">
+                        {index + 1}
+                    </div>
+                )
+            }
+        },
+        {
             header: 'Pitch Name/ID',
             accessor: 'id',
+            align: 'center',
+
             render: (row) => (
                 <div className="font-medium text-gray-900">
                     <div className="text-xs sm:text-sm">{row.translations?.name || `Pitch ${row.id}`}</div>
@@ -452,6 +468,8 @@ const Pitches = () => {
         {
             header: 'Venue',
             accessor: 'venue',
+            align: 'center',
+
             render: (row) => <span className="text-gray-700 text-xs sm:text-sm">Venue #{row.venue}</span>
         },
         {
@@ -463,16 +481,18 @@ const Pitches = () => {
         {
             header: 'Type',
             accessor: 'size',
+            align: 'center',
             render: (row) => <span className="text-gray-700 text-xs sm:text-sm">{row.size} a side</span>
         },
         {
             header: 'Pricing/hour',
             accessor: 'price_per_hour',
+            align: 'center',
             render: (row) => <span className="font-medium text-gray-900 text-xs sm:text-sm">AED {parseFloat(row.price_per_hour || 0).toLocaleString()}</span>
         },
         {
             header: 'Quick Actions',
-            align: 'center',
+            align: 'right',
             render: (row) => <ActionButtons pitch={row} />
         }
     ];

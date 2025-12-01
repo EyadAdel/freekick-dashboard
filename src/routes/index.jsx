@@ -8,6 +8,7 @@ import Bookings from '../pages/Bookings/Booking.jsx';
 // import Calendar from '../pages/Calendar/Calendar';
 // import Venues from '../pages/Venues/Venues';
 import Pitches from '../pages/Pitches/Pitches';
+import Amenities from '../pages/Amenities/Amenities';
 // import Tournaments from '../pages/Tournaments/Tournaments';
 // import Tickets from '../pages/Tickets/Tickets';
 // import Revenue from '../pages/Revenue/Revenue';
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
             {
                 path: 'pitches',
                 element: <Pitches />,
+            },
+            {
+                path: 'amenities',
+                element: <Amenities />,
             },
             {
                 path: 'tournaments',
