@@ -5,6 +5,7 @@ import MainTable from '../../components/MainTable';
 import BannerForm from '../../components/banners/BannerForm.jsx';
 import { Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import ArrowIcon from "../../components/common/ArrowIcon.jsx";
 
 const BannerPage = () => {
     const {
@@ -237,20 +238,15 @@ const BannerPage = () => {
                     <div className="min-h-screen bg-gray-50">
                         <div className="container mx-auto px-6">
                             <div className="flex items-center justify-between mb-6 mt-6">
-                                <div>
-                                    <h1 className="text-2xl font-bold text-gray-800">
-                                        Manage all banners and advertisements
-                                    </h1>
-                                    <p className="text-gray-600 mt-1">
-                                        Showing all {banners.length} banners
-                                    </p>
-                                </div>
+
                                 <button
                                     onClick={() => setViewMode('slider')}
-                                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                    className="flex items-center gap-2 text-xl bg-white p-5 py-3 rounded-lg w-full text-gray-600 hover:text-gray-900 mb-4 transition-colors"
                                 >
-                                    ← Back to Banners
+                                    <ArrowIcon size={'xl'} direction={'left'} />
+                                    <span className="font-medium">Back to Banners</span>
                                 </button>
+
                             </div>
 
                             <MainTable
@@ -283,13 +279,14 @@ const BannerPage = () => {
                         {/* Banner Slider Section */}
                         <div className="bg-white border-b">
                             <div className="container mx-auto px-6 py-6">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-xl font-bold text-gray-800">Uploaded Banners</h2>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-bold text-primary-700">Uploaded Banners</h2>
                                     <button
                                         onClick={() => setViewMode('list')}
-                                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                        className="text-base flex gap-2 items-center text-primary-700 hover:text-primary-600 font-medium"
                                     >
                                         See all
+                                        <ArrowIcon direction={'right'} size={'lg'}/>
                                     </button>
                                 </div>
 

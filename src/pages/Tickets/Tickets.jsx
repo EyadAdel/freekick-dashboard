@@ -10,6 +10,7 @@ import CustomLineChart from "../../components/sharts/LineChart.jsx";
 import CreateTicket from "../../components/Tickets/CreateTicket.jsx";
 import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 import {useDispatch} from "react-redux";
+import {showConfirm} from "../../components/showConfirm.jsx";
 
 function Tickets() {
     const {
@@ -45,7 +46,6 @@ function Tickets() {
             resetError();
         }
         if (success) {
-            toast.success('Operation completed successfully!');
             resetSuccess();
         }
     }, [error, success, resetError, resetSuccess]);
@@ -185,26 +185,28 @@ function Tickets() {
         setCurrentView('edit');
     };
 
+
     const handleBackToList = () => {
         setCurrentView('list');
         setEditingTicket(null);
+        handlePageChange(filters.page);
+
     };
 
-    const handleView = (ticket) => {
-        console.log('View ticket:', ticket);
-        toast.info('View details functionality to be implemented');
-    };
 
-    const handleUrlClick = (ticket) => {
-        if (ticket.url) {
-            recordClick(ticket.id);
-            window.open(ticket.url, '_blank');
-        }
-    };
+        const handleDelete = async (id) => {
+            const ticketToDelete = tickets.find(t => t.id === id);
+            const ticketName = ticketToDelete?.name || 'this ticket';
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this ticket?')) {
-            const result = await removeTicket(id);
+            const isConfirmed = await showConfirm({
+                title: "Delete Ticket?",
+                text: `Are you sure you want to delete "${ticketName}"? This action cannot be undone.`,
+                confirmButtonText: "Yes, delete",
+                cancelButtonText: "Cancel",
+                icon: 'warning'
+            });
+                 if(isConfirmed){
+                 const result = await removeTicket(id);
             if (result.type.includes('fulfilled')) {
                 toast.success('Ticket deleted successfully');
             }

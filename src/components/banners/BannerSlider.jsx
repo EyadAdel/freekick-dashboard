@@ -88,12 +88,12 @@ const BannerSlider = ({
                                 onClick={() => onBannerClick?.(banner)}
                             >
                                 {!loadedImages[banner.id] && !errorImages[banner.id] && (
-                                    <div className="w-full h-64 md:h-80 bg-gray-200 animate-pulse rounded-lg"></div>
+                                    <div className="w-full h-64 md:h-[60vh] bg-gray-200 animate-pulse rounded-lg"></div>
                                 )}
                                 <img
                                     src={imageSrc}
                                     alt={`Banner ${banner.id}`}
-                                    className={`w-full h-64 md:h-80 object-cover ${!loadedImages[banner.id] && !errorImages[banner.id] ? 'hidden' : 'block'}`}
+                                    className={`w-full h-64 md:h-[60vh] object-cover ${!loadedImages[banner.id] && !errorImages[banner.id] ? 'hidden' : 'block'}`}
                                     onError={() => handleImageError(banner.id)}
                                     onLoad={() => handleImageLoad(banner.id)}
                                     loading="lazy"

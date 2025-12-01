@@ -12,13 +12,13 @@ const BannerForm = ({
                     }) => {
     const [formData, setFormData] = useState(editingBanner ? {
         // image: editingBanner.image,
-        image: 'https://www.startpage.com/av/proxy-image?piurl=https%3A%2F%2Fmedia.istockphoto.com%2Fid%2F814423752%2Fphoto%2Feye-of-model-with-colorful-art-make-up-close-up.jpg%3Fs%3D612x612%26w%3D0%26k%3D20%26c%3Dl15OdMWjgCKycMMShP8UK94ELVlEGvt7GmB_esHWPYE%3D&sp=1764603143Ta04842ad85270e91fd8f8801e5440d5ca08d694fe6da030e4188fc514400db52',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6ePimPYqT3Wv5BxneytQnoDKYT95tk0BU0nkZeEX8vYVqltuxxn5Y-DFdJzkk0KIbRUY&usqp=CAU',
         imagePreview: editingBanner.image,
         type: editingBanner.type,
         value: editingBanner.value,
         is_active: editingBanner.is_active
     } : {
-        image: 'https://www.startpage.com/av/proxy-image?piurl=https%3A%2F%2Fmedia.istockphoto.com%2Fid%2F814423752%2Fphoto%2Feye-of-model-with-colorful-art-make-up-close-up.jpg%3Fs%3D612x612%26w%3D0%26k%3D20%26c%3Dl15OdMWjgCKycMMShP8UK94ELVlEGvt7GmB_esHWPYE%3D&sp=1764603143Ta04842ad85270e91fd8f8801e5440d5ca08d694fe6da030e4188fc514400db52',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6ePimPYqT3Wv5BxneytQnoDKYT95tk0BU0nkZeEX8vYVqltuxxn5Y-DFdJzkk0KIbRUY&usqp=CAU',
         imagePreview: null,
         type: '',
         value: '',

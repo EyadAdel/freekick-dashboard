@@ -35,8 +35,7 @@ class TicketsService {
      */
     async createTicket(ticketData) {
         try {
-            const response = await api.post(API_BASE_URL, ticketData);
-            alert('response')
+            const response = await api.post(`${API_BASE_URL}/`, ticketData);
             return response.data;
         } catch (error) {
             throw this.handleError(error);
