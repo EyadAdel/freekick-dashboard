@@ -52,7 +52,8 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
             });
             if (editTicket.image) {
                 setImagePreview(editTicket.image);
-                setUploadedImageUrl(editTicket.image);
+                // setUploadedImageUrl(editTicket.image);
+                setUploadedImageUrl('https://www.shutterstock.com/image-photo/august-14-2019-istanbul-turkey-260nw-1492556879.jpg')
             }
         }
     }, [editTicket, reset]);
@@ -121,15 +122,16 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
 // Replace the entire onSubmit function with:
     const onSubmit = async (data) => {
         // Upload image if selected but not yet uploaded
-        if (selectedFile && !uploadedImageUrl) {
-            toast.error('Please upload the image first');
-            return;
-        }
+        // if (selectedFile && !uploadedImageUrl) {
+        //     toast.error('Please upload the image first');
+        //     return;
+        // }
 
         const formData = {
             ...data,
             price: parseFloat(data.price) || 0,
-            image: uploadedImageUrl || editTicket?.image || '1764601545377_Capture.PNG',
+            // image: uploadedImageUrl || editTicket?.image || '1764601545377_Capture.PNG',
+            image:'https://www.shutterstock.com/image-photo/august-14-2019-istanbul-turkey-260nw-1492556879.jpg'
         };
 
         console.log('Submitting ticket data:', formData); // Debug log
@@ -148,7 +150,7 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
             if (result.success || result.type?.includes('fulfilled')) {
                 toast.success(editTicket ? 'Ticket updated successfully' : 'Ticket created successfully');
                 // Optional: delay before going back
-                // setTimeout(() => onBack(), 1000);
+                setTimeout(() => onBack(), 1000);
             } else {
                 const errorMsg = result.error || result.payload?.message || 'Operation failed';
                 toast.error(errorMsg);
@@ -230,9 +232,12 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                             render={({ field }) => (
                                 <MainInput
                                     label="City"
-                                    type="text"
+                                    type="select"
                                     placeholder="Enter city"
-                                    required
+                                    options={[
+                                        { value: 'Dubai', label: 'Dubai' },
+                                        { value: 'Ajmain', label: 'Ajmain' }
+                                    ]}                                    required
                                     error={errors.city?.message}
                                     disabled={loading}
                                     {...field}

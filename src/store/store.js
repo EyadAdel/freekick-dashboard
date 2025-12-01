@@ -5,6 +5,7 @@ import languageReducer from '../features/language/languageSlice.js';
 import pageTitleReducer from '../features/pageTitle/pageTitleSlice.js';
 import ticketsReducer from '../features/Tickets/ticketsSlice.js'
 import bannerReducer from '../features/banners/bannerSlilce.js'
+import analyticsReducer from '../features/dashboard/analyticsSlice.js'
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         tickets: ticketsReducer,
         auth: authReducer,
         banners: bannerReducer,
+        analytics: analyticsReducer,
 
 
 

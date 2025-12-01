@@ -30,7 +30,7 @@ const bannerService = {
     },
 
     async deleteBanner(id) {
-        await axios.delete(`${API_URL}${id}/`);
+        await api.delete(`${API_URL}${id}/`);
     }
 };
 
