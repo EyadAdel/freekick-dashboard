@@ -162,15 +162,14 @@ const SurfaceTypes = () => {
     // -- Render --
     return (
         <div className="p-4">
-            {showForm ? (
+            {showForm && (
                 /* --- FORM VIEW --- */
                 <SurfaceTypesForm
                     initialData={editItem}
                     onCancel={handleCancelForm}
                     onSuccess={handleFormSuccess}
                 />
-            ) : (
-                /* --- TABLE VIEW --- */
+            )}
                 <MainTable
                     columns={columns}
                     data={filteredData}
@@ -183,7 +182,7 @@ const SurfaceTypes = () => {
                     topActions={topActions}
                     filters={[]}
                 />
-            )}
+
         </div>
     );
 };

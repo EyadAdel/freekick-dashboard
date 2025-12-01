@@ -1,4 +1,3 @@
-// src/components/layout/Sidebar/Sidebar.jsx
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -21,7 +20,8 @@ import {
     HeadphonesIcon,
     ChevronLeft,
     ChevronRight,
-    Grid // <--- 1. Imported Grid icon here
+    Grid,
+    Dribbble // <--- Imported Dribbble icon for Venue Sports
 } from 'lucide-react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -59,7 +59,8 @@ const Sidebar = ({ onToggle }) => {
                 { icon: MapPin, label: t('menu_items.venues'), path: '/venues' },
                 { icon: Landmark, label: t('menu_items.pitches'), path: '/pitches' },
                 { icon: PlusCircle, label: t('menu_items.amenities'), path: '/amenities' },
-                { icon: Grid, label: t('menu_items.surface_types'), path: '/surface-types' }, // <--- 2. Added Surface Types here
+                { icon: Dribbble, label: t('menu_items.venue_sports'), path: '/venue-sports' }, // <--- Added Venue Sports
+                { icon: Grid, label: t('menu_items.surface_types'), path: '/surface-types' },
                 { icon: Layers, label: t('menu_items.addons'), path: '/add-ons' },
                 { icon: Layers, label: t('menu_items.categories'), path: '/categories' },
                 { icon: Trophy, label: t('menu_items.tournaments'), path: '/tournaments' },
@@ -131,7 +132,7 @@ const Sidebar = ({ onToggle }) => {
             >
                 {/* Logo Section with Toggle */}
                 <div className={`flex items-center ${isCollapsed ? 'justify-center px-3' : 'justify-between px-5'} h-[4rem] border-b border-primary-100 flex-shrink-0`}>
-                    <div className="flex items-center gap-3">
+                    <div  dir={'ltr'} className="flex items-center gap-3">
                         {isCollapsed &&
                             <img
                                 src={logo}
