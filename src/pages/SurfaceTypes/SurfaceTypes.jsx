@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 import MainTable from '../../components/MainTable.jsx';
-import SurfaceTypesForm from '../../components/surfaceTypes/SurfaceTypesForm.jsx';
+import SurfaceTypesForm from '../../components/SurfaceTypes/SurfaceTypesForm.jsx';
 import { surfaceTypesService } from '../../services/surfaceTypes/surfaceTypesService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
 import { Edit2, Trash2, Plus } from 'lucide-react';
