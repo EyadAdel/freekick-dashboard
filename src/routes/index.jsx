@@ -8,6 +8,11 @@ import Bookings from '../pages/Bookings/Booking.jsx';
 // import Calendar from '../pages/Calendar/Calendar';
 // import Venues from '../pages/Venues/Venues';
 import Pitches from '../pages/Pitches/Pitches';
+import Amenities from '../pages/Amenities/Amenities';
+import Support from '../pages/Support/Support';
+import SurfaceTypes from '../pages/SurfaceTypes/SurfaceTypes.jsx';
+import AddOns from '../pages/AddOns/AddOns.jsx';
+import VenueSports from '../pages/VenueSports/VenueSports.jsx';
 // import Tournaments from '../pages/Tournaments/Tournaments';
 import Tickets from '../pages/Tickets/Tickets.jsx';
 // import Revenue from '../pages/Revenue/Revenue';
@@ -67,6 +72,22 @@ const router = createBrowserRouter([
                 element: <Pitches />,
             },
             {
+                path: 'amenities',
+                element: <Amenities />,
+            },
+            {
+                path: 'surface-types',
+                element: <SurfaceTypes />,
+            },
+            {
+                path: 'add-ons',
+                element: <AddOns />,
+            },
+            {
+                path: 'venue-sports',
+                element: <VenueSports />,
+            },
+            {
                 path: 'tournaments',
                 // element: <Tournaments />,
             },
@@ -97,6 +118,10 @@ const router = createBrowserRouter([
             {
                 path: 'settings',
                 // element: <Settings />,
+            },
+            {
+                path: 'support',
+                element: <Support />,
             },
         ],
     },

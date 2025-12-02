@@ -67,12 +67,15 @@ const MainTable = ({
     // For server-side pagination: use data as-is (already paginated)
     // For client-side pagination: slice the data
     const isServerSidePagination = totalItems !== undefined && totalItems !== data.length;
+
+    // Calculate the starting index for serial numbers
+    const startIndex = (currentPage - 1) * itemsPerPage;
+
     const displayData = isServerSidePagination ? data : data.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
 
-    const startIndex = (currentPage - 1) * itemsPerPage;
     const startRange = finalTotalItems === 0 ? 0 : startIndex + 1;
     const endRange = Math.min(startIndex + displayData.length, finalTotalItems);
 
@@ -246,26 +249,34 @@ const MainTable = ({
                         </thead>
                         <tbody className="divide-y divide-gray-100 text-sm text-gray-600">
                         {displayData.length > 0 ? (
-                            displayData.map((row, rowIndex) => (
-                                <tr key={rowIndex} className="hover:bg-primary-25 transition-colors">
-                                    {columns.map((col, colIndex) => (
-                                        <td
-                                            key={colIndex}
-                                            className={`px-6 py-4 ${
-                                                col.align === 'center'
-                                                    ? 'text-center'
-                                                    : col.align === 'right'
-                                                        ? 'text-right'
-                                                        : 'text-left'
-                                            }`}
-                                        >
-                                            {col.render ? col.render(row) : row[col.accessor]}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))
-                        ) : (
+                            displayData.map((row, rowIndex) => {
+                                // Calculate actual serial number based on pagination
+                                const serialNumber = startIndex + rowIndex + 1;
 
+                                return (
+                                    <tr key={rowIndex} className="hover:bg-primary-25 transition-colors">
+                                        {columns.map((col, colIndex) => (
+                                            <td
+                                                key={colIndex}
+                                                className={`px-6 py-4 ${
+                                                    col.align === 'center'
+                                                        ? 'text-center'
+                                                        : col.align === 'right'
+                                                            ? 'text-right'
+                                                            : 'text-left'
+                                                }`}
+                                            >
+                                                {/* Pass both row and index to render function */}
+                                                {col.render
+                                                    ? col.render(row, serialNumber - 1, serialNumber) // Pass row, original index, and serial number
+                                                    : row[col.accessor]
+                                                }
+                                            </td>
+                                        ))}
+                                    </tr>
+                                )
+                            })
+                        ) : (
                             <tr>
                                 <td
                                     colSpan={columns.length}

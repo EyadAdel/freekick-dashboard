@@ -1,4 +1,3 @@
-// src/components/layout/Sidebar/Sidebar.jsx
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -20,7 +19,9 @@ import {
     FileEdit,
     HeadphonesIcon,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Grid,
+    Dribbble // <--- Imported Dribbble icon for Venue Sports
 } from 'lucide-react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -58,6 +59,8 @@ const Sidebar = ({ onToggle }) => {
                 { icon: MapPin, label: t('menu_items.venues'), path: '/venues' },
                 { icon: Landmark, label: t('menu_items.pitches'), path: '/pitches' },
                 { icon: PlusCircle, label: t('menu_items.amenities'), path: '/amenities' },
+                { icon: Dribbble, label: t('menu_items.venue_sports'), path: '/venue-sports' }, // <--- Added Venue Sports
+                { icon: Grid, label: t('menu_items.surface_types'), path: '/surface-types' },
                 { icon: Layers, label: t('menu_items.addons'), path: '/add-ons' },
                 { icon: Layers, label: t('menu_items.categories'), path: '/categories' },
                 { icon: Trophy, label: t('menu_items.tournaments'), path: '/tournaments' },
@@ -129,22 +132,22 @@ const Sidebar = ({ onToggle }) => {
             >
                 {/* Logo Section with Toggle */}
                 <div className={`flex items-center ${isCollapsed ? 'justify-center px-3' : 'justify-between px-5'} h-[4rem] border-b border-primary-100 flex-shrink-0`}>
-                    <div className="flex items-center gap-3">
+                    <div  dir={'ltr'} className="flex items-center gap-3">
                         {isCollapsed &&
-                        <img
-                            src={logo}
-                            alt="FreeKick Logo"
-                            className="w-10 h-10 object-contain flex-shrink-0"
-                        />
+                            <img
+                                src={logo}
+                                alt="FreeKick Logo"
+                                className="w-10 h-10 object-contain flex-shrink-0"
+                            />
                         }
                         {!isCollapsed && (
                             <span className="text-2xl text-secondary-600 font-bold tracking-wider flex items-center">
                                 FREE K
                                  <img
-                                    src={logo}
-                                    alt="Logo"
-                                    className="h-6 w-6 -mx-1 animate-avatar-float-slowest"
-                                />
+                                     src={logo}
+                                     alt="Logo"
+                                     className="h-6 w-6 -mx-1 animate-avatar-float-slowest"
+                                 />
                                 ICK
                                 </span>                     )}
                     </div>
@@ -264,7 +267,7 @@ const Sidebar = ({ onToggle }) => {
                 )}
             </aside>
 
-            {/* Tooltip - Rendered OUTSIDE sidebar to avoid overflow clipping */}
+            {/* Tooltip */}
             {tooltip.show && (
                 <div
                     className="fixed pointer-events-none z-[100] transition-opacity duration-200"
