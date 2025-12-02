@@ -2,10 +2,10 @@
 import React from 'react';
 import useAnalytics from "../../hooks/useAnalytics.js";
 import { useEffect, useState } from "react";
-import EmiratesChart from "../../components/charts/EmiratesChart.jsx";
-import StatCard from "../../components/charts/StatCards.jsx";
-import BookingChart from "../../components/charts/BookingChart.jsx";
-import RevenueTrendChart from "../../components/charts/RevenueTrendChart.jsx";
+import EmiratesChart from "../../components/Charts/EmiratesChart.jsx";
+import StatCard from "../../components/Charts/StatCards.jsx";
+import BookingChart from "../../components/Charts/BookingChart.jsx";
+import RevenueTrendChart from "../../components/Charts/RevenueTrendChart.jsx";
 
 import { FaCalendarDays } from "react-icons/fa6";
 import TopTeamsChart from "../../components/Charts/TopTeamsChart.jsx";
