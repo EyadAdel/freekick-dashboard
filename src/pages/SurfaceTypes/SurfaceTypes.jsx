@@ -108,7 +108,7 @@ const SurfaceTypes = () => {
         },
         {
             header: "Surface Name (EN)",
-            align: 'left',
+            align: 'center',
             render: (row) => {
                 const name = row.translations?.en?.name || '-';
                 return <span className="font-medium text-secondary-600">{name}</span>;
@@ -116,7 +116,7 @@ const SurfaceTypes = () => {
         },
         {
             header: "Surface Name (AR)",
-            align: 'left',
+            align: 'center',
             render: (row) => {
                 const name = row.translations?.ar?.name || '-';
                 return <span className="font-medium text-secondary-600">{name}</span>;
