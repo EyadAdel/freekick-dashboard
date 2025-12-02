@@ -196,7 +196,7 @@ const AddOns = () => {
             )
         },
         {
-            header: 'Name (English)',
+            header: 'Name (EN)',
             accessor: 'name_en',
             align: 'center',
             render: (row) => (
@@ -206,7 +206,7 @@ const AddOns = () => {
             )
         },
         {
-            header: 'Name (Arabic)',
+            header: 'Name (AR)',
             accessor: 'name_ar',
             align: 'center',
             render: (row) => (

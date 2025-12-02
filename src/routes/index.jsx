@@ -13,7 +13,7 @@ import Support from '../pages/Support/Support';
 import SurfaceTypes from '../pages/SurfaceTypes/SurfaceTypes.jsx';
 import AddOns from '../pages/AddOns/AddOns.jsx';
 import VenueSports from '../pages/VenueSports/VenueSports.jsx';
-// import Tournaments from '../pages/Tournaments/Tournaments';
+import Tournaments from '../pages/Tournaments/Tournaments.jsx';
 import Tickets from '../pages/Tickets/Tickets.jsx';
 // import Revenue from '../pages/Revenue/Revenue';
 // import Reports from '../pages/Reports/Reports';
@@ -89,7 +89,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'tournaments',
-                // element: <Tournaments />,
+                element: <Tournaments />,
             },
             {
                 path: 'tickets',
