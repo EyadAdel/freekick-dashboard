@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import MainTable from '../../components/MainTable.jsx';
 import { useTickets } from '../../hooks/useTickets.js';
-import { Edit, Trash2, Eye, ExternalLink } from 'lucide-react';
+import {Edit, Trash2, Eye, ExternalLink, Edit2} from 'lucide-react';
 import { toast } from 'react-toastify';
-import CustomPieChart from "../../components/sharts/PieChart.jsx";
-import CustomLineChart from "../../components/sharts/LineChart.jsx";
+import CustomPieChart from "../../components/Charts/PieChart.jsx";
+import CustomLineChart from "../../components/Charts/LineChart.jsx";
 import CreateTicket from "../../components/Tickets/CreateTicket.jsx";
 import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 import {useDispatch} from "react-redux";
@@ -148,14 +148,14 @@ function Tickets() {
 
                     <button
                         onClick={() => handleEditClick(row)}
-                        className="p-1.5 text-primary-700 hover:bg-amber-50 rounded transition-colors"
+                        className="p-2 text-gray-600 hover:bg-gray-50 rounded transition-colors"
                         title="Edit"
                     >
-                        <Edit size={18} />
+                        <Edit2 size={16} />
                     </button>
                     <button
                         onClick={() => handleDelete(row.id)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-2 text-gray-600 hover:bg-gray-50 rounded transition-colors"
                         title="Delete"
                     >
                         <Trash2 size={18} />

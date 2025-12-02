@@ -24,11 +24,11 @@ export const fetchRevenueTrend = createAsyncThunk(
     }
 );
 
-export const fetchTopPartners = createAsyncThunk(
-    'analytics/fetchTopPartners',
-    async (limit = 10, { rejectWithValue }) => {
+export const fetchTopEmirates = createAsyncThunk(
+    'analytics/fetchTopEmirates',
+    async (period = 'this_week', { rejectWithValue }) => {
         try {
-            return await analyticsService.getTopPartners(limit);
+            return await analyticsService.getTopEmirates(period);
         } catch (error) {
             return rejectWithValue(error.response?.data || error.message);
         }
@@ -57,23 +57,106 @@ export const fetchAllAnalytics = createAsyncThunk(
     }
 );
 
+export const fetchBookingChartAnalytics = createAsyncThunk(
+    'analytics/fetchBookingChartAnalytics',
+    async (period = 'this_week', { rejectWithValue }) => {
+        try {
+            return await analyticsService.getBookingChartAnalytics(period);
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to fetch booking chart data');
+        }
+    }
+);
+
+export const fetchTopTeams = createAsyncThunk(
+    'analytics/fetchTopTeams',
+    async (params = {}, { rejectWithValue }) => {
+        try {
+            return await analyticsService.getTopTeams(params);
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+// Add notification thunks
+export const fetchNotifications = createAsyncThunk(
+    'analytics/fetchNotifications',
+    async (params = {}, { rejectWithValue }) => {
+        try {
+            return await analyticsService.getNotifications(params);
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const fetchNotificationById = createAsyncThunk(
+    'analytics/fetchNotificationById',
+    async (id, { rejectWithValue }) => {
+        try {
+            return await analyticsService.getNotificationById(id);
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const markNotificationAsRead = createAsyncThunk(
+    'analytics/markNotificationAsRead',
+    async (id, { rejectWithValue }) => {
+        try {
+            return await analyticsService.markNotificationAsRead(id);
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+export const fetchPopularVenues = createAsyncThunk(
+    'analytics/fetchPopularVenues',
+    async (params = {}, { rejectWithValue }) => {
+        try {
+            return await analyticsService.getPopularVenues(params);
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
 const initialState = {
     cardAnalytics: null,
     revenueTrend: null,
-    topPartners: null,
+    topEmirates: null,
     weeklyBookings: null,
+    bookingChartData: null,
+    topTeams: null,
+    notifications: [],
+    notificationsCount: 0,
+    currentNotification: null,
+    currentEmiratesPeriod: 'this_week',
+    currentBookingPeriod: 'this_week',
+    currentTeamsPeriod: 'this_week',
     loading: {
         cardAnalytics: false,
         revenueTrend: false,
-        topPartners: false,
+        topEmirates: false,
         weeklyBookings: false,
+        bookingChart: false,
+        topTeams: false,
+        notifications: false,
+        popularVenues: false,  // ADD THIS LINE
+        notificationDetail: false,
         all: false,
     },
     error: {
         cardAnalytics: null,
         revenueTrend: null,
-        topPartners: null,
+        topEmirates: null,
         weeklyBookings: null,
+        bookingChart: null,
+        topTeams: null,
+        notifications: null,
+        notificationDetail: null,
+        popularVenues: null,  // ADD THIS LINE
         all: null,
     },
 };
@@ -87,7 +170,6 @@ const analyticsSlice = createSlice({
             if (errorType && state.error[errorType]) {
                 state.error[errorType] = null;
             } else {
-                // Clear all errors
                 Object.keys(state.error).forEach(key => {
                     state.error[key] = null;
                 });
@@ -96,11 +178,31 @@ const analyticsSlice = createSlice({
         resetAnalyticsData: (state) => {
             state.cardAnalytics = null;
             state.revenueTrend = null;
-            state.topPartners = null;
+            state.topEmirates = null;
             state.weeklyBookings = null;
+            state.topTeams = null;
+            state.popularVenues = null;  // ADD THIS LINE
+            state.notifications = [];
+            state.notificationsCount = 0;
             Object.keys(state.error).forEach(key => {
                 state.error[key] = null;
             });
+        },
+        setEmiratesPeriod: (state, action) => {
+            state.currentEmiratesPeriod = action.payload;
+        },
+        setBookingPeriod: (state, action) => {
+            state.currentBookingPeriod = action.payload;
+        },
+        setTeamsPeriod: (state, action) => {
+            state.currentTeamsPeriod = action.payload;
+        },
+        clearNotifications: (state) => {
+            state.notifications = [];
+            state.notificationsCount = 0;
+        },
+        setVenuesCity: (state, action) => {  // ADD THIS REDUCER
+            state.currentVenuesCity = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -134,19 +236,19 @@ const analyticsSlice = createSlice({
                 state.error.revenueTrend = action.payload;
             });
 
-        // Top Partners
+        // Top Emirates
         builder
-            .addCase(fetchTopPartners.pending, (state) => {
-                state.loading.topPartners = true;
-                state.error.topPartners = null;
+            .addCase(fetchTopEmirates.pending, (state) => {
+                state.loading.topEmirates = true;
+                state.error.topEmirates = null;
             })
-            .addCase(fetchTopPartners.fulfilled, (state, action) => {
-                state.loading.topPartners = false;
-                state.topPartners = action.payload;
+            .addCase(fetchTopEmirates.fulfilled, (state, action) => {
+                state.loading.topEmirates = false;
+                state.topEmirates = action.payload;
             })
-            .addCase(fetchTopPartners.rejected, (state, action) => {
-                state.loading.topPartners = false;
-                state.error.topPartners = action.payload;
+            .addCase(fetchTopEmirates.rejected, (state, action) => {
+                state.loading.topEmirates = false;
+                state.error.topEmirates = action.payload;
             });
 
         // Weekly Booking Analytics
@@ -164,6 +266,81 @@ const analyticsSlice = createSlice({
                 state.error.weeklyBookings = action.payload;
             });
 
+        // Booking Chart Analytics
+        builder
+            .addCase(fetchBookingChartAnalytics.pending, (state) => {
+                state.loading.bookingChart = true;
+                state.error.bookingChart = null;
+            })
+            .addCase(fetchBookingChartAnalytics.fulfilled, (state, action) => {
+                state.loading.bookingChart = false;
+                state.bookingChartData = action.payload;
+            })
+            .addCase(fetchBookingChartAnalytics.rejected, (state, action) => {
+                state.loading.bookingChart = false;
+                state.error.bookingChart = action.payload;
+            });
+
+        // Top Teams
+        builder
+            .addCase(fetchTopTeams.pending, (state) => {
+                state.loading.topTeams = true;
+                state.error.topTeams = null;
+            })
+            .addCase(fetchTopTeams.fulfilled, (state, action) => {
+                state.loading.topTeams = false;
+                state.topTeams = action.payload;
+            })
+            .addCase(fetchTopTeams.rejected, (state, action) => {
+                state.loading.topTeams = false;
+                state.error.topTeams = action.payload;
+            });
+
+        // Notifications
+        builder
+            .addCase(fetchNotifications.pending, (state) => {
+                state.loading.notifications = true;
+                state.error.notifications = null;
+            })
+            .addCase(fetchNotifications.fulfilled, (state, action) => {
+                state.loading.notifications = false;
+                state.notifications = action.payload.results || [];
+                state.notificationsCount = action.payload.count || 0;
+            })
+            .addCase(fetchNotifications.rejected, (state, action) => {
+                state.loading.notifications = false;
+                state.error.notifications = action.payload;
+            });
+
+        // Notification Detail
+        builder
+            .addCase(fetchNotificationById.pending, (state) => {
+                state.loading.notificationDetail = true;
+                state.error.notificationDetail = null;
+            })
+            .addCase(fetchNotificationById.fulfilled, (state, action) => {
+                state.loading.notificationDetail = false;
+                state.currentNotification = action.payload;
+            })
+            .addCase(fetchNotificationById.rejected, (state, action) => {
+                state.loading.notificationDetail = false;
+                state.error.notificationDetail = action.payload;
+            });
+
+        // Mark as Read
+        builder
+            .addCase(markNotificationAsRead.fulfilled, (state, action) => {
+                // Update the notification in the list
+                const index = state.notifications.findIndex(n => n.id === action.payload.id);
+                if (index !== -1) {
+                    state.notifications[index] = action.payload;
+                }
+                // Update current notification if it's the same
+                if (state.currentNotification?.id === action.payload.id) {
+                    state.currentNotification = action.payload;
+                }
+            });
+
         // All Analytics
         builder
             .addCase(fetchAllAnalytics.pending, (state) => {
@@ -174,15 +351,41 @@ const analyticsSlice = createSlice({
                 state.loading.all = false;
                 state.cardAnalytics = action.payload.cardAnalytics;
                 state.revenueTrend = action.payload.revenueTrend;
-                state.topPartners = action.payload.topPartners;
+                state.topEmirates = action.payload.topEmirates;
                 state.weeklyBookings = action.payload.weeklyBookings;
+                state.bookingChartData = action.payload.bookingChartData;
+                state.topTeams = action.payload.topTeams;
+                state.notifications = action.payload.notifications?.results || [];
+                state.notificationsCount = action.payload.notifications?.count || 0;
             })
             .addCase(fetchAllAnalytics.rejected, (state, action) => {
                 state.loading.all = false;
                 state.error.all = action.payload;
             });
+        builder
+            .addCase(fetchPopularVenues.pending, (state) => {
+                state.loading.popularVenues = true;
+                state.error.popularVenues = null;
+            })
+            .addCase(fetchPopularVenues.fulfilled, (state, action) => {
+                state.loading.popularVenues = false;
+                state.popularVenues = action.payload;
+            })
+            .addCase(fetchPopularVenues.rejected, (state, action) => {
+                state.loading.popularVenues = false;
+                state.error.popularVenues = action.payload;
+            });
     },
 });
 
-export const { clearAnalyticsError, resetAnalyticsData } = analyticsSlice.actions;
+export const {
+    clearAnalyticsError,
+    resetAnalyticsData,
+    setBookingPeriod,
+    setEmiratesPeriod,
+    setTeamsPeriod,
+    clearNotifications,
+    setVenuesCity,  // ADD THIS LINE
+} = analyticsSlice.actions;
+
 export default analyticsSlice.reducer;

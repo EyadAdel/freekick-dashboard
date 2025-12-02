@@ -274,3 +274,12 @@ input:-webkit-autofill {
   -webkit-text-fill-color: #000 !important;
   -webkit-user-select: text !important;
 }
+/* Optional: Add smooth transition for tooltip */
+.recharts-tooltip-wrapper {
+  transition: transform 0.2s ease-out;
+}
+
+/* Ensure tooltip stays above other elements */
+.recharts-tooltip-wrapper {
+  z-index: 1000;
+}

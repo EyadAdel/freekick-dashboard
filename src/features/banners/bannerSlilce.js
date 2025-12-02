@@ -10,12 +10,15 @@ const initialState = {
     page: 1,
     hasNext: false,
     hasPrevious: false,
+    lastFetchParams: null, // Add this to store last fetch params
 };
 
 export const fetchBanners = createAsyncThunk(
     'banners/fetchAll',
-    async (params) => {
-        return await bannerService.getBanners(params);
+    async (params, { getState }) => {
+        const response = await bannerService.getBanners(params);
+        // Store the params for later refetch
+        return { ...response, params };
     }
 );
 
@@ -28,22 +31,48 @@ export const fetchBannerById = createAsyncThunk(
 
 export const createBanner = createAsyncThunk(
     'banners/create',
-    async (data) => {
-        return await bannerService.createBanner(data);
+    async (data, { dispatch, getState }) => {
+        const newBanner = await bannerService.createBanner(data);
+
+        // Get the last used params from state
+        const state = getState().banners;
+        const lastParams = state.lastFetchParams || {};
+
+        // Refetch banners with the same params
+        dispatch(fetchBanners(lastParams));
+
+        return newBanner;
     }
 );
 
 export const updateBanner = createAsyncThunk(
     'banners/update',
-    async ({ id, data }) => {
-        return await bannerService.updateBanner(id, data);
+    async ({ id, data }, { dispatch, getState }) => {
+        const updatedBanner = await bannerService.updateBanner(id, data);
+
+        // Get the last used params from state
+        const state = getState().banners;
+        const lastParams = state.lastFetchParams || {};
+
+        // Refetch banners with the same params
+        dispatch(fetchBanners(lastParams));
+
+        return updatedBanner;
     }
 );
 
 export const deleteBanner = createAsyncThunk(
     'banners/delete',
-    async (id) => {
+    async (id, { dispatch, getState }) => {
         await bannerService.deleteBanner(id);
+
+        // Get the last used params from state
+        const state = getState().banners;
+        const lastParams = state.lastFetchParams || {};
+
+        // Refetch banners with the same params
+        dispatch(fetchBanners(lastParams));
+
         return id;
     }
 );
@@ -71,6 +100,7 @@ const bannerSlice = createSlice({
                 state.totalCount = action.payload.count;
                 state.hasNext = !!action.payload.next;
                 state.hasPrevious = !!action.payload.previous;
+                state.lastFetchParams = action.payload.params; // Store params
             })
             .addCase(fetchBanners.rejected, (state, action) => {
                 state.loading = false;
@@ -79,23 +109,41 @@ const bannerSlice = createSlice({
             .addCase(fetchBannerById.fulfilled, (state, action) => {
                 state.currentBanner = action.payload;
             })
-            .addCase(createBanner.fulfilled, (state, action) => {
-                state.banners.unshift(action.payload);
+            .addCase(createBanner.pending, (state) => {
+                state.loading = true;
+                state.error = null;
             })
-            .addCase(updateBanner.fulfilled, (state, action) => {
-                const index = state.banners.findIndex(b => b.id === action.payload.id);
-                if (index !== -1) {
-                    state.banners[index] = action.payload;
-                }
-                if (state.currentBanner?.id === action.payload.id) {
-                    state.currentBanner = action.payload;
-                }
+            .addCase(createBanner.fulfilled, (state) => {
+                state.loading = false;
+                // Banners will be refetched automatically
             })
-            .addCase(deleteBanner.fulfilled, (state, action) => {
-                state.banners = state.banners.filter(b => b.id !== action.payload);
-                if (state.currentBanner?.id === action.payload) {
-                    state.currentBanner = null;
-                }
+            .addCase(createBanner.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Failed to create banner';
+            })
+            .addCase(updateBanner.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateBanner.fulfilled, (state) => {
+                state.loading = false;
+                // Banners will be refetched automatically
+            })
+            .addCase(updateBanner.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Failed to update banner';
+            })
+            .addCase(deleteBanner.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteBanner.fulfilled, (state) => {
+                state.loading = false;
+                // Banners will be refetched automatically
+            })
+            .addCase(deleteBanner.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Failed to delete banner';
             });
     },
 });

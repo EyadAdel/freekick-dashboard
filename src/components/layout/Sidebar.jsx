@@ -211,7 +211,7 @@ const Sidebar = ({ onToggle }) => {
                                                     onMouseLeave={handleMouseLeave}
                                                     className={`flex items-center gap-3 text-sm rounded-lg transition-all ${
                                                         active
-                                                            ? 'bg-primary-700 text-white shadow-sm'
+                                                            ? 'bg-primary-500 text-white shadow-sm'
                                                             : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                                                     } ${isCollapsed ? 'justify-center px-3 py-3' : 'px-3 py-2.5'}`}
                                                 >

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import api from "../api.js";
 
 const API_URL = '/advertisement/banners/';

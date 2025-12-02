@@ -1,84 +1,91 @@
+// Dashboard.jsx
+import React from 'react';
 import useAnalytics from "../../hooks/useAnalytics.js";
-import { useEffect } from "react";
-import { CheckCircle, Clock, DollarSign, XCircle, TrendingUp, MapPin, Users, Calendar } from "lucide-react";
-// import EmiratesChart from "../../components/charts/EmiratesChart.jsx";
-import PartnersChart from "../../components/sharts/PartnersChart.jsx";
-// import BarChart from "../../components/charts/BarChart.jsx";
+import { useEffect, useState } from "react";
+import EmiratesChart from "../../components/charts/EmiratesChart.jsx";
+import StatCard from "../../components/charts/StatCards.jsx";
+import BookingChart from "../../components/charts/BookingChart.jsx";
+import RevenueTrendChart from "../../components/charts/RevenueTrendChart.jsx";
+
+import { FaCalendarDays } from "react-icons/fa6";
+import TopTeamsChart from "../../components/Charts/TopTeamsChart.jsx";
+import NotificationsPanel from "../../components/common/NotificationsPanel.jsx";
+import PopularVenues from "../../components/Charts/PopularVenues.jsx";
 
 const Dashboard = () => {
     const {
         cardAnalytics,
-        revenueTrend,
-        topPartners,
-        weeklyBookings,
+        topEmirates,
         isLoading,
         getAllAnalytics,
+        getTopEmirates,
         clearError,
-        isCardAnalyticsLoading,
-        isTopPartnersLoading,
+        currentEmiratesPeriod,
+        isTopEmiratesLoading,
         error,
     } = useAnalytics();
 
+    const [periodOptions] = useState([
+        { value: 'this_week', label: 'This Week' },
+        { value: 'last_week', label: 'Last Week' },
+        { value: 'this_month', label: 'This Month' },
+        { value: 'last_month', label: 'Last Month' },
+    ]);
+
     useEffect(() => {
-        // Fetch all analytics on component mount
         getAllAnalytics();
     }, [getAllAnalytics]);
+
+    const handlePeriodChange = (newPeriod) => {
+        getTopEmirates(newPeriod);
+    };
 
     // Calculate values based on cardAnalytics data
     const confirmedCount = cardAnalytics?.complete_booking || 0;
     const cancelledCount = cardAnalytics?.cancelled_bookings || 0;
-    const paidCount = cardAnalytics?.complete_booking || 0; // Same as confirmed for now
+    const paidCount = cardAnalytics?.complete_booking || 0;
     const pendingCount = cardAnalytics?.pending_bookings || 0;
 
-    // Extract emirates data from topPartners or use mock data
-    // Assuming topPartners might contain emirates data, or you need to fetch separately
-    // For now, let's assume topPartners contains partner data
-
-    // Mock emirates data (replace with actual API call if needed)
-    const emiratesData = {
-        "Abu Dhabi": 24,
-        "Dubai": 18,
-        "Sharjah": 16,
-        "Fujairah": 12,
-        "Umm Al Quwain": 9,
-        "Ras Al Khaimah": 7,
-        "Ajman": 5,
-    };
-
-    // Transform topPartners data if it's in a different format
-    const transformPartnersData = () => {
-        if (!topPartners) return {};
-
-        // If topPartners is an array
-        if (Array.isArray(topPartners)) {
-            return topPartners.reduce((acc, partner) => {
-                if (partner.name && partner.value !== undefined) {
-                    acc[partner.name] = partner.value;
-                }
-                return acc;
-            }, {});
+    // Define stats configuration
+    const stats = [
+        {
+            title: 'Completed Bookings',
+            value: confirmedCount,
+            percentChange: 135,
+            icon: FaCalendarDays,
+            iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
+            iconColor: 'text-secondary-600 opacity-80'
+        },
+        {
+            title: 'Active Bookings',
+            value: pendingCount,
+            percentChange: 3.68,
+            icon: FaCalendarDays,
+            iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
+            iconColor: 'text-secondary-600 opacity-80'
+        },
+        {
+            title: 'Canceled Bookings',
+            value: cancelledCount,
+            percentChange: -1.45,
+            icon: FaCalendarDays,
+            iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
+            iconColor: 'text-secondary-600 opacity-80'
+        },
+        {
+            title: 'Paid Bookings',
+            value: paidCount,
+            percentChange: 5.94,
+            icon: FaCalendarDays,
+            iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
+            iconColor: 'text-secondary-600 opacity-80'
         }
+    ];
 
-        // If topPartners is already an object
-        if (typeof topPartners === 'object' && topPartners !== null) {
-            return topPartners;
-        }
+    const currentPeriodLabel = periodOptions.find(p => p.value === currentEmiratesPeriod)?.label || 'This Week';
 
-        return {};
-    };
 
-    const partnersData = transformPartnersData();
 
-    // If loading all analytics
-    if (isLoading()) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-lg">Loading analytics...</div>
-            </div>
-        );
-    }
-
-    // If there's an error loading card analytics
     if (error.cardAnalytics) {
         return (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -100,149 +107,68 @@ const Dashboard = () => {
 
     return (
         <>
-            {/* Header */}
-
-
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6 mb-8">
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <CheckCircle className="text-green-600" size={24} />
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-gray-900">
-                                {isCardAnalyticsLoading ? '...' : confirmedCount}
-                            </div>
-                            <div className="text-sm text-gray-500">Confirmed</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                            <Clock className="text-yellow-600" size={24} />
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-gray-900">
-                                {isCardAnalyticsLoading ? '...' : pendingCount}
-                            </div>
-                            <div className="text-sm text-gray-500">Pending</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                            <XCircle className="text-red-600" size={24} />
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-gray-900">
-                                {isCardAnalyticsLoading ? '...' : cancelledCount}
-                            </div>
-                            <div className="text-sm text-gray-500">Cancelled</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <DollarSign className="text-blue-600" size={24} />
-                        </div>
-                        <div>
-                            <div className="text-3xl font-bold text-gray-900">
-                                {isCardAnalyticsLoading ? '...' : paidCount}
-                            </div>
-                            <div className="text-sm text-gray-500">Paid</div>
-                        </div>
-                    </div>
-                </div>
+            {isLoading &&
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg">
+            <div className="flex flex-col items-center gap-2">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+            <span className="text-sm text-gray-600">Loading data...</span>
             </div>
-
-            {/* Charts Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                {/* Emirates Chart */}
-                {/*<EmiratesChart*/}
-                {/*    data={emiratesData}*/}
-                {/*    loading={false} // Set to true if you fetch this separately*/}
-                {/*    error={null}*/}
-                {/*    onRetry={() => console.log('Retry emirates')}*/}
-                {/*    title="Top Emirates"*/}
-                {/*    subtitle="This Week"*/}
-                {/*/>*/}
-
-                {/*/!* Partners Chart *!/*/}
-                {/*<PartnersChart*/}
-                {/*    data={partnersData}*/}
-                {/*    loading={isTopPartnersLoading}*/}
-                {/*    error={error.topPartners}*/}
-                {/*    onRetry={() => clearError('topPartners')}*/}
-                {/*    title="Top Partners"*/}
-                {/*    subtitle="This Week"*/}
-                {/*/>*/}
             </div>
+        }
+            <section className={'lg:flex gap-4 '}>
+                <aside className={'lg:w-3/4'}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-6 mb-8">
+                        {stats.map((stat, index) => (
+                            <StatCard key={index} {...stat} />
+                        ))}
+                    </div>
+                    <div className="lg:mb-8 mb-4  gap-5 grid lg:grid-cols-2 ">
+                        <BookingChart
+                            title="Booking Trends"
+                            height={350}
+                            showPeriodSelector={true}
+                        />
+                        <RevenueTrendChart
+                            title="Revenue Trend"
+                            height={350}
+                            showPeriodSelector={true}
+                        />
+                    </div>
+                    <div className="lg:mb-8 mb-4  gap-5 grid lg:grid-cols-2  ">
+                        <EmiratesChart
+                            data={topEmirates || {}}
+                            loading={isTopEmiratesLoading}
+                            error={error?.topEmirates}
+                            onRetry={() => getTopEmirates(currentEmiratesPeriod)}
+                            title="Top Emirates"
+                            subtitle={currentPeriodLabel}
+                            periodOptions={periodOptions}
+                            currentPeriod={currentEmiratesPeriod}
+                            onPeriodChange={handlePeriodChange}
+                        />
+                        <TopTeamsChart
+                            title="Top 5  Teams"
+                            className=""
+                            limit={5}
+                        />
+                    </div>
 
-            {/*/!* Revenue Trend *!/*/}
-            {/*{revenueTrend && (*/}
-            {/*    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">*/}
-            {/*        <div className="flex items-center justify-between mb-4">*/}
-            {/*            <div>*/}
-            {/*                <h2 className="text-lg font-semibold text-gray-900">Revenue Trend</h2>*/}
-            {/*                <p className="text-sm text-gray-500">Monthly revenue overview</p>*/}
-            {/*            </div>*/}
-            {/*            <TrendingUp className="text-blue-500" size={20} />*/}
-            {/*        </div>*/}
-            {/*        <div className="bg-gray-50 p-4 rounded-lg">*/}
-            {/*            <pre className="text-xs overflow-auto max-h-60">*/}
-            {/*                {JSON.stringify(revenueTrend, null, 2)}*/}
-            {/*            </pre>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*)}*/}
+                </aside>
+                <aside>
 
-            {/*/!* Weekly Bookings *!/*/}
-            {/*{weeklyBookings && (*/}
-            {/*    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">*/}
-            {/*        <div className="flex items-center justify-between mb-4">*/}
-            {/*            <div>*/}
-            {/*                <h2 className="text-lg font-semibold text-gray-900">Weekly Bookings</h2>*/}
-            {/*                <p className="text-sm text-gray-500">Bookings by week</p>*/}
-            {/*            </div>*/}
-            {/*            <Calendar className="text-green-500" size={20} />*/}
-            {/*        </div>*/}
-            {/*        <div className="bg-gray-50 p-4 rounded-lg">*/}
-            {/*            <pre className="text-xs overflow-auto max-h-60">*/}
-            {/*                {JSON.stringify(weeklyBookings, null, 2)}*/}
-            {/*            </pre>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*)}*/}
+                </aside>
+                <div className=" lg:w-1/4">
+                    <div className="dashboard-sidebar">
+                        <NotificationsPanel />
+                    </div>
+                    <div className=" mt-5">
+                        <PopularVenues />
+                    </div>
+                </div>
+            </section>
 
-            {/* Raw Data Debug (optional - remove in production) */}
-            {/*<div className="mt-8 p-4 bg-gray-50 rounded-lg">*/}
-            {/*    <details>*/}
-            {/*        <summary className="cursor-pointer text-sm font-medium text-gray-700">*/}
-            {/*            Debug Data*/}
-            {/*        </summary>*/}
-            {/*        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">*/}
-            {/*            <div>*/}
-            {/*                <h4 className="text-sm font-medium mb-2">Top Partners Data:</h4>*/}
-            {/*                <pre className="text-xs bg-white p-3 rounded overflow-auto max-h-60">*/}
-            {/*                    {JSON.stringify(topPartners, null, 2)}*/}
-            {/*                </pre>*/}
-            {/*            </div>*/}
-            {/*            <div>*/}
-            {/*                <h4 className="text-sm font-medium mb-2">Transformed Partners Data:</h4>*/}
-            {/*                <pre className="text-xs bg-white p-3 rounded overflow-auto max-h-60">*/}
-            {/*                    {JSON.stringify(partnersData, null, 2)}*/}
-            {/*                </pre>*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    </details>*/}
-            {/*</div>*/}
+
         </>
     );
 };
