@@ -6,7 +6,7 @@ import MainLayout from '../components/layout/MainLayout.jsx';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Bookings from '../pages/Bookings/Booking.jsx';
 // import Calendar from '../pages/Calendar/Calendar';
-// import Venues from '../pages/Venues/Venues';
+import Venues from '../pages/Venues/Venues';
 import Pitches from '../pages/Pitches/Pitches';
 import Amenities from '../pages/Amenities/Amenities';
 import Support from '../pages/Support/Support';
@@ -30,6 +30,7 @@ import ForgotPassword from "../pages/ ForgotPassword.jsx";
 import OTPVerification from "../pages/OTPVerification.jsx";
 import ChangePassword from "../pages/ChangePassword.jsx";
 import BannersPage from "../pages/Banners/BannerPage.jsx";
+import VenueDetails from "../components/venues/VenueDetails.jsx";
 
 
 const router = createBrowserRouter([
@@ -62,11 +63,11 @@ const router = createBrowserRouter([
             },
             {
                 path: 'venues',
-                // element: <Venues />,
+                element: <Venues />,
             },
             {
-                path: 'venues/:id',
-                // element: <Venues />, // Venue detail page
+                path: 'venues/venue-details',
+                element: <VenueDetails />, // Venue detail page
             },
             {
                 path: 'pitches',
