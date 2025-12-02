@@ -9,8 +9,8 @@ import {
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import VenuesForm from "../../components/venues/VenuesForm.jsx";
 import { venuesService } from '../../services/venues/venuesService.js';
-import { surfaceTypesService } from '../../services/surfaceTypes/surfaceTypesService.js';
-import { daysOfWeekService } from '../../services/daysOfWeek/daysOfWeekService.js'; // Imported
+// Removed: surfaceTypesService import
+import { daysOfWeekService } from '../../services/daysOfWeek/daysOfWeekService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
 import { toast } from 'react-toastify';
 
@@ -27,8 +27,8 @@ const Venues = () => {
 
     // Data State
     const [venuesData, setVenuesData] = useState([]);
-    const [surfaceTypeOptions, setSurfaceTypeOptions] = useState([]);
-    const [daysList, setDaysList] = useState([]); // State for Days List
+    // Removed: surfaceTypeOptions state
+    const [daysList, setDaysList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -39,7 +39,7 @@ const Venues = () => {
     // Filter State
     const [activeFilters, setActiveFilters] = useState({
         status: '',
-        surfaceType: '',
+        // Removed: surfaceType from activeFilters
         venueType: '',
         globalSearch: ''
     });
@@ -55,20 +55,8 @@ const Venues = () => {
 
     const fetchFilterOptions = async () => {
         try {
-            // Fetch Surface Types and Days of Week in parallel
-            const [surfacesRes, daysRes] = await Promise.all([
-                surfaceTypesService.getAllSurfaceTypes(),
-                daysOfWeekService.getAll({ all_languages: true }) // Assuming param needed for translations
-            ]);
-
-            // Handle Surface Types
-            if (surfacesRes && surfacesRes.results) {
-                const formattedSurfaces = surfacesRes.results.map(item => ({
-                    label: item.translations?.name || item.name || `Surface ${item.id}`,
-                    value: item.id
-                }));
-                setSurfaceTypeOptions(formattedSurfaces);
-            }
+            // Modified: Only fetch Days of Week (removed Surface Types fetch)
+            const daysRes = await daysOfWeekService.getAll({ all_languages: true });
 
             // Handle Days List
             if (daysRes && daysRes.results) {
@@ -83,8 +71,8 @@ const Venues = () => {
     const fetchVenuesData = async () => {
         setIsLoading(true);
         try {
-            // Fetch filter options (surfaces, days) if not already loaded
-            if (surfaceTypeOptions.length === 0 || daysList.length === 0) {
+            // Modified: Check only if daysList is empty
+            if (daysList.length === 0) {
                 await fetchFilterOptions();
             }
             // Fetch main data
@@ -113,7 +101,7 @@ const Venues = () => {
             navigate('/venues/venue-details', {
                 state: {
                     venueData: fullVenueData,
-                    daysList: daysList // Passing the fetched days list to the details page
+                    daysList: daysList
                 }
             });
         } catch (error) {
@@ -224,9 +212,8 @@ const Venues = () => {
             if (activeFilters.status && activeFilters.status !== 'all') {
                 if (String(item.is_active) !== activeFilters.status) return false;
             }
-            if (activeFilters.surfaceType && activeFilters.surfaceType !== 'all') {
-                if (String(item.surface_type) !== String(activeFilters.surfaceType)) return false;
-            }
+            // Removed: Surface Type filtering logic
+
             if (activeFilters.venueType && activeFilters.venueType !== 'all') {
                 const itemType = String(item.venue_type || '').toLowerCase();
                 const filterType = activeFilters.venueType.toLowerCase();
@@ -274,12 +261,8 @@ const Venues = () => {
             key: 'venueType', label: 'Venue Type', type: 'select',
             options: [{ label: 'All Venue Types', value: 'all' }, ...staticVenueTypes],
             value: activeFilters.venueType
-        },
-        {
-            key: 'surfaceType', label: 'Surface Type', type: 'select',
-            options: [{ label: 'All Surface Types', value: 'all' }, ...surfaceTypeOptions],
-            value: activeFilters.surfaceType
         }
+        // Removed: Surface Type filter configuration object
     ];
 
     const columns = [
@@ -288,21 +271,20 @@ const Venues = () => {
             render: (row, i) => <div className="text-gray-600 font-medium text-sm">{i + 1}</div>
         },
         {
-            header: 'Venue', accessor: 'id', align: 'left', width: '200px',
+            header: 'Venue', accessor: 'id', align: 'center', width: '200px',
             render: (row) => (
                 <div className="font-medium text-gray-900">
                     <div className="text-sm font-bold text-secondary-600">{row.translations?.name || `Venue ${row.id}`}</div>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center justify-center gap-2 mt-1">
                         <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${row.venue_type === 'indoor' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
                             {row.venue_type || 'N/A'}
                         </span>
-                        <span className="text-xs text-gray-400">#{row.id}</span>
                     </div>
                 </div>
             )
         },
         {
-            header: 'Contact Info', accessor: 'contact', align: 'left',
+            header: 'Contact Info', accessor: 'contact', align: 'center',
             render: (row) => {
                 const name = row.contact_name || row.owner_info?.contact_name || 'N/A';
                 const phone = row.phone_number || row.owner_info?.contact_phone || 'N/A';
@@ -315,7 +297,7 @@ const Venues = () => {
             }
         },
         {
-            header: 'Location', accessor: 'location', align: 'left', width: '250px',
+            header: 'Location', accessor: 'location', align: 'center', width: '250px',
             render: (row) => {
                 const mapLink = row.latitude && row.longitude ? `https://www.google.com/maps/search/?api=1&query=${row.latitude},${row.longitude}` : null;
                 return (
@@ -390,20 +372,24 @@ const Venues = () => {
                             <div key={venue.id} className="bg-white rounded-lg border border-primary-100 p-2.5 sm:p-3 hover:shadow-md hover:border-primary-300 transition-all duration-200">
                                 <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-2 sm:gap-0">
                                     <div className="flex items-center space-x-2 sm:space-x-3 flex-1 w-full sm:w-auto">
-                                        <div className="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                                            <MapPin className="text-white w-5 h-5" />
+                                        <div className="w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                                            <MapPin className="text-white w-5 h-5"/>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 flex-wrap">
-                                                <span className="font-semibold text-secondary-600 text-xs sm:text-sm truncate">{venue.translations?.name || `Venue ${venue.id}`}</span>
+                                                <span
+                                                    className="font-semibold text-secondary-600 text-xs sm:text-sm truncate">{venue.translations?.name || `Venue ${venue.id}`}</span>
                                             </div>
-                                            <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-gray-500 flex-wrap">
-                                                <span className="font-medium">Type:</span> {venue.venue_type || 'N/A'}
+
+                                            <div
+                                                className="flex items-center gap-1.5 sm:gap-2 text-xs text-gray-500 flex-wrap">
+                                                <span className="font-medium">Type:</span> {venue.venue_type || 'N/A'}s
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-3 justify-between sm:justify-end">
-                                        <StatusBadge isActive={venue.is_active} />
+                                    <div
+                                        className="flex items-center gap-2 w-full sm:w-auto sm:ml-3 justify-between sm:justify-end">
+                                        <StatusBadge isActive={venue.is_active}/>
                                         <div className="flex gap-1.5">
                                             {statusType === 'active' && (
                                                 <button className="flex items-center gap-1 sm:gap-1.5 bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap" onClick={() => handleDeactivateVenue(venue)}>
