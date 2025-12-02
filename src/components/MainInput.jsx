@@ -136,7 +136,7 @@ const MainInput = ({
                         checked={value}
                         onChange={onChange}
                         disabled={disabled}
-                        className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 bg-white checked:border-blue-600 checked:bg-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+                        className="peer h-5 w-5 cursor-pointer appearance-none  rounded border border-gray-300 bg-white checked:border-primary-600 checked:bg-primary-600 focus:ring-2 focus:ring-primary-100 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
                         {...props}
                     />
                     <Check size={14} className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />

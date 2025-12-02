@@ -6,6 +6,9 @@ import BannerForm from '../../components/banners/BannerForm.jsx';
 import { Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import ArrowIcon from "../../components/common/ArrowIcon.jsx";
+import {showConfirm} from "../../components/showConfirm.jsx";
+import {useDispatch} from "react-redux";
+import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 
 const BannerPage = () => {
     const {
@@ -29,7 +32,11 @@ const BannerPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const itemsPerPage = 10;
+    const dispatch = useDispatch();
 
+    useEffect(() => {
+        dispatch(setPageTitle('Banners'));
+    }, [dispatch]);
     useEffect(() => {
         getBanners({
             search: searchTerm || undefined,
@@ -46,10 +53,18 @@ const BannerPage = () => {
         setEditingBanner(banner);
         setViewMode('form');
     };
-
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this banner?')) {
-            await removeBanner(id);
+        const confirmed = await showConfirm({
+            title: "Delete Banner",
+            text: "Are you sure you want to delete this banner? This action cannot be undone.",
+            confirmButtonText: "Yes, delete it",
+            cancelButtonText: "No, keep it",
+            icon: "warning"
+        });
+
+        if (confirmed) {
+            await removeBanner(id)
+                toast.success('banner deleted successfully')
         }
     };
 
@@ -117,7 +132,7 @@ const BannerPage = () => {
                 <img
                     src={row.image}
                     alt={`Banner ${row.id}`}
-                    className="w-20 h-12 object-cover rounded"
+                    className="w-14 h-8 object-cover rounded"
                     onError={(e) => {
                         e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="48"><rect fill="%234F46E5" width="80" height="48"/><text x="50%" y="50%" fill="white" font-size="12" text-anchor="middle" dy=".3em">IMG</text></svg>';
                     }}
@@ -173,14 +188,14 @@ const BannerPage = () => {
                 <div className="flex items-center justify-center gap-2">
                     <button
                         onClick={() => handleEdit(row)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        className="p-2 text-gray-600 hover:bg-gray-50 rounded transition-colors"
                         title="Edit"
                     >
                         <Edit2 size={16} />
                     </button>
                     <button
                         onClick={() => handleDelete(row.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-2 text-gray-600 hover:bg-gray-500 rounded transition-colors"
                         title="Delete"
                     >
                         <Trash2 size={16} />
@@ -220,8 +235,8 @@ const BannerPage = () => {
             case 'form':
                 return (
                     <div className="min-h-screen bg-gray-50">
-                        <div className="container mx-auto px-6 py-6">
-                            <div className="bg-white rounded-lg p-6 shadow-sm">
+                        <div className="container mx-auto px-6 ">
+                            <div className="">
                                 <BannerForm
                                     editingBanner={editingBanner}
                                     onSubmit={handleFormSubmit}
@@ -237,11 +252,11 @@ const BannerPage = () => {
                 return (
                     <div className="min-h-screen bg-gray-50">
                         <div className="container mx-auto px-6">
-                            <div className="flex items-center justify-between mb-6 mt-6">
+                            <div className="flex items-center justify-between lg:mb-6  ">
 
                                 <button
                                     onClick={() => setViewMode('slider')}
-                                    className="flex items-center gap-2 text-xl bg-white p-5 py-3 rounded-lg w-full text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+                                    className="flex items-center gap-2 text-xl bg-white p-5 py-3 rounded-lg w-full text-gray-600 hover:text-gray-900 lg:mb-4 transition-colors"
                                 >
                                     <ArrowIcon size={'xl'} direction={'left'} />
                                     <span className="font-medium">Back to Banners</span>
@@ -276,20 +291,21 @@ const BannerPage = () => {
             default:
                 return (
                     <div className="min-h-screen bg-gray-50">
-                        {/* Banner Slider Section */}
-                        <div className="bg-white border-b">
-                            <div className="container mx-auto px-6 py-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-xl font-bold text-primary-700">Uploaded Banners</h2>
-                                    <button
-                                        onClick={() => setViewMode('list')}
-                                        className="text-base flex gap-2 items-center text-primary-700 hover:text-primary-600 font-medium"
-                                    >
-                                        See all
-                                        <ArrowIcon direction={'right'} size={'lg'}/>
-                                    </button>
-                                </div>
+                        <div className="container mx-auto lg:px-4 px-2 md:px-8 pb-4">
 
+                        {/* Banner Slider Section */}
+                        <div className="bg-white shadow-sm p-4 rounded-lg border-b">
+
+                            <div className="flex bg-white  lg:p-3 rounded-lg justify-between items-center mb-2">
+                                <h2 className="lg:text-xl   font-bold text-primary-600">Uploaded Banners</h2>
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className="lg:text-base  font-bold flex gap-2 items-center text-primary-700 hover:text-primary-600 font-medium"
+                                >
+                                    See all
+                                    <ArrowIcon direction={'right'} size={'md'}/>
+                                </button>
+                            </div>
                                 <BannerSlider
                                     banners={banners.filter(b => b.is_active)}
                                     onBannerClick={handleBannerClick}
@@ -297,7 +313,7 @@ const BannerPage = () => {
 
                                 <button
                                     onClick={handleCreate}
-                                    className="w-full mt-8 bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                                    className="w-full mt-8 bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                                 >
                                     <span className="text-xl">+</span>
                                     Upload New Banner

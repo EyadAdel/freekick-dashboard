@@ -3,6 +3,7 @@ import MainInput from '../MainInput.jsx';
 import { toast } from 'react-toastify';
 import { generateUniqueFileName } from '../../utils/fileUtils';
 import { uploadService } from '../../services/upload/uploadService.js';
+import ArrowIcon from "../common/ArrowIcon.jsx";
 
 const BannerForm = ({
                         editingBanner,
@@ -112,18 +113,20 @@ const BannerForm = ({
     ];
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <div >
+            <button
+                onClick={onCancel}
+            className="flex items-center gap-2 text-xl bg-white mb-5 p-5 py-3 rounded-lg w-full text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+        >
+            <ArrowIcon size={'xl'} direction={'left'} />
+            <span className="font-medium">Back to Banners</span>
+        </button>
+        <form onSubmit={handleSubmit} className="space-y-6  rounded-lg p-6 shadow-sm bg-white">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
+                <h2 className="text-xl font-bold text-primary-700 ">
                     {editingBanner ? 'Edit Banner' : 'Create New Banner'}
                 </h2>
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="text-gray-500 hover:text-gray-700 text-2xl"
-                >
-                    ✕
-                </button>
+
             </div>
 
             {/* Image Upload */}
@@ -131,7 +134,7 @@ const BannerForm = ({
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Banner Image
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                <div className="border-2 border-dashed border-primary-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
                     {formData.imagePreview ? (
                         <div className="space-y-4">
                             <img
@@ -142,7 +145,7 @@ const BannerForm = ({
                             <button
                                 type="button"
                                 onClick={() => document.getElementById('imageInput').click()}
-                                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                                 disabled={uploading}
                             >
                                 Change Image
@@ -155,7 +158,7 @@ const BannerForm = ({
                                 <button
                                     type="button"
                                     onClick={() => document.getElementById('imageInput').click()}
-                                    className="text-blue-600 hover:text-blue-700 font-medium"
+                                    className="text-primary-600 hover:text-blue-700 font-medium"
                                     disabled={uploading}
                                 >
                                     Select Image
@@ -210,6 +213,7 @@ const BannerForm = ({
                 label="Is Active"
                 name="is_active"
                 type="checkbox"
+                className={'!text-primary-700'}
                 checked={formData.is_active}
                 onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
                 helperText="Enable or disable this banner"
@@ -222,19 +226,21 @@ const BannerForm = ({
                     type="button"
                     onClick={onCancel}
                     disabled={isLoading}
-                    className="px-6 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="lg:px-6 px-2 py-2 border text-sm lg:text-base border-primary-600 text-primary-600 rounded-lg hover:bg-blue-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     CANCEL
                 </button>
                 <button
                     type="submit"
                     disabled={isLoading || uploading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
+                    className="lg:px-6 px-2 py-2 bg-primary-600  text-sm lg:text-base text-white rounded-lg hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
                 >
-                    {isLoading ? 'SAVING...' : (editingBanner ? 'UPDATE BANNER' : 'CREATE BANNER')}
+                    {isLoading ? 'SAVING...' : (editingBanner ? 'Update Banner' : 'Create Banner')}
                 </button>
             </div>
         </form>
+        </div>
+
     );
 };
 

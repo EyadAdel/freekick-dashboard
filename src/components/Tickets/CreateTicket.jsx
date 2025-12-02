@@ -161,7 +161,7 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
         }
     };
     return (
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 ">
             {/* Header */}
             <button
                 onClick={onBack}
@@ -177,10 +177,10 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                     {/* Image Upload Section */}
                     <div className="mb-6">
 
-                        <h1 className="text-xl font-bold text-primary-700">
+                        <h1 className="text-xl lg:text-2xl font-bold text-primary-700">
                             {editTicket ? 'Edit Ticket' : 'Create New Ticket'}
                         </h1>
-                        <p className="text-gray-500 mt-2 text-xs">
+                        <p className="text-gray-400 mt-2 text-xs">
                             {editTicket ? 'Update ticket information' : 'Fill in the details to create a new event event'}
                         </p>
                     </div>
@@ -235,9 +235,15 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                                     type="select"
                                     placeholder="Enter city"
                                     options={[
+                                        { value: 'Abu_Dhabi', label: 'Abu Dhabi' },
                                         { value: 'Dubai', label: 'Dubai' },
-                                        { value: 'Ajmain', label: 'Ajmain' }
-                                    ]}                                    required
+                                        { value: 'Sharjah', label: 'Sharjah' },
+                                        { value: 'Ajman', label: 'Ajman' },
+                                        { value: 'Umm_Al_Quwain', label: 'Umm Al Quwain' },
+                                        { value: 'Ras_Al_Khaimah', label: 'Ras Al Khaimah' },
+                                        { value: 'Fujairah', label: 'Fujairah' }
+                                    ]}
+                                    required
                                     error={errors.city?.message}
                                     disabled={loading}
                                     {...field}
@@ -351,7 +357,7 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                                         <img
                                             src={imagePreview}
                                             alt="Preview"
-                                            className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
+                                            className="w-full h-48 object-cover rounded-lg border-2 border-primary-300"
                                         />
                                         <button
                                             type="button"
@@ -362,7 +368,7 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="w-full h-36 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center">
+                                    <div className="w-full h-36 bg-gray-50 rounded-lg border-2 border-dashed border-primary-300 flex flex-col items-center justify-center">
                                         <Upload size={40} className="text-gray-400 mb-2" />
                                         <p className="text-sm text-gray-500">No image selected</p>
                                     </div>
@@ -382,7 +388,7 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                                     />
                                     <label
                                         htmlFor="image-upload"
-                                        className={`inline-flex items-center gap-2 px-4 py-2.5 bg-blue-50 text-blue-600 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors font-medium ${
+                                        className={`inline-flex text-sm lg:text-base items-center gap-2 px-4 py-2.5 bg-primary-50 text-primary-700 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors font-medium ${
                                             (uploading || loading) ? 'opacity-50 cursor-not-allowed' : ''
                                         }`}
                                     >
@@ -442,7 +448,7 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                         <button
                             type="submit"
                             disabled={loading || uploading}
-                            className="px-6 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
+                            className="lg:px-6 text-sm lg:text-base px-2 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
                         >
                             {loading && <Loader2 size={18} className="animate-spin" />}
                             {editTicket ? 'Update Ticket' : 'Create Ticket'}
