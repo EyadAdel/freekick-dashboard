@@ -1,69 +1,64 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice.js';
 import MainTable from './../../components/MainTable';
 import { Eye, Pencil, Trash2, TrendingUp, Plus, Users, CheckCircle, XCircle, MapPin } from 'lucide-react';
 import { tournamentsService } from '../../services/tournaments/tournamentsService.js';
 import { venuesService } from '../../services/venues/venuesService.js';
-import { venueSportsService } from '../../services/venueSports/venueSportsService.js'; // Import the service
+import { venueSportsService } from '../../services/venueSports/venueSportsService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
 import TournamentsForm from '../../components/tournaments/TournamentsForm.jsx';
 
 const Tournaments = () => {
     const rowsPerPage = 10;
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         dispatch(setPageTitle('Tournaments'));
     }, [dispatch]);
 
-    // State Management
+    // --- STATE MANAGEMENT ---
     const [tournamentsData, setTournamentsData] = useState([]);
     const [venuesData, setVenuesData] = useState([]);
-    const [sportsData, setSportsData] = useState([]); // State for Sports
+    const [sportsData, setSportsData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Form & Edit States
     const [showForm, setShowForm] = useState(false);
     const [selectedTournament, setSelectedTournament] = useState(null);
 
-    // Filter State
     const [activeFilters, setActiveFilters] = useState({
         globalSearch: '',
         status: 'all',
         venue: 'all'
     });
 
-    // Fetch All Data (Tournaments + Venues + Sports)
+    // --- FETCH DATA ---
     const fetchAllData = async () => {
         setIsLoading(true);
         try {
-            // Fetch all required data simultaneously
             const [tournamentsRes, venuesRes, sportsRes] = await Promise.all([
                 tournamentsService.getAll(),
                 venuesService.getAllVenues(),
                 venueSportsService.getAll()
             ]);
 
-            // 1. Handle Tournaments Data
             if (tournamentsRes && tournamentsRes.results) {
                 setTournamentsData(tournamentsRes.results);
             } else if (Array.isArray(tournamentsRes)) {
                 setTournamentsData(tournamentsRes);
             }
 
-            // 2. Handle Venues Data
             if (venuesRes && venuesRes.results) {
                 setVenuesData(venuesRes.results);
             }
 
-            // 3. Handle Sports (Venue Types) Data
             const rawSports = sportsRes.results || sportsRes || [];
             if (Array.isArray(rawSports)) {
                 const formattedSports = rawSports.map(sport => ({
-                    // Try translations first, fallback to name
-                    label: sport.translations?.en.name || sport.name || 'Unknown Sport',
+                    label: sport.translations?.en?.name || sport.name || 'Unknown Sport',
                     value: sport.id
                 }));
                 setSportsData(formattedSports);
@@ -80,14 +75,26 @@ const Tournaments = () => {
         fetchAllData();
     }, []);
 
-    // Helper to get Venue Name by ID
     const getVenueName = (venueId) => {
         if (!venueId) return 'N/A';
         const venue = venuesData.find(v => v.id === venueId);
         return venue?.translations?.name || venue?.name || `Venue #${venueId}`;
     };
 
-    // --- FORM HANDLERS ---
+    // --- HANDLERS ---
+
+    // UPDATED: Pass both tournament data AND resolved venue name
+    const handleViewDetails = (tournament) => {
+        const resolvedVenueName = getVenueName(tournament.venue);
+
+        navigate(`/tournaments/tournament-details`, {
+            state: {
+                tournamentData: tournament,
+                venueName: resolvedVenueName
+            }
+        });
+    };
+
     const handleCreateTournament = () => {
         setSelectedTournament(null);
         setShowForm(true);
@@ -107,7 +114,7 @@ const Tournaments = () => {
     const handleFormSuccess = () => {
         setShowForm(false);
         setSelectedTournament(null);
-        fetchAllData(); // Refresh data
+        fetchAllData();
     };
 
     const handleDeleteTournament = async (id, name) => {
@@ -127,36 +134,28 @@ const Tournaments = () => {
         }
     };
 
-    // Filter Logic
+    // --- FILTER & STATS ---
     const filteredData = useMemo(() => {
         if (!tournamentsData) return [];
-
-        let filtered = tournamentsData.filter((item) => {
-            // Global Search
+        return tournamentsData.filter((item) => {
             if (activeFilters.globalSearch) {
                 const search = activeFilters.globalSearch.toLowerCase();
                 const name = item.name?.toLowerCase() || '';
                 const code = item.code?.toLowerCase() || '';
                 const venueName = getVenueName(item.venue).toLowerCase();
-
                 if (!name.includes(search) && !code.includes(search) && !venueName.includes(search)) return false;
             }
-            // Status Filter
             if (activeFilters.status !== 'all') {
                 const isStatusActive = activeFilters.status === 'active';
                 if (item.is_active !== isStatusActive) return false;
             }
-            // Venue Filter
             if (activeFilters.venue !== 'all') {
                 if (String(item.venue) !== String(activeFilters.venue)) return false;
             }
             return true;
         });
-
-        return filtered;
     }, [tournamentsData, venuesData, activeFilters]);
 
-    // Handlers
     const handleFilterChange = (newFilters) => {
         setActiveFilters(prev => ({ ...prev, ...newFilters }));
         setCurrentPage(1);
@@ -169,22 +168,21 @@ const Tournaments = () => {
 
     const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Statistics based on data
     const stats = useMemo(() => {
         const total = tournamentsData.length;
         const active = tournamentsData.filter(t => t.is_active).length;
         const inactive = tournamentsData.filter(t => !t.is_active).length;
-        const totalTeams = tournamentsData.reduce((acc, curr) => acc + (curr.max_teams || 0), 0);
-
+        const totalTeams = tournamentsData.reduce((acc, curr) => acc + (parseInt(curr.max_teams) || 0), 0);
         return { total, active, inactive, totalTeams };
     }, [tournamentsData]);
 
-    // --- ACTION BUTTONS ---
+    // --- ACTIONS COMPONENT ---
     const ActionButtons = ({ tournament }) => (
         <div className="flex justify-end items-center gap-1 sm:gap-2">
             <button
                 className="text-gray-500 hover:text-teal-600 p-1 rounded transition-colors hover:bg-gray-50"
                 title="View Details"
+                onClick={() => handleViewDetails(tournament)}
             >
                 <Eye size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
@@ -205,18 +203,13 @@ const Tournaments = () => {
         </div>
     );
 
-    // Columns Definition
     const columns = [
         {
             header: 'Sr.No',
             accessor: 'id',
             align: 'left',
             width: '60px',
-            render: (row, index) => (
-                <div className="text-gray-600 font-medium text-sm">
-                    {index + 1}
-                </div>
-            )
+            render: (row, index) => <div className="text-gray-600 font-medium text-sm">{index + 1}</div>
         },
         {
             header: 'Tournament Info',
@@ -288,43 +281,22 @@ const Tournaments = () => {
     ];
 
     const topActions = [
-        {
-            label: 'Create Tournament',
-            onClick: handleCreateTournament,
-            type: 'primary',
-            icon: <Plus size={16} />
-        }
+        { label: 'Create Tournament', onClick: handleCreateTournament, type: 'primary', icon: <Plus size={16} /> }
     ];
 
-    // Filter Configuration
     const filterConfig = [
         {
-            key: 'status',
-            label: 'Status',
-            type: 'select',
-            options: [
-                { label: 'All Status', value: 'all' },
-                { label: 'Active', value: 'active' },
-                { label: 'Inactive', value: 'inactive' }
-            ],
+            key: 'status', label: 'Status', type: 'select',
+            options: [ { label: 'All Status', value: 'all' }, { label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' } ],
             value: activeFilters.status
         },
         {
-            key: 'venue',
-            label: 'Filter by Venue',
-            type: 'select',
-            options: [
-                { label: 'All Venues', value: 'all' },
-                ...venuesData.map(v => ({
-                    label: v.translations?.name || v.name,
-                    value: v.id
-                }))
-            ],
+            key: 'venue', label: 'Filter by Venue', type: 'select',
+            options: [ { label: 'All Venues', value: 'all' }, ...venuesData.map(v => ({ label: v.translations?.name || v.name, value: v.id })) ],
             value: activeFilters.venue
         }
     ];
 
-    // Responsive Stat Card
     const StatCard = ({ title, value, icon, gradient, bgColor }) => (
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -342,52 +314,25 @@ const Tournaments = () => {
 
     return (
         <div className="w-full px-2 sm:px-0">
-            {/* Statistics Section */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 my-4 sm:my-8">
-                <StatCard
-                    title="Total Tournaments"
-                    value={stats.total}
-                    icon={<TrendingUp className="text-blue-600" />}
-                    gradient="from-blue-500 to-blue-600"
-                    bgColor="bg-blue-50"
-                />
-                <StatCard
-                    title="Active"
-                    value={stats.active}
-                    icon={<CheckCircle className="text-green-600" />}
-                    gradient="from-green-500 to-green-600"
-                    bgColor="bg-green-50"
-                />
-                <StatCard
-                    title="Inactive"
-                    value={stats.inactive}
-                    icon={<XCircle className="text-red-600" />}
-                    gradient="from-red-500 to-red-600"
-                    bgColor="bg-red-50"
-                />
-                <StatCard
-                    title="Total Capacity (Teams)"
-                    value={stats.totalTeams}
-                    icon={<Users className="text-purple-600" />}
-                    gradient="from-purple-500 to-purple-600"
-                    bgColor="bg-purple-50"
-                />
+                <StatCard title="Total Tournaments" value={stats.total} icon={<TrendingUp className="text-blue-600" />} gradient="from-blue-500 to-blue-600" bgColor="bg-blue-50" />
+                <StatCard title="Active" value={stats.active} icon={<CheckCircle className="text-green-600" />} gradient="from-green-500 to-green-600" bgColor="bg-green-50" />
+                <StatCard title="Inactive" value={stats.inactive} icon={<XCircle className="text-red-600" />} gradient="from-red-500 to-red-600" bgColor="bg-red-50" />
+                <StatCard title="Total Capacity (Teams)" value={stats.totalTeams} icon={<Users className="text-purple-600" />} gradient="from-purple-500 to-purple-600" bgColor="bg-purple-50" />
             </div>
 
-            {/* Form Section */}
             {showForm && (
                 <div className='mb-6 sm:mb-8'>
                     <TournamentsForm
                         initialData={selectedTournament}
                         venuesList={venuesData.map(v => ({ label: v.translations?.name || v.name, value: v.id }))}
-                        sportsList={sportsData} // Passing the sports data to the form
+                        sportsList={sportsData}
                         onCancel={handleCancelForm}
                         onSuccess={handleFormSuccess}
                     />
                 </div>
             )}
 
-            {/* Main Table Section */}
             {isLoading && tournamentsData.length === 0 ? (
                 <div className="p-6 sm:p-10 text-center text-gray-500 text-sm sm:text-base">Loading...</div>
             ) : (
@@ -409,12 +354,8 @@ const Tournaments = () => {
     );
 };
 
-// Reusable Status Badge Component
 const StatusBadge = ({ isActive }) => {
-    const style = isActive
-        ? 'bg-green-100 text-green-800 border border-green-200'
-        : 'bg-red-100 text-red-800 border border-red-200';
-
+    const style = isActive ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200';
     return (
         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${style}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}`}></span>

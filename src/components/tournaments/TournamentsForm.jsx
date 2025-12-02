@@ -32,7 +32,6 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
         sport: '',
         venue: '',
         is_active: true,
-        private: false,
     });
 
     // Cover Image State
@@ -71,7 +70,6 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                 sport: initialData.sport || '',
                 venue: initialData.venue || '',
                 is_active: initialData.is_active ?? true,
-                private: initialData.private ?? false,
             });
 
             // Handle Cover Image
@@ -194,6 +192,12 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
         if (!formData.venue) newErrors.venue = "Venue is required";
         if (!formData.max_teams) newErrors.max_teams = "Max Teams is required";
 
+        // --- NEW REQUIRED FIELDS ---
+        if (!formData.sport) newErrors.sport = "Sport is required";
+        if (!formData.start_time) newErrors.start_time = "Start Time is required";
+        if (!formData.end_time) newErrors.end_time = "End Time is required";
+        if (!formData.registration_deadline) newErrors.registration_deadline = "Registration Deadline is required";
+
         const stillUploading = galleryImages.some(img => img.isUploading);
         if (isImageUploading || stillUploading) {
             toast.warning("Please wait for all images to finish uploading.");
@@ -230,7 +234,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
 
                 start_date: formData.start_date,
                 end_date: formData.end_date,
-                registration_deadline: formData.registration_deadline || null,
+                registration_deadline: formData.registration_deadline,
                 start_time: formData.start_time ? `${formData.start_time}:00` : null,
                 end_time: formData.end_time ? `${formData.end_time}:00` : null,
 
@@ -239,7 +243,6 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                 scoring_system: formData.scoring_system,
 
                 is_active: formData.is_active,
-                private: formData.private,
 
                 sport: formData.sport ? parseInt(formData.sport, 10) : null,
                 venue: parseInt(formData.venue, 10),
@@ -434,11 +437,41 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <MainInput type="date" label="Start Date" name="start_date" value={formData.start_date} onChange={handleChange} error={errors.start_date} required />
                         <MainInput type="date" label="End Date" name="end_date" value={formData.end_date} onChange={handleChange} error={errors.end_date} required />
-                        <MainInput type="date" label="Registration Deadline" name="registration_deadline" value={formData.registration_deadline} onChange={handleChange} />
+
+                        {/* UPDATED: Registration Deadline now Required */}
+                        <MainInput
+                            type="date"
+                            label="Registration Deadline"
+                            name="registration_deadline"
+                            value={formData.registration_deadline}
+                            onChange={handleChange}
+                            error={errors.registration_deadline}
+                            required
+                        />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <MainInput type="time" label="Start Time" name="start_time" value={formData.start_time} onChange={handleChange} icon={Clock} />
-                        <MainInput type="time" label="End Time" name="end_time" value={formData.end_time} onChange={handleChange} icon={Clock} />
+                        {/* UPDATED: Start Time now Required */}
+                        <MainInput
+                            type="time"
+                            label="Start Time"
+                            name="start_time"
+                            value={formData.start_time}
+                            onChange={handleChange}
+                            icon={Clock}
+                            error={errors.start_time}
+                            required
+                        />
+                        {/* UPDATED: End Time now Required */}
+                        <MainInput
+                            type="time"
+                            label="End Time"
+                            name="end_time"
+                            value={formData.end_time}
+                            onChange={handleChange}
+                            icon={Clock}
+                            error={errors.end_time}
+                            required
+                        />
                     </div>
                 </div>
 
@@ -460,15 +493,22 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                             {errors.venue && <p className="text-red-500 text-xs mt-1">{errors.venue}</p>}
                         </div>
 
+                        {/* UPDATED: Sport now Required */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700 mb-1">Sport</label>
+                            <label className="text-sm font-medium text-gray-700 mb-1">Sport <span className='text-red-500'>*</span></label>
                             <div className="relative">
-                                <select name="sport" value={formData.sport} onChange={handleChange} className="w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-teal-500">
+                                <select
+                                    name="sport"
+                                    value={formData.sport}
+                                    onChange={handleChange}
+                                    className={`w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-teal-500 ${errors.sport ? 'border-red-500' : ''}`}
+                                >
                                     <option value="">Select Sport</option>
                                     {activeSportsList.map((item, index) => <option key={index} value={item.value}>{item.label}</option>)}
                                 </select>
                                 <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                             </div>
+                            {errors.sport && <p className="text-red-500 text-xs mt-1">{errors.sport}</p>}
                         </div>
 
                         <div className="flex flex-col">
@@ -504,10 +544,9 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                 </div>
 
                 {/* --- 7. Status --- */}
-                <div className="bg-gray-50 p-6 rounded-lg space-y-4 border border-gray-200">
+                <div className="bg-primary-50 p-6 rounded-lg space-y-4 border border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <MainInput type="checkbox" label="Is Active?" name="is_active" value={formData.is_active} onChange={handleChange} />
-                        <MainInput type="checkbox" label="Private Tournament?" name="private" value={formData.private} onChange={handleChange} />
                     </div>
                 </div>
 

@@ -14,6 +14,7 @@ import SurfaceTypes from '../pages/SurfaceTypes/SurfaceTypes.jsx';
 import AddOns from '../pages/AddOns/AddOns.jsx';
 import VenueSports from '../pages/VenueSports/VenueSports.jsx';
 import Tournaments from '../pages/Tournaments/Tournaments.jsx';
+import TournamentDetails from "../components/tournaments/TournamentDetails.jsx";
 import Tickets from '../pages/Tickets/Tickets.jsx';
 // import Revenue from '../pages/Revenue/Revenue';
 // import Reports from '../pages/Reports/Reports';
@@ -90,6 +91,9 @@ const router = createBrowserRouter([
             {
                 path: 'tournaments',
                 element: <Tournaments />,
+            },  {
+                path: 'tournaments/tournament-details',
+                element: <TournamentDetails />,
             },
             {
                 path: 'tickets',
