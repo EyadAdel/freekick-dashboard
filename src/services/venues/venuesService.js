@@ -1,31 +1,86 @@
 import api from '../api.js';
 import { toast } from 'react-toastify';
 
+const BASE_URL = '/venue/venue/venues/';
 
 export const venuesService = {
-    // view all venues
-    getAllVenues: async () => {
+    /**
+     * GET /venue/venue/venues/
+     * View all venues (supports pagination params if passed)
+     */
+    getAllVenues: async (params = {}) => {
         try {
-            const response = await api.get('/venue/venue/venues/');
-            // toast.success("Pitches loaded successfully!");
+            const response = await api.get(`${BASE_URL}`, { params });
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to load venues";
+            // Optional: only show toast on error if it's critical, otherwise console log
+            console.error(message);
+            throw error;
+        }
+    },
+
+    /**
+     * POST /venue/venue/venues/
+     * Create a new venue
+     */
+    createVenue: async (data) => {
+        try {
+            // If sending files (images), ensure 'data' is a FormData object
+            const response = await api.post(`${BASE_URL}`, data);
+            toast.success("Venue created successfully");
+            return response.data;
+        } catch (error) {
+            const message = error.response?.data?.message || "Failed to create venue";
             toast.error(message);
             throw error;
         }
     },
 
-    // delete pitch
-    deletePitch: async (id) => {
+    /**
+     * GET /venue/venue/venues/{id}/
+     * Retrieve a specific venue by ID
+     */
+    getVenueById: async (id) => {
         try {
-            const response = await api.delete(`/venue/pitch/pitches/${id}/`);
-            toast.success("Pitch deleted successfully!");
+            const response = await api.get(`${BASE_URL}${id}/`);
             return response.data;
         } catch (error) {
-            const message = error.response?.data?.message || "Failed to delete pitch";
+            const message = error.response?.data?.message || "Failed to load venue details";
             toast.error(message);
             throw error;
         }
     },
+
+    /**
+     * PATCH /venue/venue/venues/{id}/
+     * Update a venue (Partial update)
+     */
+    updateVenue: async (id, data) => {
+        try {
+            const response = await api.patch(`${BASE_URL}${id}/`, data);
+            toast.success("Venue updated successfully");
+            return response.data;
+        } catch (error) {
+            const message = error.response?.data?.message || "Failed to update venue";
+            toast.error(message);
+            throw error;
+        }
+    },
+
+    /**
+     * DELETE /venue/venue/venues/{id}/
+     * Delete a venue
+     */
+    deleteVenue: async (id) => {
+        try {
+            const response = await api.delete(`${BASE_URL}${id}/`);
+            toast.success("Venue deleted successfully");
+            return response.data;
+        } catch (error) {
+            const message = error.response?.data?.message || "Failed to delete venue";
+            toast.error(message);
+            throw error;
+        }
+    }
 };
