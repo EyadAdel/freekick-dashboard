@@ -11,7 +11,12 @@ import { FaCalendarDays } from "react-icons/fa6";
 import TopTeamsChart from "../../components/Charts/TopTeamsChart.jsx";
 import NotificationsPanel from "../../components/common/NotificationsPanel.jsx";
 import PopularVenues from "../../components/Charts/PopularVenues.jsx";
-
+import {useDispatch} from "react-redux";
+import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
+import {
+    Clock, MapPin, DollarSign,
+    CheckCircle, XCircle, ArrowLeft
+} from 'lucide-react';
 const Dashboard = () => {
     const {
         cardAnalytics,
@@ -45,7 +50,11 @@ const Dashboard = () => {
     const cancelledCount = cardAnalytics?.cancelled_bookings || 0;
     const paidCount = cardAnalytics?.complete_booking || 0;
     const pendingCount = cardAnalytics?.pending_bookings || 0;
+    const dispatch = useDispatch();
 
+    useEffect(() => {
+        dispatch(setPageTitle('Dashboard'));
+    }, [dispatch]);
     // Define stats configuration
     const stats = [
         {
@@ -53,6 +62,7 @@ const Dashboard = () => {
             value: confirmedCount,
             percentChange: 135,
             icon: FaCalendarDays,
+            mobileIcon:CheckCircle,
             iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
             iconColor: 'text-secondary-600 opacity-80'
         },
@@ -61,6 +71,7 @@ const Dashboard = () => {
             value: pendingCount,
             percentChange: 3.68,
             icon: FaCalendarDays,
+            mobileIcon:Clock,
             iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
             iconColor: 'text-secondary-600 opacity-80'
         },
@@ -69,14 +80,16 @@ const Dashboard = () => {
             value: cancelledCount,
             percentChange: -1.45,
             icon: FaCalendarDays,
+            mobileIcon:XCircle,
             iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
-            iconColor: 'text-secondary-600 opacity-80'
+            iconColor: 'text-red-500'
         },
         {
             title: 'Paid Bookings',
             value: paidCount,
             percentChange: 5.94,
             icon: FaCalendarDays,
+            mobileIcon:DollarSign,
             iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
             iconColor: 'text-secondary-600 opacity-80'
         }
@@ -118,7 +131,7 @@ const Dashboard = () => {
         }
             <section className={'lg:flex gap-4 '}>
                 <aside className={'lg:w-3/4'}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-6 mb-8">
+                    <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2  xl:grid-cols-4 gap-4 xl:gap-6 mb-8">
                         {stats.map((stat, index) => (
                             <StatCard key={index} {...stat} />
                         ))}

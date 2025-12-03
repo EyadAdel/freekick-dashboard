@@ -31,6 +31,8 @@ import OTPVerification from "../pages/OTPVerification.jsx";
 import ChangePassword from "../pages/ChangePassword.jsx";
 import BannersPage from "../pages/Banners/BannerPage.jsx";
 import VenueDetails from "../components/venues/VenueDetails.jsx";
+import Vouchers from "../pages/Vouchers/Vouchers.jsx";
+import BookingCalendar from "../pages/BookingCalendar/BookingCalendar.jsx";
 
 
 const router = createBrowserRouter([
@@ -59,7 +61,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'calendar',
-                // element: <Calendar />,
+                element: <BookingCalendar />,
             },
             {
                 path: 'venues',
@@ -127,6 +129,10 @@ const router = createBrowserRouter([
             {
                 path: 'support',
                 element: <Support />,
+            },
+            {
+                path: 'vouchers',
+                element: <Vouchers />,
             },
         ],
     },

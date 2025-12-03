@@ -21,6 +21,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Grid,
+    TrendingUp,
     Dribbble // <--- Imported Dribbble icon for Venue Sports
 } from 'lucide-react';
 import { useState } from 'react';
@@ -48,7 +49,7 @@ const Sidebar = ({ onToggle }) => {
         {
             title: t('sections.dashboard'),
             items: [
-                { icon: LayoutDashboard, label: t('menu_items.dashboard'), path: '/' },
+                { icon: TrendingUp, label: t('menu_items.dashboard'), path: '/' },
             ]
         },
         {

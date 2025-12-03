@@ -132,7 +132,7 @@ const PopularVenues = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-                <h2 className="xl:text-xl text-sm   font-bold text-gray-800">Popular Venues</h2>
+                <h2 className="xl:text-lg   font-bold text-gray-800">Popular Venues</h2>
 
                 {/* Control buttons for center content */}
                 <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ const PopularVenues = () => {
                     <div className="relative ml-2">
                         <button
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className="flex items-center whitespace-nowrap text-sm gap-2 xl:px-4 px-2 py-2 text-secondary-600 focus:cursor bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2] rounded-lg transition-colors"
+                            className="flex items-center whitespace-nowrap text-sm gap-2  px-2 py-2 text-secondary-600 focus:cursor bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2] rounded-lg transition-colors"
                         >
                             <svg
                                 className="w-4 h-4"
@@ -163,7 +163,7 @@ const PopularVenues = () => {
                                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                                 />
                             </svg>
-                            <span className="font-medium">{selectedCity}</span>
+                            <span className="text-sm">{selectedCity}</span>
                             <svg
                                 className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                                 fill="none"

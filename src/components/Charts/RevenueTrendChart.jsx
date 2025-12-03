@@ -206,9 +206,9 @@ const RevenueTrendChart = ({
             {/* Header with title and stats - BookingChart style */}
             <div className="flex flex-col lg:flex-row lg:items-start justify-between mb-8">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{title}</h2>
+                    <h2 className="xl:text-xl font-bold text-gray-800 mb-2">{title}</h2>
                     <div className="flex items-center">
-                        <span className="text-3xl font-bold text-gray-900">
+                        <span className="xl:text-xl font-bold text-gray-900">
                             ${totalRevenue.toLocaleString()}
                         </span>
                         <div className={`ml-3 px-2 py-1 rounded-full flex items-center ${

@@ -206,9 +206,9 @@ const BookingChart = ({
             {/* Header with title and stats */}
             <div className="flex flex-col lg:flex-row lg:items-start justify-between mb-8">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{title}</h2>
+                    <h2 className="xl:text-xl font-bold text-gray-800 mb-2">{title}</h2>
                     <div className="flex items-center">
-                        <span className="text-3xl font-bold text-gray-900">{totalBookings.toLocaleString()}</span>
+                        <span className="xl:text-xl font-bold text-gray-900">{totalBookings.toLocaleString()}</span>
                         <div className={`ml-3 px-2 py-1 rounded-full flex items-center ${trend.isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                             <TrendingUp className={`w-3 h-3 mr-1 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`} />
                             <span className="text-sm font-medium">
