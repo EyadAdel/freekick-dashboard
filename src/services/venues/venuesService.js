@@ -43,7 +43,7 @@ export const venuesService = {
      */
     getVenueById: async (id) => {
         try {
-            const response = await api.get(`${BASE_URL}${id}/`);
+            const response = await api.get(`${BASE_URL}${id}/?all_languages`);
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to load venue details";

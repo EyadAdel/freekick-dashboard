@@ -117,7 +117,7 @@ const router = createBrowserRouter([
                 // element: <Players />,
             },
             {
-                path: 'pitch-owners',
+                path: 'pitch-stuff',
                 // element: <PitchOwners />,
             },
             {

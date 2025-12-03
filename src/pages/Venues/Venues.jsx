@@ -168,10 +168,27 @@ const Venues = () => {
         setShowForm(true);
     };
 
-    const handleEditVenue = (venue) => {
-        setSelectedVenue(venue);
-        setShowForm(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    // --- MODIFIED: Handle Edit with View One Endpoint ---
+    const handleEditVenue = async (venue) => {
+        // Set loading to true (optional, prevents user interaction while fetching)
+        setIsLoading(true);
+        try {
+            // 1. Fetch the full data from the View One endpoint
+            const fullVenueData = await venuesService.getVenueById(venue.id);
+
+            // 2. Pass the full response (or response.data) to the state
+            // Note: Your VenuesForm is configured to handle the { status: true, data: {...} } structure
+            setSelectedVenue(fullVenueData);
+
+            // 3. Show the form
+            setShowForm(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+            console.error("Failed to fetch venue details for editing:", error);
+            toast.error("Failed to load venue details");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleCancelForm = () => {

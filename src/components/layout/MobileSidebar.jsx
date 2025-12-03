@@ -71,7 +71,7 @@ const MobileSidebar = ({ isOpen, onClose, direction }) => {
       title: t('sections.users_control'),
       items: [
         { icon: Users, label: t('menu_items.players'), path: '/players' },
-        { icon: UserCheck, label: t('menu_items.pitch_owners'), path: '/pitch-owners' },
+        { icon: UserCheck, label: t('menu_items.pitch_owners'), path: '/pitch-stuff' },
         { icon: FileEdit, label: t('menu_items.venue_requests'), path: '/venue-requests' },
       ]
     },
