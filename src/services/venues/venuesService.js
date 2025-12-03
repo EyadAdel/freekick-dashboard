@@ -41,9 +41,9 @@ export const venuesService = {
      * GET /venue/venue/venues/{id}/
      * Retrieve a specific venue by ID
      */
-    getVenueById: async (id) => {
+    getVenueById: async (id,allLanguages) => {
         try {
-            const response = await api.get(`${BASE_URL}${id}/?all_languages`);
+            const response = await api.get(`${BASE_URL}${id}/${allLanguages?"?all_languages":""}`);
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to load venue details";

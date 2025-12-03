@@ -172,9 +172,11 @@ const Venues = () => {
     const handleEditVenue = async (venue) => {
         // Set loading to true (optional, prevents user interaction while fetching)
         setIsLoading(true);
+        const allLanguage=true
+
         try {
             // 1. Fetch the full data from the View One endpoint
-            const fullVenueData = await venuesService.getVenueById(venue.id);
+            const fullVenueData = await venuesService.getVenueById(venue.id,allLanguage);
 
             // 2. Pass the full response (or response.data) to the state
             // Note: Your VenuesForm is configured to handle the { status: true, data: {...} } structure
