@@ -6,7 +6,7 @@ const CustomPieChart = ({
                             nameKey = 'name',
                             valueKey = 'value',
                             colors = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'],
-                            height = 300,
+                            height = 180,
                             title,
                             showLegend = true,
                             showCenterMetric = false, // NEW: Show metric in center of pie chart
@@ -18,7 +18,7 @@ const CustomPieChart = ({
         <div className="bg-white rounded-lg shadow p-4">
             {/* Title at the top */}
             {title && (
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">{title}</h3>
+                <h3 className="xl:text-xl font-bold text-gray-800 mb-2">{title}</h3>
             )}
 
             <div style={{ width: '100%', height: height, position: 'relative' }}>
@@ -75,10 +75,10 @@ const CustomPieChart = ({
                             pointerEvents: 'none',
                         }}
                     >
-                        <div className="text-4xl font-bold text-blue-600">
+                        <div className="text-xl font-bold text-secondary-600">
                             {centerMetricValue}
                         </div>
-                        <div className="text-lg font-medium text-gray-700 mt-1">
+                        <div className="text-sm  text-gray-700 mt-1">
                             {centerMetricLabel}
                         </div>
                     </div>

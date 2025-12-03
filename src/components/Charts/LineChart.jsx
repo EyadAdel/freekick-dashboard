@@ -28,7 +28,7 @@ const CustomLineChart = ({
                              xAxisKey = 'month',
                              lineKeys = ['clicks'],
                              colors = ['#ffff'],
-                             height = 300,
+                             height = 180,
                              title,
                              showGrid = true,
                              showLegend = false,
@@ -56,9 +56,9 @@ const CustomLineChart = ({
     }
 
     return (
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white rounded-lg shadow p-3 px-5">
             {title && (
-                <div className="mb-4">
+                <div className="mb-2">
                     <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
                     <div className="flex items-center mt-1">
                         <div className="h-1 w-8 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full mr-2"></div>

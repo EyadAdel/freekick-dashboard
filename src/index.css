@@ -283,3 +283,35 @@ input:-webkit-autofill {
 .recharts-tooltip-wrapper {
   z-index: 1000;
 }
+/* Customize react-big-calendar */
+.rbc-calendar {
+  font-family: inherit;
+}
+
+.rbc-header {
+  padding: 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.rbc-time-slot {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.rbc-event {
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.rbc-today {
+  background-color: #f0f9ff;
+}
+
+.rbc-time-content {
+  border-top: 1px solid #e5e7eb;
+}
+
+.rbc-time-header {
+  border-bottom: 2px solid #e5e7eb;
+}
