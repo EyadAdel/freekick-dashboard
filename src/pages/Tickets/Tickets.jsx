@@ -11,6 +11,7 @@ import CreateTicket from "../../components/Tickets/CreateTicket.jsx";
 import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 import {useDispatch} from "react-redux";
 import {showConfirm} from "../../components/showConfirm.jsx";
+import NotificationDebugger from "../../components/NotificationDebugger.jsx";
 
 function Tickets() {
     const {
@@ -238,6 +239,7 @@ function Tickets() {
     return (
         <div className="container mx-auto px-4 py-6">
             {/* Charts Section */}
+            <NotificationDebugger/>
 
             {/* Table Section */}
             {loading && tickets.length === 0 ? (

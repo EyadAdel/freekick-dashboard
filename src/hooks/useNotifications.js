@@ -1,13 +1,13 @@
 // hooks/useNotifications.js
-// Create this hook to manage notifications
-
-import { useState, useEffect, useCallback } from 'react';
-import { onMessageListener } from '../firebase/firebase';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { messaging } from '../firebase/firebase';
+import { onMessage } from 'firebase/messaging';
 
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const unsubscribeRef = useRef(null);
 
     // Load notifications from localStorage on mount
     useEffect(() => {
@@ -17,7 +17,6 @@ export const useNotifications = () => {
                 if (stored) {
                     const parsed = JSON.parse(stored);
                     setNotifications(parsed);
-                    // Count unread notifications
                     const unread = parsed.filter(n => !n.read).length;
                     setUnreadCount(unread);
                 }
@@ -34,21 +33,31 @@ export const useNotifications = () => {
     // Save notifications to localStorage whenever they change
     useEffect(() => {
         if (!isLoading) {
-            localStorage.setItem('notifications', JSON.stringify(notifications));
-            const unread = notifications.filter(n => !n.read).length;
-            setUnreadCount(unread);
+            try {
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+                const unread = notifications.filter(n => !n.read).length;
+                setUnreadCount(unread);
+            } catch (error) {
+                console.error('Error saving notifications:', error);
+            }
         }
     }, [notifications, isLoading]);
 
-    // Listen for new Firebase notifications
+    // Listen for new Firebase notifications - PROPERLY FIXED
     useEffect(() => {
-        const setupListener = async () => {
-            try {
-                const payload = await onMessageListener();
+        if (!messaging) {
+            console.warn('Firebase messaging not initialized');
+            return;
+        }
 
-                // Add new notification
+        // Set up listener directly with onMessage
+        const unsubscribe = onMessage(messaging, (payload) => {
+            console.log('Received foreground message:', payload);
+
+            try {
+                // Create notification object
                 const newNotification = {
-                    id: Date.now(),
+                    id: Date.now() + Math.random(), // Ensure unique ID
                     title: payload.notification?.title || 'New Notification',
                     body: payload.notification?.body || '',
                     image: payload.notification?.image || null,
@@ -57,22 +66,47 @@ export const useNotifications = () => {
                     read: false
                 };
 
+                // Add to state
                 setNotifications(prev => [newNotification, ...prev]);
 
-                // Show browser notification
-                if (Notification.permission === 'granted') {
-                    new Notification(newNotification.title, {
-                        body: newNotification.body,
-                        icon: newNotification.image || '/logo192.png',
-                        badge: '/logo192.png'
-                    });
+                // Show browser notification if permission granted
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    try {
+                        const notification = new Notification(newNotification.title, {
+                            body: newNotification.body,
+                            icon: newNotification.image || '/logo192.png',
+                            badge: '/logo192.png',
+                            tag: `notification-${newNotification.id}`,
+                            requireInteraction: false
+                        });
+
+                        // Auto close after 5 seconds
+                        setTimeout(() => notification.close(), 5000);
+
+                        // Handle click
+                        notification.onclick = () => {
+                            window.focus();
+                            notification.close();
+                        };
+                    } catch (notifError) {
+                        console.error('Error showing browser notification:', notifError);
+                    }
                 }
             } catch (error) {
-                console.error('Error in notification listener:', error);
+                console.error('Error processing notification:', error);
+            }
+        });
+
+        // Store unsubscribe function
+        unsubscribeRef.current = unsubscribe;
+
+        // Cleanup
+        return () => {
+            if (unsubscribeRef.current) {
+                console.log('Unsubscribing from Firebase messages');
+                unsubscribeRef.current();
             }
         };
-
-        setupListener();
     }, []);
 
     // Mark notification as read
@@ -100,7 +134,10 @@ export const useNotifications = () => {
 
     // Clear all notifications
     const clearAll = useCallback(() => {
-        setNotifications([]);
+        if (window.confirm('Are you sure you want to clear all notifications?')) {
+            setNotifications([]);
+            localStorage.removeItem('notifications');
+        }
     }, []);
 
     return {

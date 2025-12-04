@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../../hooks/useAuth';
 import { MdLogout } from "react-icons/md";
 import { Menu } from 'lucide-react';
-import NotificationHandler from "../NotificationHandler.jsx";
 import NotificationDropdown from "../NotificationDropdown.jsx";
 import { useNotifications } from "../../hooks/useNotifications.js"; // ADD THIS IMPORT
 

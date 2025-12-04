@@ -17,7 +17,6 @@ import {
     Clock, MapPin, DollarSign,
     CheckCircle, XCircle, ArrowLeft
 } from 'lucide-react';
-import NotificationHandler from "../../components/NotificationHandler.jsx";
 const Dashboard = () => {
     const {
         cardAnalytics,
