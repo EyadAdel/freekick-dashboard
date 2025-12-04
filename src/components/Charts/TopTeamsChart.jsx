@@ -68,30 +68,30 @@ const TopTeamsChart = ({
                     {/*<p className="text-sm text-gray-500">{subtitle}</p>*/}
                 </div>
 
-                {showPeriodSelector && (
-                    <div className="relative">
-                        <select
-                            value={period}
-                            onChange={handlePeriodChange}
-                            className="appearance-none text-secondary-600 bg-gradient-to-br from-[#84FAA4] cursor  via-primary-500 to-[#2ACEF2] py-2 px-2 border border-gray-300 rounded-lg px-4 pl-8 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            {periodOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-secondary-600" />
-                        <svg
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-secondary-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </div>
-                )}
+                {/*{showPeriodSelector && (*/}
+                {/*    <div className="relative">*/}
+                {/*        <select*/}
+                {/*            value={period}*/}
+                {/*            onChange={handlePeriodChange}*/}
+                {/*            className="appearance-none text-secondary-600 bg-gradient-to-br from-[#84FAA4] cursor  via-primary-500 to-[#2ACEF2] py-2 px-2 border border-gray-300 rounded-lg px-4 pl-8 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"*/}
+                {/*        >*/}
+                {/*            {periodOptions.map(option => (*/}
+                {/*                <option key={option.value} value={option.value}>*/}
+                {/*                    {option.label}*/}
+                {/*                </option>*/}
+                {/*            ))}*/}
+                {/*        </select>*/}
+                {/*        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-secondary-600" />*/}
+                {/*        <svg*/}
+                {/*            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-secondary-600"*/}
+                {/*            fill="none"*/}
+                {/*            stroke="currentColor"*/}
+                {/*            viewBox="0 0 24 24"*/}
+                {/*        >*/}
+                {/*            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />*/}
+                {/*        </svg>*/}
+                {/*    </div>*/}
+                {/*)}*/}
             </div>
 
             {/* Table Header */}
@@ -106,7 +106,7 @@ const TopTeamsChart = ({
                     Matches played
                 </div>
                 <div className="col-span-2 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">
-                    Rating
+                    Points
                 </div>
             </div>
 
@@ -123,7 +123,7 @@ const TopTeamsChart = ({
                                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 mr-3 flex-shrink-0">
                                     {team.logo ? (
                                         <img
-                                            src={ 'https://img.freepik.com/premium-vector/sports-team-logo-design-with-shield-stars_339976-60246.jpg'}
+                                            src={ team.logo}
                                             alt={team.name}
                                             className="w-8 h-8 rounded-full object-cover"
                                         />
@@ -177,8 +177,8 @@ const TopTeamsChart = ({
 
                             {/* Rating */}
                             <div className="col-span-2 flex justify-center">
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
-                                    {generateRating(team)} stars
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium  text-cyan-800">
+                                    {team.num_of_points}
                                 </span>
                             </div>
                         </div>

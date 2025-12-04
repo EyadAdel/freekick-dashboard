@@ -222,24 +222,7 @@ function Tickets() {
         handleSort(sortKey, sortDirection);
     };
 
-    const clicksOverTimeData = [
-        { month: 'NOV', clicks: 45 },
-        { month: 'DEC', clicks: 65 },
-        { month: 'JAN', clicks: 85 },
-        { month: 'FEB', clicks: 70 },
-        { month: 'MAR', clicks: 90 },
-        { month: 'APR', clicks: 110 },
-        { month: 'MAY', clicks: 95 },
-        { month: 'JUN', clicks: 120 },
-        { month: 'JUL', clicks: 105 },
-        { month: 'AUG', clicks: 130 },
-    ];
 
-    const emirateDistributionData = [
-        { name: 'Dubai', value: 275 },
-        { name: 'Abu Dhabi', value: 805 },
-        { name: 'Sharjah', value: 120 },
-    ];
 
     // Render Create/Edit view
     if (currentView === 'create' || currentView === 'edit') {
@@ -255,32 +238,6 @@ function Tickets() {
     return (
         <div className="container mx-auto px-4 py-6">
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <CustomLineChart
-                    data={clicksOverTimeData}
-                    xAxisKey="month"
-                    lineKeys={['clicks']}
-                    colors={['#008c8c','#00bfbf','#2ACEF2']}
-                    height={350}
-                    title="Number of Clicks"
-                    showLegend={false}
-                    showGrid={true}
-                    showGradientFill={true}
-                    gradientOpacity={0.15}
-                />
-
-                <CustomPieChart
-                    data={emirateDistributionData}
-                    colors={['#008c8c', '#00bfbf', '#2ACEF2']}
-                    height={300}
-                    title="Per Emirate"
-                    showCenterMetric={true}
-                    centerMetricValue="80%"
-                    centerMetricLabel="Clicks"
-                    showPercentage={false}
-                    showLegend={true}
-                />
-            </div>
 
             {/* Table Section */}
             {loading && tickets.length === 0 ? (
