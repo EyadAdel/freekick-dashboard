@@ -204,7 +204,7 @@ const RevenueTrendChart = ({
     return (
         <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
             {/* Header with title and stats - BookingChart style */}
-            <div className="flex flex-col lg:flex-row lg:items-start justify-between mb-8">
+            <div className="flex   items-start justify-between mb-4">
                 <div>
                     <h2 className="xl:text-xl font-bold text-gray-800 mb-2">{title}</h2>
                     <div className="flex items-center">
@@ -228,7 +228,7 @@ const RevenueTrendChart = ({
                 </div>
 
                 {showPeriodSelector && (
-                    <div className="mt-4 lg:mt-0">
+                    <div className=" lg:mt-0">
                         <div className="relative">
                             <select
                                 value={period}
