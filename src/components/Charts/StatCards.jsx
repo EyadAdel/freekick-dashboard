@@ -6,9 +6,7 @@ const StatCard = ({
                       title,
                       value,
                       percentChange,
-                      // icon: Icon,
-                      mobileIcon:Icon,
-                      iconBgColor = 'bg-blue-100',
+                      icon: Icon,
                       iconColor = 'text-blue-600'
                   }) => {
     const isPositive = percentChange >= 0;
@@ -17,7 +15,7 @@ const StatCard = ({
     return (
         <> <div className="sm:hidden flex flex-col items-center">
             <div className="relative">
-                <div className={`w-10 h-10 ${iconBgColor} rounded-xl flex items-center justify-center`}>
+                <div className={`w-10 h-10 bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2] rounded-xl flex items-center justify-center`}>
                     <Icon className={iconColor} size={24} />
                 </div>
                 <div className="absolute -bottom-1 -right-1 bg-white border-2 border-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
@@ -39,8 +37,8 @@ const StatCard = ({
                 </span>
                 <div className=" ">
 
-                    {percentChange !== undefined && (
-                        <div className={`flex items-center gap-1 w-fit px-2 rounded-md py-1 rounded ${
+                    {percentChange  && (
+                        <div className={`flex items-center gap-1 w-fit px-2 rounded-md py-1  ${
                             isPositive ? 'bg-green-50' : isNegative ? 'bg-red-50' : 'bg-gray-50'
                         }`}>
                             {isPositive ? (
@@ -60,7 +58,7 @@ const StatCard = ({
 
             </div>
 
-            <div className={`w-10 h-10 ${iconBgColor} rounded-full flex items-center justify-center`}>
+            <div className={`w-10 h-10 bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2] rounded-full flex items-center justify-center`}>
                 <Icon className={iconColor} size={20} />
             </div>
         </div>

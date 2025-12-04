@@ -33,6 +33,8 @@ import BannersPage from "../pages/Banners/BannerPage.jsx";
 import VenueDetails from "../components/venues/VenueDetails.jsx";
 import Vouchers from "../pages/Vouchers/Vouchers.jsx";
 import BookingCalendar from "../pages/BookingCalendar/BookingCalendar.jsx";
+import ProfileSettings from "../pages/ProfileSettings/ProfileSettings.jsx";
+import TestNotificationSender from "../components/TestNotificationSender.jsx";
 
 
 const router = createBrowserRouter([
@@ -133,6 +135,14 @@ const router = createBrowserRouter([
             {
                 path: 'vouchers',
                 element: <Vouchers />,
+            },
+            {
+                path: 'profile',
+                element: <ProfileSettings />,
+            },
+            {
+                path: 'test',
+                element: <TestNotificationSender />,
             },
         ],
     },

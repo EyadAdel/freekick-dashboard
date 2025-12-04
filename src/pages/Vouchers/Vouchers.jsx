@@ -422,40 +422,33 @@ function Vouchers(props) {
                     <StatCard
                         title="Total Vouchers"
                         value={analytics?.data?.total_coupons || 0}
-                        percentChange={statChanges.totalChange}
+                        // percentChange={statChanges.totalChange}
                         icon={TicketPercent}
-                        mobileIcon={TicketPercent}
-                        iconBgColor='bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]'
                         iconColor="text-secondary-600"
                     />
 
                     <StatCard
                         title="Active Vouchers"
                         value={analytics?.data?.active_coupons || 0}
-                        percentChange={statChanges.activeChange}
+                        // percentChange={statChanges.activeChange}
                         icon={CheckCircle}
-                        mobileIcon={CheckCircle}
-                        iconBgColor= 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]'
+
                         iconColor="text-secondary-600"
                     />
 
                     <StatCard
                         title="Inactive Vouchers"
                         value={analytics?.data?.inactive_coupons || 0}
-                        percentChange={statChanges.inactiveChange}
+                        // percentChange={statChanges.inactiveChange}
                         icon={XCircle}
-                        mobileIcon={XCircle}
-                        iconBgColor='bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]'
                         iconColor="text-red-600"
                     />
 
                     <StatCard
                         title="Total Usage"
                         value={totalUsage}
-                        percentChange={statChanges.usageChange}
+                        // percentChange={statChanges.usageChange}
                         icon={Users}
-                        mobileIcon={Users}
-                        iconBgColor='bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]'
                         iconColor="text-secondary-600"
                     />
                 </div>            )}

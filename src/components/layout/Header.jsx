@@ -1,5 +1,6 @@
 import { Bell, Search, Settings, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // ADD THIS IMPORT
 import LanguageSwitcher from '../LanguageSwitcher.jsx';
 import { selectPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../../hooks/useAuth';
 import { MdLogout } from "react-icons/md";
 import { Menu } from 'lucide-react';
+import NotificationHandler from "../NotificationHandler.jsx";
 
 const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
     const { direction } = useSelector((state) => state.language);
@@ -14,6 +16,7 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
     const { t } = useTranslation('common');
     const { user, isLoading } = useSelector((state) => state.auth);
     const { logout } = useAuth();
+    const navigate = useNavigate(); // ADD THIS HOOK
 
     const isRtl = direction === 'rtl';
     const [showNotifications, setShowNotifications] = useState(false);
@@ -48,6 +51,12 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
 
     const getDisplayName = () => {
         return user?.name || 'User';
+    };
+
+    // ADD THIS FUNCTION
+    const handleProfileClick = () => {
+        setShowProfile(false); // Close the dropdown
+        navigate('/profile'); // Navigate to profile page
     };
 
     const handleLogout = async () => {
@@ -159,9 +168,7 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
                                 }`}>
                                     <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                                         <h3 className="font-semibold text-gray-800">Notifications</h3>
-                                        <button className="text-sm text-primary-600 hover:text-primary-700">
-                                            Mark all as read
-                                        </button>
+                                       {/*<NotificationHandler/>*/}
                                     </div>
                                     <div className="max-h-96 overflow-y-auto">
                                         {/* Your notifications content */}
@@ -169,11 +176,6 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
                                 </div>
                             )}
                         </div>
-
-                        {/* Settings */}
-                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors hidden sm:block">
-                            <Settings className="w-5 h-5 lg:w-6 lg:h-6 text-gray-600" />
-                        </button>
 
                         {/* Profile */}
                         <div className="relative">
@@ -207,12 +209,14 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
                                     isRtl ? 'left-0' : 'right-0'
                                 }`}>
                                     <div className="p-2">
-                                        <button className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg text-start">
+                                        {/* UPDATED BUTTON - added onClick handler */}
+                                        <button
+                                            onClick={handleProfileClick}
+                                            className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg text-start"
+                                        >
                                             Profile
                                         </button>
-                                        <button className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg text-start">
-                                            Settings
-                                        </button>
+
                                         <hr className="my-2" />
                                         <button
                                             onClick={handleLogout}

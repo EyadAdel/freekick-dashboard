@@ -19,7 +19,6 @@ export const getFallbackImage = (text = 'Image', width = 64, height = 40) => {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, width / 2, height / 2);
-
     return canvas.toDataURL();
 };
 

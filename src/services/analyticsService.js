@@ -59,7 +59,7 @@ const analyticsService = {
     // Get top teams
     getTopTeams: async (params = {}) => {
         try {
-            const response = await api.get('/teams/teams', {
+            const response = await api.get('/teams/teams/get_leaderboard/', {
                 params: {
                     page_size: 5,
                     ordering: '-number_of_booking',

@@ -63,7 +63,7 @@ const Sidebar = ({ onToggle }) => {
                 { icon: Dribbble, label: t('menu_items.venue_sports'), path: '/venue-sports' }, // <--- Added Venue Sports
                 { icon: Grid, label: t('menu_items.surface_types'), path: '/surface-types' },
                 { icon: Layers, label: t('menu_items.addons'), path: '/add-ons' },
-                { icon: Layers, label: t('menu_items.categories'), path: '/categories' },
+                // { icon: Layers, label: t('menu_items.categories'), path: '/categories' },
                 { icon: Trophy, label: t('menu_items.tournaments'), path: '/tournaments' },
                 { icon: Ticket, label: t('menu_items.tickets'), path: '/tickets' },
             ]

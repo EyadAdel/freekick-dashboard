@@ -17,6 +17,7 @@ import {
     Clock, MapPin, DollarSign,
     CheckCircle, XCircle, ArrowLeft
 } from 'lucide-react';
+import NotificationHandler from "../../components/NotificationHandler.jsx";
 const Dashboard = () => {
     const {
         cardAnalytics,
@@ -48,8 +49,8 @@ const Dashboard = () => {
     // Calculate values based on cardAnalytics data
     const confirmedCount = cardAnalytics?.complete_booking || 0;
     const cancelledCount = cardAnalytics?.cancelled_bookings || 0;
-    const paidCount = cardAnalytics?.complete_booking || 0;
-    const pendingCount = cardAnalytics?.pending_bookings || 0;
+    const TotalRevenue = cardAnalytics?.total_revenue || 0;
+    const total_earnings = cardAnalytics?.total_earnings || 0;
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -61,36 +62,28 @@ const Dashboard = () => {
             title: 'Completed Bookings',
             value: confirmedCount,
             percentChange: 135,
-            icon: FaCalendarDays,
-            mobileIcon:CheckCircle,
-            iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
+            icon:CheckCircle,
             iconColor: 'text-secondary-600 opacity-80'
         },
         {
             title: 'Active Bookings',
-            value: pendingCount,
+            value: total_earnings,
             percentChange: 3.68,
-            icon: FaCalendarDays,
-            mobileIcon:Clock,
-            iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
+            icon:Clock,
             iconColor: 'text-secondary-600 opacity-80'
         },
         {
             title: 'Canceled Bookings',
             value: cancelledCount,
             percentChange: -1.45,
-            icon: FaCalendarDays,
-            mobileIcon:XCircle,
-            iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
+            icon:XCircle,
             iconColor: 'text-red-500'
         },
         {
-            title: 'Paid Bookings',
-            value: paidCount,
+            title: 'Total Revenue',
+            value: TotalRevenue,
             percentChange: 5.94,
-            icon: FaCalendarDays,
-            mobileIcon:DollarSign,
-            iconBgColor: 'bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]',
+            icon:DollarSign,
             iconColor: 'text-secondary-600 opacity-80'
         }
     ];
@@ -129,6 +122,7 @@ const Dashboard = () => {
             </div>
             </div>
         }
+        <NotificationHandler />
             <section className={'lg:flex gap-4 '}>
                 <aside className={'lg:w-3/4'}>
                     <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2  xl:grid-cols-4 gap-4 xl:gap-6 mb-8">
