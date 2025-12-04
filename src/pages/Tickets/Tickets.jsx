@@ -238,10 +238,7 @@ function Tickets() {
     // Render List view
     return (
         <div className="container mx-auto px-4 py-6">
-            {/* Charts Section */}
-            <NotificationDebugger/>
 
-            {/* Table Section */}
             {loading && tickets.length === 0 ? (
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>

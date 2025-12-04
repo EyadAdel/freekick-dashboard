@@ -1,13 +1,12 @@
 // hooks/useNotifications.js
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { messaging } from '../firebase/firebase';
+import { useState, useEffect, useCallback } from 'react';
 import { onMessage } from 'firebase/messaging';
+import { messaging } from '../firebase/firebase';
 
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const unsubscribeRef = useRef(null);
 
     // Load notifications from localStorage on mount
     useEffect(() => {
@@ -33,78 +32,52 @@ export const useNotifications = () => {
     // Save notifications to localStorage whenever they change
     useEffect(() => {
         if (!isLoading) {
-            try {
-                localStorage.setItem('notifications', JSON.stringify(notifications));
-                const unread = notifications.filter(n => !n.read).length;
-                setUnreadCount(unread);
-            } catch (error) {
-                console.error('Error saving notifications:', error);
-            }
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            const unread = notifications.filter(n => !n.read).length;
+            setUnreadCount(unread);
         }
     }, [notifications, isLoading]);
 
-    // Listen for new Firebase notifications - PROPERLY FIXED
+    // Listen for new Firebase notifications - FIXED
     useEffect(() => {
         if (!messaging) {
             console.warn('Firebase messaging not initialized');
             return;
         }
 
-        // Set up listener directly with onMessage
+        // Set up the listener - onMessage is the correct way
         const unsubscribe = onMessage(messaging, (payload) => {
-            console.log('Received foreground message:', payload);
+            console.log('Message received in foreground:', payload);
 
-            try {
-                // Create notification object
-                const newNotification = {
-                    id: Date.now() + Math.random(), // Ensure unique ID
-                    title: payload.notification?.title || 'New Notification',
-                    body: payload.notification?.body || '',
-                    image: payload.notification?.image || null,
-                    data: payload.data || {},
-                    timestamp: new Date().toISOString(),
-                    read: false
-                };
+            // Add new notification
+            const newNotification = {
+                id: Date.now(),
+                title: payload.notification?.title || 'New Notification',
+                body: payload.notification?.body || '',
+                image: payload.notification?.image || null,
+                data: payload.data || {},
+                timestamp: new Date().toISOString(),
+                read: false
+            };
 
-                // Add to state
-                setNotifications(prev => [newNotification, ...prev]);
+            setNotifications(prev => [newNotification, ...prev]);
 
-                // Show browser notification if permission granted
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    try {
-                        const notification = new Notification(newNotification.title, {
-                            body: newNotification.body,
-                            icon: newNotification.image || '/logo192.png',
-                            badge: '/logo192.png',
-                            tag: `notification-${newNotification.id}`,
-                            requireInteraction: false
-                        });
-
-                        // Auto close after 5 seconds
-                        setTimeout(() => notification.close(), 5000);
-
-                        // Handle click
-                        notification.onclick = () => {
-                            window.focus();
-                            notification.close();
-                        };
-                    } catch (notifError) {
-                        console.error('Error showing browser notification:', notifError);
-                    }
-                }
-            } catch (error) {
-                console.error('Error processing notification:', error);
+            // Show browser notification
+            if (Notification.permission === 'granted') {
+                new Notification(newNotification.title, {
+                    body: newNotification.body,
+                    icon: newNotification.image || '/logo192.png',
+                    badge: '/logo192.png',
+                    tag: `notification-${newNotification.id}`,
+                    requireInteraction: false
+                });
             }
         });
 
-        // Store unsubscribe function
-        unsubscribeRef.current = unsubscribe;
-
-        // Cleanup
+        // Cleanup listener on unmount
         return () => {
-            if (unsubscribeRef.current) {
-                console.log('Unsubscribing from Firebase messages');
-                unsubscribeRef.current();
+            if (unsubscribe) {
+                unsubscribe();
             }
         };
     }, []);
@@ -134,10 +107,7 @@ export const useNotifications = () => {
 
     // Clear all notifications
     const clearAll = useCallback(() => {
-        if (window.confirm('Are you sure you want to clear all notifications?')) {
-            setNotifications([]);
-            localStorage.removeItem('notifications');
-        }
+        setNotifications([]);
     }, []);
 
     return {

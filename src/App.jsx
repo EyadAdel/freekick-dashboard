@@ -5,6 +5,8 @@ import { store } from './store/store';
 import './i18n/i18n.js';
 import 'react-toastify/dist/ReactToastify.css';
 import AppContent from "./AppContent.jsx";
+import {requestNotificationPermission} from "./firebase/firebase.js";
+import {useEffect} from "react";
 
 // Separate component to access Redux state
 function ToastWrapper() {
@@ -39,6 +41,31 @@ if ('serviceWorker' in navigator) {
     });
 }
 function App() {
+    useEffect(() => {
+        const setupNotifications = async () => {
+            try {
+                // Register service worker first
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.register(
+                        '/firebase-messaging-sw.js'
+                    );
+                    console.log('Service Worker registered:', registration);
+                }
+
+                // Request notification permission
+                const token = await requestNotificationPermission();
+                if (token) {
+                    console.log('Notifications enabled with token:', token);
+                } else {
+                    console.log('Notification permission not granted');
+                }
+            } catch (error) {
+                console.error('Error setting up notifications:', error);
+            }
+        };
+
+        setupNotifications();
+    }, []);
     return (
         <Provider store={store}>
             <AppContent />
