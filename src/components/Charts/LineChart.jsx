@@ -1,22 +1,23 @@
 import React from 'react';
 import {
     LineChart,
+    AreaChart,
     Line,
+    Area,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
     Legend,
-    ResponsiveContainer,
-    Area
+    ResponsiveContainer
 } from 'recharts';
 
 const CustomTooltipComponent = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-[#00bfbf] text-white text-sm  p-3 rounded-lg shadow-lg">
-                <p className="font-semibold text-xs mb-1">Month : {label}</p>
-                <p className="font-bold text-xs ">  clicks : {payload[0]?.value || 0}</p>
+            <div className="bg-[#00bfbf] text-white text-sm p-3 rounded-lg shadow-lg">
+                <p className="font-semibold text-xs mb-1">Month: {label}</p>
+                <p className="font-bold text-xs">clicks: {payload[0]?.value || 0}</p>
             </div>
         );
     }
@@ -33,9 +34,9 @@ const CustomLineChart = ({
                              showGrid = true,
                              showLegend = false,
                              showGradientFill = true,
-                             gradientOpacity = 0.3
+                             gradientOpacity = 0.3,
+                             chartType = 'line' // 'line' or 'area'
                          }) => {
-
     // Safety checks
     const safeData = Array.isArray(data) ? data : [];
     const safeLineKeys = Array.isArray(lineKeys) ? lineKeys : ['clicks'];
@@ -55,6 +56,9 @@ const CustomLineChart = ({
         );
     }
 
+    // Choose the appropriate chart component
+    const ChartComponent = chartType === 'area' ? AreaChart : LineChart;
+
     return (
         <div className="bg-white rounded-lg shadow p-3 px-5">
             {title && (
@@ -69,7 +73,7 @@ const CustomLineChart = ({
 
             <div style={{ width: '100%', height: height }}>
                 <ResponsiveContainer>
-                    <LineChart
+                    <ChartComponent
                         data={safeData}
                         margin={{
                             top: 20,
@@ -120,12 +124,14 @@ const CustomLineChart = ({
                             fill="url(#chartBackground)"
                         />
 
-                        {showGrid && <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke="#cbd5e1"
-                            strokeOpacity={0.5}
-                            vertical={false}
-                        />}
+                        {showGrid && (
+                            <CartesianGrid
+                                strokeDasharray="3 3"
+                                stroke="#cbd5e1"
+                                strokeOpacity={0.5}
+                                vertical={false}
+                            />
+                        )}
 
                         <XAxis
                             dataKey={xAxisKey}
@@ -162,44 +168,65 @@ const CustomLineChart = ({
                             />
                         )}
 
-                        {safeLineKeys.map((key, index) => (
-                            <React.Fragment key={key}>
-                                {showGradientFill && (
-                                    <Area
-                                        type="monotone"
-                                        dataKey={key}
-                                        stroke="transparent"
-                                        fill={`url(#${generateAreaGradientId(index)})`}
-                                        fillOpacity={1}
-                                    />
-                                )}
-
-                                <Line
+                        {chartType === 'area' ? (
+                            // Area Chart rendering
+                            safeLineKeys.map((key, index) => (
+                                <Area
+                                    key={key}
                                     type="monotone"
                                     dataKey={key}
                                     stroke={`url(#${generateGradientId(index)})`}
-                                    strokeWidth={4}
-                                    dot={{
-                                        r: 6,
-                                        fill: '#ffff',
-                                        stroke: '#2ACEF2',
-                                        strokeWidth: 2.5,
-                                        className: 'shadow-sm'
-                                    }}
-                                    activeDot={{
-                                        r: 9,
-                                        fill: '#2ACEF2',
-                                        stroke: 'white',
-                                        strokeWidth: 3,
-                                        className: 'shadow-md'
-                                    }}
+                                    strokeWidth={3}
+                                    fill={showGradientFill ? `url(#${generateAreaGradientId(index)})` : 'transparent'}
+                                    fillOpacity={1}
+                                    dot={false}
+                                    activeDot={false}
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     connectNulls={true}
                                 />
-                            </React.Fragment>
-                        ))}
-                    </LineChart>
+                            ))
+                        ) : (
+                            // Line Chart rendering
+                            safeLineKeys.map((key, index) => (
+                                <React.Fragment key={key}>
+                                    {showGradientFill && (
+                                        <Area
+                                            type="monotone"
+                                            dataKey={key}
+                                            stroke="transparent"
+                                            fill={`url(#${generateAreaGradientId(index)})`}
+                                            fillOpacity={1}
+                                        />
+                                    )}
+
+                                    <Line
+                                        type="monotone"
+                                        dataKey={key}
+                                        stroke={`url(#${generateGradientId(index)})`}
+                                        strokeWidth={4}
+                                        dot={{
+                                            r: 6,
+                                            fill: '#ffff',
+                                            stroke: '#2ACEF2',
+                                            strokeWidth: 2.5,
+                                            className: 'shadow-sm'
+                                        }}
+                                        activeDot={{
+                                            r: 9,
+                                            fill: '#2ACEF2',
+                                            stroke: 'white',
+                                            strokeWidth: 3,
+                                            className: 'shadow-md'
+                                        }}
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        connectNulls={true}
+                                    />
+                                </React.Fragment>
+                            ))
+                        )}
+                    </ChartComponent>
                 </ResponsiveContainer>
             </div>
         </div>

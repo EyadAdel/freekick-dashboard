@@ -13,7 +13,7 @@ class ProfileService {
      */
     async getProfile() {
         try {
-            const response = await api.get('/auth/users/me/');
+            const response = await api.get('/user/staff/my_staff/',);
             return {
                 success: true,
                 data: response.data.data
@@ -34,7 +34,7 @@ class ProfileService {
      */
     async updateProfile(profileData) {
         try {
-            const response = await api.patch('/auth/users/me/', profileData);
+            const response = await api.patch('/user/staff/my_staff/', profileData);
             return {
                 success: true,
                 data: response.data,
@@ -85,10 +85,10 @@ class ProfileService {
      */
     async getPreferences() {
         try {
-            const response = await api.get('/auth/users/preferences/');
+            const response = await api.get('/auth/users/my_notification_settings/');
             return {
                 success: true,
-                data: response.data
+                data: response.data.data
             };
         } catch (error) {
             console.error('❌ Error fetching preferences:', error);
@@ -106,7 +106,7 @@ class ProfileService {
      */
     async updatePreferences(preferences) {
         try {
-            const response = await api.patch('/auth/users/preferences/', preferences);
+            const response = await api.patch('/auth/users/my_notification_settings/', preferences);
             return {
                 success: true,
                 data: response.data,

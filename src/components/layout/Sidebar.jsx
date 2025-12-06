@@ -63,7 +63,6 @@ const Sidebar = ({ onToggle }) => {
                 { icon: Dribbble, label: t('menu_items.venue_sports'), path: '/venue-sports' }, // <--- Added Venue Sports
                 { icon: Grid, label: t('menu_items.surface_types'), path: '/surface-types' },
                 { icon: Layers, label: t('menu_items.addons'), path: '/add-ons' },
-                // { icon: Layers, label: t('menu_items.categories'), path: '/categories' },
                 { icon: Trophy, label: t('menu_items.tournaments'), path: '/tournaments' },
                 { icon: Ticket, label: t('menu_items.tickets'), path: '/tickets' },
             ]
@@ -87,6 +86,7 @@ const Sidebar = ({ onToggle }) => {
             title: t('sections.users_control'),
             items: [
                 { icon: Users, label: t('menu_items.players'), path: '/players' },
+                { icon: Users, label:'Teams', path: '/teams' },
                 { icon: UserCheck, label: t('menu_items.pitch_owners'), path: '/pitch-stuff' },
                 { icon: FileEdit, label: t('menu_items.venue_requests'), path: '/venue-requests' },
             ]

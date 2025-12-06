@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Camera, Settings, Bell, User, Phone } from 'lucide-react';
-import { toast, } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import profileService from '../../services/profileService';
-import MainInput from '../../components/MainInput'; // Adjust path as needed
-import { uploadService } from '../../services/upload/uploadService'; // Import upload service
+import MainInput from '../../components/MainInput';
+import { uploadService } from '../../services/upload/uploadService';
 import { generateUniqueFileName } from '../../utils/fileUtils';
-import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
-import {useDispatch} from "react-redux"; // Import the utility
+import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
+import { useDispatch } from "react-redux";
+
 const ProfileSettings = () => {
     const [activeTab, setActiveTab] = useState('profile');
     const [loading, setLoading] = useState(false);
@@ -30,17 +31,15 @@ const ProfileSettings = () => {
         getValues: getProfileValues
     } = useForm({
         defaultValues: {
-            name: '',
-            user_name: '',
-            image:'https://www.bigfootdigital.co.uk/wp-content/uploads/2020/07/image-optimisation-scaled.jpg',
+            contact_name: '',
+            pitch_name: '',
             email: '',
-            phone: '',
-            date_of_birth: '',
-            present_address: '',
-            permanent_address: '',
+            contact_phone: '',
+            state: '',
             city: '',
-            postal_code: '',
-            country: ''
+            pitch_address: '',
+            profile_image:null,
+            auto_accept_bookings: true
         }
     });
 
@@ -61,11 +60,17 @@ const ProfileSettings = () => {
 
     const newPassword = watchSecurity('new_password');
 
-    // Preferences data
+    // Updated preferences data structure
     const [preferences, setPreferences] = useState({
-        new_booking_activity: true,
-        pitch_owner_requests: false,
-        payment_activity: true
+        app_updates: true,
+        app_news: true,
+        app_booking: true,
+        app_promotions: true,
+        sms_booking: true,
+        sms_promotions: true,
+        whatsapp_booking: true,
+        whatsapp_promotions: true,
+        whatsapp_news: true
     });
 
     // Security data
@@ -84,36 +89,44 @@ const ProfileSettings = () => {
 
         if (result.success) {
             const profileData = {
-                name: result.data.name || '',
-                user_name: result.data.user_name || '',
+                contact_name: result.data.contact_name || '',
+                pitch_name: result.data.pitch_name || '',
                 email: result.data.email || '',
-                phone: result.data.phone || '', // Added phone field
-                date_of_birth: result.data.date_of_birth || '',
-                present_address: result.data.present_address || '',
-                permanent_address: result.data.permanent_address || '',
+                contact_phone: result.data.contact_phone || '',
+                state: result.data.state || '',
                 city: result.data.city || '',
-                postal_code: result.data.postal_code || '',
-                country: result.data.country || '',
-                image: result.data.image || 'https://www.bigfootdigital.co.uk/wp-content/uploads/2020/07/image-optimisation-scaled.jpg',
+                pitch_address: result.data.pitch_address || '',
+                profile_image: result.data.profile_image ,
+                auto_accept_bookings: result.data.auto_accept_bookings ?? true
             };
 
-            // Reset form with fetched data
             resetProfileForm(profileData);
+
+            // Set the profile image URL for display
+            if (result.data.profile_image) {
+                setProfileImageUrl(result.data.profile_image);
+            }
         } else {
             toast.error(result.error || 'Failed to load profile');
         }
-
         setLoading(false);
     };
 
     const fetchPreferences = async () => {
         const result = await profileService.getPreferences();
-
+        console.log(result,'prefrences')
         if (result.success) {
+            // Map the API response to our state structure
             setPreferences({
-                new_booking_activity: result.data.new_booking_activity ?? true,
-                pitch_owner_requests: result.data.pitch_owner_requests ?? false,
-                payment_activity: result.data.payment_activity ?? true
+                app_updates: result.data.app_updates ?? true,
+                app_news: result.data.app_news ?? true,
+                app_booking: result.data.app_booking ?? true,
+                app_promotions: result.data.app_promotions ?? true,
+                sms_booking: result.data.sms_booking ?? true,
+                sms_promotions: result.data.sms_promotions ?? true,
+                whatsapp_booking: result.data.whatsapp_booking ?? true,
+                whatsapp_promotions: result.data.whatsapp_promotions ?? true,
+                whatsapp_news: result.data.whatsapp_news ?? true
             });
         }
     };
@@ -156,7 +169,7 @@ const ProfileSettings = () => {
                 setProfileValue('image', uploadResult.url, { shouldDirty: true });
 
                 // Update the displayed image immediately
-                setProfileImageUrl(uploadResult.url+pub-f8c5de66602c4f6f91311c6fd40e1794.r2.dev);
+                setProfileImageUrl(uploadResult.url);
 
                 toast.success('Profile picture uploaded successfully!');
             } else {
@@ -170,7 +183,6 @@ const ProfileSettings = () => {
         }
     };
 
-    // Modified onProfileSubmit to include the image URL
     const onProfileSubmit = async (data) => {
         setLoading(true);
 
@@ -190,6 +202,7 @@ const ProfileSettings = () => {
 
         setLoading(false);
     };
+
     const handlePreferencesSubmit = async () => {
         setLoading(true);
         const result = await profileService.updatePreferences(preferences);
@@ -250,7 +263,49 @@ const ProfileSettings = () => {
         setLoading(false);
     };
 
+    // Helper function to format preference labels
+    const formatPreferenceLabel = (key) => {
+        const labelMap = {
+            app_updates: 'App Updates',
+            app_news: 'App News',
+            app_booking: 'App Booking Notifications',
+            app_promotions: 'App Promotions',
+            sms_booking: 'SMS Booking Notifications',
+            sms_promotions: 'SMS Promotions',
+            whatsapp_booking: 'WhatsApp Booking Notifications',
+            whatsapp_promotions: 'WhatsApp Promotions',
+            whatsapp_news: 'WhatsApp News'
+        };
+        return labelMap[key] || key.replace(/_/g, ' ');
+    };
 
+    // Group preferences by category
+    const preferenceGroups = [
+        {
+            title: 'App Notifications',
+            preferences: [
+                'app_updates',
+                'app_news',
+                'app_booking',
+                'app_promotions'
+            ]
+        },
+        {
+            title: 'SMS Notifications',
+            preferences: [
+                'sms_booking',
+                'sms_promotions'
+            ]
+        },
+        {
+            title: 'WhatsApp Notifications',
+            preferences: [
+                'whatsapp_booking',
+                'whatsapp_promotions',
+                'whatsapp_news'
+            ]
+        }
+    ];
     return (
         <div className="min-h-screen">
             <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-2">
@@ -334,24 +389,23 @@ const ProfileSettings = () => {
                                         />
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            {/* Your form fields remain the same */}
                                             <MainInput
-                                                label="Your Name"
-                                                name="name"
+                                                label=" Name"
+                                                name="contact_name"
                                                 type="text"
-                                                {...registerProfile('name', { required: 'Name is required' })}
-                                                error={profileErrors.name?.message}
-                                                placeholder="Charlene Reed"
+                                                {...registerProfile('contact_name', { required: 'Contact name is required' })}
+                                                error={profileErrors.contact_name?.message}
+                                                placeholder="Omar"
                                                 disabled={loading}
                                             />
 
                                             <MainInput
-                                                label="User Name"
-                                                name="user_name"
+                                                label="Pitch Name"
+                                                name="pitch_name"
                                                 type="text"
-                                                {...registerProfile('user_name')}
-                                                error={profileErrors.user_name?.message}
-                                                placeholder="charlene123"
+                                                {...registerProfile('pitch_name')}
+                                                error={profileErrors.pitch_name?.message}
+                                                placeholder="Enter pitch name"
                                                 disabled={loading}
                                             />
 
@@ -367,51 +421,33 @@ const ProfileSettings = () => {
                                                     }
                                                 })}
                                                 error={profileErrors.email?.message}
-                                                placeholder="charlenereed@gmail.com"
+                                                placeholder="om23440@gmail.com"
                                                 disabled={loading}
                                             />
 
                                             <MainInput
                                                 label="Phone Number"
-                                                name="phone"
+                                                name="contact_phone"
                                                 type="tel"
-                                                {...registerProfile('phone', {
+                                                {...registerProfile('contact_phone', {
+                                                    required: 'Phone number is required',
                                                     pattern: {
                                                         value: /^[\+]?[1-9][\d]?[\-\s\.]?\(?\d{3}\)?[\-\s\.]?\d{3}[\-\s\.]?\d{4,6}$/,
                                                         message: 'Invalid phone number'
                                                     }
                                                 })}
-                                                error={profileErrors.phone?.message}
-                                                placeholder="+1 (555) 123-4567"
+                                                error={profileErrors.contact_phone?.message}
+                                                placeholder="+201064160586"
                                                 disabled={loading}
                                             />
 
                                             <MainInput
-                                                label="Date of Birth"
-                                                name="date_of_birth"
-                                                type="date"
-                                                {...registerProfile('date_of_birth')}
-                                                error={profileErrors.date_of_birth?.message}
-                                                disabled={loading}
-                                            />
-
-                                            <MainInput
-                                                label="Present Address"
-                                                name="present_address"
+                                                label="State"
+                                                name="state"
                                                 type="text"
-                                                {...registerProfile('present_address')}
-                                                error={profileErrors.present_address?.message}
-                                                placeholder="San Jose, California, USA"
-                                                disabled={loading}
-                                            />
-
-                                            <MainInput
-                                                label="Permanent Address"
-                                                name="permanent_address"
-                                                type="text"
-                                                {...registerProfile('permanent_address')}
-                                                error={profileErrors.permanent_address?.message}
-                                                placeholder="San Jose, California, USA"
+                                                {...registerProfile('state')}
+                                                error={profileErrors.state?.message}
+                                                placeholder="Enter state"
                                                 disabled={loading}
                                             />
 
@@ -421,31 +457,35 @@ const ProfileSettings = () => {
                                                 type="text"
                                                 {...registerProfile('city')}
                                                 error={profileErrors.city?.message}
-                                                placeholder="San Jose"
+                                                placeholder="Dubai"
                                                 disabled={loading}
                                             />
 
-                                            <MainInput
-                                                label="Postal Code"
-                                                name="postal_code"
-                                                type="text"
-                                                {...registerProfile('postal_code')}
-                                                error={profileErrors.postal_code?.message}
-                                                placeholder="45962"
-                                                disabled={loading}
-                                            />
+                                            <div className="md:col-span-2">
+                                                <MainInput
+                                                    label="Pitch Address"
+                                                    name="pitch_address"
+                                                    type="text"
+                                                    {...registerProfile('pitch_address')}
+                                                    error={profileErrors.pitch_address?.message}
+                                                    placeholder="Enter pitch address"
+                                                    disabled={loading}
+                                                />
+                                            </div>
 
-                                            <MainInput
-                                                label="Country"
-                                                name="country"
-                                                type="text"
-                                                {...registerProfile('country')}
-                                                error={profileErrors.country?.message}
-                                                placeholder="USA"
-                                                disabled={loading}
-                                            />
+                                            <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id="auto_accept_bookings"
+                                                    {...registerProfile('auto_accept_bookings')}
+                                                    className="w-4 h-4 text-primary-500 rounded"
+                                                    disabled={loading}
+                                                />
+                                                <label htmlFor="auto_accept_bookings" className="text-gray-700">
+                                                    Auto Accept Bookings
+                                                </label>
+                                            </div>
                                         </div>
-
                                         <div className="mt-8 flex justify-end gap-4">
                                             <button
                                                 type="button"
@@ -468,48 +508,60 @@ const ProfileSettings = () => {
                             </div>
                         )}
 
-                        {/* Preferences Tab */}
                         {activeTab === 'preferences' && (
-                            <div>
-                                <div className="space-y-6">
-                                    <h3 className="lg:text-lg font-semibold text-gray-900 mb-4">Notification</h3>
+                            <div className="space-y-8">
+                                {/*<h3 className="lg:text-2xl text-lg font-semibold text-gray-900 mb-6">Notifications </h3>*/}
 
-                                    {[
-                                        { key: 'new_booking_activity', label: 'New Booking activity' },
-                                        { key: 'pitch_owner_requests', label: 'Pitch Owner requests' },
-                                        { key: 'payment_activity', label: 'Payment Activity' }
-                                    ].map((item) => (
-                                        <div key={item.key} className="flex items-center justify-between py-4 border-b border-gray-100">
-                                            <span className="text-gray-700 text-sm lg:text-base">{item.label}</span>
-                                            <button
-                                                onClick={() => setPreferences({ ...preferences, [item.key]: !preferences[item.key] })}
-                                                disabled={loading}
-                                                className={`relative lg:w-12 lg:h-6 w-10 h-5 rounded-full transition-colors disabled:opacity-50 ${
-                                                    preferences[item.key] ? 'bg-primary-500' : 'bg-gray-300'
-                                                }`}
-                                            >
-                                                <span
-                                                    className={`absolute top-0.5 left-0.5 w-4 h-4 lg:w-5 lg:h-5 bg-white rounded-full shadow-md transition-transform ${
-                                                        preferences[item.key] ? 'translate-x-5 lg:translate-x-6' : 'translate-x-0'
-                                                    }`}
-                                                />
-                                            </button>
+                                {preferenceGroups.map((group) => (
+                                    <div key={group.title} className="space-y-4 mb-8">
+                                        <h4 className="lg:text-lg font-medium text-gray-800 border-b pb-2">
+                                            {group.title}
+                                        </h4>
+
+                                        <div className="space-y-4">
+                                            {group.preferences.map((prefKey) => (
+                                                <div key={prefKey} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <div>
+                                                        <span className="text-gray-800 text-sm lg:font-medium">
+                                                            {formatPreferenceLabel(prefKey)}
+                                                        </span>
+                                                        {/*<p className="text-sm text-gray-500 mt-1">*/}
+                                                        {/*    {prefKey.includes('app') && 'Receive notifications in the app'}*/}
+                                                        {/*    {prefKey.includes('sms') && 'Receive notifications via SMS'}*/}
+                                                        {/*    {prefKey.includes('whatsapp') && 'Receive notifications via WhatsApp'}*/}
+                                                        {/*</p>*/}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setPreferences({ ...preferences, [prefKey]: !preferences[prefKey] })}
+                                                        disabled={loading}
+                                                        className={`relative lg:w-12 lg:h-6 w-10 h-5 rounded-full transition-colors disabled:opacity-50 ${
+                                                            preferences[prefKey] ? 'bg-primary-500' : 'bg-gray-300'
+                                                        }`}
+                                                        aria-label={`Toggle ${formatPreferenceLabel(prefKey)}`}
+                                                    >
+                                                        <span
+                                                            className={`absolute top-0.5 left-0.5 w-4 h-4 lg:w-5 lg:h-5 bg-white rounded-full shadow-md transition-transform ${
+                                                                preferences[prefKey] ? 'translate-x-5 lg:translate-x-6' : 'translate-x-0'
+                                                            }`}
+                                                        />
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ))}
 
                                 <div className="mt-8 flex justify-end">
                                     <button
                                         onClick={handlePreferencesSubmit}
                                         disabled={loading}
-                                        className="px-8 py-3 text-sm lg:text-base bg-primary-500 hover:bg-secondary-700 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                                        className="px-8 py-3 text-sm lg:text-base bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                                     >
                                         {loading ? 'Saving...' : 'Save Preferences'}
                                     </button>
                                 </div>
                             </div>
                         )}
-
                         {/* Security Tab */}
                         {activeTab === 'security' && (
                             <div className="space-y-8">

@@ -122,7 +122,7 @@ const Dashboard = () => {
             </div>
         }
         {/*<NotificationHandler />*/}
-            <section className={'lg:flex gap-4 '}>
+            <section className={'lg:flex gap-4 py-2 '}>
                 <aside className={'lg:w-3/4'}>
                     <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2  xl:grid-cols-4 gap-4 xl:gap-6 mb-8">
                         {stats.map((stat, index) => (
@@ -131,7 +131,7 @@ const Dashboard = () => {
                     </div>
                     <div className="lg:mb-8 mb-4  gap-5 grid lg:grid-cols-2 ">
                         <BookingChart
-                            title="Booking Trends"
+                            title="Total Bookings "
                             height={350}
                             showPeriodSelector={true}
                         />

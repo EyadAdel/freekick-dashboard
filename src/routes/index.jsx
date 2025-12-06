@@ -35,6 +35,10 @@ import Vouchers from "../pages/Vouchers/Vouchers.jsx";
 import BookingCalendar from "../pages/BookingCalendar/BookingCalendar.jsx";
 import ProfileSettings from "../pages/ProfileSettings/ProfileSettings.jsx";
 import TestNotificationSender from "../components/TestNotificationSender.jsx";
+import Teams from "../pages/Teams/Teams.jsx";
+import Players from "../pages/players/players.jsx";
+import AppsNotifications from "../pages/AppsNotifications/AppsNotifications.jsx";
+import RevenueOverview from "../pages/RevenueOverview/RevenueOverview.jsx";
 
 
 const router = createBrowserRouter([
@@ -110,7 +114,7 @@ const router = createBrowserRouter([
             },
             {
                 path: 'revenue',
-                // element: <Revenue />,
+                element: <RevenueOverview />,
             },
             {
                 path: 'reports',
@@ -118,7 +122,11 @@ const router = createBrowserRouter([
             },
             {
                 path: 'players',
-                // element: <Players />,
+                element: <Players />,
+            },
+            {
+                path: 'teams',
+                element: <Teams />,
             },
             {
                 path: 'pitch-stuff',
@@ -141,8 +149,8 @@ const router = createBrowserRouter([
                 element: <ProfileSettings />,
             },
             {
-                path: 'test',
-                element: <TestNotificationSender />,
+                path: 'notifications',
+                element: <AppsNotifications />,
             },
         ],
     },

@@ -55,6 +55,35 @@ const analyticsService = {
             throw error;
         }
     },
+    getBookingTransferAnalytics: async () => {
+        try {
+            const response = await api.get('/booking/analytics/monthly_transfers/', );
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+    // Get staff actions with filters, pagination, and sorting
+    getStaffActions: async (params = {}) => {
+        try {
+            const response = await api.get('/user/staff-actions/', {
+
+                    params
+
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+    getStaffActionsAnalytics: async ( ) => {
+        try {
+            const response = await api.get('/user/staff-actions/analytics/', );
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
 
     // Get top teams
     getTopTeams: async (params = {}) => {
