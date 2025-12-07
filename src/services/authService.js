@@ -33,6 +33,21 @@ export const authService = {
         }
     },
 
+    // NEW: Get Users List
+    getUsers: async (params) => {
+        try {
+            const response = await api.get('/auth/users/', { params });
+            return response.data;
+        } catch (error) {
+            const errorMessage = error.response?.data?.message
+                || error.response?.data?.details?.[0]?.message
+                || error.response?.data?.detail
+                || 'Failed to fetch users.';
+
+            throw new Error(errorMessage);
+        }
+    },
+
     logout: async () => {
         return Promise.resolve({ success: true });
     },

@@ -19,7 +19,7 @@ import Tickets from '../pages/Tickets/Tickets.jsx';
 // import Revenue from '../pages/Revenue/Revenue';
 // import Reports from '../pages/Reports/Reports';
 // import Players from '../pages/Players/Players';
-// import PitchOwners from '../pages/PitchOwners/PitchOwners';
+import PitchOwners from '../pages/PitchOwners/PitchOwners';
 // import Settings from '../pages/Settings/Settings';
 import Login from '../pages/Login.jsx';
 // import NotFound from '../pages/NotFound/NotFound';
@@ -39,6 +39,7 @@ import Teams from "../pages/Teams/Teams.jsx";
 import Players from "../pages/players/players.jsx";
 import AppsNotifications from "../pages/AppsNotifications/AppsNotifications.jsx";
 import RevenueOverview from "../pages/RevenueOverview/RevenueOverview.jsx";
+import PitchOwnerDetails from "../components/pitchOwners/PitchOwnerDetails.jsx";
 import Reports from "../pages/Reports/Reports.jsx";
 
 
@@ -130,8 +131,12 @@ const router = createBrowserRouter([
                 element: <Teams />,
             },
             {
-                path: 'pitch-stuff',
-                // element: <PitchOwners />,
+                path: 'pitch-owner',
+                element: <PitchOwners />,
+            },
+            {
+                path: 'pitch-owner/pitch-owner-details',
+                element: <PitchOwnerDetails />,
             },
             {
                 path: 'settings',
