@@ -318,69 +318,10 @@ function Players() {
 
     // Show list view
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Stats Cards */}
-            <div className="px-4 pb-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-8 mb-6">
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                <User className="text-green-600" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-gray-900">
-                                    {analyticsLoading ? '...' : activePlayers}
-                                </div>
-                                <div className="text-sm text-gray-500">Active Players</div>
-                            </div>
-                        </div>
-                    </div>
+        <div className=" bg-white rounded-xl p-5">
 
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <Calendar className="text-blue-600" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-gray-900">
-                                    {analyticsLoading ? '...' : totalBookings}
-                                </div>
-                                <div className="text-sm text-gray-500">Total Bookings</div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                <Trophy className="text-yellow-600" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-gray-900">
-                                    {analyticsLoading ? '...' : totalTournaments}
-                                </div>
-                                <div className="text-sm text-gray-500">Tournaments</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <Wallet className="text-purple-600" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-gray-900">
-                                    {analyticsLoading ? '...' : formatWallet(totalWalletBalance)}
-                                </div>
-                                <div className="text-sm text-gray-500">Total Wallet Balance</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <h1 className="px-8 text-primary-700 lg:-mb-14 lg:text-xl lg:mt-8 font-bold">
+            <h1 className="px-8 text-primary-700 lg:-mb-8 lg:text-xl xl:text-2xl lg:mt-8  font-bold">
                 Players List
             </h1>
 

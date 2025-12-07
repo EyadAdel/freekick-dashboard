@@ -156,6 +156,16 @@ const analyticsService = {
             throw error;
         }
     },
+    getPopularVenuesAnalytics: async (year = new Date().getFullYear()) => {
+        try {
+            const response = await api.get('/venue/venue/venues/analytics/', {
+                params: { year }
+            });
+            return response.data.data || [];
+        } catch (error) {
+            throw error;
+        }
+    },
     // Get all analytics including notifications
     getAllAnalytics: async () => {
         try {
@@ -177,6 +187,8 @@ const analyticsService = {
                 analyticsService.getTopTeams(),
                 analyticsService.getNotifications({ page_limit: 5 }),
                 analyticsService.getPopularVenues({ city: 'Abu Dhabi' }),
+                analyticsService.getPopularVenuesAnalytics() // Add this call
+
             ]);
 
             return {
@@ -188,6 +200,7 @@ const analyticsService = {
                 topTeams,
                 notifications: notificationsResponse,    // Explicit assignment
                 popularVenues: venuesResponse,          // Explicit assignment
+
             };
         } catch (error) {
             throw error;

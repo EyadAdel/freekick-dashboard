@@ -116,7 +116,9 @@ function Teams() {
             sortable: true,
             sortKey: 'name',
             render: (row) => (
-                <div className="flex items-center gap-3">
+                <div
+                    onClick={() => handleViewTeam(row)}
+                    className="flex cursor-pointer items-center gap-3">
                     {row.logo ? (
                         <img
                             src={row.logo}
@@ -292,11 +294,10 @@ function Teams() {
 
     // Show list view
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Stats Cards */}
+        <div className=" bg-white rounded-xl p-5">
 
 
-            <h1 className="px-8 text-primary-700 lg:-mb-14 lg:text-xl lg:mt-8 font-bold">
+            <h1 className="px-8 text-primary-700 lg:-mb-8 lg:text-xl xl:text-2xl lg:mt-8  font-bold">
                 Teams List
             </h1>
             <MainTable

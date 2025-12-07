@@ -30,195 +30,12 @@ import {
     Power
 } from "lucide-react";
 import MainTable from "../../components/MainTable.jsx";
+import TeamPointsTab from "./TeamPoints.jsx";
 
-// ============================================================================
-// PAGINATION COMPONENT
-// ============================================================================
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-    const getPageNumbers = () => {
-        const pages = [];
-        const showEllipsis = totalPages > 7;
-
-        if (!showEllipsis) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-            return pages;
-        }
-
-        if (currentPage <= 4) {
-            for (let i = 1; i <= 5; i++) pages.push(i);
-            pages.push('...');
-            pages.push(totalPages);
-        } else if (currentPage >= totalPages - 3) {
-            pages.push(1);
-            pages.push('...');
-            for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
-        } else {
-            pages.push(1);
-            pages.push('...');
-            for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
-            pages.push('...');
-            pages.push(totalPages);
-        }
-
-        return pages;
-    };
-
-    if (totalPages <= 1) return null;
-
-    return (
-        <div className="flex items-center justify-center gap-2 mt-6">
-            <button
-                onClick={() => onPageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="p-2 rounded-lg hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-                <ChevronLeft className="w-5 h-5 text-primary-600" />
-            </button>
-
-            {getPageNumbers().map((page, idx) => (
-                page === '...' ? (
-                    <span key={`ellipsis-${idx}`} className="px-2 text-gray-400">...</span>
-                ) : (
-                    <button
-                        key={page}
-                        onClick={() => onPageChange(page)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                            currentPage === page
-                                ? 'bg-primary-500 text-white'
-                                : 'hover:bg-primary-50 text-gray-700'
-                        }`}
-                    >
-                        {page}
-                    </button>
-                )
-            ))}
-
-            <button
-                onClick={() => onPageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="p-2 rounded-lg hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-                <ChevronRight className="w-5 h-5 text-primary-600" />
-            </button>
-        </div>
-    );
-};
 
 // ============================================================================
 // EDIT MODAL COMPONENT
 // ============================================================================
-const EditModal = ({ isOpen, onClose, onSave, team }) => {
-    const [isActive, setIsActive] = useState(team.is_active);
-    const [points, setPoints] = useState(team.num_of_points);
-    const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-        setIsActive(team.is_active);
-        setPoints(team.num_of_points);
-    }, [team]);
-
-    const handleSave = async () => {
-        setIsLoading(true);
-        try {
-            await onSave({ is_active: isActive, num_of_points: points });
-            onClose();
-        } catch (error) {
-            console.error('Failed to update team', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-                <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-gray-900">Edit Team Status</h3>
-                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-
-                <div className="p-6 space-y-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Team Status
-                        </label>
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setIsActive(true)}
-                                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                                    isActive
-                                        ? 'bg-primary-500 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                            >
-                                <CheckCircle className="w-5 h-5 inline-block mr-2" />
-                                Active
-                            </button>
-                            <button
-                                onClick={() => setIsActive(false)}
-                                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                                    !isActive
-                                        ? 'bg-gray-600 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                            >
-                                <XCircle className="w-5 h-5 inline-block mr-2" />
-                                Inactive
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Team Points
-                        </label>
-                        <input
-                            type="number"
-                            value={points}
-                            onChange={(e) => setPoints(parseInt(e.target.value) || 0)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            placeholder="Enter points"
-                        />
-                    </div>
-                </div>
-
-                <div className="p-6 bg-gray-50 flex gap-3 rounded-b-xl">
-                    <button
-                        onClick={onClose}
-                        className="flex-1 px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleSave}
-                        disabled={isLoading}
-                        className="flex-1 px-4 py-3 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                        {isLoading ? (
-                            <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                                Saving...
-                            </>
-                        ) : (
-                            <>
-                                <Save className="w-4 h-4" />
-                                Save Changes
-                            </>
-                        )}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // ============================================================================
 // TEAM DETAIL VIEW
@@ -226,11 +43,9 @@ const EditModal = ({ isOpen, onClose, onSave, team }) => {
 const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
     const teamId = initialTeam?.id;
     const { team: fetchedTeam, isLoading: isFetchingDetails } = useTeam(teamId);
-    const { joinedTeam, isLoading: isLoadingJoined } = useJoinedTeam(teamId);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
 
     // State for edit modal
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     // Team bookings hook
     const [bookingFilters, setBookingFilters] = useState({
@@ -609,24 +424,24 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
             <button
                 onClick={handleToggle}
                 disabled={disabled}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm transition-all ${
-                    isActive
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'
+                className={`flex w-full text-center justify-center items-center  gap-2 px-2 py-1.5 rounded-lg font-medium text-sm transition-all ${
+                    !isActive
+                        ? 'bg-primary-500 text-white  hover:text-primary-700 hover:bg-white border border-primary-500'
                         : 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-200'
                 } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-                {isActive ? (
+                {!isActive ? (
                     <>
+                        Active team
                         <CheckCircle className="w-4 h-4" />
-                        Active
                     </>
                 ) : (
                     <>
                         <XCircle className="w-4 h-4" />
-                        Inactive
+                        deactive team
                     </>
                 )}
-                <Power className={`w-3 h-3 transition-transform ${disabled ? '' : 'hover:scale-110'}`} />
+                {/*<Power className={`w-4 h-4 transition-transform ${disabled ? '' : 'hover:scale-110'}`} />*/}
             </button>
         );
     };
@@ -647,7 +462,7 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
     return (
         <div className="min-h-screen xl:px-5  bg-gray-50">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200">
+            <div className="bg-white ">
                 <div className=" mx-auto  py-4">
                     <button
                         onClick={onBack}
@@ -660,115 +475,148 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
             </div>
 
             {/* Main Content */}
-            <div className=" mx-auto py-8">
+            <div className=" mx-auto py-5">
                 <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                     {/* Left Sidebar - Team Info */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 sticky top-6">
-                            {/* Team Logo & Name */}
-                            <div className="text-center mb-6">
-                                {team.logo ? (
-                                    <img src={team.logo} alt={team.name} className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-primary-100 object-cover" />
-                                ) : (
-                                    <div className="w-20 h-20 rounded-full bg-primary-500 flex items-center justify-center mx-auto mb-4">
-                                        <Shield className="w-10 h-10 text-white" />
-                                    </div>
-                                )}
-                                <h2 className="text-xl font-bold text-gray-900 mb-2">{team.name}</h2>
-                                <p className="text-sm text-gray-500 mb-3">ID: TM{String(team.id).padStart(5, '0')}</p>
+                        <div className="bg-white rounded-xl shadow-md lg:sticky lg:top-6">
+                            {/* Header with Status Toggle */}
+                            {/*<div className="flex justify-between p-4 ">*/}
+                            {/*    Team Profile*/}
+                            {/*    <StatusToggle*/}
+                            {/*        isActive={team.is_active}*/}
+                            {/*        onToggle={handleStatusToggle}*/}
+                            {/*        disabled={isUpdating}*/}
+                            {/*    />*/}
+                            {/*</div>*/}
 
-                                {/* Updated Status and Points Section */}
-                                <div className="flex flex-col items-center gap-3 mb-4">
-                                    <div className="flex items-center gap-2">
-                                        <StatusToggle
-                                            isActive={team.is_active}
-                                            onToggle={handleStatusToggle}
-                                            disabled={isUpdating}
+                            {/* Team Logo & Name Section */}
+                            <div className="relative pb-16">
+                                {/* Background Banner */}
+                                <div className="h-32 bg-primary-100 rounded-t-xl"></div>
+
+                                {/* Logo - Positioned Half on Banner, Half Below */}
+                                <div className="absolute left-1/2 -translate-x-1/2 top-16">
+                                    {team.logo ? (
+                                        <img
+                                            src={team.logo}
+                                            alt={team.name}
+                                            className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
                                         />
-                                        <span className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 ${
-                                            team.private ? 'bg-secondary-600 text-white' : 'bg-primary-100 text-primary-700'
-                                        }`}>
-                                            {team.private ? <Lock className="w-3 h-3" /> : <Globe className="w-3 h-3" />}
-                                            {team.private ? 'Private' : 'Public'}
-                                        </span>
-                                    </div>
+                                    ) : (
+                                        <div className="w-32 h-32 rounded-full bg-primary-500 border-4 border-white shadow-lg flex items-center justify-center">
+                                            <Shield className="w-14 h-14 text-white" />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
 
-                                    {/* Points Editor */}
-
+                            {/* Team Info */}
+                            <div className="px-6 pb-6 text-center border-b border-gray-200">
+                                <h2 className="text-xl font-bold text-gray-900 mb-2">{team.name}</h2>
+                                <div className={'flex gap-2 justify-center'}>
+                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
+                                    team.private
+                                        ? 'bg-primary-50 text-primary-700'
+                                        : 'bg-green-50 text-green-700'
+                                }`}>
+                {team.private ? <Lock className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+                                    {team.private ? 'Private' : 'Public'}
+            </span>
+                                <button
+                                    className={`flex w-fit text-center justify-center items-center  gap-2 px-2 py-1.5 rounded-lg font-medium text-sm transition-all ${
+                                        team.is_active
+                                            ? 'bg-primary-50 text-primary-700 px-3 rounded-xl'
+                                            : 'bg-red-100 text-red-700 px-2 rounded-xl'
+                                    } `}
+                                >
+                                {team.is_active ? 'Active' : 'Inactive'}
+                                </button>
                                 </div>
 
                             </div>
 
                             {/* Stats */}
-                            <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
+                            <div className="p-6 space-y-4 border-b border-gray-200">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <Users className="w-4 h-4 text-gray-400" />
-                                        <span className="text-sm text-gray-600">Members</span>
+                                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                                            <Users className="w-4 h-4 text-blue-600" />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-600">Members</span>
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-900">{team.number_of_members || 0}</span>
+                                    <span className="text-base font-bold text-gray-900">{team.number_of_members || 0}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <Activity className="w-4 h-4 text-gray-400" />
-                                        <span className="text-sm text-gray-600">Matches</span>
+                                        <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+                                            <Activity className="w-4 h-4 text-purple-600" />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-600">Matches</span>
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-900">{team.num_of_matches || 0}</span>
+                                    <span className="text-base font-bold text-gray-900">{team.num_of_matches || 0}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <Trophy className="w-4 h-4 text-gray-400" />
-                                        <span className="text-sm text-gray-600">Tournaments</span>
+                                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                                            <Trophy className="w-4 h-4 text-amber-600" />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-600">Tournaments</span>
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-900">{team.num_of_tournaments || 0}</span>
+                                    <span className="text-base font-bold text-gray-900">{team.num_of_tournaments || 0}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                    <Star className="w-4 h-4 text-gray-400" />
-                                    <span className="text-sm text-gray-600">Points</span>
-
+                                        <div className="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center">
+                                            <Star className="w-4 h-4 text-yellow-600" />
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-600">Points</span>
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-900">{team.num_of_points || 0}</span>
-
-                                    {/*<PointsEditor*/}
-                                    {/*    points={team.num_of_points || 0}*/}
-                                    {/*    onSave={handlePointsUpdate}*/}
-                                    {/*    disabled={isUpdating}*/}
-                                    {/*/>*/}
+                                    <span className="text-base font-bold text-gray-900">{team.num_of_points || 0}</span>
                                 </div>
                             </div>
 
                             {/* Team Leader */}
                             {team.team_leader && (
-                                <div className="mb-6">
-                                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Team Leader</h4>
-                                    <div className="flex items-center gap-3 mb-3">
+                                <div className="lg:px-6 lg:py-4 p-2 ">
+                                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                                        Team Leader
+                                    </h4>
+                                    <div className="flex items-center gap-3 mb-4">
                                         {team.team_leader.image ? (
-                                            <img src={team.team_leader.image} alt={team.team_leader.name} className="w-10 h-10 rounded-full object-cover" />
+                                            <img
+                                                src={team.team_leader.image}
+                                                alt={team.team_leader.name}
+                                                className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
+                                            />
                                         ) : (
-                                            <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-semibold">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-lg">
                                                 {team.team_leader.name?.charAt(0)?.toUpperCase()}
                                             </div>
                                         )}
-                                        <div className="flex-1">
-                                            <p className="text-sm font-semibold text-gray-900">{team.team_leader.name}</p>
-                                            <p className="text-xs text-gray-500 truncate">{team.team_leader.email}</p>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-semibold text-gray-900 truncate">
+                                                {team.team_leader.name}
+                                            </p>
+                                            <p className="text-xs text-gray-500 truncate">
+                                                {team.team_leader.email}
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        {team.team_leader?.email && (
-                                            <button
-                                                onClick={handleCreatorEmail}
-                                                className="w-full px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
-                                            >
-                                                <Mail className="w-4 h-4" />
-                                                Email
-                                            </button>
-                                        )}
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {/*{team.team_leader?.email && (*/}
+                                        {/*    <button*/}
+                                        {/*        onClick={handleCreatorEmail}*/}
+                                        {/*        className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all"*/}
+                                        {/*    >*/}
+                                        {/*        <Mail className="w-4 h-4" />*/}
+                                        {/*        Email*/}
+                                        {/*    </button>*/}
+                                        {/*)}*/}
                                         {team.team_leader?.phone && (
                                             <button
                                                 onClick={handleCreatorWhatsApp}
-                                                className="w-full px-3 py-2 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                                                className=" w-full px-3 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all"
                                             >
                                                 <Phone className="w-4 h-4" />
                                                 WhatsApp
@@ -777,15 +625,22 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                                     </div>
                                 </div>
                             )}
-
+                            <div className="flex w-full justify-between p-4 ">
+                                <StatusToggle
+                                    isActive={team.is_active}
+                                    onToggle={handleStatusToggle}
+                                    disabled={isUpdating}
+                                />
+                            </div>
                             {/* Created Date */}
-                            <div className="text-xs text-gray-500">
-                                <Calendar className="w-3 h-3 inline-block mr-1" />
-                                Created {formatDate(team.created_at)}
+                            <div className="p-6">
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    <span>Created {formatDate(team.created_at)}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-
                     {/* Right Content Area */}
                     <div className="lg:col-span-2 2xl:col-span-3 space-y-6">
                         {/* Bookings Section */}
@@ -802,15 +657,21 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                                     <select
                                         value={bookingStatus}
                                         onChange={(e) => setBookingStatus(e.target.value)}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        className="px-4 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-white"
+                                        style={{
+                                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                                            backgroundPosition: 'right 0.5rem center',
+                                            backgroundRepeat: 'no-repeat',
+                                            backgroundSize: '1.5em 1.5em',
+                                            paddingRight: '2.5rem'
+                                        }}
                                     >
                                         <option value="all">All Status</option>
                                         <option value="confirmed">Confirmed</option>
                                         <option value="pending">Pending</option>
                                         <option value="cancelled">Cancelled</option>
                                     </select>
-                                </div>
-                            </div>
+                                </div>                            </div>
                             <div className="p-6">
                                 {bookingsLoading ? (
                                     <div className="flex justify-center py-12">
@@ -891,38 +752,42 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                                 </div>
                             )}
                         </div>
-                        {/* Members Section */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+                        <div className="bg-white mt-5 rounded-lg shadow-sm border border-gray-100">
                             <div className="lg:px-6 p-4 flex justify-between items-center border-b border-gray-100">
-                                <h3 className="text-lg font-bold text-gray-900">Team Members</h3>
-                                <p className="text-sm text-gray-500 mt-1">Total : {team.members?.length || 0} players</p>
+                                <h3 className=" font-bold text-gray-900">Team Members</h3>
+                                <p className="text-xs text-gray-500 mt-1">Total : {team.members?.length || 0} players</p>
                             </div>
                             <div className="p-6">
                                 {team.members && team.members.length > 0 ? (
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 gap-4">
                                         {team.members.map((member, idx) => (
-                                            <div key={idx} className="flex flex-col items-center text-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 border border-gray-100">
+                                            <div key={idx} className="relative flex  flex-col flex-wrap items-center text-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 border border-gray-100">
+                                                {/* Index number in top-left corner */}
+                                                <span className="absolute -top-4 -right-2 bg-primary-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                            {idx + 1}
+                        </span>
+
                                                 {member.user_info?.image ? (
                                                     <img
                                                         src={member.user_info.image}
                                                         alt={member.user_info.name}
-                                                        className="w-16 h-16 rounded-full object-cover border-3 border-white shadow-md mb-3"
+                                                        className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md mb-1"
                                                     />
                                                 ) : (
-                                                    <div className="w-16 h-16 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-xl border-3 border-white shadow-md mb-3">
+                                                    <div className="w-14 h-14 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold  border-2 border-white shadow-md mb-1">
                                                         {(member.user_info?.name || member.name)?.charAt(0)?.toUpperCase() || 'P'}
                                                     </div>
                                                 )}
                                                 <p className="text-sm font-bold text-gray-900 truncate w-full">
                                                     {member.user_info?.name || member.name}
                                                 </p>
-                                                <div className="mt-2">
-                                                    {member.is_admin ? (
-                                                        <span className="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-700">Admin</span>
-                                                    ) : (
-                                                        <span className="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">Player</span>
-                                                    )}
-                                                </div>
+                                                {/*<div className="mt-1">*/}
+                                                {/*    {member.is_admin ? (*/}
+                                                {/*        <span className="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-700">Admin</span>*/}
+                                                {/*    ) : (*/}
+                                                {/*        <span className="inline-block px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">Player</span>*/}
+                                                {/*    )}*/}
+                                                {/*</div>*/}
                                             </div>
                                         ))}
                                     </div>
@@ -935,17 +800,13 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                                 )}
                             </div>
                         </div>
+
+                        <TeamPointsTab teamId={teamId}/>
                     </div>
                 </div>
             </div>
 
-            {/* Edit Modal */}
-            <EditModal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                onSave={handleUpdateTeam}
-                team={team}
-            />
+
         </div>
     );
 };

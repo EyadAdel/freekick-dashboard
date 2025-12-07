@@ -39,18 +39,6 @@ export const teamService = {
         }
     },
 
-    // Get joined team (tournaments the team has joined)
-    // getJoinedTeam: async (id) => {
-    //     try {
-    //         const response = await api.get(`/tournaments/joined-teams/${id}/`);
-    //         return response.data;
-    //     } catch (error) {
-    //         // Log but don't throw - return empty array instead
-    //         console.warn('Tournament API failed for team', id, error.message);
-    //         return []; // Return empty array instead of throwing
-    //     }
-    // },
-
     // Get team analytics/statistics
     getTeamAnalytics: async () => {
         try {
@@ -82,9 +70,9 @@ export const teamService = {
         }
     },
 
-    updateTeam: async (id,data) => {
+    updateTeam: async (id, data) => {
         try {
-            const response = await api.patch(`/teams/teams/${id}/`,data);
+            const response = await api.patch(`/teams/teams/${id}/`, data);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -113,7 +101,7 @@ export const teamService = {
             if (filters.page) params.append('page', filters.page);
             if (filters.page_limit) params.append('page_limit', filters.page_limit);
 
-            const response = await api.get(`/booking/book/team/${teamId}`,{params});
+            const response = await api.get(`/booking/book/team/${teamId}`, { params });
 
             // Handle different response structures
             if (response.data && response.data.results) {
@@ -146,7 +134,7 @@ export const teamService = {
             if (params.page) queryParams.append('page', params.page);
             if (params.page_limit) queryParams.append('page_limit', params.page_limit);
 
-            const response = await api.get(`/tournaments/tournaments/team/${teamId}/`,);
+            const response = await api.get(`/tournaments/tournaments/team/${teamId}/`);
 
             // Handle different response structures
             if (response.data && response.data.results) {
@@ -161,6 +149,56 @@ export const teamService = {
             console.error('❌ Service - Error fetching team tournaments:', error);
             // Return empty structure instead of throwing
             return { results: [], count: 0 };
+        }
+    },
+
+    // Get team points
+    getTeamPoints: async (filters = {}) => {
+        try {
+            const params = new URLSearchParams();
+
+            // Add pagination
+            if (filters.page) params.append('page', filters.page);
+            if (filters.page_limit) params.append('page_limit', filters.page_limit);
+
+            // Add search
+            if (filters.search) params.append('search', filters.search);
+
+            // Add ordering
+            if (filters.ordering) params.append('ordering', filters.ordering);
+
+            // Add filters
+            if (filters.team_id) params.append('team_id', filters.team_id);
+            if (filters.points) params.append('points', filters.points);
+            if (filters.points__gte) params.append('points__gte', filters.points__gte);
+            if (filters.points__lte) params.append('points__lte', filters.points__lte);
+            if (filters.reason) params.append('reason', filters.reason);
+            if (filters.reason__icontains) params.append('reason__icontains', filters.reason__icontains);
+
+            const response = await api.get(`/teams/team-points/?${params.toString()}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Create team points
+    createTeamPoints: async (data) => {
+        try {
+            const response = await api.post('/teams/team-points/', data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    },
+
+    // Update team points
+    updateTeamPoints: async (id, data) => {
+        try {
+            const response = await api.patch(`/teams/team-points/${id}/`, data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
         }
     }
 };
