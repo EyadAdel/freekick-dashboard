@@ -4,6 +4,7 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import { fallbackImages } from '../../utils/fallbackImages';
+import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
 
 const CustomDots = ({ dots }) => (
     <div className="custom-dots-container">
@@ -95,7 +96,7 @@ const BannerSlider = ({
                 {activeBanners.map((banner) => {
                     const imageSrc = errorImages[banner.id]
                         ? 'https://m.media-amazon.com/images/I/51GHmbR4g3L._AC_SL1050_.jpg'
-                        : banner.image || 'https://m.media-amazon.com/images/I/51GHmbR4g3L._AC_SL1050_.jpg';
+                        : IMAGE_BASE_URL + banner.image;
 
                     return (
                         <div key={banner.id} className="px-2">

@@ -5,16 +5,14 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import profileService from '../../services/profileService';
 import MainInput from '../../components/MainInput';
-import { uploadService } from '../../services/upload/uploadService';
-import { generateUniqueFileName } from '../../utils/fileUtils';
+
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 import { useDispatch } from "react-redux";
 
 const ProfileSettings = () => {
     const [activeTab, setActiveTab] = useState('profile');
     const [loading, setLoading] = useState(false);
-    const [profileImageUrl, setProfileImageUrl] = useState('https://www.bigfootdigital.co.uk/wp-content/uploads/2020/07/image-optimisation-scaled.jpg');
-    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [profileImageUrl, setProfileImageUrl] = useState(null);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -38,10 +36,10 @@ const ProfileSettings = () => {
             state: '',
             city: '',
             pitch_address: '',
-            profile_image:null,
             auto_accept_bookings: true
         }
     });
+    const [selectedImageFile, setSelectedImageFile] = useState(null);
 
     // React Hook Form setup for security
     const {
@@ -96,11 +94,11 @@ const ProfileSettings = () => {
                 state: result.data.state || '',
                 city: result.data.city || '',
                 pitch_address: result.data.pitch_address || '',
-                profile_image: result.data.profile_image ,
                 auto_accept_bookings: result.data.auto_accept_bookings ?? true
             };
 
             resetProfileForm(profileData);
+            setSelectedImageFile(null); // Reset selected file
 
             // Set the profile image URL for display
             if (result.data.profile_image) {
@@ -111,7 +109,6 @@ const ProfileSettings = () => {
         }
         setLoading(false);
     };
-
     const fetchPreferences = async () => {
         const result = await profileService.getPreferences();
         console.log(result,'prefrences')
@@ -139,60 +136,83 @@ const ProfileSettings = () => {
         }
     };
 
-    const handleProfilePictureUpload = async (event) => {
+    const handleImageUpload = (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            toast.error('Please select a valid image file (JPEG, PNG, etc.)');
+            toast.error('Please select a valid image file');
             return;
         }
 
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
+        // Validate file size (e.g., max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
             toast.error('Image size must be less than 5MB');
             return;
         }
 
-        setIsUploadingImage(true);
-
-        try {
-            // Generate unique filename
-            const uniqueFileName = generateUniqueFileName(file.name);
-
-            // Upload the image using the upload service
-            const uploadResult = await uploadService.processFullUpload(file, uniqueFileName);
-
-            if (uploadResult && uploadResult.url) {
-                // Update the form field with the new image URL
-                setProfileValue('image', uploadResult.url, { shouldDirty: true });
-
-                // Update the displayed image immediately
-                setProfileImageUrl(uploadResult.url);
-
-                toast.success('Profile picture uploaded successfully!');
-            } else {
-                toast.error('Failed to get image URL from upload');
-            }
-        } catch (error) {
-            console.error('Upload error:', error);
-            toast.error(error.response?.data?.message || 'Failed to upload profile picture');
-        } finally {
-            setIsUploadingImage(false);
+        // Clean up previous preview URL if it exists
+        if (profileImageUrl && profileImageUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(profileImageUrl);
         }
-    };
 
+        // Create preview URL for display
+        const previewUrl = URL.createObjectURL(file);
+        setProfileImageUrl(previewUrl);
+
+        // Store the file in state
+        setSelectedImageFile(file);
+
+        // Mark form as dirty
+        setProfileValue('profile_image_dirty', true, { shouldDirty: true });
+
+        toast.success('Image selected successfully');
+    };
+// Clean up on component unmount
+    useEffect(() => {
+        return () => {
+            if (profileImageUrl) {
+                URL.revokeObjectURL(profileImageUrl);
+            }
+        };
+    }, [profileImageUrl]);
     const onProfileSubmit = async (data) => {
         setLoading(true);
 
         try {
-            // The image URL is already included in the form data
-            const result = await profileService.updateProfile(data);
+            // Create FormData to send file as binary
+            const formData = new FormData();
+
+            // Append all form fields EXCEPT profile_image
+            formData.append('contact_name', data.contact_name);
+            formData.append('pitch_name', data.pitch_name);
+            formData.append('email', data.email);
+            formData.append('contact_phone', data.contact_phone);
+            formData.append('state', data.state);
+            formData.append('city', data.city);
+            formData.append('pitch_address', data.pitch_address);
+            formData.append('auto_accept_bookings', data.auto_accept_bookings);
+
+            // Append the file ONLY if a new one was selected
+            if (selectedImageFile instanceof File) {
+                formData.append('profile_image', selectedImageFile);
+            }
+
+            const result = await profileService.updateProfile(formData);
 
             if (result.success) {
                 toast.success(result.message || 'Profile updated successfully');
-                resetProfileForm(data); // Reset form state
+
+                // Reset the selected file state
+                setSelectedImageFile(null);
+
+                // Update the form with new data (without profile_image)
+                resetProfileForm({
+                    ...data,
+                    profile_image_dirty: undefined
+                });
             } else {
                 toast.error(result.error || 'Failed to update profile');
             }
@@ -202,7 +222,6 @@ const ProfileSettings = () => {
 
         setLoading(false);
     };
-
     const handlePreferencesSubmit = async () => {
         setLoading(true);
         const result = await profileService.updatePreferences(preferences);
@@ -357,27 +376,20 @@ const ProfileSettings = () => {
                                         <label
                                             htmlFor="profile-picture-upload"
                                             className={`absolute bottom-0 right-0 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 cursor-pointer ${
-                                                isUploadingImage ? 'bg-gray-400' : 'bg-primary-500 hover:bg-primary-600'
+                                                loading ? 'bg-gray-400' : 'bg-primary-500 hover:bg-primary-600'
                                             }`}
                                         >
-                                            {isUploadingImage ? (
-                                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                            ) : (
-                                                <Camera className="w-5 h-5 text-white" />
-                                            )}
+                                            <Camera className="w-5 h-5 text-white" />
                                             <input
                                                 id="profile-picture-upload"
                                                 type="file"
                                                 accept="image/*"
-                                                onChange={handleProfilePictureUpload}
                                                 className="hidden"
-                                                disabled={isUploadingImage || loading}
+                                                disabled={loading}
+                                                onChange={handleImageUpload}
                                             />
                                         </label>
                                     </div>
-                                    {isUploadingImage && (
-                                        <p className="text-sm text-gray-500">Uploading image...</p>
-                                    )}
                                 </div>
 
                                 <aside className={'w-full'}>

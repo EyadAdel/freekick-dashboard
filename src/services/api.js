@@ -1,4 +1,3 @@
-
 // src/services/api.js
 import axios from 'axios';
 
@@ -6,9 +5,7 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api.freekickapp.com',
     timeout: 30000, // Increased timeout
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    // ⚠️ DON'T set Content-Type here - it breaks FormData uploads
 });
 
 // Request interceptor
@@ -17,6 +14,15 @@ api.interceptors.request.use(
         const token = localStorage.getItem('authToken');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+        }
+
+        // Handle Content-Type dynamically
+        if (config.data instanceof FormData) {
+            // Let the browser set Content-Type for FormData (with boundary)
+            delete config.headers['Content-Type'];
+        } else if (!config.headers['Content-Type']) {
+            // Default to JSON for other requests
+            config.headers['Content-Type'] = 'application/json';
         }
 
         return config;
@@ -46,10 +52,27 @@ api.interceptors.response.use(
                     console.error('🔐 Unauthorized - clearing tokens');
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('refreshToken');
+                    // Optionally redirect to login
+                    // window.location.href = '/login';
                     break;
-                // ... other cases
+                case 403:
+                    console.error('🚫 Forbidden - insufficient permissions');
+                    break;
+                case 404:
+                    console.error('🔍 Not Found');
+                    break;
+                case 500:
+                    console.error('💥 Server Error');
+                    break;
+                default:
+                    console.error(`❌ Error ${status}`);
             }
+        } else if (error.request) {
+            console.error('📡 No response from server');
+        } else {
+            console.error('⚙️ Request setup error');
         }
+
         return Promise.reject(error);
     }
 );
