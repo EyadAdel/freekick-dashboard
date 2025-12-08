@@ -409,8 +409,8 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
         const handleToggle = async () => {
             const confirmed = await showConfirm({
                 title: `Are you sure?`,
-                text: `Do you want to ${isActive ? 'deactivate' : 'activate'} this team?`,
-                confirmButtonText: `Yes, ${isActive ? 'Deactivate' : 'Activate'}`,
+                text: `Do you want to ${isActive ? 'suspend' : 'activate'} this team?`,
+                confirmButtonText: `Yes, ${isActive ? 'suspend' : 'Activate'}`,
                 cancelButtonText: "Cancel",
                 icon: isActive ? 'warning' : 'info'
             });
@@ -432,13 +432,13 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
             >
                 {!isActive ? (
                     <>
-                        Active team
+                        Activate team
                         <CheckCircle className="w-4 h-4" />
                     </>
                 ) : (
                     <>
                         <XCircle className="w-4 h-4" />
-                        deactive team
+                        Suspend team
                     </>
                 )}
                 {/*<Power className={`w-4 h-4 transition-transform ${disabled ? '' : 'hover:scale-110'}`} />*/}
@@ -478,162 +478,155 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
             <div className=" mx-auto py-5">
                 <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                     {/* Left Sidebar - Team Info */}
+
                     <div className="lg:col-span-1">
-                        <div className="bg-white rounded-xl shadow-md lg:sticky lg:top-6">
-                            {/* Header with Status Toggle */}
-                            {/*<div className="flex justify-between p-4 ">*/}
-                            {/*    Team Profile*/}
-                            {/*    <StatusToggle*/}
-                            {/*        isActive={team.is_active}*/}
-                            {/*        onToggle={handleStatusToggle}*/}
-                            {/*        disabled={isUpdating}*/}
-                            {/*    />*/}
-                            {/*</div>*/}
-
-                            {/* Team Logo & Name Section */}
-                            <div className="relative pb-16">
-                                {/* Background Banner */}
-                                <div className="h-32 bg-primary-100 rounded-t-xl"></div>
-
-                                {/* Logo - Positioned Half on Banner, Half Below */}
-                                <div className="absolute left-1/2 -translate-x-1/2 top-16">
-                                    {team.logo ? (
-                                        <img
-                                            src={team.logo}
-                                            alt={team.name}
-                                            className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
-                                        />
-                                    ) : (
-                                        <div className="w-32 h-32 rounded-full bg-primary-500 border-4 border-white shadow-lg flex items-center justify-center">
-                                            <Shield className="w-14 h-14 text-white" />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Team Info */}
-                            <div className="px-6 pb-6 text-center border-b border-gray-200">
-                                <h2 className="text-xl font-bold text-gray-900 mb-2">{team.name}</h2>
-                                <div className={'flex gap-2 justify-center'}>
-                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                                    team.private
-                                        ? 'bg-primary-50 text-primary-700'
-                                        : 'bg-green-50 text-green-700'
-                                }`}>
-                {team.private ? <Lock className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
-                                    {team.private ? 'Private' : 'Public'}
-            </span>
-                                <button
-                                    className={`flex w-fit text-center justify-center items-center  gap-2 px-2 py-1.5 rounded-lg font-medium text-sm transition-all ${
-                                        team.is_active
-                                            ? 'bg-primary-50 text-primary-700 px-3 rounded-xl'
-                                            : 'bg-red-100 text-red-700 px-2 rounded-xl'
-                                    } `}
-                                >
-                                {team.is_active ? 'Active' : 'Inactive'}
-                                </button>
-                                </div>
-
-                            </div>
-
-                            {/* Stats */}
-                            <div className="p-6 space-y-4 border-b border-gray-200">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                            <Users className="w-4 h-4 text-blue-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-600">Members</span>
-                                    </div>
-                                    <span className="text-base font-bold text-gray-900">{team.number_of_members || 0}</span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
-                                            <Activity className="w-4 h-4 text-purple-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-600">Matches</span>
-                                    </div>
-                                    <span className="text-base font-bold text-gray-900">{team.num_of_matches || 0}</span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                                            <Trophy className="w-4 h-4 text-amber-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-600">Tournaments</span>
-                                    </div>
-                                    <span className="text-base font-bold text-gray-900">{team.num_of_tournaments || 0}</span>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center">
-                                            <Star className="w-4 h-4 text-yellow-600" />
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-600">Points</span>
-                                    </div>
-                                    <span className="text-base font-bold text-gray-900">{team.num_of_points || 0}</span>
-                                </div>
-                            </div>
-
-                            {/* Team Leader */}
-                            {team.team_leader && (
-                                <div className="lg:px-6 lg:py-4 p-2 ">
-                                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                                        Team Leader
-                                    </h4>
-                                    <div className="flex items-center gap-3 mb-4">
-                                        {team.team_leader.image ? (
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-6">
+                            {/* Profile Header with gradient background */}
+                            <div className="bg-primary-50 p-6 text-white">
+                                <div className="flex flex-col items-center">
+                                    <div className="w-28 h-28 rounded-full backdrop-blur-sm flex items-center justify-center mb-3 border-2">
+                                        {team.logo ? (
                                             <img
-                                                src={team.team_leader.image}
-                                                alt={team.team_leader.name}
-                                                className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
+                                                className="w-full h-full rounded-full object-cover"
+                                                src={team.logo}
+                                                alt={team.name}
                                             />
                                         ) : (
-                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-lg">
-                                                {team.team_leader.name?.charAt(0)?.toUpperCase()}
-                                            </div>
+                                            <Shield className="w-12 h-12 text-gray-400" />
                                         )}
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold text-gray-900 truncate">
-                                                {team.team_leader.name}
-                                            </p>
-                                            <p className="text-xs text-gray-500 truncate">
-                                                {team.team_leader.email}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-1 gap-2">
-                                        {/*{team.team_leader?.email && (*/}
-                                        {/*    <button*/}
-                                        {/*        onClick={handleCreatorEmail}*/}
-                                        {/*        className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all"*/}
-                                        {/*    >*/}
-                                        {/*        <Mail className="w-4 h-4" />*/}
-                                        {/*        Email*/}
-                                        {/*    </button>*/}
-                                        {/*)}*/}
+                                    <h2 className="text-xl text-gray-900 font-bold">{team.name}</h2>
+                                    <p className="text-gray-400 text-sm">Team ID: {String(team.id).padStart(5, '0')}</p>
+                                    <div className="mt-3 flex gap-2">
+                    <span className={`px-4 py-1.5 rounded-full text-xs font-semibold ${
+                        team.is_active ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'
+                    }`}>
+                        {team.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                                        <span className={`px-4 py-1.5 rounded-full text-xs font-semibold ${
+                                            team.private
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-purple-500 text-white'
+                                        }`}>
+                        {team.private ? 'Private' : 'Public'}
+                    </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Stats Section */}
+                            <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 border-b">
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-primary-600">{team.num_of_points || 0}</div>
+                                    <div className="text-xs text-gray-500 mt-1">Points</div>
+                                </div>
+                                <div className="text-center border-x border-gray-200">
+                                    <div className="text-2xl font-bold text-primary-600">{team.number_of_members || 0}</div>
+                                    <div className="text-xs text-gray-500 mt-1">Members</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-primary-600">{team.num_of_tournaments || 0}</div>
+                                    <div className="text-xs text-gray-500 mt-1">Tournaments</div>
+                                </div>
+                            </div>
+
+                            {/* Additional Stats */}
+                            <div className="p-6 space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                                        <Activity className="w-5 h-5 text-purple-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-gray-500">Matches Played</p>
+                                        <p className="text-sm font-medium">{team.num_of_matches || 0}</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+                                        <Trophy className="w-5 h-5 text-amber-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-gray-500">Total Tournaments</p>
+                                        <p className="text-sm font-medium">{team.num_of_tournaments || 0}</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                                        <Users className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs text-gray-500">Team Members</p>
+                                        <p className="text-sm font-medium">{team.number_of_members || 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Team Leader Section */}
+                            <div className="p-6 border-t border-gray-100">
+                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                                    Team Leader
+                                </h4>
+                                {team.team_leader && (
+                                    <>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            {team.team_leader.image ? (
+                                                <img
+                                                    src={team.team_leader.image}
+                                                    alt={team.team_leader.name}
+                                                    className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
+                                                />
+                                            ) : (
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-lg">
+                                                    {team.team_leader.name?.charAt(0)?.toUpperCase()}
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                                    {team.team_leader.name}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {team.team_leader.phone}
+                                                </p>
+                                            </div>
+                                        </div>
                                         {team.team_leader?.phone && (
                                             <button
                                                 onClick={handleCreatorWhatsApp}
-                                                className=" w-full px-3 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all"
+                                                className="w-full px-4 py-2.5 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-600 hover:text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 <Phone className="w-4 h-4" />
                                                 WhatsApp
                                             </button>
                                         )}
-                                    </div>
-                                </div>
-                            )}
-                            <div className="flex w-full justify-between p-4 ">
-                                <StatusToggle
-                                    isActive={team.is_active}
-                                    onToggle={handleStatusToggle}
-                                    disabled={isUpdating}
-                                />
+                                    </>
+                                )}
                             </div>
+
+                            {/* Actions Section */}
+                            <div className="p-6 pt-0 space-y-2">
+                                {team.is_active ? (
+                                    <button
+                                        disabled={isUpdating}
+                                        onClick={() => handleStatusToggle(false)}
+                                        className="w-full px-4 py-2.5 bg-red-100 text-red-500 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isUpdating ? 'Updating...' : 'Suspend Team'}
+                                    </button>
+                                ) : (
+                                    <button
+                                        disabled={isUpdating}
+                                        onClick={() => handleStatusToggle(true)}
+                                        className="w-full px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isUpdating ? 'Updating...' : 'Activate Team'}
+                                    </button>
+                                )}
+                            </div>
+
                             {/* Created Date */}
-                            <div className="p-6">
+                            <div className="p-6 pt-0">
                                 <div className="flex items-center gap-2 text-xs text-gray-500">
                                     <Calendar className="w-3.5 h-3.5" />
                                     <span>Created {formatDate(team.created_at)}</span>
