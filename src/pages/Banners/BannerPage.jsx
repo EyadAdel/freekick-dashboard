@@ -9,7 +9,7 @@ import ArrowIcon from "../../components/common/ArrowIcon.jsx";
 import {showConfirm} from "../../components/showConfirm.jsx";
 import {useDispatch} from "react-redux";
 import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
-
+import  {IMAGE_BASE_URL} from '../../utils/ImageBaseURL.js'
 const BannerPage = () => {
     const {
         banners,
@@ -129,8 +129,7 @@ const BannerPage = () => {
             accessor: 'image',
             align: 'left',
             render: (row) => (
-                <img
-                    src={row.image}
+                <img src={IMAGE_BASE_URL + row.image}
                     alt={`Banner ${row.id}`}
                     className="w-14 h-8 object-cover rounded"
                     onError={(e) => {
