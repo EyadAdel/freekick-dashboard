@@ -736,7 +736,7 @@ const PlayerDetailView = ({ player: initialPlayer, onBack, onRefresh }) => {
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-white shadow-sm">
-                <div className="mx-auto px-4 sm:px-6 py-4">
+                <div className="mx-auto px-3  py-4">
                     <button
                         onClick={onBack}
                         className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors"
@@ -748,7 +748,7 @@ const PlayerDetailView = ({ player: initialPlayer, onBack, onRefresh }) => {
             </div>
 
             {/* Main Content */}
-            <div className="mx-auto px-2 sm:px-6 py-6">
+            <div className="mx-auto  py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                     {/* Left Column - Player Profile Card */}
                     <div className="col-span-1">
