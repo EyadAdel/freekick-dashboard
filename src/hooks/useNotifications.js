@@ -2,113 +2,203 @@
 import { useState, useEffect, useCallback } from 'react';
 import { onMessage } from 'firebase/messaging';
 import { messaging } from '../firebase/firebase';
+import useAnalytics from './useAnalytics'; // Import your existing hook
 
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Load notifications from localStorage on mount
+    // Get the API functions from your existing hook
+    const {
+        notifications: apiNotifications,
+        getNotifications,
+        markAsRead: apiMarkAsRead
+    } = useAnalytics();
+
+    // Fetch notifications from API on mount
     useEffect(() => {
-        const loadNotifications = () => {
+        const fetchNotifications = async () => {
             try {
-                const stored = localStorage.getItem('notifications');
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    setNotifications(parsed);
-                    const unread = parsed.filter(n => !n.read).length;
-                    setUnreadCount(unread);
-                }
+                setIsLoading(true);
+                await getNotifications({ page_limit: 50, ordering: '-created_at' });
             } catch (error) {
-                console.error('Error loading notifications:', error);
+                console.error('Error fetching notifications:', error);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        loadNotifications();
+        fetchNotifications();
     }, []);
 
-    // Save notifications to localStorage whenever they change
+    // Update local state when API notifications change
     useEffect(() => {
-        if (!isLoading) {
-            localStorage.setItem('notifications', JSON.stringify(notifications));
-            const unread = notifications.filter(n => !n.read).length;
+        if (apiNotifications && apiNotifications.length > 0) {
+            // Transform API notifications to match local format
+            const transformedNotifications = apiNotifications.map(notification => ({
+                id: notification.id,
+                title: notification.title || 'New Notification',
+                body: notification.message || '',
+                image: notification.image || null,
+                data: notification,
+                timestamp: notification.created_at,
+                read: notification.is_active, // Assuming is_active means it's been read
+                model_id: notification.model_id
+            }));
+
+            setNotifications(transformedNotifications);
+
+            // Calculate unread count
+            const unread = transformedNotifications.filter(n => !n.read).length;
             setUnreadCount(unread);
         }
-    }, [notifications, isLoading]);
+    }, [apiNotifications]);
 
-    // Listen for new Firebase notifications - FIXED
+    // Listen for new Firebase notifications
     useEffect(() => {
         if (!messaging) {
             console.warn('Firebase messaging not initialized');
             return;
         }
 
-        // Set up the listener - onMessage is the correct way
-        const unsubscribe = onMessage(messaging, (payload) => {
-            console.log('Message received in foreground:', payload);
+        const unsubscribe = onMessage(messaging, async (payload) => {
+            console.log('New Firebase notification received:', payload);
 
-            // Add new notification
-            const newNotification = {
-                id: Date.now(),
-                title: payload.notification?.title || 'New Notification',
-                body: payload.notification?.body || '',
-                image: payload.notification?.image || null,
-                data: payload.data || {},
-                timestamp: new Date().toISOString(),
-                read: false
-            };
+            // Refresh notifications from API when new notification arrives
+            try {
+                await getNotifications({ page_limit: 50, ordering: '-created_at' });
 
-            setNotifications(prev => [newNotification, ...prev]);
+                // Show browser notification
+                if (Notification.permission === 'granted') {
+                    new Notification(
+                        payload.notification?.title || 'New Notification',
+                        {
+                            body: payload.notification?.body || '',
+                            icon: payload.notification?.image || '/logo192.png',
+                            badge: '/logo192.png',
+                            tag: `notification-${Date.now()}`,
+                            requireInteraction: false
+                        }
+                    );
+                }
 
-            // Show browser notification
-            if (Notification.permission === 'granted') {
-                new Notification(newNotification.title, {
-                    body: newNotification.body,
-                    icon: newNotification.image || '/logo192.png',
-                    badge: '/logo192.png',
-                    tag: `notification-${newNotification.id}`,
-                    requireInteraction: false
-                });
+                // Play notification sound (optional)
+                playNotificationSound();
+            } catch (error) {
+                console.error('Error refreshing notifications:', error);
             }
         });
 
-        // Cleanup listener on unmount
         return () => {
             if (unsubscribe) {
                 unsubscribe();
             }
         };
-    }, []);
+    }, [getNotifications]);
 
-    // Mark notification as read
-    const markAsRead = useCallback((id) => {
-        setNotifications(prev =>
-            prev.map(notification =>
-                notification.id === id
-                    ? { ...notification, read: true }
-                    : notification
-            )
-        );
-    }, []);
+    // Play notification sound
+    const playNotificationSound = () => {
+        try {
+            const audio = new Audio('/notification-sound.mp3'); // Add sound file to public folder
+            audio.volume = 0.5;
+            audio.play().catch(err => console.log('Audio play failed:', err));
+        } catch (error) {
+            console.log('Could not play notification sound:', error);
+        }
+    };
+
+    // Mark notification as read (calls API)
+    const markAsRead = useCallback(async (id) => {
+        try {
+            // Optimistically update UI
+            setNotifications(prev =>
+                prev.map(notification =>
+                    notification.id === id
+                        ? { ...notification, read: true }
+                        : notification
+                )
+            );
+
+            // Call API to mark as read
+            await apiMarkAsRead(id);
+
+            // Refresh notifications to sync with backend
+            await getNotifications({ page_limit: 50, ordering: '-created_at' });
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+            // Revert optimistic update on error
+            await getNotifications({ page_limit: 50, ordering: '-created_at' });
+        }
+    }, [apiMarkAsRead, getNotifications]);
 
     // Mark all as read
-    const markAllAsRead = useCallback(() => {
-        setNotifications(prev =>
-            prev.map(notification => ({ ...notification, read: true }))
-        );
-    }, []);
+    const markAllAsRead = useCallback(async () => {
+        try {
+            // Optimistically update UI
+            setNotifications(prev =>
+                prev.map(notification => ({ ...notification, read: true }))
+            );
 
-    // Delete notification
-    const deleteNotification = useCallback((id) => {
-        setNotifications(prev => prev.filter(n => n.id !== id));
-    }, []);
+            // Call API for each unread notification
+            const unreadNotifications = notifications.filter(n => !n.read);
+            await Promise.all(
+                unreadNotifications.map(notification => apiMarkAsRead(notification.id))
+            );
+
+            // Refresh notifications
+            await getNotifications({ page_limit: 50, ordering: '-created_at' });
+        } catch (error) {
+            console.error('Error marking all as read:', error);
+            await getNotifications({ page_limit: 50, ordering: '-created_at' });
+        }
+    }, [notifications, apiMarkAsRead, getNotifications]);
+
+    // Delete notification (if your API supports it)
+    const deleteNotification = useCallback(async (id) => {
+        try {
+            // Optimistically update UI
+            setNotifications(prev => prev.filter(n => n.id !== id));
+
+            // TODO: Call your delete API endpoint here
+            // await deleteNotificationAPI(id);
+
+            // Refresh notifications
+            await getNotifications({ page_limit: 50, ordering: '-created_at' });
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+            await getNotifications({ page_limit: 50, ordering: '-created_at' });
+        }
+    }, [getNotifications]);
 
     // Clear all notifications
-    const clearAll = useCallback(() => {
-        setNotifications([]);
-    }, []);
+    const clearAll = useCallback(async () => {
+        try {
+            // Optimistically update UI
+            setNotifications([]);
+
+            // TODO: Call your clear all API endpoint here
+            // await clearAllNotificationsAPI();
+
+            // Refresh notifications
+            await getNotifications({ page_limit: 50, ordering: '-created_at' });
+        } catch (error) {
+            console.error('Error clearing notifications:', error);
+            await getNotifications({ page_limit: 50, ordering: '-created_at' });
+        }
+    }, [getNotifications]);
+
+    // Refresh notifications manually
+    const refreshNotifications = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            await getNotifications({ page_limit: 50, ordering: '-created_at' });
+        } catch (error) {
+            console.error('Error refreshing notifications:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [getNotifications]);
 
     return {
         notifications,
@@ -117,6 +207,7 @@ export const useNotifications = () => {
         markAsRead,
         markAllAsRead,
         deleteNotification,
-        clearAll
+        clearAll,
+        refreshNotifications
     };
 };

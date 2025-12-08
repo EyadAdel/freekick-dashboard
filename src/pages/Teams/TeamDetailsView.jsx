@@ -31,188 +31,14 @@ import {
 } from "lucide-react";
 import MainTable from "../../components/MainTable.jsx";
 import TeamPointsTab from "./TeamPoints.jsx";
+import BookingCard from "../../components/players/BookingCard.jsx";
+import {playerService} from "../../services/players/playerService.js";
 
 
-const BookingCard = ({ booking }) => {
-    const getStatusBadge = (status, acceptedByPitchOwner) => {
-        // Determine the status to display
-        let displayStatus = status?.toLowerCase();
-
-        // If pitch owner has accepted, show as confirmed
-        if (acceptedByPitchOwner && displayStatus !== 'cancelled') {
-            displayStatus = 'confirmed';
-        }
-
-        const statusConfig = {
-            confirmed: {
-                color: 'bg-green-100 text-green-700',
-                icon: CheckCircle,
-                label: 'Confirmed'
-            },
-            pending: {
-                color: 'bg-yellow-100 text-yellow-700',
-                icon: Clock,
-                label: 'Pending'
-            },
-            cancelled: {
-                color: 'bg-red-100 text-red-700',
-                icon: XCircle,
-                label: 'Cancelled'
-            },
-            matched: {
-                color: 'bg-blue-100 text-blue-700',
-                icon: Users,
-                label: 'Matched'
-            }
-        };
-
-        const config = statusConfig[displayStatus] || statusConfig.pending;
-        const Icon = config.icon;
-
-        return (
-            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
-                <Icon className="w-3 h-3" />
-                {config.label}
-            </span>
-        );
-    };
-
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
-
-    const formatTime = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-    };
-
-    // Calculate match status based on players
-    const getMatchStatus = () => {
-        if (!booking.max_players) return 'Waiting for players...';
-
-        const currentPlayers = booking.team_player || 0;
-        const neededPlayers = booking.max_players - currentPlayers;
-
-        if (neededPlayers <= 0) {
-            return 'Match Full';
-        }
-
-        return `${neededPlayers} more players needed`;
-    };
-
-    return (
-        <div className="bg-white rounded-xl border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200 overflow-hidden">
-            {/* Booking ID Header */}
-            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-700">
-                    Booking ID: <span className="text-gray-900">{booking.id}</span>
-                </span>
-                {getStatusBadge(booking.status, booking.accepted_by_pitch_owner)}
-            </div>
-
-            {/* Main Content */}
-            <div className="p-4">
-                <div className="flex justify-between items-center w-full gap-3 mb-4">
-                    {/* Match Status Section */}
-                    <div className="flex gap-2 items-center">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center border-2 border-blue-100">
-                            <Users className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="text-base font-semibold text-gray-900">
-                                {booking.play_kind?.translations?.name || 'Match'}
-                            </h3>
-                            {/*<p className="text-sm text-gray-600">*/}
-                            {/*    {getMatchStatus()}*/}
-                            {/*</p>*/}
-                            {booking.max_players && (
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                    {booking.team_player || 0} / {booking.max_players} players
-                                </p>
-                            )}
-                            <div className="flex text-xs items-center gap-4">
-                                {booking.is_private ? (
-                                    <span className="flex items-center gap-1 text-gray-400">
-                                    <Lock className="w-3 h-3" />
-                                    Private
-                                </span>
-                                ) : (
-                                    <span className="flex items-center gap-1 text-gray-400">
-                                    <Globe className="w-3 h-3" />
-                                    Public
-                                </span>
-                                )}
-
-                                {booking.code && (
-                                    <span className="flex items-center gap-1 text-gray-400">
-                                    <Key className="w-3 h-3" />
-                                    Code: {booking.code}
-                                </span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Location Info */}
-                    <div className="flex items-start gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                            <MapPin className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">
-                                {booking.pitch?.translations?.name || 'Venue'}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                                {booking.pitch?.venue?.city || 'Location'}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Time Info */}
-                    <div className="flex items-start gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                            <Clock className="w-4 h-4 text-orange-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">
-                                {formatDate(booking.start_time)}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                                {formatTime(booking.start_time)}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Price */}
-                    <div className="text-right">
-                        <p className="text-xl font-bold text-emerald-600">
-                            {booking.total_price} AED
-                        </p>
-                        {booking.split_payment && (
-                            <p className="text-xs text-gray-500 mt-0.5">
-                                Split payment
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    );
-};
 
 const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
     const teamId = initialTeam?.id;
-    const { team: fetchedTeam, isLoading: isFetchingDetails } = useTeam(teamId);
+    const { team: fetchedTeam,refetch, isLoading: isFetchingDetails } = useTeam(teamId);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
 
     // State for edit modal
@@ -611,7 +437,6 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                         Suspend team
                     </>
                 )}
-                {/*<Power className={`w-4 h-4 transition-transform ${disabled ? '' : 'hover:scale-110'}`} />*/}
             </button>
         );
     };
@@ -619,12 +444,22 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
     const handleStatusToggle = async (newStatus) => {
         setIsUpdating(true);
         try {
-            await teamService.updateTeam(team.id, { is_active: newStatus });
-            toast.success(`Team ${newStatus ? 'activated' : 'deactivated'} successfully`);
-            refetchTeam();
-            if (onRefresh) onRefresh();
+            const confirmed = await showConfirm({
+                title: 'Are you sure?',
+                text: `Do you want to ${team.is_active ? 'Suspend' : 'activate'} this Team?`,
+                confirmButtonText: `Yes, ${team.is_active ? 'Suspend' : 'Activate'}`,
+                cancelButtonText: 'Cancel',
+                icon: team.is_active ? 'warning' : 'info'
+            });
+
+            if (confirmed) {
+                await teamService.updateTeam(team.id,  newStatus);
+                toast.success(`Team ${newStatus ? 'activated' : 'deactivated'} successfully`);
+                await refetch();
+                if (onRefresh) onRefresh();
+            }
         } catch (error) {
-            toast.error('Failed to update team status: ' + error.message);
+            // toast.error('Failed to update team status: ' + error.message);
         } finally {
             setIsUpdating(false);
         }

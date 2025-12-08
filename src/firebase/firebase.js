@@ -1,5 +1,4 @@
-// firebase/firebase.js - Fixed Firebase Configuration
-
+// firebase/firebase.js
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
@@ -27,6 +26,41 @@ try {
     console.error("Error initializing messaging:", error);
 }
 
+// Send FCM token to backend
+const sendTokenToBackend = async (token) => {
+    try {
+        const authToken = localStorage.getItem('authToken');
+
+        if (!authToken) {
+            console.error('No auth token found');
+            return false;
+        }
+
+        const response = await fetch('YOUR_API_BASE_URL/api/save-fcm-token/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                fcm_token: token,
+                device_type: 'web'
+            })
+        });
+
+        if (response.ok) {
+            console.log('FCM token sent to backend successfully');
+            return true;
+        } else {
+            console.error('Failed to send FCM token to backend');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error sending FCM token to backend:', error);
+        return false;
+    }
+};
+
 // Request notification permission and get FCM token
 export const requestNotificationPermission = async () => {
     try {
@@ -38,6 +72,14 @@ export const requestNotificationPermission = async () => {
         // Check if service worker is registered
         if (!('serviceWorker' in navigator)) {
             console.error('Service Worker not supported');
+            return null;
+        }
+
+        // Check current permission status
+        const currentPermission = Notification.permission;
+
+        if (currentPermission === "denied") {
+            console.log("Notification permission was previously denied.");
             return null;
         }
 
@@ -58,15 +100,8 @@ export const requestNotificationPermission = async () => {
                 // Save token to localStorage for reference
                 localStorage.setItem('fcm_token', token);
 
-                // TODO: Send this token to your backend server
-                // Example:
-                /*
-                await fetch('/api/save-fcm-token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token })
-                });
-                */
+                // Send token to backend
+                await sendTokenToBackend(token);
 
                 return token;
             } else {
@@ -83,6 +118,31 @@ export const requestNotificationPermission = async () => {
     } catch (error) {
         console.error("Error getting notification permission:", error);
         return null;
+    }
+};
+
+// Delete FCM token from backend (call on logout)
+export const deleteFCMToken = async () => {
+    try {
+        const token = localStorage.getItem('fcm_token');
+        const authToken = localStorage.getItem('authToken');
+
+        if (!token || !authToken) {
+            return;
+        }
+
+        await fetch('YOUR_API_BASE_URL/api/delete-fcm-token/', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ fcm_token: token })
+        });
+
+        localStorage.removeItem('fcm_token');
+    } catch (error) {
+        console.error('Error deleting FCM token:', error);
     }
 };
 

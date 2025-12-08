@@ -166,7 +166,7 @@ getPlayerPoints: async (filters = {}) => {
         if (filters.reason) params.append('reason', filters.reason);
         if (filters.reason__icontains) params.append('reason__icontains', filters.reason__icontains);
 
-        const response = await api.get(`/user/points/?${params.toString()}`);
+        const response = await api.get(`/user/points/`,{params});
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
