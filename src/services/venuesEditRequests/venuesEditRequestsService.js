@@ -42,7 +42,7 @@ export const venuesEditRequestsService = {
      */
     getRequestById: async (id) => {
         try {
-            const response = await api.get(`${BASE_URL}${id}/`);
+            const response = await api.get(`${BASE_URL}${id}/?all_languages`);
             return response.data;
         } catch (error) {
             console.error(error);

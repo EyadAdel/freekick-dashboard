@@ -33,6 +33,7 @@ const MEDIA_BASE_URL = 'https://api.active.sa/media/';
 // --- LEAFLET ICON FIX ---
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import {useSelector} from "react-redux";
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -80,6 +81,8 @@ const LocationMarker = ({ setFormData }) => {
 const DEFAULT_CENTER = [24.4539, 54.3773];
 
 const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
+    const { user } = useSelector((state) => state.auth);
+    const RoleIsAdmin = user.role.is_admin
 
     // --- STATE ---
     const [mapTheme, setMapTheme] = useState('standard');
@@ -386,10 +389,13 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
 
         setIsSubmitting(true);
         try {
+            const data = initialData?.data || initialData;
+
             const payload = {
                 ...formData,
                 // Ensure surface type is null if empty string
                 surface_type: formData.surface_type || null,
+                venue:data.id,
                 price_per_hour: parseFloat(formData.price_per_hour),
                 advance_booking_days: parseInt(formData.advance_booking_days) || 0,
                 minimum_cancellation_hours: parseInt(formData.minimum_cancellation_hours) || 0,
@@ -401,9 +407,14 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                 }))
             };
 
-            const data = initialData?.data || initialData;
             if (data && data.id) {
-                await venuesService.updateVenue(data.id, payload);
+                if(RoleIsAdmin){
+                    await venuesService.updateVenue(data.id, payload);
+
+                }else{
+                    await venuesService.venueUpdateRequest(data.id, payload);
+
+                }
             } else {
                 await venuesService.createVenue(payload);
             }

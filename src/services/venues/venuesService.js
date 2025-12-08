@@ -2,6 +2,7 @@ import api from '../api.js';
 import { toast } from 'react-toastify';
 
 const BASE_URL = '/venue/venue/venues/';
+const REQUEST_BASE_URL = '/venue/request-update/venue-update-requests/';
 
 export const venuesService = {
     /**
@@ -63,6 +64,17 @@ export const venuesService = {
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to update venue";
+            toast.error(message);
+            throw error;
+        }
+    },
+    venueUpdateRequest: async (id, data) => {
+        try {
+            const response = await api.post(`${REQUEST_BASE_URL}`, data);
+            toast.success("Venue Edit Request Created successfully");
+            return response.data;
+        } catch (error) {
+            const message = error.response?.data?.message || "Failed to create venue edit request ";
             toast.error(message);
             throw error;
         }
