@@ -4,13 +4,14 @@ import { useBookings, useBookingAnalytics } from '../../hooks/useBookings';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import {
     Clock, MapPin, DollarSign,
-    CheckCircle, XCircle, ArrowLeft
+    CheckCircle, XCircle, ArrowLeft,
+    Users, Calendar, CreditCard
 } from 'lucide-react';
 
 // Import your reusable components
 import MainTable from '../../components/MainTable';
 import BookingDetailView from "./BookingDetailView.jsx";
-import ArrowIcon from "../../components/common/ArrowIcon.jsx";
+import StatCard from '../../components/Charts/StatCards.jsx'; // Import your reusable StatCard
 
 // Main Bookings Component with Server-Side Sorting
 const Bookings = () => {
@@ -31,16 +32,10 @@ const Bookings = () => {
         page: currentPage,
         page_limit: itemsPerPage,
         ...filters,
-        // Add ordering parameter for server-side sorting
         ...(sortConfig.key && {
             ordering: getOrderingParam(sortConfig.key, sortConfig.order)
         })
     };
-
-    // Debug: Log API filters whenever they change
-    useEffect(() => {
-        console.log('🔍 API Filters:', apiFilters);
-    }, [JSON.stringify(apiFilters)]);
 
     // Fetch bookings with filters
     const { bookings, isLoading, error, refetch } = useBookings(apiFilters);
@@ -80,9 +75,9 @@ const Bookings = () => {
 
         return (
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-                <Icon size={14} />
+        <Icon size={14} />
                 {status}
-            </span>
+      </span>
         );
     };
 
@@ -121,7 +116,6 @@ const Bookings = () => {
         setCurrentPage(1); // Reset to first page when sorting
     };
 
-
     const columns = [
         {
             header: 'Pitch Name',
@@ -142,8 +136,8 @@ const Bookings = () => {
                         </div>
                     )}
                     <span className="font-medium text-gray-900">
-                        {row.pitch?.translations?.name || 'Pitch ' + row.id}
-                    </span>
+            {row.pitch?.translations?.name || 'Pitch ' + row.id}
+          </span>
                 </div>
             )
         },
@@ -154,8 +148,8 @@ const Bookings = () => {
             sortKey: 'id',
             render: (row) => (
                 <span className="font-mono text-xs text-gray-500">
-                    VN{String(row.id).padStart(5, '0')}
-                </span>
+          VN{String(row.id).padStart(5, '0')}
+        </span>
             )
         },
         {
@@ -191,8 +185,8 @@ const Bookings = () => {
             sortKey: 'amount',
             render: (row) => (
                 <span className="font-medium text-gray-900">
-                    {parseFloat(row.total_price || 0).toFixed(0)} AED
-                </span>
+          {parseFloat(row.total_price || 0).toFixed(0)} AED
+        </span>
             )
         },
         {
@@ -214,8 +208,6 @@ const Bookings = () => {
                     aria-label="View booking details"
                 >
                     <ArrowLeft size={18} className="rotate-180" />
-                    {/*<ArrowIcon direction="right" size="md" />*/}
-
                 </button>
             )
         }
@@ -246,28 +238,48 @@ const Bookings = () => {
     // Server returns paginated data directly - no client-side sorting needed
     const bookingData = bookings?.results || [];
 
-    // Debug: Log data received
-    useEffect(() => {
-        if (bookings) {
-            console.log('📊 Bookings received:', {
-                count: bookings.count,
-                results: bookings.results?.length,
-                page: currentPage
-            });
-        }
-    }, [bookings]);
-
-// Get analytics data with fallback values
+    // Get analytics data with fallback values
     const cardAnalytics = analytics?.cardAnalytics || {};
 
-// Map API fields to what we need
-    const confirmedCount = cardAnalytics.complete_booking || 0;  // "Confirmed" = completed bookings
-    const cancelledCount = cardAnalytics.cancelled_bookings || 0;
-    const paidCount = cardAnalytics.complete_booking || 0;       // Paid = completed bookings
+    // Calculate stats from booking analytics
+    const confirmedCount = bookings?.confirmed || 0;
+    const cancelledCount = bookings?.cancelled || 0;
 
-// Calculate pending from total bookings (since API doesn't provide it)
     const totalItems = bookings?.count || 0;
-    const pendingCount = totalItems - confirmedCount - cancelledCount;
+    const pendingCount = bookings?.pending || 0
+
+    // Prepare stats for StatCard components
+    const bookingStats = [
+        {
+            title: 'Confirmed',
+            value: confirmedCount,
+            percentChange: 12, // You can get this from analytics API or calculate dynamically
+            icon: CheckCircle,
+            iconColor: 'text-green-600'
+        },
+        {
+            title: 'Pending',
+            value: pendingCount,
+            percentChange: -5,
+            icon: Clock,
+            iconColor: 'text-yellow-600'
+        },
+        {
+            title: 'Cancelled',
+            value: cancelledCount,
+            percentChange: 8,
+            icon: XCircle,
+            iconColor: 'text-red-600'
+        },
+        {
+            title: 'Total ',
+            value: totalItems,
+            percentChange: 18,
+            icon: DollarSign,
+            iconColor: 'text-blue-600'
+        }
+    ];
+
 
     if (error) {
         return (
@@ -301,69 +313,42 @@ const Bookings = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Stats Cards */}
-            <div className="px-4 pb-0">
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 xl: gap-8 mb-6">
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                <CheckCircle className="text-green-600" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-gray-900">
-                                    {analyticsLoading ? '...' : confirmedCount}
-                                </div>
-                                <div className="text-sm text-gray-500">Confirmed</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                <Clock className="text-yellow-600" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-gray-900">
-                                    {analyticsLoading ? '...' : pendingCount}
-                                </div>
-                                <div className="text-sm text-gray-500">Pending</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                                <XCircle className="text-red-600" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-gray-900">
-                                    {analyticsLoading ? '...' : cancelledCount}
-                                </div>
-                                <div className="text-sm text-gray-500">Cancelled</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <DollarSign className="text-blue-600" size={24} />
-                            </div>
-                            <div>
-                                <div className="text-3xl font-bold text-gray-900">
-                                    {analyticsLoading ? '...' : paidCount}
-                                </div>
-                                <div className="text-sm text-gray-500">Paid</div>
-                            </div>
-                        </div>
-                    </div>
+            <div className="lg:px-4 px-2 pb-0">
+                {/* Main Stats Row */}
+                <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2 xl:gap-8 mb-6">
+                    {bookingStats.map((stat, index) => (
+                        <StatCard
+                            key={index}
+                            title={stat.title}
+                            value={stat.value}
+                            percentChange={stat.percentChange}
+                            icon={stat.icon}
+                            iconColor={stat.iconColor}
+                        />
+                    ))}
                 </div>
+
+                {/* Optional: Additional Stats Row (uncomment if needed) */}
+                {/*
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 mb-6">
+          {additionalStats.map((stat, index) => (
+            <StatCard
+              key={index}
+              title={stat.title}
+              value={stat.value}
+              percentChange={stat.percentChange}
+              icon={stat.icon}
+              iconColor={stat.iconColor}
+            />
+          ))}
+        </div>
+        */}
             </div>
 
+            <h1 className="px-8 text-primary-700 lg:-mb-14 lg:text-xl lg:mt-8 font-bold">
+                Bookings list
+            </h1>
 
-<h1 className={'px-8 text-primary-700 lg:-mb-14 lg:text-xl lg:mt-8 font-bold'}>Bookings list</h1>
             <MainTable
                 columns={columns}
                 data={bookingData}
@@ -376,6 +361,7 @@ const Bookings = () => {
                 onPageChange={handlePageChange}
                 sortConfig={sortConfig}
                 onSort={handleSort}
+                isLoading={isLoading}
             />
         </div>
     );

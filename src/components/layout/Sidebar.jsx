@@ -22,7 +22,7 @@ import {
     ChevronRight,
     Grid,
     TrendingUp,
-    Dribbble // <--- Imported Dribbble icon for Venue Sports
+    Dribbble
 } from 'lucide-react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -36,6 +36,7 @@ const Sidebar = ({ onToggle }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [tooltip, setTooltip] = useState({ show: false, label: '', top: 0 });
     const { direction } = useSelector((state) => state.language);
+    const { user } = useSelector((state) => state.auth); // Get user from Redux
 
     const handleToggle = () => {
         const newState = !isCollapsed;
@@ -45,59 +46,231 @@ const Sidebar = ({ onToggle }) => {
         }
     };
 
+    // Check if user has permission based on role
+    const hasPermission = (permission) => {
+        if (!user || !user.role) return false;
+
+        const { role } = user;
+
+        // Define permission mapping based on roles
+        const permissions = {
+            // Admin permissions
+            admin: role.is_admin || role.is_superuser || role.is_staff,
+
+            // Pitch Owner permissions
+            pitch_owner: role.is_pitch_owner,
+
+            // Sub Admin permissions
+            sub_admin: role.is_sub_admin,
+
+            // Sub Pitch Owner permissions
+            sub_pitch_owner: role.is_sub_pitch_owner,
+
+            // Staff permissions (view only)
+            staff: role.is_staff,
+            except_sub_pitch:role.is_pitch_owner || role.is_sub_admin || role.is_admin  ,
+
+
+            // Specific module permissions
+            can_view_venues: role.is_admin || role.is_staff || role.is_pitch_owner,
+            can_view_bookings: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
+            can_view_finance: role.is_admin || role.is_staff,
+            can_view_users: role.is_admin || role.is_staff,
+            can_view_display: role.is_admin || role.is_staff,
+            can_view_players: role.is_admin ||  role.is_sub_admin,
+            can_view_teams: role.is_admin ||  role.is_sub_admin,
+            can_view_pitch_owners: role.is_admin ||  role.is_sub_admin,
+            can_view_venue_requests: role.is_admin ||  role.is_sub_admin,
+            can_view_tournaments: role.is_admin || role.is_staff || role.is_pitch_owner,
+            can_view_tickets: role.is_admin ||  role.is_sub_admin,
+            can_view_reports: role.is_admin ,
+            can_view_revenue: role.is_admin || role.is_pitch_owner,
+            can_view_support: true, // Everyone can access support
+            can_view_settings: role.is_admin || role.is_staff,
+            can_view_calendar: role.is_admin ||  role.is_sub_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
+            can_view_pitches: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
+            can_view_amenities: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
+            can_view_venue_sports: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
+            can_view_surface_types: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
+            can_view_addons: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
+            can_view_banners: role.is_admin ||  role.is_sub_admin,
+            can_view_notifications: role.is_admin ||  role.is_sub_admin,
+            can_view_vouchers:role.is_admin ||  role.is_sub_admin,
+        };
+
+        return permissions[permission] || false;
+    };
+
+    // Define menu items with permission requirements
     const menuItems = [
         {
             title: t('sections.dashboard'),
             items: [
-                { icon: TrendingUp, label: t('menu_items.dashboard'), path: '/' },
+                {
+                    icon: TrendingUp,
+                    label: t('menu_items.dashboard'),
+                    path: '/',
+                    permission: 'except_sub_pitch' // Anyone authenticated can view dashboard
+                },
             ]
         },
         {
             title: t('sections.sales_control'),
             items: [
-                { icon: FaCalendarAlt , label: t('menu_items.booking'), path: '/bookings' },
-                { icon: Calendar, label: t('menu_items.calendar'), path: '/calendar' },
-                { icon: MapPin, label: t('menu_items.venues'), path: '/venues' },
-                { icon: Landmark, label: t('menu_items.pitches'), path: '/pitches' },
-                { icon: PlusCircle, label: t('menu_items.amenities'), path: '/amenities' },
-                { icon: Dribbble, label: t('menu_items.venue_sports'), path: '/venue-sports' }, // <--- Added Venue Sports
-                { icon: Grid, label: t('menu_items.surface_types'), path: '/surface-types' },
-                { icon: Layers, label: t('menu_items.addons'), path: '/add-ons' },
-                { icon: Trophy, label: t('menu_items.tournaments'), path: '/tournaments' },
-                { icon: Ticket, label: t('menu_items.tickets'), path: '/tickets' },
+                {
+                    icon: FaCalendarAlt,
+                    label: t('menu_items.booking'),
+                    path: '/bookings',
+                    permission: 'can_view_bookings'
+                },
+                {
+                    icon: Calendar,
+                    label: t('menu_items.calendar'),
+                    path: '/calendar',
+                    permission: 'can_view_calendar'
+                },
+                {
+                    icon: MapPin,
+                    label: t('menu_items.venues'),
+                    path: '/venues',
+                    permission: 'can_view_venues'
+                },
+                {
+                    icon: Landmark,
+                    label: t('menu_items.pitches'),
+                    path: '/pitches',
+                    permission: 'can_view_pitches'
+                },
+                {
+                    icon: PlusCircle,
+                    label: t('menu_items.amenities'),
+                    path: '/amenities',
+                    permission: 'can_view_amenities'
+                },
+                {
+                    icon: Dribbble,
+                    label: t('menu_items.venue_sports'),
+                    path: '/venue-sports',
+                    permission: 'can_view_venue_sports'
+                },
+                {
+                    icon: Grid,
+                    label: t('menu_items.surface_types'),
+                    path: '/surface-types',
+                    permission: 'can_view_surface_types'
+                },
+                {
+                    icon: Layers,
+                    label: t('menu_items.addons'),
+                    path: '/add-ons',
+                    permission: 'can_view_addons'
+                },
+                {
+                    icon: Trophy,
+                    label: t('menu_items.tournaments'),
+                    path: '/tournaments',
+                    permission: 'can_view_tournaments'
+                },
+                {
+                    icon: Ticket,
+                    label: t('menu_items.tickets'),
+                    path: '/tickets',
+                    permission: 'can_view_tickets'
+                },
             ]
         },
         {
             title: t('sections.display'),
             items: [
-                { icon: Image, label: t('menu_items.banners_ads'), path: '/banners' },
-                { icon: Bell, label: t('menu_items.notifications'), path: '/notifications' },
+                {
+                    icon: Image,
+                    label: t('menu_items.banners_ads'),
+                    path: '/banners',
+                    permission: 'can_view_banners'
+                },
+                {
+                    icon: Bell,
+                    label: t('menu_items.notifications'),
+                    path: '/notifications',
+                    permission: 'can_view_notifications'
+                },
             ]
         },
         {
             title: t('sections.finance'),
             items: [
-                { icon: DollarSign, label: t('menu_items.revenue'), path: '/revenue' },
-                { icon: FileText, label: t('menu_items.reports'), path: '/reports' },
-                { icon: CreditCard, label: t('menu_items.vouchers'), path: '/vouchers' },
+                {
+                    icon: DollarSign,
+                    label: t('menu_items.revenue'),
+                    path: '/revenue',
+                    permission: 'can_view_revenue'
+                },
+                {
+                    icon: FileText,
+                    label: t('menu_items.reports'),
+                    path: '/reports',
+                    permission: 'can_view_reports'
+                },
+                {
+                    icon: CreditCard,
+                    label: t('menu_items.vouchers'),
+                    path: '/vouchers',
+                    permission: 'can_view_vouchers'
+                },
             ]
         },
         {
             title: t('sections.users_control'),
             items: [
-                { icon: Users, label: t('menu_items.players'), path: '/players' },
-                { icon: Users, label:'Teams', path: '/teams' },
-                { icon: UserCheck, label: t('menu_items.pitch_owners'), path: '/pitch-owner' },
-                { icon: FileEdit, label: t('menu_items.venue_requests'), path: '/venue-edit-requests' },
+                {
+                    icon: Users,
+                    label: t('menu_items.players'),
+                    path: '/players',
+                    permission: 'can_view_players'
+                },
+                {
+                    icon: Users,
+                    label: 'Teams',
+                    path: '/teams',
+                    permission: 'can_view_teams'
+                },
+                {
+                    icon: UserCheck,
+                    label: t('menu_items.pitch_owners'),
+                    path: '/pitch-owner',
+                    permission: 'can_view_pitch_owners'
+                },
+                {
+                    icon: FileEdit,
+                    label: t('menu_items.venue_requests'),
+                    path: '/venue-edit-requests',
+                    permission: 'can_view_venue_requests'
+                },
             ]
         },
         {
             title: t('sections.support'),
             items: [
-                { icon: HeadphonesIcon, label: t('menu_items.support'), path: '/support' },
+                {
+                    icon: HeadphonesIcon,
+                    label: t('menu_items.support'),
+                    path: '/support',
+                    permission: 'can_view_support'
+                },
             ]
         }
     ];
+
+    // Filter menu items based on user permissions
+    const filteredMenuItems = menuItems.map(section => ({
+        ...section,
+        items: section.items.filter(item => {
+            // If no permission specified, show to all
+            if (!item.permission) return true;
+            // Check if user has permission
+            return hasPermission(item.permission);
+        })
+    })).filter(section => section.items.length > 0); // Remove empty sections
 
     const isActive = (path) => location.pathname === path;
 
@@ -133,7 +306,7 @@ const Sidebar = ({ onToggle }) => {
             >
                 {/* Logo Section with Toggle */}
                 <div className={`flex items-center ${isCollapsed ? 'justify-center px-3' : 'justify-between px-5'} h-[4rem] border-b border-primary-100 flex-shrink-0`}>
-                    <div  dir={'ltr'} className="flex items-center gap-3">
+                    <div dir={'ltr'} className="flex items-center gap-3">
                         {isCollapsed &&
                             <img
                                 src={logo}
@@ -144,14 +317,17 @@ const Sidebar = ({ onToggle }) => {
                         {!isCollapsed && (
                             <span className="text-2xl text-secondary-600 font-bold tracking-wider flex items-center">
                                 FREE K
-                                 <img
-                                     src={logo}
-                                     alt="Logo"
-                                     className="h-6 w-6 -mx-1 animate-avatar-float-slowest"
-                                 />
+                                <img
+                                    src={logo}
+                                    alt="Logo"
+                                    className="h-6 w-6 -mx-1 animate-avatar-float-slowest"
+                                />
                                 ICK
-                                </span>                     )}
+                            </span>
+                        )}
                     </div>
+
+
 
                     {/* Toggle Button */}
                     {!isCollapsed && (
@@ -160,7 +336,6 @@ const Sidebar = ({ onToggle }) => {
                             className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 group relative"
                             title={t('tooltips.collapse_sidebar')}
                         >
-                            {/* Soccer Ball */}
                             <div className="relative w-5 h-5">
                                 <svg
                                     viewBox="0 0 24 24"
@@ -173,7 +348,6 @@ const Sidebar = ({ onToggle }) => {
                                     <path d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12" strokeWidth="1.5" opacity="0.4" />
                                     <path d="M12 8 L9 10 L10 13 L14 13 L15 10 Z" fill="currentColor" opacity="0.2" />
                                 </svg>
-                                {/* Kick motion indicator */}
                                 <div className={`absolute ${direction === 'rtl' ? 'right-0' : 'left-0'} top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
                                     <ToggleIcon className="w-3 h-3 text-primary-600" />
                                 </div>
@@ -185,16 +359,14 @@ const Sidebar = ({ onToggle }) => {
                 {/* Navigation with custom scrollbar */}
                 <ScrollArea className="flex-1">
                     <nav dir={direction} className={`py-4 ${isCollapsed ? 'px-2' : 'px-3'}`}>
-                        {menuItems.map((section, index) => (
+                        {filteredMenuItems.map((section, index) => (
                             <div key={index} className="mb-6 last:mb-0">
-                                {/* Section Title - Only show when not collapsed and if there's a title */}
                                 {!isCollapsed && section.title && (
                                     <h3 className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 px-3 truncate">
                                         {section.title}
                                     </h3>
                                 )}
 
-                                {/* Section divider when collapsed */}
                                 {isCollapsed && index > 0 && (
                                     <div className="border-t border-gray-200 my-3 mx-2"></div>
                                 )}
@@ -258,7 +430,6 @@ const Sidebar = ({ onToggle }) => {
                                     <path d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12" strokeWidth="1.5" opacity="0.4" />
                                     <path d="M12 8 L9 10 L10 13 L14 13 L15 10 Z" fill="currentColor" opacity="0.2" />
                                 </svg>
-                                {/* Kick motion indicator */}
                                 <div className={`absolute ${direction === 'ltr' ? 'right-0' : 'left-0'} top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
                                     <ToggleIcon className="w-3 h-3 text-primary-600" />
                                 </div>
@@ -284,7 +455,6 @@ const Sidebar = ({ onToggle }) => {
                         <div className="px-3 py-2 bg-primary-700 text-white text-xs font-medium rounded-md whitespace-nowrap shadow-lg">
                             {tooltip.label}
                         </div>
-                        {/* Arrow pointing to sidebar */}
                         <div
                             className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-primary-700 rotate-45 ${
                                 direction === 'rtl'

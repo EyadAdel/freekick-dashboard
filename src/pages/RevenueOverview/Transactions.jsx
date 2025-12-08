@@ -300,7 +300,7 @@ function Transactions(props) {
 
             <div className="mt-8 bg-white p-5 rounded-lg lg:mt-10">
                 <div className="mb-4">
-                    <h2 className="text-xl font-bold text-gray-800">Transaction History</h2>
+                    <h2 className="text-xl font-bold text-gray-800">Transactions </h2>
                 </div>
 
                 <MainTable

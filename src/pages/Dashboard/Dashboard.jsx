@@ -11,7 +11,7 @@ import { FaCalendarDays } from "react-icons/fa6";
 import TopTeamsChart from "../../components/Charts/TopTeamsChart.jsx";
 import NotificationsPanel from "../../components/common/NotificationsPanel.jsx";
 import PopularVenues from "../../components/Charts/PopularVenues.jsx";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 import {
     Clock, MapPin, DollarSign,
@@ -29,8 +29,23 @@ const Dashboard = () => {
         isTopEmiratesLoading,
         error,
     } = useAnalytics();
+    const { user } = useSelector((state) => state.auth); // Get user from Redux
+    const { role } = user;
+    const permissions = {
+        // Admin permissions
+        admin: role.is_admin ,
 
-    const [periodOptions] = useState([
+        // Pitch Owner permissions
+        pitch_owner: role.is_pitch_owner,
+
+        // Sub Admin permissions
+        sub_admin: role.is_sub_admin,
+
+        // Sub Pitch Owner permissions
+        sub_pitch_owner: role.is_sub_pitch_owner,
+    }
+
+        const [periodOptions] = useState([
         { value: 'this_week', label: 'This Week' },
         { value: 'last_week', label: 'Last Week' },
         { value: 'this_month', label: 'This Month' },
@@ -61,32 +76,31 @@ const Dashboard = () => {
             title: 'Completed Bookings',
             value: confirmedCount,
             percentChange: 135,
-            icon:CheckCircle,
+            icon: CheckCircle,
             iconColor: 'text-secondary-600 opacity-80'
         },
-        {
+        ...(permissions.admin ? [{
             title: 'Active Bookings',
-            value: total_earnings,
+            value: total_earnings, // This should probably be active_bookings if available
             percentChange: 3.68,
-            icon:Clock,
+            icon: Clock,
             iconColor: 'text-secondary-600 opacity-80'
-        },
+        }] : []),
         {
             title: 'Canceled Bookings',
             value: cancelledCount,
             percentChange: -1.45,
-            icon:XCircle,
+            icon: XCircle,
             iconColor: 'text-red-500'
         },
         {
             title: 'Total Revenue',
             value: TotalRevenue,
             percentChange: 5.94,
-            icon:DollarSign,
+            icon: DollarSign,
             iconColor: 'text-secondary-600 opacity-80'
         }
     ];
-
     const currentPeriodLabel = periodOptions.find(p => p.value === currentEmiratesPeriod)?.label || 'This Week';
 
 
@@ -124,7 +138,7 @@ const Dashboard = () => {
         {/*<NotificationHandler />*/}
             <section className={'lg:flex gap-4 py-2 '}>
                 <aside className={'lg:w-3/4'}>
-                    <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2  xl:grid-cols-4 gap-4 xl:gap-6 mb-8">
+                    <div className={`grid   ${!permissions?.admin?'grid-cols-3 ':'xl:grid-cols-4 grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2'}  gap-4 xl:gap-6 mb-8`}>
                         {stats.map((stat, index) => (
                             <StatCard key={index} {...stat} />
                         ))}
@@ -168,9 +182,11 @@ const Dashboard = () => {
                     <div className="dashboard-sidebar">
                         <NotificationsPanel />
                     </div>
+                    {!permissions.pitch_owner &&
                     <div className=" mt-5">
                         <PopularVenues />
                     </div>
+                    }
                 </div>
             </section>
 
