@@ -143,4 +143,43 @@ export const playerService = {
             return { balance: 0 };
         }
     }
+,
+getPlayerPoints: async (filters = {}) => {
+    try {
+        const params = new URLSearchParams();
+
+        // Add pagination
+        if (filters.page) params.append('page', filters.page);
+        if (filters.page_limit) params.append('page_limit', filters.page_limit);
+
+        // Add search
+        if (filters.search) params.append('search', filters.search);
+
+        // Add ordering
+        if (filters.ordering) params.append('ordering', filters.ordering);
+
+        // Add filters
+        if (filters.user__id) params.append('user__id', filters.user__id);
+        if (filters.points) params.append('points', filters.points);
+        if (filters.points__gte) params.append('points__gte', filters.points__gte);
+        if (filters.points__lte) params.append('points__lte', filters.points__lte);
+        if (filters.reason) params.append('reason', filters.reason);
+        if (filters.reason__icontains) params.append('reason__icontains', filters.reason__icontains);
+
+        const response = await api.get(`/user/points/?${params.toString()}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+},
+
+    // Create team points
+    createPlayerPoints: async (data) => {
+    try {
+        const response = await api.post('/user/points/', data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+}
 };
