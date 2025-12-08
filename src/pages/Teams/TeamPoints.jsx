@@ -1,7 +1,7 @@
 // pages/teams/TeamPointsTab.jsx
 import React, { useState, useEffect } from 'react';
 import MainTable from '../../components/MainTable';
-import { teamService } from '../../services/teams/TeamService.js';
+import { teamService } from '../../services/Teams/TeamService.js';
 import { Plus } from 'lucide-react';
 import Swal from 'sweetalert2';
 
