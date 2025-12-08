@@ -5,7 +5,7 @@ import ArrowIcon from "../../components/common/ArrowIcon.jsx";
 import { pitchOwnersService } from '../../services/pitchOwners/pitchOwnersService.js';
 import MainTable from "../../components/MainTable.jsx";
 import AddActionModal from "../../components/pitchOwners/AddActionModal.jsx"; // Adjust path if needed
-
+import {  useSelector } from 'react-redux';
 import { useContact } from "../../hooks/useContact.js";
 import {
     Calendar,
@@ -25,7 +25,8 @@ import {
     FileText,
     TrendingUp,
     TrendingDown,
-    ListFilter
+    ListFilter,
+    Percent // <--- 1. Imported Percent Icon
 } from "lucide-react";
 
 // ============================================================================
@@ -68,6 +69,8 @@ const getStatusBadge = (status) => {
 const PitchOwnerDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user } = useSelector((state) => state.auth);
+
     const { handleEmailClick, handleWhatsAppClick } = useContact();
 
     // 1. Retrieve Data
@@ -181,6 +184,10 @@ const PitchOwnerDetails = () => {
     const handleActionSuccess = () => { setRefreshTrigger(prev => prev + 1); setCurrentActionPage(1); };
     const handleBack = () => navigate(-1);
 
+    if (!user || !user.role) return false;
+
+    const { role } = user;
+
     return (
         <div className="min-h-screen xl:px-5 bg-gray-50">
             {/* Header */}
@@ -212,12 +219,30 @@ const PitchOwnerDetails = () => {
                                     </div>
                                 </div>
                             </div>
+
                             {/* Stats */}
                             <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
                                 <div className="flex items-center justify-between"><div className="flex items-center gap-2"><LayoutGrid className="w-4 h-4 text-gray-400" /><span className="text-sm text-gray-600">Total Pitches</span></div><span className="text-sm font-semibold text-gray-900">{totalPitches}</span></div>
                                 <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-gray-400" /><span className="text-sm text-gray-600">Total Bookings</span></div><span className="text-sm font-semibold text-gray-900">{totalBookingsCount}</span></div>
                                 <div className="flex items-center justify-between"><div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-gray-400" /><span className="text-sm text-gray-600">Est. Revenue</span></div><span className="text-sm font-semibold text-green-600">{formatAmount(totalRevenue)}</span></div>
+
+                                {/* --- 2. ADDED COMMISSION RATE HERE --- */}
+                                {role.is_admin &&
+
+                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Percent className="w-4 h-4 text-gray-400" />
+                                        <span className="text-sm text-gray-600">Commission Rate</span>
+                                    </div>
+                                    <span className="text-sm font-semibold text-gray-900">
+                                        {ownerData.commission_rate ?? 0}%
+                                    </span>
+                                </div>
+                                }
+                                {/* ----------------------------------- */}
+
                             </div>
+
                             {/* Contact Info */}
                             <div className="mb-6">
                                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contact Person</h4>
@@ -283,8 +308,11 @@ const PitchOwnerDetails = () => {
                     </div>
                 </div>
 
+
                 {/* 2. STAFF ACTIONS TABLE SECTION - Now Full Width (Outside Grid) */}
-                <div className="w-full">
+                {role.is_admin &&
+
+                    <div className="w-full">
                     <div className="bg-white px-4 rounded-lg shadow-sm border border-gray-100">
                         <div className="pt-5 lg:px-6 flex justify-between items-center mb-2">
                             <div className="flex items-center gap-2">
@@ -334,6 +362,7 @@ const PitchOwnerDetails = () => {
                         />
                     </div>
                 </div>
+                }
 
             </div>
 

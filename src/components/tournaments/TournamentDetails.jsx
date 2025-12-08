@@ -8,13 +8,13 @@ import {
 import { tournamentsService } from '../../services/tournaments/tournamentsService';
 import { venuesService } from '../../services/venues/venuesService';
 import { toast } from 'react-toastify';
-import {useDispatch} from "react-redux";
-import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
+import { useDispatch } from "react-redux";
+import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
+// --- IMPORT ADDED ---
+import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
 
 const TournamentDetails = () => {
     const dispatch = useDispatch();
-
-
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -23,9 +23,13 @@ const TournamentDetails = () => {
     // 1. Initialize State with passed data (Tournament + Venue Name)
     const initialTournament = location.state?.tournamentData || null;
     const initialVenueName = location.state?.venueName || '';
+
     useEffect(() => {
-        dispatch(setPageTitle(`${initialTournament.name}`));
-    }, [dispatch]);
+        if (initialTournament) {
+            dispatch(setPageTitle(`${initialTournament.name}`));
+        }
+    }, [dispatch, initialTournament]);
+
     const [tournament, setTournament] = useState(initialTournament);
     const [venueName, setVenueName] = useState(initialVenueName);
     const [loading, setLoading] = useState(!initialTournament);
@@ -47,6 +51,7 @@ const TournamentDetails = () => {
                     const response = await tournamentsService.getById(id);
                     currentData = response.data || response;
                     setTournament(currentData);
+                    dispatch(setPageTitle(`${currentData.name}`));
                 }
 
                 // B. Fetch Venue Name ONLY if we don't have it (Fallback)
@@ -74,7 +79,7 @@ const TournamentDetails = () => {
         };
 
         fetchDetails();
-    }, [id, navigate, tournament, venueName]);
+    }, [id, navigate, tournament, venueName, dispatch]);
 
     if (loading) {
         return (
@@ -138,14 +143,16 @@ const TournamentDetails = () => {
 
                 {/* 1. Background Image Container */}
                 <div className="h-64 md:h-80 w-full overflow-hidden relative">
-                    {!tournament.cover_image ? (
+                    {tournament.cover_image ? (
                         <img
-                            src={tournament.cover_image}
+                            src={`${IMAGE_BASE_URL}${tournament.cover_image}`}
                             alt={tournament.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'https://via.placeholder.com/1200x400?text=No+Cover+Image';
+                                // Fallback if the specific image fails to load
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
                             }}
                         />
                     ) : (
@@ -153,11 +160,18 @@ const TournamentDetails = () => {
                             <Trophy size={64} className="text-white opacity-30" />
                         </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                    {/* Fallback div in case image load fails via JS or no image exists */}
+                    {tournament.cover_image && (
+                        <div className="hidden w-full h-full bg-gradient-to-r from-primary-600 to-primary-700 items-center justify-center absolute top-0 left-0 -z-10">
+                            <Trophy size={64} className="text-white opacity-30" />
+                        </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none"></div>
 
                     <button
                         onClick={() => navigate('/tournaments')}
-                        className="absolute top-6 left-6 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white p-2 rounded-full transition-all"
+                        className="absolute top-6 left-6 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white p-2 rounded-full transition-all z-20"
                     >
                         <ArrowLeft size={24} />
                     </button>
@@ -327,7 +341,7 @@ const TournamentDetails = () => {
                                                 className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-gray-100 border border-gray-200"
                                             >
                                                 <img
-                                                    src={imgObj.image}
+                                                    src={`${IMAGE_BASE_URL}${imgObj.image}`}
                                                     alt={`Gallery ${index}`}
                                                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                 />
@@ -412,7 +426,7 @@ const TournamentDetails = () => {
                     </button>
                     <div className="max-w-5xl max-h-[90vh] p-4" onClick={(e) => e.stopPropagation()}>
                         <img
-                            src={allImages[currentImageIndex].image}
+                            src={`${IMAGE_BASE_URL}${allImages[currentImageIndex].image}`}
                             alt="Full View"
                             className="max-w-full max-h-[85vh] object-contain rounded shadow-2xl"
                         />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import MainTable from './../../components/MainTable';
 import {
@@ -15,6 +15,8 @@ import { showConfirm } from '../../components/showConfirm.jsx';
 import { toast } from 'react-toastify';
 
 const Venues = () => {
+    const { user } = useSelector((state) => state.auth); // Get user from Redux
+
     const rowsPerPage = 10;
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -436,56 +438,80 @@ const Venues = () => {
             )}
         </div>
     );
+    if (!user || !user.role) return false;
 
-    return (
-        <div className="w-full px-2 sm:px-0">
-            {/* Stats Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 my-4 sm:my-8">
-                <StatCard title="Total Venues" value={stats.total} icon={<TrendingUp className="text-blue-600" />} gradient="from-blue-500 to-blue-600" bgColor="bg-blue-50" />
-                <StatCard title="Active Venues" value={stats.active} icon={<CheckCircle className="text-green-600" />} gradient="from-green-500 to-green-600" bgColor="bg-green-50" />
-                <StatCard title="Inactive Venues" value={stats.inactive} icon={<XCircle className="text-red-600" />} gradient="from-red-500 to-red-600" bgColor="bg-red-50" />
-            </div>
+    const { role } = user;
+    return (<>
 
-            {/* Status Management Lists */}
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
-                <StatusManagementSection title="Active Venues" venues={activeVenuesList} statusType="active" emptyMessage="No active venues" />
-                <StatusManagementSection title="Inactive Venues" venues={inactiveVenuesList} statusType="inactive" emptyMessage="No inactive venues" />
-            </div>
-
-            {/* Hidden Forms */}
-            {showForm && <div className='mb-6 sm:mb-8'><VenuesForm initialData={selectedVenue} onCancel={handleCancelForm} onSuccess={handleFormSuccess} /></div>}
-
-            {/* View Tabs */}
-            <div className="bg-gradient-to-br from-white to-primary-50/30 rounded-lg shadow-sm border border-primary-100 p-1 sm:p-1.5 mt-4 sm:mt-5 mb-4 sm:mb-6">
-                <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1">
-                    {[{ key: 'all', label: 'All Venues', count: stats.total }, { key: 'active', label: 'Active', count: stats.active }, { key: 'inactive', label: 'Inactive', count: stats.inactive }].map((tab) => (
-                        <button key={tab.key} onClick={() => handleViewChange(tab.key)} className={`flex-1 flex items-center justify-center gap-2 px-2 sm:px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 ${currentView === tab.key ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md' : 'text-gray-600 hover:text-secondary-600 hover:bg-primary-50'}`}>
-                            <span className="truncate">{tab.label}</span>
-                            <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${currentView === tab.key ? 'bg-primary-700 text-white' : 'bg-gray-200 text-gray-600'}`}>{tab.count}</span>
-                        </button>
-                    ))}
+            <div className="w-full px-2 sm:px-0">
+                {/* Stats Section */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 my-4 sm:my-8">
+                    <StatCard title="Total Venues" value={stats.total} icon={<TrendingUp className="text-blue-600"/>}
+                              gradient="from-blue-500 to-blue-600" bgColor="bg-blue-50"/>
+                    <StatCard title="Active Venues" value={stats.active}
+                              icon={<CheckCircle className="text-green-600"/>} gradient="from-green-500 to-green-600"
+                              bgColor="bg-green-50"/>
+                    <StatCard title="Inactive Venues" value={stats.inactive} icon={<XCircle className="text-red-600"/>}
+                              gradient="from-red-500 to-red-600" bgColor="bg-red-50"/>
                 </div>
+
+
+                {/* Status Management Lists */}
+                {role.is_pitch_owner===false && (
+
+                    <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
+                    <StatusManagementSection title="Active Venues" venues={activeVenuesList} statusType="active"
+                                             emptyMessage="No active venues"/>
+                    <StatusManagementSection title="Inactive Venues" venues={inactiveVenuesList} statusType="inactive"
+                                             emptyMessage="No inactive venues"/>
+                </div>
+                )}
+
+                {/* Hidden Forms */}
+                {showForm &&
+                    <div className='mb-6 sm:mb-8'><VenuesForm initialData={selectedVenue} onCancel={handleCancelForm}
+                                                              onSuccess={handleFormSuccess}/></div>}
+
+                {/* View Tabs */}
+                <div
+                    className="bg-gradient-to-br from-white to-primary-50/30 rounded-lg shadow-sm border border-primary-100 p-1 sm:p-1.5 mt-4 sm:mt-5 mb-4 sm:mb-6">
+                    <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1">
+                        {[{key: 'all', label: 'All Venues', count: stats.total}, {
+                            key: 'active',
+                            label: 'Active',
+                            count: stats.active
+                        }, {key: 'inactive', label: 'Inactive', count: stats.inactive}].map((tab) => (
+                            <button key={tab.key} onClick={() => handleViewChange(tab.key)}
+                                    className={`flex-1 flex items-center justify-center gap-2 px-2 sm:px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 ${currentView === tab.key ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md' : 'text-gray-600 hover:text-secondary-600 hover:bg-primary-50'}`}>
+                                <span className="truncate">{tab.label}</span>
+                                <span
+                                    className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${currentView === tab.key ? 'bg-primary-700 text-white' : 'bg-gray-200 text-gray-600'}`}>{tab.count}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Main Table */}
+                {isLoading && venuesData.length === 0 ? (
+                    <div className="p-6 sm:p-10 text-center text-gray-500 text-sm sm:text-base">Loading...</div>
+                ) : (
+                    <MainTable
+                        data={filteredData || []} columns={columns} filters={filterConfig}
+                        searchPlaceholder="Search venue" topActions={topActions}
+                        currentPage={currentPage} totalItems={filteredData?.length || 0}
+                        itemsPerPage={rowsPerPage} onSearch={handleSearch}
+                        onFilterChange={handleFilterChange} onPageChange={handlePageChange}
+                    />
+                )}
             </div>
 
-            {/* Main Table */}
-            {isLoading && venuesData.length === 0 ? (
-                <div className="p-6 sm:p-10 text-center text-gray-500 text-sm sm:text-base">Loading...</div>
-            ) : (
-                <MainTable
-                    data={filteredData || []} columns={columns} filters={filterConfig}
-                    searchPlaceholder="Search venue" topActions={topActions}
-                    currentPage={currentPage} totalItems={filteredData?.length || 0}
-                    itemsPerPage={rowsPerPage} onSearch={handleSearch}
-                    onFilterChange={handleFilterChange} onPageChange={handlePageChange}
-                />
-            )}
-        </div>
-    );
+
+    </>);
 };
 
 // ================= UTILITY COMPONENTS =================
 
-const StatusBadge = ({ isActive }) => {
+const StatusBadge = ({isActive}) => {
     const style = isActive ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200';
     return (
         <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium ${style} whitespace-nowrap`}>
@@ -494,10 +520,12 @@ const StatusBadge = ({ isActive }) => {
     );
 };
 
-const StatCard = ({ title, value, icon, gradient, bgColor }) => (
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+const StatCard = ({title, value, icon, gradient, bgColor}) => (
+    <div
+        className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
         <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <div className={`p-2 sm:p-3 ${bgColor} rounded-lg sm:rounded-xl`}>{React.cloneElement(icon, { className: "w-5 h-5 sm:w-7 sm:h-7" })}</div>
+            <div
+                className={`p-2 sm:p-3 ${bgColor} rounded-lg sm:rounded-xl`}>{React.cloneElement(icon, {className: "w-5 h-5 sm:w-7 sm:h-7"})}</div>
             <div className={`w-12 sm:w-16 h-1 bg-gradient-to-r ${gradient} rounded-full`}></div>
         </div>
         <div>

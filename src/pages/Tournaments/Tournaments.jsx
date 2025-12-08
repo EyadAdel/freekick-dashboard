@@ -3,12 +3,14 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice.js';
 import MainTable from './../../components/MainTable';
-import { Eye, Pencil, Trash2, TrendingUp, Plus, Users, CheckCircle, XCircle, MapPin } from 'lucide-react';
+import { Eye, Pencil, Trash2, TrendingUp, Plus, Users, CheckCircle, XCircle, MapPin, Image as ImageIcon } from 'lucide-react';
 import { tournamentsService } from '../../services/tournaments/tournamentsService.js';
 import { venuesService } from '../../services/venues/venuesService.js';
 import { venueSportsService } from '../../services/venueSports/venueSportsService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
 import TournamentsForm from '../../components/tournaments/TournamentsForm.jsx';
+import StatCard from './../../components/Charts/StatCards.jsx';
+import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
 
 const Tournaments = () => {
     const rowsPerPage = 10;
@@ -82,8 +84,6 @@ const Tournaments = () => {
     };
 
     // --- HANDLERS ---
-
-    // UPDATED: Pass both tournament data AND resolved venue name
     const handleViewDetails = (tournament) => {
         const resolvedVenueName = getVenueName(tournament.venue);
 
@@ -215,12 +215,31 @@ const Tournaments = () => {
             header: 'Tournament Info',
             accessor: 'name',
             align: 'left',
+            // UPDATED RENDER: Shows image if exists, otherwise shows Static Icon
             render: (row) => (
-                <div className="flex flex-col">
-                    <span className="font-semibold text-gray-900 text-sm">{row.name}</span>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded w-fit mt-1">
-                        Code: {row.code}
-                    </span>
+                <div className="flex items-center gap-3">
+                    {row.cover_image ? (
+                        <img
+                            src={`${IMAGE_BASE_URL}${row.cover_image}`}
+                            alt={row.name}
+                            className="w-12 h-12 rounded-lg object-cover border border-gray-100 shadow-sm flex-shrink-0 bg-gray-50"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://placehold.co/100x100?text=No+Img'; // Fallback network image
+                            }}
+                        />
+                    ) : (
+                        <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0 text-gray-400">
+                            <ImageIcon size={20} />
+                        </div>
+                    )}
+
+                    <div className="flex flex-col">
+                        <span className="font-semibold text-gray-900 text-sm line-clamp-1" title={row.name}>{row.name}</span>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded w-fit mt-1">
+                            Code: {row.code}
+                        </span>
+                    </div>
                 </div>
             )
         },
@@ -297,32 +316,11 @@ const Tournaments = () => {
         }
     ];
 
-    const StatCard = ({ title, value, icon, gradient, bgColor }) => (
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className={`p-2 sm:p-3 ${bgColor} rounded-lg sm:rounded-xl`}>
-                    {React.cloneElement(icon, { className: "w-5 h-5 sm:w-7 sm:h-7" })}
-                </div>
-                <div className={`w-12 sm:w-16 h-1 bg-gradient-to-r ${gradient} rounded-full`}></div>
-            </div>
-            <div>
-                <p className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1 sm:mb-2">{title}</p>
-                <p className="text-2xl sm:text-4xl font-bold text-gray-900">{value}</p>
-            </div>
-        </div>
-    );
-
     return (
         <div className="w-full px-2 sm:px-0">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 my-4 sm:my-8">
-                <StatCard title="Total Tournaments" value={stats.total} icon={<TrendingUp className="text-blue-600" />} gradient="from-blue-500 to-blue-600" bgColor="bg-blue-50" />
-                <StatCard title="Active" value={stats.active} icon={<CheckCircle className="text-green-600" />} gradient="from-green-500 to-green-600" bgColor="bg-green-50" />
-                <StatCard title="Inactive" value={stats.inactive} icon={<XCircle className="text-red-600" />} gradient="from-red-500 to-red-600" bgColor="bg-red-50" />
-                <StatCard title="Total Capacity (Teams)" value={stats.totalTeams} icon={<Users className="text-purple-600" />} gradient="from-purple-500 to-purple-600" bgColor="bg-purple-50" />
-            </div>
-
-            {showForm && (
-                <div className='mb-6 sm:mb-8'>
+            {showForm ? (
+                // SHOW ONLY FORM (Create or Edit Mode)
+                <div className='my-4 sm:my-8'>
                     <TournamentsForm
                         initialData={selectedTournament}
                         venuesList={venuesData.map(v => ({ label: v.translations?.name || v.name, value: v.id }))}
@@ -331,24 +329,54 @@ const Tournaments = () => {
                         onSuccess={handleFormSuccess}
                     />
                 </div>
-            )}
-
-            {isLoading && tournamentsData.length === 0 ? (
-                <div className="p-6 sm:p-10 text-center text-gray-500 text-sm sm:text-base">Loading...</div>
             ) : (
-                <MainTable
-                    data={filteredData || []}
-                    columns={columns}
-                    filters={filterConfig}
-                    searchPlaceholder="Search by name, code or venue..."
-                    topActions={topActions}
-                    currentPage={currentPage}
-                    totalItems={filteredData?.length || 0}
-                    itemsPerPage={rowsPerPage}
-                    onSearch={handleSearch}
-                    onFilterChange={handleFilterChange}
-                    onPageChange={handlePageChange}
-                />
+                // SHOW DASHBOARD (Stats + Table)
+                <>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 my-4 sm:my-8">
+                        <StatCard
+                            title="Total Tournaments"
+                            value={stats.total}
+                            icon={TrendingUp}
+                            iconColor="text-blue-600"
+                        />
+                        <StatCard
+                            title="Active"
+                            value={stats.active}
+                            icon={CheckCircle}
+                            iconColor="text-green-600"
+                        />
+                        <StatCard
+                            title="Inactive"
+                            value={stats.inactive}
+                            icon={XCircle}
+                            iconColor="text-red-600"
+                        />
+                        <StatCard
+                            title="Total Capacity"
+                            value={stats.totalTeams}
+                            icon={Users}
+                            iconColor="text-purple-600"
+                        />
+                    </div>
+
+                    {isLoading && tournamentsData.length === 0 ? (
+                        <div className="p-6 sm:p-10 text-center text-gray-500 text-sm sm:text-base">Loading...</div>
+                    ) : (
+                        <MainTable
+                            data={filteredData || []}
+                            columns={columns}
+                            filters={filterConfig}
+                            searchPlaceholder="Search by name, code or venue..."
+                            topActions={topActions}
+                            currentPage={currentPage}
+                            totalItems={filteredData?.length || 0}
+                            itemsPerPage={rowsPerPage}
+                            onSearch={handleSearch}
+                            onFilterChange={handleFilterChange}
+                            onPageChange={handlePageChange}
+                        />
+                    )}
+                </>
             )}
         </div>
     );

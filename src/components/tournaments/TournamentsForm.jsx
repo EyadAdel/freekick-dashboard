@@ -11,6 +11,8 @@ import {
     Clock, AlignLeft, FileText, Activity, Image as ImageIcon, Plus
 } from 'lucide-react';
 import { toast } from 'react-toastify';
+// --- IMPORT ADDED ---
+import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
 
 const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess, initialData = null }) => {
 
@@ -74,7 +76,13 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
 
             // Handle Cover Image
             if (initialData.cover_image) {
-                setImagePreview(initialData.cover_image);
+                // If it's an existing image, we prefix with BASE_URL for display
+                // But we keep the relative path in finalImageUrl/uniqueName so if they don't change it, we send the same path back (or handle it in logic)
+                const fullUrl = initialData.cover_image.startsWith('http')
+                    ? initialData.cover_image
+                    : `${IMAGE_BASE_URL}${initialData.cover_image}`;
+
+                setImagePreview(fullUrl);
                 setFinalImageUrl(initialData.cover_image);
                 setUniqueName(initialData.cover_image);
             }
@@ -83,8 +91,11 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
             if (initialData.images && Array.isArray(initialData.images)) {
                 const formattedGallery = initialData.images.map(img => ({
                     id: img.id || Math.random(),
-                    url: img.image,
-                    preview: img.image,
+                    url: img.image, // Keep relative path for payload logic
+                    // Display with Base URL
+                    preview: img.image.startsWith('http')
+                        ? img.image
+                        : `${IMAGE_BASE_URL}${img.image}`,
                     isUploading: false
                 }));
                 setGalleryImages(formattedGallery);
@@ -111,7 +122,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
 
         const previewUrl = URL.createObjectURL(file);
         setSelectedImage(file);
-        setImagePreview(previewUrl);
+        setImagePreview(previewUrl); // Local blob URL for immediate preview
         setErrors(prev => ({ ...prev, cover_image: '' }));
 
         setIsImageUploading(true);
@@ -147,7 +158,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
         const newImages = files.map(file => ({
             id: Math.random().toString(36).substr(2, 9),
             file: file,
-            preview: URL.createObjectURL(file),
+            preview: URL.createObjectURL(file), // Local blob URL
             isUploading: true,
             url: ''
         }));
@@ -216,7 +227,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
             const finalGalleryImages = galleryImages
                 .filter(img => img.url)
                 .map(img => ({
-                    image: img.url
+                    image: img.url // This should be the path/filename saved to DB
                 }));
 
             // Construct Payload
@@ -274,7 +285,6 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
     const scoringOptions = [
         { label: 'Knockout', value: 'knockout' },
         { label: 'League', value: 'league' },
-        { label: 'Group + Knockout', value: 'group_knockout' },
     ];
 
     const activeSportsList = sportsList.length > 0 ? sportsList : [];
@@ -326,9 +336,6 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                         </div>
                     </div>
 
-
-
-
                     <div className="flex flex-col">
                         <label className="text-sm font-medium text-gray-700 mb-1">Description</label>
                         <textarea name="description" value={formData.description} onChange={handleChange} rows="3"
@@ -354,7 +361,12 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                             </div>
                         ) : imagePreview ? (
                             <div className="relative w-full h-full p-2 group">
-                                <img src={imagePreview} alt="Preview" className="w-full h-full object-contain rounded-md" />
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="w-full h-full object-contain rounded-md"
+                                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/400x300?text=No+Preview'; }}
+                                />
                                 <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
                                     <button type="button" onClick={removeCoverImage} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"><Trash2 size={20} /></button>
                                 </div>
@@ -394,7 +406,12 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                                         </div>
                                     ) : null}
 
-                                    <img src={img.preview} alt="Gallery" className="w-full h-full object-cover" />
+                                    <img
+                                        src={img.preview}
+                                        alt="Gallery"
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/150x150?text=No+Img'; }}
+                                    />
 
                                     {!img.isUploading && (
                                         <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">

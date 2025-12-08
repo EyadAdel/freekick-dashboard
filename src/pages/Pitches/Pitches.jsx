@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import MainTable from './../../components/MainTable';
 import {Eye, Pencil, Trash2, CheckCircle, XCircle, TrendingUp, Clock, Filter} from 'lucide-react';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
@@ -9,6 +9,8 @@ import { venuesService } from '../../services/venues/venuesService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
 
 const Pitches = () => {
+    const { user } = useSelector((state) => state.auth); // Get user from Redux
+
     const rowsPerPage = 10;
     const dispatch = useDispatch();
 
@@ -560,7 +562,9 @@ const Pitches = () => {
             </div>
         </div>
     );
+    if (!user || !user.role) return false;
 
+    const { role } = user;
     return (
         <div className="w-full px-2 sm:px-0">
             {/* Statistics Section */}
@@ -596,21 +600,24 @@ const Pitches = () => {
             </div>
 
             {/* Status Management Sections */}
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
-                <StatusManagementSection
-                    title="Approved Pitches"
-                    pitches={approvedPitches}
-                    statusType="approved"
-                    emptyMessage="No approved pitches"
-                />
+            {role.is_pitch_owner===false && (
+                <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
+                    <StatusManagementSection
+                        title="Approved Pitches"
+                        pitches={approvedPitches}
+                        statusType="approved"
+                        emptyMessage="No approved pitches"
+                    />
 
-                <StatusManagementSection
-                    title="Rejected Pitches"
-                    pitches={rejectedPitches}
-                    statusType="rejected"
-                    emptyMessage="No rejected pitches"
-                />
-            </div>
+                    <StatusManagementSection
+                        title="Rejected Pitches"
+                        pitches={rejectedPitches}
+                        statusType="rejected"
+                        emptyMessage="No rejected pitches"
+                    />
+                </div>
+            )}
+
 
             {/* Form Section */}
             {showForm && (
@@ -626,7 +633,7 @@ const Pitches = () => {
             )}
 
             {/* View Tabs */}
-            <ViewTabs />
+            <ViewTabs/>
 
             {/* Main Table Section */}
             {isLoading && pitchesData.length === 0 ? (

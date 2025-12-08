@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { useNavigate } from 'react-router-dom'; // <--- Import useNavigate
 import MainTable from './../../components/MainTable';
 import StatCard from './../../components/Charts/StatCards.jsx';
@@ -68,7 +69,9 @@ const StatusBadge = ({ isActive }) => {
 const PitchOwners = () => {
     const rowsPerPage = 10;
     const dispatch = useDispatch();
-    const navigate = useNavigate(); // <--- Initialize hook
+    const navigate = useNavigate();
+    const { user } = useSelector((state) => state.auth); // Get user from Redux
+
 
     useEffect(() => {
         dispatch(setPageTitle('Pitch Owners'));
@@ -362,22 +365,25 @@ const PitchOwners = () => {
                     </button>
 
                     {/* Edit Button */}
-                    <button
-                        className="text-gray-500 hover:text-primary-600 p-1.5 rounded-lg hover:bg-primary-50 transition-colors"
-                        title="Edit Details"
-                        onClick={() => handleEditStaff(row)}
-                    >
-                        <Pencil size={18} />
-                    </button>
+                    {role.is_admin && (<>
+                        <button
+                            className="text-gray-500 hover:text-primary-600 p-1.5 rounded-lg hover:bg-primary-50 transition-colors"
+                            title="Edit Details"
+                            onClick={() => handleEditStaff(row)}
+                        >
+                            <Pencil size={18}/>
+                        </button>
 
-                    {/* Delete Button */}
-                    <button
-                        className="text-gray-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                        onClick={() => handleDeleteStaff(row.id, getOwnerName(row))}
-                        title="Delete Owner"
-                    >
-                        <Trash2 size={18} />
-                    </button>
+                        {/* Delete Button */}
+                        <button
+                            className="text-gray-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                            onClick={() => handleDeleteStaff(row.id, getOwnerName(row))}
+                            title="Delete Owner"
+                        >
+                            <Trash2 size={18}/>
+                        </button>
+                    </>)}
+
                 </div>
             )
         }
@@ -389,9 +395,9 @@ const PitchOwners = () => {
             label: 'Status',
             type: 'select',
             options: [
-                { label: 'All Status', value: 'all' },
-                { label: 'Active', value: 'true' },
-                { label: 'Inactive', value: 'false' }
+                {label: 'All Status', value: 'all'},
+                {label: 'Active', value: 'true'},
+                {label: 'Inactive', value: 'false'}
             ],
             value: activeFilters.status
         }
@@ -405,10 +411,13 @@ const PitchOwners = () => {
         }
     ];
 
-    // --- RENDER ---
+    if (!user || !user.role) return false;
+
+    const {role} = user;
+
     return (
         <div className="w-full px-2 sm:px-0">
-            {showForm ? (
+        {showForm ? (
                 // FORM VIEW
                 <PitchOwnerForm
                     initialData={selectedOwner}
@@ -480,7 +489,7 @@ const PitchOwners = () => {
                                 columns={columns}
                                 filters={filterConfig}
                                 searchPlaceholder="Search name, pitch, city..."
-                                topActions={topActions}
+                                topActions={role.is_admin===true?topActions:[]}
                                 currentPage={currentPage}
                                 totalItems={totalCount}
                                 itemsPerPage={rowsPerPage}

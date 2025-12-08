@@ -85,14 +85,14 @@ const Sidebar = ({ onToggle }) => {
             can_view_tickets: role.is_admin ||  role.is_sub_admin,
             can_view_reports: role.is_admin ,
             can_view_revenue: role.is_admin || role.is_pitch_owner,
-            can_view_support: true, // Everyone can access support
+            can_view_support: role.is_admin ||  role.is_sub_admin, // Everyone can access support
             can_view_settings: role.is_admin || role.is_staff,
             can_view_calendar: role.is_admin ||  role.is_sub_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
             can_view_pitches: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
-            can_view_amenities: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
+            can_view_amenities: role.is_admin || role.is_sub_admin,
             can_view_venue_sports: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
             can_view_surface_types: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
-            can_view_addons: role.is_admin || role.is_staff || role.is_pitch_owner || role.is_sub_pitch_owner,
+            can_view_addons: role.is_admin || role.is_sub_admin,
             can_view_banners: role.is_admin ||  role.is_sub_admin,
             can_view_notifications: role.is_admin ||  role.is_sub_admin,
             can_view_vouchers:role.is_admin ||  role.is_sub_admin,
