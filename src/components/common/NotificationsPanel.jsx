@@ -1,22 +1,17 @@
-import React, { useEffect } from 'react';
+// components/NotificationsPanel.jsx - Updated version
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAnalytics from '../../hooks/useAnalytics';
+import { useNotifications } from '../../hooks/useNotifications.js';
 
 const NotificationsPanel = () => {
     const navigate = useNavigate();
     const {
         notifications,
-        notificationsCount,
-        isNotificationsLoading,
-        getNotifications,
+        isLoading,
         markAsRead,
-        error
-    } = useAnalytics();
-    useEffect(() => {
-        // Fetch latest 5 notifications
-        getNotifications({ page_limit: 5, ordering: '-created_at' });
-    }, []);
-    console.log(notifications,'ggggggg')
+        refreshNotifications
+    } = useNotifications();
+
     const getNotificationIcon = (notification) => {
         const title = notification.title?.toLowerCase() || '';
 
@@ -46,7 +41,6 @@ const NotificationsPanel = () => {
             );
         }
 
-        // Default notification icon
         return (
             <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center">
                 <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,10 +68,10 @@ const NotificationsPanel = () => {
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
-    const handleNotificationClick = (notification) => {
-        // Mark as read if needed
-        if (!notification.is_active) {
-            markAsRead(notification.id);
+    const handleNotificationClick = async (notification) => {
+        // Mark as read
+        if (!notification.read) {
+            await markAsRead(notification.id);
         }
 
         // Navigate based on notification type or model_id
@@ -86,39 +80,33 @@ const NotificationsPanel = () => {
         }
     };
 
-    const handleViewMore = () => {
-        // navigate('/notifications');
-    };
-
-    if (error.notifications) {
-        return (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
-                </div>
-                <div className="text-center py-8">
-                    <p className="text-red-500 text-sm">Failed to load notifications</p>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">Notifications</h2>
                 <button
-                    className="text-gray-400 hover:text-gray-600"
-                    onClick={() => getNotifications({ page_limit: 5, ordering: '-created_at' })}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    onClick={refreshNotifications}
+                    disabled={isLoading}
                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                    <svg
+                        className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
                     </svg>
                 </button>
             </div>
 
             <div className="space-y-4">
-                {isNotificationsLoading ? (
+                {isLoading ? (
                     <div className="flex items-center justify-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                     </div>
@@ -129,19 +117,20 @@ const NotificationsPanel = () => {
                         </svg>
                         <p className="text-gray-500 text-sm">No notifications yet</p>
                     </div>
-                ) : (notifications.map((notification,index) => (
+                ) : (
+                    notifications.slice(0, 5).map((notification, index) => (
                         <div
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
                             className={`flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors relative ${
-                                !notification.is_active
+                                !notification.read
                                     ? 'bg-blue-50 hover:bg-blue-100'
                                     : 'hover:bg-gray-50'
                             }`}
                         >
                             {/* Vertical dashed line connecting icons */}
-                            {index < notifications.length - 1 && (
-                                <div className="absolute    left-8 top-[52px] h-[calc(100%+16px)] w-0 border-l border-primary-700  border border-dashed border-gray-300"></div>
+                            {index < Math.min(notifications.length, 5) - 1 && (
+                                <div className="absolute left-8 top-[52px] h-[calc(100%+16px)] w-0 border-l border-dashed border-gray-300"></div>
                             )}
 
                             {getNotificationIcon(notification)}
@@ -151,12 +140,17 @@ const NotificationsPanel = () => {
                                         {notification.title || 'Notification'}
                                     </h3>
                                     <span className="text-xs text-gray-500 whitespace-nowrap">
-                                        {formatTime(notification.created_at)}
+                                        {formatTime(notification.timestamp)}
                                     </span>
                                 </div>
                                 <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                                    {notification.message || 'No message content'}
+                                    {notification.body || 'No message content'}
                                 </p>
+                                {!notification.read && (
+                                    <span className="inline-block mt-1 text-xs text-blue-600 font-medium">
+                                        New
+                                    </span>
+                                )}
                             </div>
                         </div>
                     ))
@@ -165,10 +159,10 @@ const NotificationsPanel = () => {
 
             {notifications.length > 0 && (
                 <button
-                    onClick={handleViewMore}
+                    onClick={() => navigate('/notifications')}
                     className="w-full mt-4 text-center text-sm text-primary-600 hover:text-primary-700 font-medium py-2"
                 >
-                    View more
+                    View all {notifications.length} notifications
                 </button>
             )}
         </div>

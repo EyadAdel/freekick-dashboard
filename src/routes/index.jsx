@@ -34,7 +34,6 @@ import VenueDetails from "../components/venues/VenueDetails.jsx";
 import Vouchers from "../pages/Vouchers/Vouchers.jsx";
 import BookingCalendar from "../pages/BookingCalendar/BookingCalendar.jsx";
 import ProfileSettings from "../pages/ProfileSettings/ProfileSettings.jsx";
-import TestNotificationSender from "../components/TestNotificationSender.jsx";
 import Teams from "../pages/Teams/Teams.jsx";
 import Players from "../pages/players/players.jsx";
 import AppsNotifications from "../pages/AppsNotifications/AppsNotifications.jsx";

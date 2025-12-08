@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AppContent from "./AppContent.jsx";
 import {requestNotificationPermission} from "./firebase/firebase.js";
 import {useEffect} from "react";
+import NotificationInitializer from "./components/NotificationInitializer.jsx";
 
 // Separate component to access Redux state
 function ToastWrapper() {
@@ -68,6 +69,7 @@ function App() {
     }, []);
     return (
         <Provider store={store}>
+            <NotificationInitializer />
             <AppContent />
             <ToastWrapper />
         </Provider>
