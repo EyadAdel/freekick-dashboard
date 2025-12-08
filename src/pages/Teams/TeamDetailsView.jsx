@@ -31,18 +31,14 @@ import {
 } from "lucide-react";
 import MainTable from "../../components/MainTable.jsx";
 import TeamPointsTab from "./TeamPoints.jsx";
+import BookingCard from "../../components/players/BookingCard.jsx";
+import {playerService} from "../../services/players/playerService.js";
 
 
-// ============================================================================
-// EDIT MODAL COMPONENT
-// ============================================================================
 
-// ============================================================================
-// TEAM DETAIL VIEW
-// ============================================================================
 const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
     const teamId = initialTeam?.id;
-    const { team: fetchedTeam, isLoading: isFetchingDetails } = useTeam(teamId);
+    const { team: fetchedTeam,refetch, isLoading: isFetchingDetails } = useTeam(teamId);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
 
     // State for edit modal
@@ -441,7 +437,6 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                         Suspend team
                     </>
                 )}
-                {/*<Power className={`w-4 h-4 transition-transform ${disabled ? '' : 'hover:scale-110'}`} />*/}
             </button>
         );
     };
@@ -449,12 +444,22 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
     const handleStatusToggle = async (newStatus) => {
         setIsUpdating(true);
         try {
-            await teamService.updateTeam(team.id, { is_active: newStatus });
-            toast.success(`Team ${newStatus ? 'activated' : 'deactivated'} successfully`);
-            refetchTeam();
-            if (onRefresh) onRefresh();
+            const confirmed = await showConfirm({
+                title: 'Are you sure?',
+                text: `Do you want to ${team.is_active ? 'Suspend' : 'activate'} this Team?`,
+                confirmButtonText: `Yes, ${team.is_active ? 'Suspend' : 'Activate'}`,
+                cancelButtonText: 'Cancel',
+                icon: team.is_active ? 'warning' : 'info'
+            });
+
+            if (confirmed) {
+                await teamService.updateTeam(team.id,  newStatus);
+                toast.success(`Team ${newStatus ? 'activated' : 'deactivated'} successfully`);
+                await refetch();
+                if (onRefresh) onRefresh();
+            }
         } catch (error) {
-            toast.error('Failed to update team status: ' + error.message);
+            // toast.error('Failed to update team status: ' + error.message);
         } finally {
             setIsUpdating(false);
         }
@@ -672,37 +677,8 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                                     </div>
                                 ) : filteredBookings.length > 0 ? (
                                     <div className="space-y-3">
-                                        {filteredBookings.map((booking) => (
-                                            <div key={booking.id} className="border border-gray-100 rounded-lg p-4 hover:border-primary-300 transition-colors">
-                                                <div className="flex items-start justify-between mb-3">
-                                                    <div>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <h4 className="font-semibold text-gray-900">Booking #{booking.id}</h4>
-                                                            {getStatusBadge(booking.status)}
-                                                        </div>
-                                                        <p className="text-sm text-gray-500">Match #{booking.match || 'N/A'}</p>
-                                                    </div>
-                                                    <p className="text-lg font-bold text-primary-600">{formatAmount(booking.total_price || 0)}</p>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-3 text-sm">
-                                                    <div className="flex items-center gap-2 text-gray-600">
-                                                        <MapPin className="w-4 h-4" />
-                                                        {booking.pitch?.translations?.name || 'N/A'}
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-gray-600">
-                                                        <Clock className="w-4 h-4" />
-                                                        {formatDateTime(booking.start_time)}
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-gray-600">
-                                                        <Users className="w-4 h-4" />
-                                                        {booking.max_players || 0} Players
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-gray-600">
-                                                        <Award className="w-4 h-4" />
-                                                        {booking.play_kind?.translations?.name || 'N/A'}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        {filteredBookings.map((booking,index) => (
+                                            <BookingCard key={index} booking={booking} />
                                         ))}
                                     </div>
                                 ) : (

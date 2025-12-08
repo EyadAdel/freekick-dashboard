@@ -72,7 +72,7 @@ export const teamService = {
 
     updateTeam: async (id, data) => {
         try {
-            const response = await api.patch(`/teams/teams/${id}/`, data);
+            const response = await api.patch(`/teams/teams/${id}/`, {is_active:data,id:id});
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

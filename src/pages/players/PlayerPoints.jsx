@@ -30,7 +30,7 @@ const PlayerPoints = ({ playerId }) => {
                 // page: currentPage,
                 // page_limit: itemsPerPage,
                 search: searchTerm,
-                user: playerId,
+                user__id: playerId,
                 // ordering: sortConfig.direction === 'desc' ? `-${sortConfig.key}` : sortConfig.key,
                 ...filters
             };
@@ -166,7 +166,7 @@ const PlayerPoints = ({ playerId }) => {
             accessor: 'kind',
             align: 'center',
             render: (row) => (
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-medium capitalize">
+                <span className={` ${row.kind === 'subtraction'?'bg-red-50 text-red-800':'bg-primary-50 text-primary-600'} px-2 py-1  rounded-xl text-xs font-medium capitalize`}>
                     {row.kind || 'N/A'}
                 </span>
             )
@@ -288,9 +288,8 @@ const PlayerPoints = ({ playerId }) => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                 >
                                     <option value="addition">Addition</option>
-                                    <option value="deduction">Deduction</option>
-                                    <option value="bonus">Bonus</option>
-                                    <option value="penalty">Penalty</option>
+                                    <option value="subtraction">Subtraction </option>
+
                                 </select>
                             </div>
 
