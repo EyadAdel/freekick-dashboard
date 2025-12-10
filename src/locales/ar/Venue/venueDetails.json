@@ -1,0 +1,58 @@
+{
+  "header": {
+    "backToVenues": "العودة للملاعب",
+    "updateVenue": "تحديث الملعب"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "venueTypeIndoor": "داخلي",
+    "venueTypeOutdoor": "خارجي"
+  },
+  "card": {
+    "opens": "يفتح",
+    "closes": "يغلق",
+    "pricePerHour": "السعر بالساعة",
+    "currency": "د.إ",
+    "contactInfo": "معلومات الاتصال",
+    "manager": "المدير",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "closedDays": "أيام العطلة",
+    "openMap": "فتح الخريطة",
+    "day": "يوم"
+  },
+  "gallery": {
+    "title": "معرض صور الملعب"
+  },
+  "info": {
+    "title": "الوصف",
+    "noDescription": "لا يوجد وصف لهذا الملعب.",
+    "surface": "نوع الأرضية",
+    "unknownSurface": "أرضية غير معروفة",
+    "size": "المساحة",
+    "sportsActivities": "الرياضات والأنشطة",
+    "facilities": "المرافق"
+  },
+  "addons": {
+    "title": "الإضافات المتاحة",
+    "minOrder": "أقل طلب"
+  },
+  "policies": {
+    "title": "السياسات والقواعد",
+    "venueRules": "قواعد الملعب",
+    "noRules": "لا توجد قواعد محددة.",
+    "bookingTerms": "شروط الحجز",
+    "cancellationNotice": "فترة الإلغاء",
+    "hours": "ساعات",
+    "advanceBooking": "الحجز المسبق",
+    "days": "أيام",
+    "splitPayment": "الدفع المقسم",
+    "allowed": "مسموح",
+    "notAllowed": "غير مسموح"
+  },
+  "messages": {
+    "notFound": "بيانات الملعب غير موجودة.",
+    "back": "عودة"
+  }
+}

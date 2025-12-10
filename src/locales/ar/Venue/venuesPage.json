@@ -1,0 +1,85 @@
+{
+  "pageTitle": "الملاعب",
+  "loading": "جاري التحميل...",
+  "entity": {
+    "venue": "ملعب",
+    "venues": "ملاعب"
+  },
+  "stats": {
+    "totalFiltered": "إجمالي الملاعب (مصفاة)",
+    "active": "الملاعب النشطة",
+    "inactive": "الملاعب غير النشطة"
+  },
+  "statusSection": {
+    "activeTitle": "الملاعب النشطة",
+    "inactiveTitle": "الملاعب غير النشطة",
+    "noActive": "لا توجد ملاعب نشطة",
+    "noInactive": "لا توجد ملاعب غير نشطة",
+    "btnActivate": "تفعيل",
+    "btnDeactivate": "تعطيل"
+  },
+  "viewTabs": {
+    "all": "كل الملاعب",
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "filters": {
+    "searchPlaceholder": "بحث عن ملعب",
+    "status": {
+      "label": "الحالة",
+      "all": "كل الحالات",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "type": {
+      "label": "نوع الملعب",
+      "all": "كل الأنواع",
+      "indoor": "داخلي",
+      "outdoor": "خارجي"
+    }
+  },
+  "table": {
+    "headers": {
+      "srNo": "م",
+      "venue": "الملعب",
+      "contactInfo": "معلومات الاتصال",
+      "location": "الموقع",
+      "playTypes": "أنواع اللعب",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "rows": {
+      "na": "غير متوفر",
+      "noAddress": "لا يوجد عنوان",
+      "viewOnMap": "عرض على الخريطة",
+      "none": "لا يوجد"
+    }
+  },
+  "actions": {
+    "create": "إضافة ملعب",
+    "view": "عرض التفاصيل",
+    "edit": "تعديل الملعب",
+    "delete": "حذف الملعب"
+  },
+  "messages": {
+    "errorLoad": "خطأ في تحميل الملاعب",
+    "errorDetails": "فشل تحميل تفاصيل الملعب"
+  },
+  "confirm": {
+    "activate": {
+      "title": "تفعيل \"{{name}}\"؟",
+      "text": "سيكون هذا الملعب مرئياً للمستخدمين.",
+      "btn": "نعم، قم بالتفعيل"
+    },
+    "deactivate": {
+      "title": "تعطيل \"{{name}}\"؟",
+      "text": "سيتم إخفاء هذا الملعب عن المستخدمين.",
+      "btn": "نعم، قم بالتعطيل"
+    },
+    "delete": {
+      "title": "حذف \"{{name}}\"؟",
+      "text": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف الملعب بشكل دائم.",
+      "btn": "نعم، قم بالحذف"
+    }
+  }
+}

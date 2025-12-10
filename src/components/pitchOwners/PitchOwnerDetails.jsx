@@ -4,7 +4,7 @@ import ArrowIcon from "../../components/common/ArrowIcon.jsx";
 
 import { pitchOwnersService } from '../../services/pitchOwners/pitchOwnersService.js';
 import MainTable from "../../components/MainTable.jsx";
-import AddActionModal from "../../components/pitchOwners/AddActionModal.jsx"; // Adjust path if needed
+import AddActionModal from "../../components/pitchOwners/AddActionModal.jsx";
 import {  useSelector } from 'react-redux';
 import { useContact } from "../../hooks/useContact.js";
 import {
@@ -26,11 +26,12 @@ import {
     TrendingUp,
     TrendingDown,
     ListFilter,
-    Percent // <--- 1. Imported Percent Icon
+    Percent,
+    Wallet // <--- Imported Wallet Icon
 } from "lucide-react";
 
 // ============================================================================
-// HELPERS (Kept exactly as is)
+// HELPERS
 // ============================================================================
 const formatDate = (dateTime) => {
     if (!dateTime) return 'N/A';
@@ -84,6 +85,7 @@ const PitchOwnerDetails = () => {
     // Staff Actions State
     const [actionsData, setActionsData] = useState([]);
     const [totalActions, setTotalActions] = useState(0);
+    const [actionsTotalBalance, setActionsTotalBalance] = useState(0); // <--- New State for Global Total
     const [currentActionPage, setCurrentActionPage] = useState(1);
     const [loadingActions, setLoadingActions] = useState(false);
     const [actionsLimit, setActionsLimit] = useState(10);
@@ -120,6 +122,8 @@ const PitchOwnerDetails = () => {
                 if (response && response.status) {
                     setActionsData(response.results);
                     setTotalActions(response.count);
+                    // Set the global total balance from the API response
+                    setActionsTotalBalance(response.total);
                 }
             } catch (error) {
                 console.error("Error fetching staff actions:", error);
@@ -160,15 +164,34 @@ const PitchOwnerDetails = () => {
 
     const actionColumns = [
         { header: 'SR.No', accessor: 'id', align: 'left', render: (row, index) => <span className="text-gray-500">{index + 1}</span> },
-        { header: 'Type', accessor: 'kind', align: 'left', render: (row) => {
+        { header: 'Description', accessor: 'description', align: 'left', render: (row) => <span className="text-gray-700 text-sm truncate max-w-[300px] block" title={row.description}>{row.description}</span> },
+
+        { header: 'Type', accessor: 'kind', align: 'center', render: (row) => {
                 const isPositive = ['add', 'addition'].includes(row.kind?.toLowerCase());
-                return (<div className={`flex items-center gap-2 font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>{isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}<span className="capitalize">{row.kind}</span></div>);
+                return (<div className={`flex items-center justify-center gap-2 font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>{isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}<span className="capitalize">{row.kind}</span></div>);
             }},
-        { header: 'Amount', accessor: 'amount', align: 'right', render: (row) => {
+        { header: 'Amount', accessor: 'amount', align: 'center', render: (row) => {
                 const isPositive = ['add', 'addition'].includes(row.kind?.toLowerCase());
                 return (<span className={`font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>{isPositive ? '+' : '-'} {formatAmount(row.amount)}</span>);
             }},
-        { header: 'Description', accessor: 'description', align: 'left', render: (row) => <span className="text-gray-700 text-sm truncate max-w-[300px] block" title={row.description}>{row.description}</span> },
+
+        // --- NEW BALANCE COLUMN ---
+        {
+            header: 'Balance',
+            accessor: 'balance',
+            align: 'center',
+            render: (row) => {
+                const isPositive = ['add', 'addition'].includes(row.kind?.toLowerCase());
+                const amount = parseFloat(row.amount || 0);
+                const lastTotal = parseFloat(row.last_total || 0);
+                // Calculate Balance: Last Total +/- Amount
+                const currentBalance = isPositive ? lastTotal + amount : lastTotal - amount;
+
+                return <span className="text-sm font-bold text-gray-800">{formatAmount(currentBalance)}</span>
+            }
+        },
+        // --------------------------
+
         { header: 'Date', accessor: 'created_at', align: 'right', render: (row) => <span className="text-gray-500 text-sm">{formatDateTime(row.created_at)}</span> }
     ];
 
@@ -199,7 +222,7 @@ const PitchOwnerDetails = () => {
                 </div>
             </div>
 
-            {/* Main Content Wrapper - Added space-y-8 for vertical gap */}
+            {/* Main Content Wrapper */}
             <div className="mx-auto py-8 space-y-8">
 
                 {/* 1. Top Section: Sidebar + Bookings + Pitches */}
@@ -225,22 +248,17 @@ const PitchOwnerDetails = () => {
                                 <div className="flex items-center justify-between"><div className="flex items-center gap-2"><LayoutGrid className="w-4 h-4 text-gray-400" /><span className="text-sm text-gray-600">Total Pitches</span></div><span className="text-sm font-semibold text-gray-900">{totalPitches}</span></div>
                                 <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-gray-400" /><span className="text-sm text-gray-600">Total Bookings</span></div><span className="text-sm font-semibold text-gray-900">{totalBookingsCount}</span></div>
                                 <div className="flex items-center justify-between"><div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-gray-400" /><span className="text-sm text-gray-600">Est. Revenue</span></div><span className="text-sm font-semibold text-green-600">{formatAmount(totalRevenue)}</span></div>
-
-                                {/* --- 2. ADDED COMMISSION RATE HERE --- */}
                                 {role.is_admin &&
-
                                     <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Percent className="w-4 h-4 text-gray-400" />
-                                        <span className="text-sm text-gray-600">Commission Rate</span>
-                                    </div>
-                                    <span className="text-sm font-semibold text-gray-900">
+                                        <div className="flex items-center gap-2">
+                                            <Percent className="w-4 h-4 text-gray-400" />
+                                            <span className="text-sm text-gray-600">Commission Rate</span>
+                                        </div>
+                                        <span className="text-sm font-semibold text-gray-900">
                                         {ownerData.commission_rate ?? 0}%
                                     </span>
-                                </div>
+                                    </div>
                                 }
-                                {/* ----------------------------------- */}
-
                             </div>
 
                             {/* Contact Info */}
@@ -309,59 +327,69 @@ const PitchOwnerDetails = () => {
                 </div>
 
 
-                {/* 2. STAFF ACTIONS TABLE SECTION - Now Full Width (Outside Grid) */}
+                {/* 2. STAFF ACTIONS TABLE SECTION */}
                 {role.is_admin &&
 
                     <div className="w-full">
-                    <div className="bg-white px-4 rounded-lg shadow-sm border border-gray-100">
-                        <div className="pt-5 lg:px-6 flex justify-between items-center mb-2">
-                            <div className="flex items-center gap-2">
-                                <FileText className="w-5 h-5 text-gray-700" />
-                                <h3 className="text-lg font-bold text-gray-900">Staff Actions</h3>
-                            </div>
+                        <div className="bg-white px-4 rounded-lg shadow-sm border border-gray-100">
+                            <div className="pt-5 lg:px-6 flex flex-wrap justify-between items-center mb-2 gap-4">
 
-                            <div className="flex items-center gap-3">
-                                {/* Action Limit Dropdown */}
-                                <div className="flex items-center gap-2">
-                                    <ListFilter className="w-4 h-4 text-gray-400" />
-                                    <select
-                                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-700 cursor-pointer"
-                                        value={actionsLimit}
-                                        onChange={(e) => {
-                                            setActionsLimit(Number(e.target.value));
-                                            setCurrentActionPage(1);
-                                        }}
-                                    >
-                                        <option value={10}>10 / page</option>
-                                        <option value={20}>20 / page</option>
-                                        <option value={50}>50 / page</option>
-                                        <option value={100}>100 / page</option>
-                                        <option value={500}>500 / page</option>
-                                        <option value={1000}>1000 / page</option>
-                                    </select>
+                                {/* Title & Total Balance */}
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="w-5 h-5 text-gray-700" />
+                                        <h3 className="text-lg font-bold text-gray-900">Staff Actions</h3>
+                                    </div>
+                                    {/* DISPLAY TOTAL BALANCE HERE */}
+                                    <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 rounded-full border border-primary-100">
+                                        <Wallet className="w-4 h-4 text-primary-600" />
+                                        <span className="text-sm text-primary-700">Total Balance:</span>
+                                        <span className="text-sm font-bold text-primary-800">{formatAmount(actionsTotalBalance)}</span>
+                                    </div>
                                 </div>
 
-                                <button
-                                    onClick={handleAddAction}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
-                                >
-                                    <Plus className="w-4 h-4" />
-                                    Add Action
-                                </button>
-                            </div>
-                        </div>
+                                <div className="flex items-center gap-3">
+                                    {/* Action Limit Dropdown */}
+                                    <div className="flex items-center gap-2">
+                                        <ListFilter className="w-4 h-4 text-gray-400" />
+                                        <select
+                                            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-700 cursor-pointer"
+                                            value={actionsLimit}
+                                            onChange={(e) => {
+                                                setActionsLimit(Number(e.target.value));
+                                                setCurrentActionPage(1);
+                                            }}
+                                        >
+                                            <option value={10}>10 / page</option>
+                                            <option value={20}>20 / page</option>
+                                            <option value={50}>50 / page</option>
+                                            <option value={100}>100 / page</option>
+                                            <option value={500}>500 / page</option>
+                                            <option value={1000}>1000 / page</option>
+                                        </select>
+                                    </div>
 
-                        <MainTable
-                            columns={actionColumns}
-                            data={actionsData}
-                            currentPage={currentActionPage}
-                            itemsPerPage={actionsLimit}
-                            totalItems={totalActions}
-                            onPageChange={setCurrentActionPage}
-                            showSearch={false}
-                        />
+                                    <button
+                                        onClick={handleAddAction}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add Action
+                                    </button>
+                                </div>
+                            </div>
+
+                            <MainTable
+                                columns={actionColumns}
+                                data={actionsData}
+                                currentPage={currentActionPage}
+                                itemsPerPage={actionsLimit}
+                                totalItems={totalActions}
+                                onPageChange={setCurrentActionPage}
+                                showSearch={false}
+                            />
+                        </div>
                     </div>
-                </div>
                 }
 
             </div>

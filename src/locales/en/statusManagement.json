@@ -1,0 +1,11 @@
+{
+  "active": "Active",
+  "inactive": "Inactive",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "pending": "Pending",
+  "approve": "Approve",
+  "reject": "Reject",
+  "items_count": "{{count}} item",
+  "items_count_plural": "{{count}} items"
+}

@@ -4,19 +4,22 @@ import { Eye, EyeOff, AlertCircle, Check } from 'lucide-react';
 const MainInput = ({
                        label,
                        name,
+                       min,
+                       max,
                        type = 'text',
                        value,
                        onChange,
                        placeholder = '',
                        error = '',
                        helperText = '',
-                       icon: Icon, // Pass an icon component (e.g., Mail)
-                       options = [], // For select inputs
+                       icon: Icon,
+                       options = [],
                        disabled = false,
                        required = false,
                        className = '',
                        ...props
                    }) => {
+
     const [showPassword, setShowPassword] = useState(false);
     const isError = error.length > 0;
 
@@ -25,6 +28,46 @@ const MainInput = ({
 
     // Dynamic Input Type for Password
     const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
+
+    // --- NEW LOGIC: Handle Min/Max Enforcement on Change ---
+    const handleInputChange = (e) => {
+        let newValue = e.target.value;
+
+        // Only enforce logic for number inputs
+        if (type === 'number' && newValue !== '') {
+            const numVal = parseFloat(newValue);
+            const minVal = min !== undefined && min !== '' ? parseFloat(min) : null;
+            const maxVal = max !== undefined && max !== '' ? parseFloat(max) : null;
+
+            // 1. Enforce Max (Prevent typing higher than max)
+            if (maxVal !== null && numVal > maxVal) {
+                newValue = maxVal.toString();
+            }
+
+            // 2. Enforce Min (Prevent typing lower than min)
+            // Note: This effectively prevents typing negative numbers if min is 0.
+            // If min is e.g. 10, typing "5" will instantly become "10".
+            if (minVal !== null && numVal < minVal) {
+                newValue = minVal.toString();
+            }
+        }
+
+        // Create a synthetic event or mutate the existing one to pass back to parent
+        const syntheticEvent = {
+            ...e,
+            target: {
+                ...e.target,
+                name: name,
+                value: newValue,
+                type: type,
+                checked: e.target.checked
+            }
+        };
+
+        if (onChange) {
+            onChange(syntheticEvent);
+        }
+    };
 
     // Base Styles
     const baseStyles = `
@@ -92,7 +135,7 @@ const MainInput = ({
                 id={name}
                 name={name}
                 value={value}
-                onChange={onChange}
+                onChange={onChange} // Textarea doesn't need min/max logic usually
                 disabled={disabled}
                 placeholder={placeholder}
                 rows={4}
@@ -158,8 +201,11 @@ const MainInput = ({
             id={name}
             type={inputType}
             name={name}
+            max={max}
+            min={min}
             value={value}
-            onChange={onChange}
+            // Use the new handler instead of passing props.onChange directly
+            onChange={handleInputChange}
             disabled={disabled}
             placeholder={placeholder}
             className={`${baseStyles} ${stateStyles} ${Icon ? 'pl-10' : ''}`}

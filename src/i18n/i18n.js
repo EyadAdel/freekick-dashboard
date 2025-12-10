@@ -8,16 +8,34 @@ import enCommon from '../locales/en/common.json';
 import arCommon from '../locales/ar/common.json';
 import enSidebar from '../locales/en/Sidebar.json';
 import arSidebar from '../locales/ar/Sidebar.json';
+import arVenueForm from '../locales/ar/Venue/venueForm.json';
+import enVenueForm from '../locales/en/Venue/venueForm.json';
+import enVenuesPage from '../locales/en/Venue/venuesPage.json';
+import arVenuesPage from '../locales/ar/Venue/venuesPage.json';
+import enVenueDetails from '../locales/en/Venue/venueDetails.json';
+import arVenueDetails from '../locales/ar/Venue/venueDetails.json';
+import enStatus from '../locales/en/statusManagement.json';
+import arStatus from '../locales/ar/statusManagement.json';
 
 // Translation resources
 const resources = {
     en: {
         common: enCommon,
         sidebar: enSidebar,
+        venueForm: enVenueForm,
+        venuesPage: enVenuesPage,
+        statusManagement: enStatus,
+        venueDetails: enVenueDetails,
+
     },
     ar: {
         common: arCommon,
         sidebar: arSidebar,
+        venueForm: arVenueForm,
+        venuesPage: arVenuesPage,
+        statusManagement: arStatus,
+        venueDetails: arVenueDetails,
+
     },
 };
 
@@ -36,7 +54,7 @@ i18n
         lng: getInitialLanguage(),
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'sidebar'],
+        ns: ['common', 'sidebar','venueForm','venuesPage','venueDetails','statusManagement'],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {
             escapeValue: false,

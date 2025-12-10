@@ -1,0 +1,103 @@
+{
+  "titles": {
+    "create": "Create New Venue",
+    "edit": "Edit Venue",
+    "createSubtitle": "Fill in the details for the new venue",
+    "editSubtitle": "Update venue details",
+    "basicInfo": "Basic Information",
+    "policies": "Policies & Rules",
+    "locationContact": "Location & Contact",
+    "details": "Venue Details",
+    "features": "Features & Amenities",
+    "addons": "Add-ons (Optional)",
+    "images": "Venue Images"
+  },
+  "labels": {
+    "venueNameEn": "Venue Name (EN)",
+    "venueNameAr": "Venue Name (AR)",
+    "descriptionEn": "Description (EN)",
+    "descriptionAr": "Description (AR)",
+    "addressTextEn": "Address Text (EN)",
+    "addressTextAr": "Address Text (AR)",
+    "rulesEn": "Rules & Regulations (EN)",
+    "rulesAr": "Rules & Regulations (AR)",
+    "cancelPolicyEn": "Cancellation Policy (EN)",
+    "cancelPolicyAr": "Cancellation Policy (AR)",
+    "owner": "Venue Owner",
+    "city": "City",
+    "fullAddress": "Full Address (Location)",
+    "contactName": "Contact Name",
+    "phone": "Phone Number",
+    "email": "Email",
+    "venueType": "Venue Type",
+    "surfaceType": "Surface Type",
+    "pricePerHour": "Price Per Hour",
+    "availableFrom": "Available From",
+    "availableTo": "Available To",
+    "advanceDays": "Advance Booking Days",
+    "minCancellation": "Min Cancellation (Hours)",
+    "mapLocation": "Select Location on Map",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "playTypes": "Venue Play Types",
+    "amenities": "Amenities",
+    "closedDays": "Closed Days",
+    "price": "Price",
+    "minNumber": "Min Number"
+  },
+  "placeholders": {
+    "descEn": "Enter venue description...",
+    "descAr": "Enter venue description...",
+    "rulesEn": "Enter venue rules...",
+    "rulesAr": "Enter venue rules...",
+    "policyEn": "Enter cancellation policy...",
+    "policyAr": "Enter cancellation policy...",
+    "selectOwner": "Select Owner",
+    "selectCity": "Select City",
+    "selectType": "Select Type",
+    "selectSurface": "Select Surface",
+    "selectMap": "Select on map",
+    "pricePlaceholder": "0.00"
+  },
+  "badges": {
+    "english": "English",
+    "arabic": "Arabic",
+    "englishPolicies": "English Policies",
+    "arabicPolicies": "Arabic Policies"
+  },
+  "options": {
+    "indoor": "Indoor",
+    "outdoor": "Outdoor",
+    "unknown": "Unknown",
+    "noPitch": "No Pitch"
+  },
+  "mapThemes": {
+    "standard": "Standard",
+    "satellite": "Satellite",
+    "dark": "Dark Mode",
+    "light": "Light Mode"
+  },
+  "toggles": {
+    "splitBooking": "Allow Split Booking",
+    "recurringBooking": "Allow Recurring Booking",
+    "isActive": "Is Active",
+    "auto": "Auto",
+    "clickToUpload": "Click to upload",
+    "selectMultiple": "Select multiple"
+  },
+  "messages": {
+    "translating": "Translating...",
+    "uploadWait": "Please wait for images to finish uploading.",
+    "required": "Required",
+    "fillRequired": "Please fill in required fields",
+    "saveSuccess": "Venue saved successfully!",
+    "saveFail": "Failed to save venue.",
+    "loadFail": "Failed to load configuration data.",
+    "optionsError": "Failed to load form options"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "create": "Create Venue",
+    "update": "Update Venue"
+  }
+}
