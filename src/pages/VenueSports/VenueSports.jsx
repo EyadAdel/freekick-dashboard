@@ -38,7 +38,7 @@ const VenueSports = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(setPageTitle('Venue Sports'));
+        dispatch(setPageTitle('Venues Sports'));
     }, [dispatch]);
 
     // --- STATE ---
@@ -216,7 +216,7 @@ const VenueSports = () => {
 
     const topActions = [
         {
-            label: '+ Create Venue Type',
+            label: '+ Create Venues Type',
             onClick: handleCreate,
             type: 'primary',
             icon: <Plus size={18} />

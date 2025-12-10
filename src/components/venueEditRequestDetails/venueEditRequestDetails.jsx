@@ -308,7 +308,7 @@ const VenueEditRequestDetails = () => {
                     {/* RIGHT CONTENT AREA */}
                     <div className="lg:col-span-2 2xl:col-span-3 space-y-6">
 
-                        {/* Section 1: Venue Details */}
+                        {/* Section 1: Venues Details */}
                         <div className="bg-white rounded-lg shadow-sm border border-gray-100">
                             <div className="p-4 px-6 w-full border-b border-gray-100">
                                 <h3 className="text-lg font-bold text-gray-900">Venue Details</h3>

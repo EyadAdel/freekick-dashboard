@@ -502,7 +502,7 @@ const VenueDetails = () => {
                     surfaceTypesService.getAllSurfaceTypes()
                 ]);
 
-                // Handle Venue Data
+                // Handle Venues Data
                 const venueData = venueRes.data;
                 setVenue(venueData);
                 if (venueData.images && venueData.images.length > 0) {

@@ -598,26 +598,43 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                     {/* 7. Images */}
                     <div className="space-y-4">
-                        <SectionHeader title={t('titles.images')} icon={ImageIcon} />
+                        <SectionHeader title={t('titles.images')} icon={ImageIcon}/>
+                        <label
+                            className="aspect-square w-full h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 border-gray-300 hover:border-primary-500 cursor-pointer bg-white hover:bg-primary-50 hover:shadow-sm">
+                            <input type="file" hidden multiple ref={fileInputRef} accept="image/*"
+                                   onChange={handleImageSelect}/>
+                            <div className="p-3 bg-primary-100 rounded-full mb-3 text-primary-600"><UploadCloud
+                                className="w-6 h-6"/></div>
+                            <span
+                                className="text-xs text-gray-600 font-semibold">{t('toggles.clickToUpload')}</span><span
+                            className="text-[10px] text-gray-400 mt-1">{t('toggles.selectMultiple')}</span>
+                        </label>
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
                             {formData.images.map((item, index) => {
                                 const isObject = typeof item === 'object';
                                 const imgSrc = isObject ? item.preview : item;
                                 const isUploading = isObject && item.uploading;
                                 return (
-                                    <div key={index} className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm">
-                                        <img src={imgSrc} alt={`Venue ${index}`} className={`w-full h-full object-cover transition-opacity ${isUploading ? 'opacity-50' : 'opacity-100'}`} />
-                                        {isUploading && (<div className="absolute inset-0 flex items-center justify-center bg-black/20"><Loader2 className="animate-spin text-white w-8 h-8" /></div>)}
-                                        {isObject && !isUploading && item.serverUrl && (<div className="absolute top-1 right-1 bg-green-500 text-white rounded-full p-0.5"><Check size={12} /></div>)}
-                                        <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all z-20"><button type="button" onClick={() => removeImage(index)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-transform"><Trash2 size={18} /></button></div>
+                                    <div key={index}
+                                         className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm">
+                                        <img src={imgSrc} alt={`Venue ${index}`}
+                                             className={`w-full h-full object-cover transition-opacity ${isUploading ? 'opacity-50' : 'opacity-100'}`}/>
+                                        {isUploading && (<div
+                                            className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                            <Loader2 className="animate-spin text-white w-8 h-8"/></div>)}
+                                        {isObject && !isUploading && item.serverUrl && (<div
+                                            className="absolute top-1 right-1 bg-green-500 text-white rounded-full p-0.5">
+                                            <Check size={12}/></div>)}
+                                        <div
+                                            className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all z-20">
+                                            <button type="button" onClick={() => removeImage(index)}
+                                                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-transform">
+                                                <Trash2 size={18}/></button>
+                                        </div>
                                     </div>
                                 );
                             })}
-                            <label className="aspect-square border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 border-gray-300 hover:border-primary-500 cursor-pointer bg-white hover:bg-primary-50 hover:shadow-sm">
-                                <input type="file" hidden multiple ref={fileInputRef} accept="image/*" onChange={handleImageSelect} />
-                                <div className="p-3 bg-primary-100 rounded-full mb-3 text-primary-600"><UploadCloud className="w-6 h-6" /></div>
-                                <span className="text-xs text-gray-600 font-semibold">{t('toggles.clickToUpload')}</span><span className="text-[10px] text-gray-400 mt-1">{t('toggles.selectMultiple')}</span>
-                            </label>
+
                         </div>
                     </div>
 

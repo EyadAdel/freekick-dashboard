@@ -469,7 +469,7 @@ const CalendarGrid = ({ groupedBookings, timeSlots }) => {
                         </div>
                     </div>
 
-                    {/* Venue Headers */}
+                    {/* Venues Headers */}
                     {Object.keys(groupedBookings).map((pitchKey) => (
                         <div key={pitchKey} className="border-r border-gray-200">
                             <div className="h-16 flex items-center justify-center px-4 border-b bg-primary-50">

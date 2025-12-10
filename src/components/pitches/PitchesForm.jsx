@@ -1,96 +1,255 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MainInput from './../MainInput.jsx';
-import useTranslation from '../../hooks/useTranslation.js';
+import useAutoTranslation from '../../hooks/useTranslation.js';
 import { uploadService } from '../../services/upload/uploadService.js';
 import { pitchesService } from '../../services/pitches/pitchesService.js';
+import { venuesService } from '../../services/venues/venuesService.js';
+
 import { generateUniqueFileName } from '../../utils/fileUtils';
+import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
 
 import {
-    Type, DollarSign, Maximize, MapPin, Layers, Save, X, Globe,
-    UploadCloud, Trash2, ChevronDown, Users, Loader2, Edit
+    Type, DollarSign, Layers, Save, X, Globe,
+    UploadCloud, Trash2, ChevronDown, Loader2, Edit,
+    Image as ImageIcon, Check, RefreshCw, CheckSquare
 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
-// Added initialData prop for editing mode
-const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, initialData = null }) => {
+// --- REUSABLE TRANSLATION COMPONENT ---
+const TranslationInput = ({
+                              label,
+                              value,
+                              onChange,
+                              loading,
+                              isManual,
+                              onReset,
+                              error,
+                              isTextArea = false,
+                              rows = 3,
+                              placeholder,
+                              forcedDir = null // 'ltr' or 'rtl' specific override
+                          }) => {
+    const { t, i18n } = useTranslation('pitchForm');
+    const isRTL = i18n.language === 'ar';
+
+    // Determine input direction: forcedDir takes precedence, then app language
+    const inputDir = forcedDir || (isRTL ? 'rtl' : 'ltr');
+
+    const getButtonPosition = () => {
+        if (forcedDir === 'rtl' || (isRTL )) return 'left-0 ml-1';
+        return 'right-0 mr-1';
+    };
+
+    const getLoadingPosition = () => {
+        if (forcedDir === 'rtl' || (isRTL )) return 'left-0 ml-1';
+        return 'right-0 mr-1';
+    };
+
+    return (
+        <div className="relative w-full">
+            {isTextArea ? (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                    <textarea
+                        rows={rows}
+                        className={`w-full p-3 border rounded-lg bg-white outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all text-sm ${error ? 'border-red-500' : 'border-gray-300'} ${inputDir === 'rtl' ? 'text-right' : 'text-left'}`}
+                        placeholder={placeholder}
+                        value={value}
+                        onChange={onChange}
+                        dir={inputDir}
+                    />
+                </div>
+            ) : (
+                <MainInput
+                    label={label}
+                    value={value}
+                    onChange={onChange}
+                    error={error}
+                    dir={inputDir}
+                />
+            )}
+
+            {loading && !isManual && (
+                <span className={`absolute top-0 ${getLoadingPosition()} text-xs text-blue-500 mt-2 animate-pulse`}>
+                    {t('basic_info.translating')}
+                </span>
+            )}
+
+            {isManual && (
+                <button
+                    type="button"
+                    onClick={onReset}
+                    className={`absolute top-0 ${getButtonPosition()} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
+                    title={t('basic_info.reset_auto_tooltip')}
+                >
+                    <RefreshCw size={10} /> {t('basic_info.auto_btn')}
+                </button>
+            )}
+        </div>
+    );
+};
+
+const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, pitchDetails = null }) => {
+    const { t, i18n } = useTranslation('pitchForm');
+    const isRTL = i18n.language === 'ar';
+    const initialData = pitchDetails?.data;
 
     // --- STATE ---
     const [formData, setFormData] = useState({
-        name: '',
-        name_ar: '',
+        translations: {
+            en: { name: '' },
+            ar: { name: '' }
+        },
         price_per_hour: '',
         size: '',
-        max_players: '',
         venue: '',
         parent_pitch: '',
         is_active: true,
         is_primary: false,
+        image: null
     });
-
-    // Image States
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [uniqueName, setUniqueName] = useState('1764535039939_e5484e6e7b4d7ce632cdd46fa5cbf66c.jpg');
-    const [imagePreview, setImagePreview] = useState(null);
-    const [finalImageUrl, setFinalImageUrl] = useState('');
-    const [isImageUploading, setIsImageUploading] = useState(false);
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Translation Logic
+    // --- VENUES STATE ---
+    const [fetchedVenues, setFetchedVenues] = useState([]);
+    const [isLoadingVenues, setIsLoadingVenues] = useState(false);
+
+    // --- PITCHES STATE ---
+    const [fetchedPitches, setFetchedPitches] = useState([]);
+    const [isLoadingPitches, setIsLoadingPitches] = useState(false);
+
+    // Translation State
     const [activeField, setActiveField] = useState(null);
+    const [manualEdits, setManualEdits] = useState({
+        en: { name: false },
+        ar: { name: false }
+    });
+
     const fileInputRef = useRef(null);
 
-    // --- POPULATE FORM IF EDITING (initialData) ---
+    // --- HELPER: PROCESS SERVER IMAGES ---
+    const processImage = (imagePath) => {
+        if (!imagePath) return null;
+        return imagePath.startsWith('http') ? imagePath : `${IMAGE_BASE_URL}${imagePath}`;
+    };
+
+    // --- 1. FETCH VENUES IF PROP IS EMPTY ---
+    useEffect(() => {
+        if (!venuesData || venuesData.length === 0) {
+            const fetchVenues = async () => {
+                setIsLoadingVenues(true);
+                try {
+                    const response = await venuesService.getAllVenues({ page_limit: 1000 });
+                    const rawData = response.results || (Array.isArray(response) ? response : []);
+
+                    const formattedOptions = rawData.map(v => ({
+                        value: v.id,
+                        label: i18n.language === 'ar'
+                            ? (v.translations?.ar?.name || v.translations?.name || v.name)
+                            : (v.translations?.en?.name || v.translations?.name || v.name) || `Venue #${v.id}`
+                    }));
+
+                    setFetchedVenues(formattedOptions);
+                } catch (error) {
+                    console.error("Failed to fetch venues", error);
+                    toast.error(t('messages.load_venues_error'));
+                } finally {
+                    setIsLoadingVenues(false);
+                }
+            };
+            fetchVenues();
+        }
+    }, [venuesData, i18n.language, t]);
+
+    // --- 2. FETCH PITCHES IF PROP IS EMPTY ---
+    useEffect(() => {
+        if (!pitchesList || pitchesList.length === 0) {
+            const fetchPitches = async () => {
+                setIsLoadingPitches(true);
+                try {
+                    const response = await pitchesService.getAllPitchess({ page_limit: 1000 });
+                    const rawData = response.results || (Array.isArray(response) ? response : []);
+
+                    const formattedOptions = rawData.map(p => ({
+                        value: p.id,
+                        label: i18n.language === 'ar'
+                            ? (p.translations?.ar?.name || p.translations?.name || p.name)
+                            : (p.translations?.en?.name || p.translations?.name || p.name) || `Pitch #${p.id}`
+                    }));
+
+                    setFetchedPitches(formattedOptions);
+                } catch (error) {
+                    console.error("Failed to fetch pitches", error);
+                } finally {
+                    setIsLoadingPitches(false);
+                }
+            };
+            fetchPitches();
+        }
+    }, [pitchesList, i18n.language]);
+
+    // Determine which lists to use
+    const displayVenues = (venuesData && venuesData.length > 0) ? venuesData : fetchedVenues;
+    const displayPitches = (pitchesList && pitchesList.length > 0) ? pitchesList : fetchedPitches;
+
+    // --- POPULATE FORM IF EDITING ---
     useEffect(() => {
         if (initialData) {
             setFormData({
-                name: initialData.translations?.en?.name || '',
-                name_ar: initialData.translations?.ar?.name || '',
+                translations: {
+                    en: { name: initialData.translations?.en?.name || '' },
+                    ar: { name: initialData.translations?.ar?.name || '' }
+                },
                 price_per_hour: initialData.price_per_hour || '',
-                size: initialData.size || '',
-                max_players: initialData.max_players || '',
+                size: initialData.size ? String(initialData.size) : '',
                 venue: initialData.venue || '',
                 parent_pitch: initialData.parent_pitch || '',
                 is_active: initialData.is_active ?? true,
                 is_primary: initialData.is_primary ?? false,
+                image: initialData.image ? {
+                    id: 'initial_img',
+                    preview: processImage(initialData.image),
+                    serverUrl: initialData.image,
+                    uniqueName: initialData.image,
+                    uploading: false
+                } : null
             });
 
-            // Handle existing image
-            if (initialData.image) {
-                setImagePreview(initialData.image); // Assuming image comes as a URL string
-                setFinalImageUrl(initialData.image);
-                // Keep the existing uniqueName if needed, or extract it from URL
-                setUniqueName(initialData.image);
-            }
+            setManualEdits({
+                en: { name: true },
+                ar: { name: true }
+            });
         }
     }, [initialData]);
 
     // --- TRANSLATION HOOKS ---
-    const { translatedText: arabicTranslation, loading: loadingAr } =
-        useTranslation(activeField === 'en' ? formData.name : "", 'ar');
+    const { translatedText: arName, loading: loadArName } = useAutoTranslation(activeField === 'en' ? formData.translations.en.name : "", 'ar');
+    const { translatedText: enName, loading: loadEnName } = useAutoTranslation(activeField === 'ar' ? formData.translations.ar.name : "", 'en');
 
-    const { translatedText: englishTranslation, loading: loadingEn } =
-        useTranslation(activeField === 'ar' ? formData.name_ar : "", 'en');
+    const useSyncTranslation = (targetLang, field, text) => {
+        useEffect(() => {
+            const sourceLang = targetLang === 'en' ? 'ar' : 'en';
+            if (activeField === sourceLang && text && !manualEdits[targetLang][field]) {
+                setFormData(prev => ({
+                    ...prev,
+                    translations: {
+                        ...prev.translations,
+                        [targetLang]: { ...prev.translations[targetLang], [field]: text }
+                    }
+                }));
+            }
+        }, [text, activeField, manualEdits, targetLang, field]);
+    };
 
-    useEffect(() => {
-        // Only auto-translate if NOT in edit mode, or if user is actively typing (activeField is set)
-        if (activeField === 'en' && arabicTranslation) {
-            setFormData(prev => ({ ...prev, name_ar: arabicTranslation }));
-        }
-    }, [arabicTranslation, activeField]);
+    useSyncTranslation('ar', 'name', arName);
+    useSyncTranslation('en', 'name', enName);
 
-    useEffect(() => {
-        if (activeField === 'ar' && englishTranslation) {
-            setFormData(prev => ({ ...prev, name: englishTranslation }));
-        }
-    }, [englishTranslation, activeField]);
-
+    // --- HANDLERS ---
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        if (name === 'name') setActiveField('en');
-        if (name === 'name_ar') setActiveField('ar');
-
         setFormData((prev) => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
@@ -98,78 +257,94 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, initialData
         if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
-    // --- UPLOAD LOGIC ---
-    const handleImageSelect = async (file) => {
-        if (!file) return;
+    const handleTranslationChange = (lang, field, value) => {
+        setActiveField(lang);
+        setManualEdits(prev => ({ ...prev, [lang]: { ...prev[lang], [field]: true } }));
+        setFormData(prev => ({
+            ...prev,
+            translations: {
+                ...prev.translations,
+                [lang]: { ...prev.translations[lang], [field]: value }
+            }
+        }));
+        if (lang === 'en' && errors.name) setErrors(prev => ({ ...prev, name: '' }));
+        if (lang === 'ar' && errors.name_ar) setErrors(prev => ({ ...prev, name_ar: '' }));
+    };
+
+    const resetManualEdit = (lang, field) => {
+        setManualEdits(prev => ({ ...prev, [lang]: { ...prev[lang], [field]: false } }));
+        const otherLang = lang === 'en' ? 'ar' : 'en';
+        setActiveField(otherLang);
+    };
+
+    // --- IMAGE UPLOAD LOGIC ---
+    const handleImageSelect = (e) => {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+
+        const file = files[0];
         if (!file.type.startsWith('image/')) {
-            toast.error("Please upload a valid image file");
+            toast.error(t('images.valid_image_error'));
             return;
         }
 
-        const previewUrl = URL.createObjectURL(file);
-        setSelectedImage(file);
-        setImagePreview(previewUrl);
+        const newImage = {
+            id: Date.now() + Math.random(),
+            file,
+            preview: URL.createObjectURL(file),
+            uploading: true,
+            serverUrl: null,
+            uniqueName: null
+        };
+
+        setFormData(prev => ({ ...prev, image: newImage }));
         setErrors(prev => ({ ...prev, image: '' }));
 
-        setIsImageUploading(true);
-        try {
-            const generatedName = generateUniqueFileName(file.name);
-            setUniqueName(generatedName);
-            const result = await uploadService.processFullUpload(file, generatedName);
-            const uploadedUrl = result.url || result.key || result.imageUrl;
+        const uploadImage = async () => {
+            try {
+                const uniqueName = generateUniqueFileName(file.name);
+                const result = await uploadService.processFullUpload(file, uniqueName);
 
-            setFinalImageUrl(uploadedUrl);
-            toast.success("Image uploaded successfully");
-        } catch (error) {
-            console.error("Image upload failed", error);
-            setSelectedImage(null);
-            setImagePreview(null); // Revert to null or previous image?
-            setFinalImageUrl('');
-            if(fileInputRef.current) fileInputRef.current.value = '';
-            toast.error("Image upload failed.");
-        } finally {
-            setIsImageUploading(false);
-        }
+                setFormData(prev => ({
+                    ...prev,
+                    image: {
+                        ...prev.image,
+                        serverUrl: result.url || uniqueName,
+                        uniqueName: uniqueName,
+                        uploading: false
+                    }
+                }));
+                toast.success(t('images.upload_success'));
+            } catch (error) {
+                console.error("Image upload failed", error);
+                toast.error(t('images.upload_fail'));
+                setFormData(prev => ({ ...prev, image: null }));
+            }
+        };
+
+        uploadImage();
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    const onFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) handleImageSelect(file);
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const file = e.dataTransfer.files[0];
-        if (file) handleImageSelect(file);
-    };
-
-    const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); };
-
-    const removeImage = (e) => {
-        e.stopPropagation();
-        setSelectedImage(null);
-        setImagePreview(null);
-        setFinalImageUrl('');
-        setUniqueName('');
-        if (fileInputRef.current) fileInputRef.current.value = "";
+    const removeImage = () => {
+        setFormData(prev => ({ ...prev, image: null }));
     };
 
     // --- SUBMIT ---
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const newErrors = {};
-        if (!formData.name) newErrors.name = "Pitch Name (EN) is required";
-        if (!formData.name_ar) newErrors.name_ar = "Pitch Name (AR) is required";
-        if (!formData.price_per_hour) newErrors.price_per_hour = "Price is required";
-        if (!formData.size) newErrors.size = "Size is required";
-        if (!formData.max_players) newErrors.max_players = "Max players is required";
-        if (!formData.venue) newErrors.venue = "Venue is required";
-
-        if (isImageUploading) {
-            toast.warning("Please wait for the image to finish uploading.");
+        if (formData.image?.uploading) {
+            toast.warning(t('images.wait_upload'));
             return;
         }
+
+        const newErrors = {};
+        if (!formData.translations.en.name) newErrors.name = t('validation.name_en_required');
+        if (!formData.translations.ar.name) newErrors.name_ar = t('validation.name_ar_required');
+        if (!formData.price_per_hour) newErrors.price_per_hour = t('validation.price_required');
+        if (!formData.size) newErrors.size = t('validation.size_required');
+        if (!formData.venue) newErrors.venue = t('validation.venue_required');
 
         setErrors(newErrors);
         if (Object.keys(newErrors).length > 0) return;
@@ -177,35 +352,38 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, initialData
         setIsSubmitting(true);
 
         try {
+            let finalImage = null;
+            if (formData.image) {
+                finalImage = formData.image.uniqueName || formData.image.serverUrl;
+            }
+
             const payload = {
                 translations: {
-                    en: { name: formData.name },
-                    ar: { name: formData.name_ar }
+                    en: { name: formData.translations.en.name },
+                    ar: { name: formData.translations.ar.name }
                 },
                 is_active: formData.is_active,
                 price_per_hour: parseFloat(formData.price_per_hour).toFixed(2),
                 size: parseInt(formData.size, 10),
-                max_players: parseInt(formData.max_players, 10),
                 is_primary: formData.is_primary,
-                venue: formData.venue,
+                venue: parseInt(formData.venue, 10),
                 parent_pitch: formData.parent_pitch ? parseInt(formData.parent_pitch, 10) : null,
-                // If finalImageUrl exists (new upload or existing), use it. Otherwise null.
-                image: finalImageUrl || uniqueName || null
+                image: finalImage
             };
 
             if (initialData) {
-                // --- UPDATE (PATCH) ---
                 await pitchesService.updatePitch(initialData.id, payload);
             } else {
-                // --- CREATE (POST) ---
                 await pitchesService.addPitch(payload);
             }
 
             if (onSuccess) onSuccess();
+            toast.success(initialData ? t('messages.update_success') : t('messages.create_success'));
 
         } catch (error) {
             console.error("Submission failed", error);
-            if(!error.response) toast.error("Something went wrong during submission.");
+            const msg = error.response?.data?.message || t('messages.generic_error');
+            toast.error(msg);
         } finally {
             setIsSubmitting(false);
         }
@@ -218,157 +396,236 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, initialData
         { label: '11 * 11', value: '11' }, { label: '12 * 12', value: '12' },
     ];
 
+    const SectionHeader = ({ title, icon: Icon }) => (
+        <h3 className="text-base md:text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
+            {Icon && <Icon size={20} />} {title}
+        </h3>
+    );
+
     return (
-        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-            <div className="bg-gradient-to-r from-primary-500 to-primary-700 px-8 py-6">
+        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-primary-500 to-primary-700 px-4 py-4 md:px-8 md:py-6">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                        <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
                             {initialData ? <Edit className="text-primary-100" /> : <Layers className="text-primary-100" />}
-                            {initialData ? "Edit Pitch" : "Create New Pitch"}
+                            {initialData ? t('header.edit_title') : t('header.create_title')}
                         </h2>
-                        <p className="text-primary-100 text-sm mt-1">
-                            {initialData ? "Update the details for this pitch." : "Fill in the details for the venue pitch."}
+                        <p className="text-primary-100 text-xs md:text-sm mt-1">
+                            {initialData ? t('header.edit_desc') : t('header.create_desc')}
                         </p>
                     </div>
-                    <button onClick={onCancel} className="text-white hover:bg-primary-600 p-2 rounded-lg">
+                    <button onClick={onCancel} className="text-white hover:bg-primary-600 p-2 rounded-lg transition-colors">
                         <X size={24} />
                     </button>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-8 space-y-8">
-                {/* ... (Rest of the form UI remains exactly the same as previous) ... */}
+            <form onSubmit={handleSubmit} className="p-4 md:p-6 lg:p-8 space-y-8 md:space-y-10">
 
-                {/* Names */}
+                {/* 1. Translations */}
                 <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2">Basic Information</h3>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="relative">
-                            <MainInput
-                                label="Pitch Name (English)"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
+                    <SectionHeader title={t('basic_info.title')} icon={Globe} />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+                        <div className="space-y-4">
+                            <span className="badge bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">{t('basic_info.badge_en')}</span>
+                            <TranslationInput
+                                label={t('basic_info.name_en_label')}
+                                value={formData.translations.en.name}
+                                onChange={(e) => handleTranslationChange('en', 'name', e.target.value)}
+                                loading={loadEnName}
+                                isManual={manualEdits.en.name}
+                                onReset={() => resetManualEdit('en', 'name')}
                                 error={errors.name}
-                                icon={Type}
-                                required
+                                forcedDir="ltr"
                             />
-                            {activeField === 'ar' && loadingEn && (
-                                <span className="absolute top-0 right-0 text-xs text-blue-500 mt-2 mr-2 animate-pulse">Translating...</span>
-                            )}
                         </div>
-                        <div className="relative">
-                            <MainInput
-                                label="Pitch Name (Arabic)"
-                                name="name_ar"
-                                value={formData.name_ar}
-                                onChange={handleChange}
+                        <div className="space-y-4" dir="rtl">
+                            <span className="badge bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">{t('basic_info.badge_ar')}</span>
+                            <TranslationInput
+                                label={t('basic_info.name_ar_label')}
+                                value={formData.translations.ar.name}
+                                onChange={(e) => handleTranslationChange('ar', 'name', e.target.value)}
+                                loading={loadArName}
+                                isManual={manualEdits.ar.name}
+                                onReset={() => resetManualEdit('ar', 'name')}
                                 error={errors.name_ar}
-                                icon={Globe}
-                                required
-                                style={{ direction: 'rtl' }}
+                                forcedDir="rtl"
                             />
-                            {activeField === 'en' && loadingAr && (
-                                <span className="absolute top-0 left-0 text-xs text-blue-500 mt-2 ml-2 animate-pulse">Translating...</span>
-                            )}
                         </div>
                     </div>
                 </div>
 
-                {/* Image Upload */}
+                {/* 2. Image Upload */}
                 <div className="space-y-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Pitch Image</label>
-                    <div
-                        onClick={() => !isImageUploading && fileInputRef.current.click()}
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop}
-                        className={`relative w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors 
-                        ${errors.image ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-primary-500'}
-                        ${isImageUploading ? 'cursor-wait bg-gray-50' : 'cursor-pointer'}`}
-                    >
-                        <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={onFileChange} disabled={isImageUploading} />
-
-                        {isImageUploading ? (
-                            <div className="flex flex-col items-center justify-center">
-                                <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
-                                <p className="text-sm font-medium text-gray-600">Uploading...</p>
-                            </div>
-                        ) : imagePreview ? (
-                            <div className="relative w-full h-full p-2 group">
-                                <img src={imagePreview} alt="Preview" className="w-full h-full object-contain rounded-md" />
-                                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
-                                    <button type="button" onClick={removeImage} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"><Trash2 size={20} /></button>
+                    <SectionHeader title={t('images.title')} icon={ImageIcon} />
+                    <div className="flex flex-col md:flex-row gap-4">
+                        {formData.image && (
+                            <div className="relative group aspect-square w-full md:w-64 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm">
+                                <img
+                                    src={formData.image.preview}
+                                    alt="Pitch"
+                                    className={`w-full h-full object-cover transition-opacity ${formData.image.uploading ? 'opacity-50' : 'opacity-100'}`}
+                                />
+                                {formData.image.uploading && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                        <Loader2 className="animate-spin text-white w-8 h-8" />
+                                    </div>
+                                )}
+                                {!formData.image.uploading && (formData.image.serverUrl || formData.image.uniqueName) && (
+                                    <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} bg-green-500 text-white rounded-full p-1`}>
+                                        <Check size={14} />
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+                                    <button
+                                        type="button"
+                                        onClick={removeImage}
+                                        className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-transform"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
                                 </div>
                             </div>
-                        ) : (
-                            <div className="text-center p-4">
-                                <div className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3"><UploadCloud size={24} /></div>
-                                <p className="text-sm font-medium text-gray-700">Click to upload</p>
-                            </div>
+                        )}
+                        {!formData.image && (
+                            <label className="aspect-square w-full h-48  border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 border-gray-300 hover:border-primary-500 cursor-pointer bg-white hover:bg-primary-50 hover:shadow-sm">
+                                <input
+                                    type="file"
+                                    hidden
+                                    ref={fileInputRef}
+                                    accept="image/*"
+                                    onChange={handleImageSelect}
+                                />
+                                <div className="p-3 bg-primary-100 rounded-full mb-3 text-primary-600">
+                                    <UploadCloud className="w-8 h-8" />
+                                </div>
+                                <span className="text-sm text-gray-600 font-semibold">{t('images.upload_label')}</span>
+                                <span className="text-xs text-gray-500 mt-1">{t('images.click_to_select')}</span>
+                            </label>
                         )}
                     </div>
                 </div>
 
-                {/* Details (Prices, Size, Selects) */}
+                {/* 3. Details */}
                 <div className="space-y-6">
+                    <SectionHeader title={t('details.title')} icon={Type} />
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <MainInput label="Price Per Hour" name="price_per_hour" type="number" value={formData.price_per_hour} onChange={handleChange} error={errors.price_per_hour} icon={DollarSign} />
+                        <MainInput
+                            label={t('details.price_label')}
+                            name="price_per_hour"
+                            type="number"
+                            value={formData.price_per_hour}
+                            onChange={handleChange}
+                            error={errors.price_per_hour}
+                            icon={DollarSign}
+                            dir={isRTL ? 'rtl' : 'ltr'}
+                        />
 
                         <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700 mb-1">Size Type</label>
+                            <label className="text-sm font-medium text-gray-700 mb-1">{t('details.size_label')}</label>
                             <div className="relative">
-                                <select name="size" value={formData.size} onChange={handleChange} className="w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-primary-500">
-                                    <option value="">Select Size</option>
+                                <select
+                                    name="size"
+                                    value={formData.size}
+                                    onChange={handleChange}
+                                    className={`w-full ${isRTL ? 'pr-3 pl-10' : 'pl-3 pr-10'} py-2.5 border rounded-lg bg-white outline-none focus:border-primary-500 appearance-none text-sm text-gray-700`}
+                                    dir="ltr" // Keep sizes LTR (numbers) or remove to follow system
+                                >
+                                    <option value="">{t('details.select_size')}</option>
                                     {sizeOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                                 </select>
-                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                                <ChevronDown size={16} className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none`} />
                             </div>
                             {errors.size && <p className="text-red-500 text-xs mt-1">{errors.size}</p>}
                         </div>
 
-                        <MainInput label="Max Players" name="max_players" type="number" value={formData.max_players} onChange={handleChange} error={errors.max_players} icon={Users} />
-
+                        {/* VENUE DROPDOWN (Auto-fetched) */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700 mb-1">Venue</label>
+                            <label className="text-sm font-medium text-gray-700 mb-1 flex justify-between">
+                                {t('details.venue_label')}
+                                {isLoadingVenues && <Loader2 size={12} className="animate-spin text-primary-500" />}
+                            </label>
                             <div className="relative">
-                                <select name="venue" value={formData.venue} onChange={handleChange} className="w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-primary-500">
-                                    <option value="">Select Venue</option>
-                                    {venuesData && venuesData.map((item, index) => <option key={index} value={item.value}>{item.label}</option>)}
+                                <select
+                                    name="venue"
+                                    value={formData.venue}
+                                    onChange={handleChange}
+                                    disabled={isLoadingVenues}
+                                    className={`w-full ${isRTL ? 'pr-3 pl-10' : 'pl-3 pr-10'} py-2.5 border rounded-lg bg-white outline-none focus:border-primary-500 appearance-none text-sm text-gray-700 disabled:bg-gray-50`}
+                                >
+                                    <option value="">
+                                        {isLoadingVenues ? t('details.loading_venues') : t('details.select_venue')}
+                                    </option>
+                                    {displayVenues && displayVenues.map((item, index) => (
+                                        <option key={index} value={item.value}>{item.label}</option>
+                                    ))}
                                 </select>
-                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                                <ChevronDown size={16} className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none`} />
                             </div>
                             {errors.venue && <p className="text-red-500 text-xs mt-1">{errors.venue}</p>}
                         </div>
 
+                        {/* PARENT PITCH DROPDOWN (Auto-fetched) */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700 mb-1">Parent Pitch</label>
+                            <label className="text-sm font-medium text-gray-700 mb-1 flex justify-between">
+                                {t('details.parent_pitch_label')}
+                                {isLoadingPitches && <Loader2 size={12} className="animate-spin text-primary-500" />}
+                            </label>
                             <div className="relative">
-                                <select name="parent_pitch" value={formData.parent_pitch} onChange={handleChange} className="w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-primary-500">
-                                    <option value="">Select Parent Pitch</option>
-                                    {pitchesList && pitchesList.map((item, index) => <option key={index} value={item.value}>{item.label}</option>)}
+                                <select
+                                    name="parent_pitch"
+                                    value={formData.parent_pitch}
+                                    onChange={handleChange}
+                                    disabled={isLoadingPitches}
+                                    className={`w-full ${isRTL ? 'pr-3 pl-10' : 'pl-3 pr-10'} py-2.5 border rounded-lg bg-white outline-none focus:border-primary-500 appearance-none text-sm text-gray-700 disabled:bg-gray-50`}
+                                >
+                                    <option value="">
+                                        {isLoadingPitches ? t('details.loading_pitches') : t('details.select_parent_pitch_optional')}
+                                    </option>
+                                    {displayPitches && displayPitches
+                                        // Prevent self-selection if editing
+                                        .filter(p => p.value !== initialData?.id)
+                                        .map((item, index) => <option key={index} value={item.value}>{item.label}</option>)}
                                 </select>
-                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                                <ChevronDown size={16} className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none`} />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Status */}
-                <div className="bg-primary-50 p-6 rounded-lg space-y-4 border border-primary-100">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <MainInput type="checkbox" label="Is Active?" name="is_active" value={formData.is_active} onChange={handleChange} />
-                        <MainInput type="checkbox" label="Is Primary Pitch?" name="is_primary" value={formData.is_primary} onChange={handleChange} />
+                {/* 4. Settings */}
+                <div className="space-y-6">
+                    <SectionHeader title={t('settings.title')} icon={CheckSquare} />
+                    <div className="border border-primary-100 bg-primary-50 flex flex-wrap gap-4 md:gap-8 p-6 rounded-lg">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" name="is_active" checked={formData.is_active} onChange={handleChange} className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500" />
+                            <span className="text-sm font-medium text-gray-700">{t('settings.is_active')}</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" name="is_primary" checked={formData.is_primary} onChange={handleChange} className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500" />
+                            <span className="text-sm font-medium text-gray-700">{t('settings.is_primary')}</span>
+                        </label>
                     </div>
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-4 pt-4">
-                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">Cancel</button>
-                    <button type="submit" disabled={isSubmitting || isImageUploading} className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg">
-                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? "Update Pitch" : "Save Pitch"}</>}
+                <div className="md:flex gap-4 pt-6 border-t">
+                    <button type="button" onClick={onCancel}
+                            className="md:flex items-center justify-center hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">
+                        {t('buttons.cancel')}
+                    </button>
+                    <button type="submit" disabled={isSubmitting || formData.image?.uploading}
+                            className="flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base">
+                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? t('buttons.update') : t('buttons.save')}</>}
+                    </button>
+                    <button type="button" onClick={onCancel}
+                            className="flex-1 md:hidden bg-gray-100 w-full mt-3 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">
+                        {t('buttons.cancel')}
                     </button>
                 </div>
+
             </form>
         </div>
     );

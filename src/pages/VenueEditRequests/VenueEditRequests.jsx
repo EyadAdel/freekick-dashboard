@@ -71,7 +71,7 @@ const VenueEditRequests = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        dispatch(setPageTitle('Venue Update Requests'));
+        dispatch(setPageTitle('Venues Update Requests'));
     }, [dispatch]);
 
     // --- STATE MANAGEMENT ---
@@ -223,11 +223,11 @@ const VenueEditRequests = () => {
             render: (row) => <span className="text-gray-500 text-xs">#{row.id}</span>
         },
         {
-            header: 'Venue Info',
+            header: 'Venues Info',
             accessor: 'name',
             width: '250px',
             render: (row) => {
-                const name = row.translations?.en?.name || "Untitled Venue";
+                const name = row.translations?.en?.name || "Untitled Venues";
                 const address = row.translations?.en?.address || "No Address";
                 return (
                     <div className="flex items-start gap-3">

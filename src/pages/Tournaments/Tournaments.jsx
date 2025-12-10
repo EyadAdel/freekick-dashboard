@@ -307,7 +307,7 @@ const Tournaments = () => {
             )
         },
         {
-            header: 'Venue',
+            header: 'Venues',
             accessor: 'venue',
             align: 'left',
             render: (row) => (
@@ -373,7 +373,7 @@ const Tournaments = () => {
             value: activeFilters.status
         },
         {
-            key: 'venue', label: 'Filter by Venue', type: 'select',
+            key: 'venue', label: 'Filter by Venues', type: 'select',
             options: [ { label: 'All Venues', value: 'all' }, ...venuesData.map(v => ({ label: v.translations?.name || v.name, value: v.id })) ],
             value: activeFilters.venue
         }

@@ -8,6 +8,7 @@ import Bookings from '../pages/Bookings/Booking.jsx';
 // import Calendar from '../pages/Calendar/Calendar';
 import Venues from '../pages/Venues/Venues';
 import Pitches from '../pages/Pitches/Pitches';
+import PitchDetails from '../components/pitches/PitchDetails.jsx';
 import Amenities from '../pages/Amenities/Amenities';
 import Support from '../pages/Support/Support';
 import SurfaceTypes from '../pages/SurfaceTypes/SurfaceTypes.jsx';
@@ -91,6 +92,10 @@ const router = createBrowserRouter([
             {
                 path: 'pitches',
                 element: <Pitches />,
+            },
+            {
+                path: 'pitches/pitch-details',
+                element: <PitchDetails />,
             },
             {
                 path: 'amenities',

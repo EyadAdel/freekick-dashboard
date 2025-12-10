@@ -43,7 +43,7 @@ const PopularVenues = () => {
                 const venueName = venue.translations?.en?.name ||
                     venue.translations?.ar?.name ||
                     venue.name ||
-                    'Unknown Venue';
+                    'Unknown Venues';
 
                 // Get booking count from API response - using num_of_booking field
                 const bookingsCount = venue.num_of_booking || 0;
@@ -320,7 +320,7 @@ const PopularVenues = () => {
                         </div>
                     </div>
 
-                    {/* Legend with Venue Details */}
+                    {/* Legend with Venues Details */}
                     <div className="w-full ">
                         {venuesWithPercentages.map((venue, index) => (
                             <div key={venue.id || index} className="flex items-start justify-between px-3 py-1 hover:bg-gray-50 rounded-lg transition-colors duration-200">

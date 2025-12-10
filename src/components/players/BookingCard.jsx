@@ -94,7 +94,7 @@ const BookingCard = ({ booking }) => {
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900">
-                                {booking.pitch?.translations?.name || 'Venue'}
+                                {booking.pitch?.translations?.name || 'Venues'}
                             </p>
                             <p className="text-xs text-gray-500">
                                 {booking.pitch?.venue?.city || 'Location'}

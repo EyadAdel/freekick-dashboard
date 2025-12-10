@@ -1,69 +1,115 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'; // Import i18n hook
 import MainTable from './../../components/MainTable';
-import { Eye, Pencil, Trash2, CheckCircle, XCircle, TrendingUp, Clock } from 'lucide-react';
+import { Eye, Pencil, Trash2, CheckCircle, XCircle, TrendingUp, Image as ImageIcon } from 'lucide-react';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import PitchesForm from "../../components/pitches/PitchesForm.jsx";
 import { pitchesService } from '../../services/pitches/pitchesService.js';
 import { venuesService } from '../../services/venues/venuesService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
-// Import the Generic Component and the shared Badge
+import { toast } from 'react-toastify';
 import StatusManagementSection, { StatusBadge } from '../../components/StatusManagementSection.jsx';
+import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
+import StatCard from '../../components/Charts/StatCards.jsx';
+
+// --- Helper: Language Translation for Backend Objects ---
+const getTrans = (obj, lang) => {
+    if (!obj) return '';
+    if (typeof obj === 'string') return obj;
+    if (obj[lang]) return obj[lang];
+    if (obj.en) return obj.en;
+    // Fallback for structure like { translations: { name: "..." } }
+    if (obj.translations) {
+        // Recursive check if translations is an object
+        return obj.translations[lang]?.name || obj.translations.en?.name || obj.translations.name || '';
+    }
+    return obj.name || '';
+};
+
+// Helper Component: Handles Image Loading & Fallback Icon
+const PitchImage = ({ imagePath, alt }) => {
+    const [hasError, setHasError] = useState(false);
+
+    if (!imagePath || hasError) {
+        return (
+            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200" title="No Image Available">
+                <ImageIcon size={20} className="text-gray-400" />
+            </div>
+        );
+    }
+
+    return (
+        <img
+            src={`${IMAGE_BASE_URL}${imagePath}`}
+            alt={alt}
+            className="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm"
+            onError={() => setHasError(true)}
+        />
+    );
+};
 
 const Pitches = () => {
-    const { user } = useSelector((state) => state.auth); // Get user from Redux
-
-    const rowsPerPage = 10;
+    const { user } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { t, i18n } = useTranslation('pitchesPage'); // Use 'pitchesPage' namespace
+    const currentLang = i18n.language;
+    const rowsPerPage = 10;
 
     useEffect(() => {
-        dispatch(setPageTitle('Pitches'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pageTitle', 'Pitches')));
+    }, [dispatch, t]);
 
-    // State Management
+    // ================= STATE MANAGEMENT =================
+
+    // 1. Table Data
     const [pitchesData, setPitchesData] = useState([]);
-    const [venuesData, setVenuesData] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Form & Edit States
+    // 2. Global Data
+    const [allPitches, setAllPitches] = useState([]);
+
+    // 3. Dropdown Data
+    const [venuesData, setVenuesData] = useState([]);
+
+    // 4. Form & Selection
     const [showForm, setShowForm] = useState(false);
     const [selectedPitch, setSelectedPitch] = useState(null);
 
-    // Filter State
-    const [activeFilters, setActiveFilters] = useState({
+    // 5. Filters
+    const [filters, setFilters] = useState({
+        search: '',
         status: '',
         type: '',
         venue: '',
-        price: '',
-        pitcherName: '',
-        globalSearch: ''
+        price: ''
     });
 
-    // View State - To switch between different pitch status views
+    // 6. View State
     const [currentView, setCurrentView] = useState('all');
 
-    // Fetch Data
-    const fetchPitchesData = async () => {
-        setIsLoading(true);
-        try {
-            const response = await pitchesService.getAllPitchess(currentPage);
-            if (response && response.results) {
-                setPitchesData(response.results);
-            }
-        } catch (error) {
-            console.error("Failed to fetch pitches:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // ================= API CALLS =================
+
+    const apiFilters = useMemo(() => ({
+        page: currentPage,
+        page_limit: rowsPerPage,
+        search: filters.search,
+        venue: filters.venue === 'all' ? undefined : filters.venue,
+        is_active: filters.status === 'all' ? undefined : filters.status,
+        size: filters.type === 'all' ? undefined : filters.type,
+        price_per_hour: filters.price || undefined
+    }), [currentPage, rowsPerPage, filters]);
 
     const fetchVenuesData = async () => {
         try {
-            const response = await venuesService.getAllVenues();
+            const response = await venuesService.getAllVenues({ page_limit: 1000 });
             if (response && response.results) {
                 const formattedVenues = response.results.map((venue) => ({
-                    label: venue.translations.name,
+                    label: getTrans(venue.translations, currentLang) || venue.id,
                     value: venue.id
                 }));
                 setVenuesData(formattedVenues);
@@ -73,74 +119,152 @@ const Pitches = () => {
         }
     };
 
-    const fetchAllData = async () => {
+    const fetchPitchesData = async () => {
         setIsLoading(true);
         try {
-            await Promise.all([fetchPitchesData(), fetchVenuesData()]);
+            const response = await pitchesService.getAllPitchess(apiFilters);
+            if (response) {
+                setPitchesData(response.results || []);
+                setTotalItems(response.count || 0);
+            }
         } catch (error) {
-            console.error("Failed to fetch data:", error);
+            console.error("Failed to fetch pitches:", error);
+            toast.error(t('messages.loadFailed', "Failed to load pitches data"));
         } finally {
             setIsLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchAllData();
-    }, []);
+    const fetchGlobalData = async () => {
+        try {
+            const response = await pitchesService.getAllPitchess({ page_limit: 10000 });
+            if (response && response.results) {
+                setAllPitches(response.results);
+            }
+        } catch (error) {
+            console.error("Failed to fetch global pitch data:", error);
+        }
+    };
 
-    // Status Management Functions
+    useEffect(() => {
+        fetchVenuesData();
+        fetchGlobalData();
+    }, [currentLang]); // Re-fetch or re-format when language changes
+
+    useEffect(() => {
+        fetchPitchesData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [apiFilters]);
+
+    // ================= HANDLERS =================
+
+    const handleSearch = (term) => {
+        setFilters(prev => ({ ...prev, search: term }));
+        setCurrentPage(1);
+    };
+
+    const handleFilterChange = (newFilters) => {
+        setFilters(prev => ({ ...prev, ...newFilters }));
+        setCurrentPage(1);
+    };
+
+    const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+
+    const handleViewChange = (view) => {
+        setCurrentView(view);
+        let statusValue = '';
+
+        if (view === 'approved') statusValue = 'true';
+        if (view === 'rejected') statusValue = 'false';
+
+        setFilters(prev => ({ ...prev, status: statusValue }));
+        setCurrentPage(1);
+    };
+
     const handleApprovePitch = async (pitch) => {
+        const pitchName = getTrans(pitch.translations, currentLang) || `Pitch ${pitch.id}`;
         const isConfirmed = await showConfirm({
-            title: `Approve "${pitch.translations?.name || `Pitch ${pitch.id}`}"?`,
-            text: "This pitch will be set to active status and visible to users.",
-            confirmButtonText: 'Yes, Approve it'
+            title: t('modals.approveTitle', { name: pitchName }),
+            text: t('modals.approveText', "This pitch will be set to active status."),
+            confirmButtonText: t('modals.approveBtn', 'Yes, Approve it')
         });
 
         if (!isConfirmed) return;
 
         try {
             await pitchesService.updatePitch(pitch.id, { is_active: true });
-            setPitchesData(prev =>
-                prev.map(p =>
-                    p.id === pitch.id ? { ...p, is_active: true } : p
-                )
-            );
+            fetchPitchesData();
+            fetchGlobalData();
         } catch (error) {
             console.error("Failed to approve pitch:", error);
         }
     };
 
     const handleRejectPitch = async (pitch) => {
+        const pitchName = getTrans(pitch.translations, currentLang) || `Pitch ${pitch.id}`;
         const isConfirmed = await showConfirm({
-            title: `Reject "${pitch.translations?.name || `Pitch ${pitch.id}`}"?`,
-            text: "This pitch will be set to inactive status and hidden from users.",
-            confirmButtonText: 'Yes, Reject it'
+            title: t('modals.rejectTitle', { name: pitchName }),
+            text: t('modals.rejectText', "This pitch will be set to inactive status."),
+            confirmButtonText: t('modals.rejectBtn', 'Yes, Reject it')
         });
 
         if (!isConfirmed) return;
 
         try {
             await pitchesService.updatePitch(pitch.id, { is_active: false });
-            setPitchesData(prev =>
-                prev.map(p =>
-                    p.id === pitch.id ? { ...p, is_active: false } : p
-                )
-            );
+            fetchPitchesData();
+            fetchGlobalData();
         } catch (error) {
             console.error("Failed to reject pitch:", error);
         }
     };
 
-    // --- FORM HANDLERS ---
+    const handleDeletePitch = async (id, pitchName) => {
+        const isConfirmed = await showConfirm({
+            title: t('modals.deleteTitle', { name: pitchName }),
+            text: t('modals.deleteText', "This action cannot be undone."),
+            confirmButtonText: t('modals.deleteBtn', 'Yes, Delete it')
+        });
+
+        if (!isConfirmed) return;
+
+        try {
+            await pitchesService.deletePitch(id);
+            if (pitchesData.length === 1 && currentPage > 1) {
+                setCurrentPage(prev => prev - 1);
+            } else {
+                fetchPitchesData();
+            }
+            fetchGlobalData();
+        } catch (error) {
+            console.error("Failed to delete pitch:", error);
+        }
+    };
+
     const handleCreatePitch = () => {
         setSelectedPitch(null);
         setShowForm(true);
     };
 
-    const handleEditPitch = (pitch) => {
-        setSelectedPitch(pitch);
-        setShowForm(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    const handleViewPitch = (pitch) => {
+        navigate('/pitches/pitch-details', {
+            state: { pitchId: pitch.id }
+        });
+    };
+
+    const handleEditPitch = async (pitch) => {
+        setIsLoading(true);
+
+        try {
+            const fullPitchData = await pitchesService.getPitchById(pitch.id);
+            setSelectedPitch(fullPitchData);
+            setShowForm(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (error) {
+            console.error("Failed to fetch pitch details for editing:", error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleCancelForm = () => {
@@ -151,227 +275,143 @@ const Pitches = () => {
     const handleFormSuccess = () => {
         setShowForm(false);
         setSelectedPitch(null);
-        fetchAllData();
+        fetchPitchesData();
+        fetchGlobalData();
     };
 
-    const handleDeletePitch = async (id, pitchName) => {
-        const isConfirmed = await showConfirm({
-            title: `Delete "${pitchName}"?`,
-            text: "This action cannot be undone. The pitch will be permanently removed.",
-            confirmButtonText: 'Yes, Delete it'
-        });
+    // ================= DATA PROCESSING =================
 
-        if (!isConfirmed) return;
+    const globalActivePitches = useMemo(() => allPitches.filter(p => p.is_active), [allPitches]);
+    const globalInactivePitches = useMemo(() => allPitches.filter(p => !p.is_active), [allPitches]);
 
-        try {
-            await pitchesService.deletePitch(id);
-            setPitchesData(prev => prev.filter(pitch => pitch.id !== id));
-        } catch (error) {
-            console.error("Failed to delete pitch:", error);
+    const formattedPitchesList = useMemo(() => {
+        return allPitches.map(pitch => ({
+            label: getTrans(pitch.translations, currentLang) || `Pitch #${pitch.id}`,
+            value: pitch.id
+        }));
+    }, [allPitches, currentLang]);
+
+    // ================= TABLE CONFIG =================
+
+    const filterConfig = [
+        {
+            key: 'status',
+            label: t('filters.status', 'Status'),
+            type: 'select',
+            options: [
+                { label: t('filters.allStatus', 'All Status'), value: 'all' },
+                { label: t('status.active', 'Active'), value: 'true' },
+                { label: t('status.inactive', 'Inactive'), value: 'false' }
+            ],
+            value: filters.status || 'all'
+        },
+        {
+            key: 'venue',
+            label: t('filters.filterVenues', 'Filter Venues'),
+            type: 'select',
+            options: [{ label: t('filters.allVenues', 'All Venues'), value: 'all' }, ...venuesData],
+            value: filters.venue || 'all'
+        },
+        {
+            key: 'price',
+            label: t('filters.pricePerHour', 'Price Per Hour'),
+            type: 'number',
+            placeholder: t('filters.pricePlaceholder', 'e.g. 200'),
+            value: filters.price
         }
-    };
+    ];
 
-    // Filter Logic
-    const filteredData = useMemo(() => {
-        if (!pitchesData) return [];
-
-        let filtered = pitchesData.filter((item) => {
-            if (activeFilters.status && activeFilters.status !== 'all') {
-                if (String(item.is_active) !== activeFilters.status) return false;
-            }
-            if (activeFilters.type && activeFilters.type !== 'all') {
-                if (String(item.size) !== activeFilters.type) return false;
-            }
-            if (activeFilters.venue && activeFilters.venue !== 'all') {
-                if (String(item.venue) !== String(activeFilters.venue)) return false;
-            }
-            if (activeFilters.price) {
-                const itemPrice = parseFloat(item.price_per_hour || 0);
-                const filterPrice = parseFloat(activeFilters.price);
-                if (!isNaN(filterPrice)) {
-                    if (itemPrice !== filterPrice) return false;
-                }
-            }
-            if (activeFilters.pitcherName) {
-                const name = item.translations?.name?.toLowerCase() || '';
-                const searchTerm = activeFilters.pitcherName.toLowerCase();
-                if (!name.includes(searchTerm)) return false;
-            }
-            if (activeFilters.globalSearch) {
-                const search = activeFilters.globalSearch.toLowerCase();
-                const name = item.translations?.name?.toLowerCase() || '';
-                const venue = String(item.venue);
-                if (!name.includes(search) && !venue.includes(search)) return false;
-            }
-            return true;
-        });
-
-        // Apply view filter
-        switch (currentView) {
-            case 'approved':
-                filtered = filtered.filter(pitch => pitch.is_active);
-                break;
-            case 'rejected':
-                filtered = filtered.filter(pitch => !pitch.is_active);
-                break;
-            case 'pending':
-                filtered = filtered.filter(pitch => !pitch.is_active);
-                break;
-            case 'all':
-            default:
-                break;
-        }
-
-        return filtered;
-    }, [pitchesData, activeFilters, currentView]);
-
-    // Handlers
-    const handleFilterChange = (newFilters) => {
-        setActiveFilters(prev => ({ ...prev, ...newFilters }));
-        setCurrentPage(1);
-    };
-
-    const handleSearch = (term) => {
-        setActiveFilters(prev => ({ ...prev, globalSearch: term }));
-        setCurrentPage(1);
-    };
-
-    const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
-
-    const handleViewChange = (view) => {
-        setCurrentView(view);
-        setCurrentPage(1);
-    };
-
-    // Statistics
-    const stats = useMemo(() => {
-        const total = pitchesData.length;
-        const active = pitchesData.filter(pitch => pitch.is_active).length;
-        const inactive = pitchesData.filter(pitch => !pitch.is_active).length;
-        const pending = pitchesData.filter(pitch => !pitch.is_active).length;
-
-        return { total, active, inactive, pending };
-    }, [pitchesData]);
-
-    // Get pitches by status for management sections
-    const approvedPitches = useMemo(() => {
-        return pitchesData.filter(pitch => pitch.is_active);
-    }, [pitchesData]);
-
-    const rejectedPitches = useMemo(() => {
-        return pitchesData.filter(pitch => !pitch.is_active);
-    }, [pitchesData]);
-
-    // --- ACTION BUTTONS (Responsive) ---
     const ActionButtons = ({ pitch }) => (
         <div className="flex justify-end items-center gap-1 sm:gap-2">
             <button
                 className="text-gray-500 hover:text-teal-600 p-1 rounded transition-colors hover:bg-gray-50"
-                title="View Pitch"
+                title={t('actions.view', "View Pitch")}
+                onClick={() => handleViewPitch(pitch)}
             >
                 <Eye size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button
                 className="text-gray-500 hover:text-blue-600 p-1 rounded transition-colors hover:bg-gray-50"
-                title="Edit Pitch"
+                title={t('actions.edit', "Edit Pitch")}
                 onClick={() => handleEditPitch(pitch)}
             >
                 <Pencil size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button
                 className="text-gray-500 hover:text-red-600 p-1 rounded transition-colors hover:bg-gray-50"
-                onClick={() => handleDeletePitch(pitch.id, pitch.translations?.name || `Pitch ${pitch.id}`)}
-                title="Delete Pitch"
+                onClick={() => handleDeletePitch(pitch.id, getTrans(pitch.translations, currentLang) || `Pitch ${pitch.id}`)}
+                title={t('actions.delete', "Delete Pitch")}
             >
                 <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
         </div>
     );
 
-    // Filter Config
-    const filterConfig = [
-        {
-            key: 'status',
-            label: 'Status',
-            type: 'select',
-            options: [
-                { label: 'All Status', value: 'all' },
-                { label: 'Active', value: 'true' },
-                { label: 'Inactive', value: 'false' }
-            ],
-            value: activeFilters.status
-        },
-        {
-            key: 'venue',
-            label: 'Filter Venues',
-            type: 'select',
-            options: [{ label: 'All Venues', value: 'all' }, ...venuesData],
-            value: activeFilters.venue
-        },
-        {
-            key: 'price',
-            label: 'Price Per Hour',
-            type: 'number',
-            placeholder: 'e.g. 200',
-            options: [],
-            value: activeFilters.price
-        }
-    ];
-
     const columns = [
         {
-            header: 'Sr.No',
+            header: t('table.srNo', 'Sr.No'),
             accessor: 'id',
             align: 'left',
             width: '80px',
-            render: (row, index) => {
-
-                return (
-                    <div className="text-gray-600 font-medium text-sm">
-                        {index + 1}
-                    </div>
-                )
-            }
-        },
-        {
-            header: 'Pitch Name/ID',
-            accessor: 'id',
-            align: 'center',
-
-            render: (row) => (
-                <div className="font-medium text-gray-900">
-                    <div className="text-xs sm:text-sm">{row.translations?.name || `Pitch ${row.id}`}</div>
-                    <div className="text-xs text-gray-500">#{row.id}</div>
+            render: (row, index) => (
+                <div className="text-gray-600 font-medium text-sm">
+                    {index + 1}
                 </div>
             )
         },
         {
-            header: 'Venue',
-            accessor: 'venue',
+            header: t('table.image', 'Image'),
+            accessor: 'image',
             align: 'center',
-
-            render: (row) => <span className="text-gray-700 text-xs sm:text-sm">Venue #{row.venue}</span>
+            width: '80px',
+            render: (row) => (
+                <div className="flex items-center justify-center">
+                    <PitchImage
+                        imagePath={row.image}
+                        alt={getTrans(row.translations, currentLang) || 'Pitch'}
+                    />
+                </div>
+            )
         },
         {
-            header: 'Status',
+            header: t('table.pitchNameId'),
+            accessor: 'name',
+            align: 'center',
+            render: (row) => (
+                <div className="font-medium text-gray-900">
+                    <div className="text-xs sm:text-sm">{getTrans(row.translations, currentLang) || `Pitch ${row.id}`}</div>
+                </div>
+            )
+        },
+        {
+            header: t('table.venues', 'Venues'),
+            accessor: 'venue',
+            align: 'center',
+            render: (row) => {
+                const venueInfo = venuesData.find(v => v.value === row.venue);
+                return <span className="text-gray-700 text-xs sm:text-sm">{venueInfo ? venueInfo.label : `Venue #${row.venue}`}</span>;
+            }
+        },
+        {
+            header: t('table.status', 'Status'),
             accessor: 'is_active',
             align: 'center',
             render: (row) => <StatusBadge isActive={row.is_active} />
         },
         {
-            header: 'Type',
+            header: t('table.type', 'Type'),
             accessor: 'size',
             align: 'center',
-            render: (row) => <span className="text-gray-700 text-xs sm:text-sm">{row.size} a side</span>
+            render: (row) => <span className="text-gray-700 text-xs sm:text-sm">{row.size} {t('common.aside', 'a side')}</span>
         },
         {
-            header: 'Pricing/hour',
+            header: t('table.pricing', 'Pricing/hour'),
             accessor: 'price_per_hour',
             align: 'center',
-            render: (row) => <span className="font-medium text-gray-900 text-xs sm:text-sm">AED {parseFloat(row.price_per_hour || 0).toLocaleString()}</span>
+            render: (row) => <span className="font-medium text-gray-900 text-xs sm:text-sm">{t('common.currency', 'AED')} {parseFloat(row.price_per_hour || 0).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US')}</span>
         },
         {
-            header: 'Quick Actions',
+            header: t('table.quickActions', 'Quick Actions'),
             align: 'right',
             render: (row) => <ActionButtons pitch={row} />
         }
@@ -379,69 +419,14 @@ const Pitches = () => {
 
     const topActions = [
         {
-            label: 'Create Pitch',
+            label: t('actions.createPitch', 'Create Pitch'),
             onClick: handleCreatePitch,
             type: 'primary'
         }
     ];
 
-    // View Tabs Component (Fully Responsive)
-    const ViewTabs = () => (
-        <div className="bg-gradient-to-br from-white to-primary-50/30 rounded-lg shadow-sm border border-primary-100 p-1 sm:p-1.5 mt-4 sm:mt-5 mb-4 sm:mb-6">
-            <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1">
-                {[
-                    { key: 'all', label: 'All Pitches', count: stats.total },
-                    { key: 'approved', label: 'Approved', count: stats.active },
-                    { key: 'rejected', label: 'Rejected', count: stats.inactive },
-                ].map((tab) => (
-                    <button
-                        key={tab.key}
-                        onClick={() => handleViewChange(tab.key)}
-                        className={`flex-1 flex items-center justify-center gap-2 px-2 sm:px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 ${
-                            currentView === tab.key
-                                ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
-                                : 'text-gray-600 hover:text-secondary-600 hover:bg-primary-50'
-                        }`}
-                    >
-                        <span className="truncate">{tab.label}</span>
-                        <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${
-                            currentView === tab.key
-                                ? 'bg-primary-700 text-white'
-                                : 'bg-gray-200 text-gray-600'
-                        }`}>
-                            {tab.count}
-                        </span>
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
+    // ================= RENDER HELPERS =================
 
-    // PREPARE PITCHES LIST FOR DROPDOWN
-    const formattedPitchesList = useMemo(() => {
-        return pitchesData.map(pitch => ({
-            label: pitch.translations?.name || `Pitch #${pitch.id}`,
-            value: pitch.id
-        }));
-    }, [pitchesData]);
-
-    // Responsive Stat Card
-    const StatCard = ({ title, value, icon, gradient, bgColor }) => (
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className={`p-2 sm:p-3 ${bgColor} rounded-lg sm:rounded-xl`}>
-                    {React.cloneElement(icon, { className: "w-5 h-5 sm:w-7 sm:h-7" })}
-                </div>
-                <div className={`w-12 sm:w-16 h-1 bg-gradient-to-r ${gradient} rounded-full`}></div>
-            </div>
-            <div>
-                <p className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1 sm:mb-2">{title}</p>
-                <p className="text-2xl sm:text-4xl font-bold text-gray-900">{value}</p>
-            </div>
-        </div>
-    );
-
-    // --- RENDER HELPERS FOR GENERIC COMPONENT ---
     const renderPitchIcon = (pitch) => (
         <span className="text-sm sm:text-base font-bold text-white">{pitch.size}</span>
     );
@@ -449,72 +434,72 @@ const Pitches = () => {
     const renderPitchHeader = (pitch) => (
         <>
             <span className="font-semibold text-secondary-600 text-xs sm:text-sm truncate">
-                {pitch.translations?.name || `Pitch ${pitch.id}`}
+                {getTrans(pitch.translations, currentLang) || `Pitch ${pitch.id}`}
             </span>
             <span className="px-1.5 sm:px-2 py-0.5 bg-primary-50 text-primary-700 rounded text-xs font-medium whitespace-nowrap">
-                {pitch.size} a side
+                {pitch.size} {t('common.aside', 'a side')}
             </span>
         </>
     );
 
-
     const renderPitchMeta = (pitch) => {
-        // Look for the venue in the existing venuesData state
         const venueInfo = venuesData.find(v => v.value === pitch.venue);
         const venueName = venueInfo ? venueInfo.label : `Venue #${pitch.venue}`;
-
         return (
             <>
-
                 <span className="w-1 h-1 bg-gray-300 rounded-full hidden sm:block"></span>
                 <span className="flex items-center gap-1 whitespace-nowrap">
-                    <span className="font-medium">Venue:</span>
-                    {/* Display the Name instead of the ID */}
-                    <span className="text-gray-700 font-semibold ml-1">{venueName}</span>
+                    <span className="font-medium">{t('card.venue', 'Venue')}:</span>
+                    <span className="text-gray-700 font-semibold ml-1 rtl:mr-1">{venueName}</span>
                 </span>
                 <span className="w-1 h-1 bg-gray-300 rounded-full hidden sm:block"></span>
                 <span className="flex items-center gap-1 whitespace-nowrap">
-                    <span className="font-medium">Price:</span> AED {parseFloat(pitch.price_per_hour || 0).toLocaleString()}/hr
+                    <span className="font-medium">{t('card.price', 'Price')}:</span> {t('common.currency', 'AED')} {parseFloat(pitch.price_per_hour || 0).toLocaleString(currentLang === 'ar' ? 'en-US' : 'en-US')}/{t('common.hr', 'hr')}
                 </span>
             </>
         );
     };
 
-
     if (!user || !user.role) return false;
-
     const { role } = user;
+
+    // ================= CONDITIONAL RETURN =================
+
+    if (showForm) {
+        return (
+            <div className="w-full px-2 sm:px-0 mb-6 sm:mb-8">
+                <PitchesForm
+                    venuesData={venuesData}
+                    pitchesList={formattedPitchesList}
+                    pitchDetails={selectedPitch}
+                    onCancel={handleCancelForm}
+                    onSuccess={handleFormSuccess}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="w-full px-2 sm:px-0">
-            {/* Statistics Section */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 my-4 sm:my-8">
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 my-4 sm:my-8">
                 <StatCard
-                    title="Total Pitches"
-                    value={stats.total}
-                    icon={<TrendingUp className="text-blue-600" />}
-                    gradient="from-blue-500 to-blue-600"
-                    bgColor="bg-blue-50"
+                    title={t('stats.total', 'Total Pitches')}
+                    value={totalItems}
+                    icon={TrendingUp}
+                    iconColor="text-blue-600"
                 />
                 <StatCard
-                    title="Active Pitches"
-                    value={stats.active}
-                    icon={<CheckCircle className="text-green-600" />}
-                    gradient="from-green-500 to-green-600"
-                    bgColor="bg-green-50"
+                    title={t('stats.active', 'Active Pitches')}
+                    value={globalActivePitches.length}
+                    icon={CheckCircle}
+                    iconColor="text-green-600"
                 />
                 <StatCard
-                    title="Inactive Pitches"
-                    value={stats.inactive}
-                    icon={<XCircle className="text-red-600" />}
-                    gradient="from-red-500 to-red-600"
-                    bgColor="bg-red-50"
-                />
-                <StatCard
-                    title="Pending Approval"
-                    value={stats.pending}
-                    icon={<Clock className="text-orange-600" />}
-                    gradient="from-orange-500 to-orange-600"
-                    bgColor="bg-orange-50"
+                    title={t('stats.inactive', 'Inactive Pitches')}
+                    value={globalInactivePitches.length}
+                    icon={XCircle}
+                    iconColor="text-red-600"
                 />
             </div>
 
@@ -522,13 +507,12 @@ const Pitches = () => {
             {role.is_pitch_owner === false && (
                 <div className="flex flex-col lg:flex-row gap-4 sm:gap-8">
                     <StatusManagementSection
-                        name={{group: 'Pitches', single: "Pitch"}}
-                        title="Approved Pitches"
-                        items={approvedPitches}
+                        name={{group: t('statusSection.groupName', 'Pitches'), single: t('statusSection.singleName', "Pitch")}}
+                        title={t('statusSection.approvedTitle', "Approved Pitches")}
+                        items={globalActivePitches}
                         statusType="approved"
-                        rejectLabel="Reject"
-                        emptyMessage="No approved pitches"
-                        onApprove={handleApprovePitch}
+                        rejectLabel={t('statusSection.reject', "Reject")}
+                        emptyMessage={t('statusSection.noApproved', "No approved pitches")}
                         onReject={handleRejectPitch}
                         renderIcon={renderPitchIcon}
                         renderHeader={renderPitchHeader}
@@ -536,14 +520,13 @@ const Pitches = () => {
                     />
 
                     <StatusManagementSection
-                        title="Rejected Pitches"
-                        name={{group: 'Pitches', single: "Pitch"}}
-                        items={rejectedPitches}
+                        title={t('statusSection.rejectedTitle', "Rejected Pitches")}
+                        name={{group: t('statusSection.groupName', 'Pitches'), single: t('statusSection.singleName', "Pitch")}}
+                        items={globalInactivePitches}
                         statusType="rejected"
-                        emptyMessage="No rejected pitches"
+                        approveLabel={t('statusSection.approve', "Approve")}
+                        emptyMessage={t('statusSection.noRejected', "No rejected pitches")}
                         onApprove={handleApprovePitch}
-                        approveLabel="Approve"
-                        onReject={handleRejectPitch}
                         renderIcon={renderPitchIcon}
                         renderHeader={renderPitchHeader}
                         renderMeta={renderPitchMeta}
@@ -551,35 +534,43 @@ const Pitches = () => {
                 </div>
             )}
 
-
-            {/* Form Section */}
-            {showForm && (
-                <div className='mb-6 sm:mb-8'>
-                    <PitchesForm
-                        venuesData={venuesData}
-                        pitchesList={formattedPitchesList}
-                        initialData={selectedPitch}
-                        onCancel={handleCancelForm}
-                        onSuccess={handleFormSuccess}
-                    />
-                </div>
-            )}
-
             {/* View Tabs */}
-            <ViewTabs/>
+            <div className="bg-gradient-to-br from-white to-primary-50/30 rounded-lg shadow-sm border border-primary-100 p-1 sm:p-1.5 mt-4 sm:mt-5 mb-4 sm:mb-6">
+                <div className="flex flex-col sm:flex-row space-y-1 sm:space-y-0 sm:space-x-1 rtl:space-x-reverse">
+                    {[
+                        { key: 'all', label: t('tabs.all', 'All Pitches'), count: totalItems },
+                        { key: 'approved', label: t('tabs.approved', 'Approved') },
+                        { key: 'rejected', label: t('tabs.rejected', 'Rejected') },
+                    ].map((tab) => (
+                        <button
+                            key={tab.key}
+                            onClick={() => handleViewChange(tab.key)}
+                            className={`flex-1 flex items-center justify-center gap-2 px-2 sm:px-3 py-2 rounded-lg font-semibold text-xs transition-all duration-200 ${
+                                currentView === tab.key
+                                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
+                                    : 'text-gray-600 hover:text-secondary-600 hover:bg-primary-50'
+                            }`}
+                        >
+                            <span className="truncate">{tab.label}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
 
-            {/* Main Table Section */}
+            {/* Main Table */}
             {isLoading && pitchesData.length === 0 ? (
-                <div className="p-6 sm:p-10 text-center text-gray-500 text-sm sm:text-base">Loading...</div>
+                <div className="p-6 sm:p-10 text-center text-gray-500 text-sm sm:text-base">
+                    {t('messages.loading', 'Loading...')}
+                </div>
             ) : (
                 <MainTable
-                    data={filteredData || []}
+                    data={pitchesData}
                     columns={columns}
                     filters={filterConfig}
-                    searchPlaceholder="Search pitch"
+                    searchPlaceholder={t('filters.searchPlaceholder', 'Search pitch')}
                     topActions={topActions}
                     currentPage={currentPage}
-                    totalItems={filteredData?.length || 0}
+                    totalItems={totalItems}
                     itemsPerPage={rowsPerPage}
                     onSearch={handleSearch}
                     onFilterChange={handleFilterChange}

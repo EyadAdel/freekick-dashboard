@@ -1,0 +1,40 @@
+{
+  "header": {
+    "backToPitches": "العودة للملاعب",
+    "updatePitch": "تحديث الملعب"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "primary": "ملعب رئيسي"
+  },
+  "card": {
+    "players": "لاعبين",
+    "venueId": "رقم المكان",
+    "bookings": "الحجوزات",
+    "created": "تاريخ الإنشاء",
+    "updated": "آخر تحديث",
+    "pricePerHour": "السعر بالساعة",
+    "playersCapacity": "سعة اللاعبين",
+    "venue": "المكان",
+    "pitchSize": "حجم الملعب"
+  },
+  "info": {
+    "title": "تفاصيل الملعب",
+    "description": "الوصف",
+    "noDescription": "لا يوجد وصف لهذا الملعب.",
+    "specifications": "المواصفات",
+    "sizeLabel": "حجم الملعب",
+    "typeLabel": "النوع",
+    "mainPitch": "ملعب رئيسي",
+    "subPitch": "ملعب فرعي",
+    "parentPitch": "الملعب الأصلي"
+  },
+  "messages": {
+    "notFound": "الملعب غير موجود",
+    "back": "رجوع"
+  },
+  "common": {
+    "max": "الحد الأقصى"
+  }
+}
