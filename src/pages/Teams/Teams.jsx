@@ -4,8 +4,9 @@ import { useDispatch } from "react-redux";
 import { useTeams, useTeamAnalytics } from "../../hooks/useTeams.js";
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 import { ArrowLeft, Trophy, Users, Target, Award } from "lucide-react";
-import TeamDetailView from "./TeamDetailsView.jsx";
 import MainTable from "../../components/MainTable.jsx";
+import {useNavigate} from "react-router-dom";
+import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
 
 function Teams() {
     const dispatch = useDispatch();
@@ -19,6 +20,7 @@ function Teams() {
     const [filters, setFilters] = useState({});
 
     const itemsPerPage = 10;
+    const  navigate = useNavigate()
 
     // Build API filters with pagination and sorting
     const apiFilters = {
@@ -38,8 +40,6 @@ function Teams() {
     // Fetch teams with filters
     const { teams, isLoading, error, refetch } = useTeams(apiFilters);
 
-    // Fetch analytics for stats cards
-    const { analytics, isLoading: analyticsLoading } = useTeamAnalytics();
 
     useEffect(() => {
         dispatch(setPageTitle('Teams'));
@@ -87,8 +87,9 @@ function Teams() {
     };
 
     const handleViewTeam = (team) => {
-        setSelectedTeam(team);
-        setViewMode('detail');
+        navigate(`/teams/team-profile`, {
+            state: {team:team}
+        });
     };
 
     const handleBackToList = () => {
@@ -121,7 +122,7 @@ function Teams() {
                     className="flex cursor-pointer items-center gap-3">
                     {row.logo ? (
                         <img
-                            src={row.logo}
+                            src={ IMAGE_BASE_URL + row.logo}
                             alt="Team Logo"
                             className="w-10 h-10 rounded-full object-cover"
                         />
@@ -145,7 +146,7 @@ function Teams() {
                 <div className="flex items-center gap-2">
                     {row.team_leader?.image ? (
                         <img
-                            src={row.team_leader.image}
+                            src={IMAGE_BASE_URL + row.team_leader.image}
                             alt={row.team_leader.name}
                             className="w-8 h-8 rounded-full object-cover"
                         />
@@ -281,16 +282,16 @@ function Teams() {
         );
     }
 
-    // Show detail view if a team is selected
-    if (viewMode === 'detail' && selectedTeam) {
-        return (
-            <TeamDetailView
-                team={selectedTeam}
-                onBack={handleBackToList}
-                onRefresh={handleRefresh}
-            />
-        );
-    }
+    // // Show detail view if a team is selected
+    // if (viewMode === 'detail' && selectedTeam) {
+    //     return (
+    //         <TeamDetailView
+    //             team={selectedTeam}
+    //             onBack={handleBackToList}
+    //             onRefresh={handleRefresh}
+    //         />
+    //     );
+    // }
 
     // Show list view
     return (

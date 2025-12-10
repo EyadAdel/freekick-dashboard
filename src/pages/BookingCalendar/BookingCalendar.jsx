@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useBookings } from '../../hooks/useBookings';
+import { useCalendarBookings } from '../../hooks/useBookings.js';
 import CustomDropdown from '../../components/common/CustomDropdown.jsx';
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
+import {venuesService} from "../../services/venues/venuesService.js";
 
 // ============================================================================
 // UTILITY CLASSES
@@ -538,10 +539,12 @@ const BookingCalendar = () => {
         return filters;
     }, [datePicker.selectedDate]);
 
-    const { bookings, isLoading, error, refetch } = useBookings(apiFilters);
+    // Use the new useCalendarBookings hook instead of useBookings
+    const { bookings, isLoading, error, refetch } = useCalendarBookings(apiFilters);
     const bookingResults = bookings?.results || [];
-
-    const venueFilter = useVenueFilter(bookingResults);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [venuesData, setVenuesData] = useState([]);
+    const venueFilter = useVenueFilter(venuesData);
 
     const filteredBookings = useMemo(() => {
         if (venueFilter.selectedVenue === 'all') return bookingResults;
@@ -558,10 +561,25 @@ const BookingCalendar = () => {
         [filteredBookings]
     );
 
+
+    const fetchVenuesData = async () => {
+        try {
+
+            // Fetch main data
+            const response = await venuesService.getAllVenues({ page: currentPage });
+            if (response && response.results) {
+                setVenuesData(response.results);
+            }
+        } catch (error) {
+            console.error("Failed to fetch venues:", error);
+        }
+    };
     useEffect(() => {
         dispatch(setPageTitle('Calendar'));
     }, [dispatch]);
-
+    useEffect(() => {
+        fetchVenuesData()
+    }, []);
     if (error) {
         return <ErrorState error={error} onRetry={refetch} />;
     }

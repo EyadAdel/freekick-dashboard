@@ -15,15 +15,29 @@ import {useDispatch, useSelector} from "react-redux";
 import {  clearCancelStatus } from "../../features/bookings/bookingSlice";
 import { showConfirm } from "../../components/showConfirm.jsx";
 import {toast} from "react-toastify";
+import {useLocation, useNavigate} from "react-router-dom";
+import  {IMAGE_BASE_URL} from '../../utils/ImageBaseURL.js'
 
-const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
-    const bookingId = initialBooking?.id;
+const BookingDetailView = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { user } = useSelector((state) => state.auth); // Get user from Redux
+    const { role } = user;
+    // Get booking data from location state
+    const bookingFromState = location.state?.booking;
+
+    // Get booking ID from state or try to extract from URL if needed
+    const bookingId = bookingFromState?.id || location.state?.bookingId;
+
+    // Fetch booking data - use booking from state if available, otherwise fetch by ID
     const { booking: fetchedBooking, isLoading: isFetchingDetails, error: fetchError } = useBooking(bookingId);
+
     const { handleEmailClick, handleWhatsAppClick } = useContact();
     const { componentRef, handlePrint } = usePrint();
     const dispatch = useDispatch();
 
-    const booking = fetchedBooking || initialBooking;
+    // Use booking from state if available, otherwise use fetched data
+    const booking =  fetchedBooking;
     const [isActionLoading, setIsActionLoading] = useState(false);
     const { cancelStatus, cancelError } = useSelector(state => state.bookings);
 
@@ -31,13 +45,25 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
         if (cancelStatus === 'succeeded') {
             alert('Booking cancelled successfully');
             dispatch(clearCancelStatus());
-            if (onRefresh) onRefresh();
-            if (onBack) onBack();
+            // Navigate back after successful cancellation
+            navigate('/bookings');
         } else if (cancelStatus === 'failed') {
             alert('Failed to cancel booking: ' + cancelError);
             dispatch(clearCancelStatus());
         }
-    }, [cancelStatus, cancelError, dispatch, onRefresh, onBack]);
+    }, [cancelStatus, cancelError, dispatch, navigate]);
+
+    const handleBack = () => {
+        // Go back to bookings list
+        navigate('/bookings');
+    };
+
+    const handleRefresh = () => {
+        // You can implement refresh logic if needed
+        // For now, we'll just go back to the list which will refresh automatically
+        navigate('/bookings');
+    };
+
     if (!booking && isFetchingDetails) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -54,11 +80,9 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-red-600">No booking data available</p>
-                    {onBack && (
-                        <button onClick={onBack} className="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg">
-                            Go Back
-                        </button>
-                    )}
+                    <button onClick={handleBack} className="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg">
+                        Go Back to Bookings
+                    </button>
                 </div>
             </div>
         );
@@ -113,8 +137,7 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
             if (confirmed) {
                 setIsActionLoading(true);
                 await bookingService.cancelBooking(booking.id);
-                if (onRefresh) onRefresh();
-                if (onBack) onBack();
+                handleRefresh(); // Refresh and go back to list
             }
         } catch (err) {
             toast.error('Failed to cancel booking: ' + err.message);
@@ -158,7 +181,7 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                     <div className="flex flex-col items-start justify-between gap-2">
                         <div className="flex items-center gap-4">
                             <button
-                                onClick={onBack}
+                                onClick={handleBack}
                                 className="flex items-center gap-2 text-primary-700 hover:text-primary-600 transition-colors">
                                 <ArrowIcon direction="left" size="lg" />
                                 <span className="font-medium">Back to Bookings</span>
@@ -186,7 +209,7 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                                 <div className="relative mb-4">
                                     {booking.user_info?.image ? (
                                         <img
-                                            src={booking.user_info.image}
+                                            src={IMAGE_BASE_URL + booking?.user_info?.image}
                                             alt={booking.user_info.name}
                                             className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-100 shadow-md"
                                         />
@@ -347,16 +370,16 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className={'grid bg-primary-50 p-4 m-4 gap-5 rounded-xl grid-cols-2'}>
-                            <div className="relative rounded-lg  h-48  md:h-64">
-                                {/*booking.pitch?.image || booking.venue_info?.images?.[0]?.image ||*/}
-                                <img
-                                    src={ 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=800'}
-                                    alt="Venue"
-                                    className="w-full lg:h-64 h-48 object-cover rounded-xl"
-                                />
-                            </div>
-                                {booking.venue_info && (
+                            <div className={'grid bg-primary-50 p-4 m-4 gap-5 rounded-xl sm:grid-cols-2'}>
+                                <div className="relative rounded-lg  h-48  md:h-64">
+                                    {/*booking.pitch?.image || booking.venue_info?.images?.[0]?.image ||*/}
+                                    <img
+                                        src={IMAGE_BASE_URL + booking.pitch?.image || booking.venue_info?.images?.[0]?.image }
+                                        alt="Venue"
+                                        className="w-full lg:h-64 h-48 object-cover rounded-xl"
+                                    />
+                                </div>
+                                {booking?.venue_info && (
                                     <div className=" rounded-lg">
                                         <VenueInfoCard booking={booking} />
                                     </div>
@@ -375,9 +398,13 @@ const BookingDetailView = ({ booking: initialBooking, onBack, onRefresh }) => {
                                         <div key={idx} className="relative group flex-shrink-0">
                                             {user.image ? (
                                                 <img
-                                                    src={user.image}
+                                                    src={IMAGE_BASE_URL + user.image}
                                                     alt={user.name}
                                                     className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-3 border-white shadow-md hover:scale-110 transition-transform"
+                                                    onClick={() => (role.is_admin || role.is_sub_admin) ?
+                                                        navigate('/players/player-profile', { state: { player: user } }) :
+                                                        undefined
+                                                    }
                                                 />
                                             ) : (
                                                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 text-xs sm:text-sm font-bold border-3 border-white shadow-md hover:scale-110 transition-transform">
@@ -534,47 +561,46 @@ const VenueInfoCard = ({ booking }) => {
 
     return (
         <div className="w-full  mx-auto  rounded-xl   overflow-hidden">
-                    <div className="h-48  md:h-64">
-                        <h4 className="font-bold text-gray-900 text-lg mb-3">
-                            {booking.venue_info?.translations?.name || 'Zayed Sports Club'}
-                        </h4>
+            <div className="min-h-48  md:min-h-64">
+                <h4 className="font-bold text-gray-900 text-lg mb-3">
+                    {booking.venue_info?.translations?.name || 'Zayed Sports Club'}
+                </h4>
 
-                        <div className="space-y-2.5">
-                            {/* Location */}
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <MapPin size={16} className="text-gray-400 flex-shrink-0" />
-                                <span>{booking.venue_info?.translations?.address || booking.venue_info?.city || 'Bani Yas, Abu Dhabi'}</span>
-                            </div>
+                <div className="space-y-2.5">
+                    {/* Location */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin size={16} className="text-gray-400 flex-shrink-0" />
+                        <span>{booking.venue_info?.translations?.address || booking.venue_info?.city || 'Bani Yas, Abu Dhabi'}</span>
+                    </div>
 
-                            {/* Sports */}
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <Globe size={16} className="text-gray-400 flex-shrink-0" />
-                                <span>
+                    {/* Sports */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Globe size={16} className="text-gray-400 flex-shrink-0" />
+                        <span>
                                                     {booking.venue_info?.venue_play_type?.map(sport => sport.translations?.name).join(', ') || 'Soccer, Basketball'}
                                                 </span>
-                            </div>
+                    </div>
 
-                            {/* Phone */}
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <Phone size={16} className="text-gray-400 flex-shrink-0" />
-                                <span>{booking.venue_info?.phone_number || '+1 234 567 8901'}</span>
-                            </div>
+                    {/* Phone */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Phone size={16} className="text-gray-400 flex-shrink-0" />
+                        <span>{booking.venue_info?.phone_number || '+1 234 567 8901'}</span>
+                    </div>
 
-                            {/* Email */}
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <Mail size={16} className="text-gray-400 flex-shrink-0" />
-                                <span>{booking.venue_info?.owner_info?.email || 'paris.milton@example.com'}</span>
-                            </div>
+                    {/* Email */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Mail size={16} className="text-gray-400 flex-shrink-0" />
+                        <span>{booking.venue_info?.owner_info?.email || 'paris.milton@example.com'}</span>
+                    </div>
 
-                            {/* Type */}
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                <Building size={16} className="text-gray-400 flex-shrink-0" />
-                                <span>{booking.venue_info?.venue_type === 'indoor' ? '7v7, Indoor' : '7v7, Outdoor'}</span>
-                            </div>
-                        </div>
+                    {/* Type */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Building size={16} className="text-gray-400 flex-shrink-0" />
+                        <span>{booking.venue_info?.venue_type === 'indoor' ? '7v7, Indoor' : '7v7, Outdoor'}</span>
                     </div>
                 </div>
+            </div>
+        </div>
 
     );
 };
-

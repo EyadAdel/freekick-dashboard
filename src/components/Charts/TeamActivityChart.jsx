@@ -1,11 +1,14 @@
 // components/Charts/TeamLeaderboardActivity.jsx
 import React, { useEffect, useState } from 'react';
 import analyticsService from '../../services/analyticsService';
+import {useNavigate} from "react-router-dom";
+import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
 
 function TeamLeaderboardActivity() {
     const [teams, setTeams] = useState([]);
     const [loading, setLoading] = useState(true);
     const [totalPoints, setTotalPoints] = useState(0);
+    const navigate= useNavigate()
 
     useEffect(() => {
         fetchTeamData();
@@ -125,7 +128,8 @@ function TeamLeaderboardActivity() {
                                 <div className="relative">
                                     {team.team_leader?.image ? (
                                         <img
-                                            src={team.team_leader.image}
+                                            onClick={()=>navigate('/teams/team-profile',{state:{team:team}})}
+                                            src={IMAGE_BASE_URL + team.team_leader.image}
                                             alt={team.team_leader.name}
                                             className="w-8 h-8 rounded-full object-cover"
                                         />
@@ -192,7 +196,8 @@ function TeamLeaderboardActivity() {
 
                             {team.logo && (
                                 <img
-                                    src={team.logo}
+                                    onClick={()=>navigate('/teams/team-profile',{state:{team:team}})}
+                                    src={IMAGE_BASE_URL + team.logo}
                                     alt={`${team.name} logo`}
                                     className="w-6 h-6 rounded"
                                 />

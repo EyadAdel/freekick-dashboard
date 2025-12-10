@@ -17,7 +17,8 @@ import { showConfirm } from '../../components/showConfirm';
 
 // Utils
 import { formatDate, calculateAge, formatAmount } from '../../hooks/players/formatters.js'; // Fixed path
-import { getTournamentColumns } from '../../hooks/players/tournamentColumns.jsx'; // Fixed path
+import { getTournamentColumns } from '../../hooks/players/tournamentColumns.jsx';
+import {useLocation, useNavigate} from "react-router-dom"; // Fixed path
 
 // Constants
 const TOURNAMENT_FILTERS = [
@@ -48,8 +49,12 @@ const TOURNAMENT_FILTERS = [
     }
 ];
 
-const PlayerDetailView = ({ player: initialPlayer, onBack, onRefresh }) => {
-    const playerId = initialPlayer?.id || 1;
+const PlayerDetailView = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const playerFromState = location.state?.player;
+
+    const playerId = playerFromState?.id || 1;
 
     // Booking state management
     const [bookingDate, setBookingDate] = useState(new Date());
@@ -64,7 +69,6 @@ const PlayerDetailView = ({ player: initialPlayer, onBack, onRefresh }) => {
     });
     const [currentTournamentPage, setCurrentTournamentPage] = useState(1);
     const tournamentsPerPage = 5;
-
     // Calculate booking filters
     const bookingFilters = useMemo(() => {
         const formattedDate = bookingDate.toISOString().split('T')[0];
@@ -80,7 +84,7 @@ const PlayerDetailView = ({ player: initialPlayer, onBack, onRefresh }) => {
     const { tournaments, isLoading: tournamentsLoading } = usePlayerTournaments(playerId);
     const { mutate: updateStatus, isLoading: isUpdatingStatus } = useUpdatePlayerStatus();
 
-    const currentPlayer = player || initialPlayer || getDefaultPlayer();
+    const currentPlayer = player || playerFromState || getDefaultPlayer();
     const filteredBookings = useMemo(() => bookings?.results || [], [bookings]);
     const tournamentColumns = getTournamentColumns();
 
@@ -137,10 +141,13 @@ const PlayerDetailView = ({ player: initialPlayer, onBack, onRefresh }) => {
     if (isFetchingDetails) {
         return <LoadingSpinner />;
     }
+    const handleBack = () => {
+        navigate('/players');
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header onBack={onBack} />
+            <Header onBack={handleBack} />
 
             <div className="mx-auto  py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
