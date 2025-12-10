@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useTeam, useJoinedTeam, useTeamBookings, useTeamTournaments } from "../../hooks/useTeams.js";
+import { useTeam, useTeamBookings, useTeamTournaments } from "../../hooks/useTeams.js";
 import { useContact } from "../../hooks/useContact.js";
 import { showConfirm } from "../../components/showConfirm.jsx";
 import { teamService } from "../../services/Teams/TeamService.js";
@@ -32,36 +32,41 @@ import {
 import MainTable from "../../components/MainTable.jsx";
 import TeamPointsTab from "./TeamPoints.jsx";
 import BookingCard from "../../components/players/BookingCard.jsx";
-import {playerService} from "../../services/players/playerService.js";
+import {useLocation, useNavigate} from "react-router-dom";
+import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
 
 
 
-const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
-    const teamId = initialTeam?.id;
+const TeamDetailView = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const teamFromState = location.state?.team;
+    const teamId = useMemo(() => {
+        return teamFromState?.id || 1;
+    }, [teamFromState?.id]); // Only recalculate when the ID changes
+
     const { team: fetchedTeam,refetch, isLoading: isFetchingDetails } = useTeam(teamId);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
 
-    // State for edit modal
-
-    // Team bookings hook
     const [bookingFilters, setBookingFilters] = useState({
         start_time__date: new Date().toISOString().split('T')[0],
         status: 'all'
     });
-
-    // Team tournaments hook
     const { bookings: teamBookings, isLoading: bookingsLoading } = useTeamBookings(teamId, bookingFilters);
     const { tournaments: teamTournaments, isLoading: tournamentsLoading } = useTeamTournaments(teamId);
-
-    const team = fetchedTeam || initialTeam;
-
-    // Booking filters
     const [bookingDate, setBookingDate] = useState(new Date());
     const [bookingStatus, setBookingStatus] = useState('all');
+    const [currentTournamentPage, setCurrentTournamentPage] = useState(1);
+
+    const team = fetchedTeam ;
+
+    // Booking filters
 
     // Tournament pagination
-    const [currentTournamentPage, setCurrentTournamentPage] = useState(1);
     const tournamentsPerPage = 10;
+    const filteredBookings = useMemo(() => {
+        return teamBookings?.results || [];
+    }, [teamBookings]);
 
     // Update booking filters when date or status changes
     useEffect(() => {
@@ -75,7 +80,9 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
     const [tournamentFilters, setTournamentFilters] = useState({});
     const [tournamentSort, setTournamentSort] = useState({ key: 'start_date', direction: 'desc' });
     const [isUpdating, setIsUpdating] = useState(false);
-
+    const handleBack = () => {
+        navigate('/teams');
+    };
     // Tournament columns configuration for MainTable
 // Update the tournament columns configuration
     const tournamentColumns = [
@@ -88,7 +95,7 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                 <div className="flex items-center gap-3">
                     {tournament.images && tournament.images.length > 0 ? (
                         <img
-                            src={`https://pub-f8c5de66602c4f6f91311c6fd40e1794.r2.dev/${tournament.images[0].image}`}
+                            src={IMAGE_BASE_URL + tournament.images[0].image}
                             alt={tournament.name}
                             className="w-10 h-10 rounded-lg object-cover"
                         />
@@ -179,7 +186,7 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                             <div key={user.id} className="relative">
                                 {user.image ? (
                                     <img
-                                        src={user.image}
+                                        src={ IMAGE_BASE_URL + user.image}
                                         alt={user.name}
                                         className="w-6 h-6 rounded-full border-2 border-white"
                                     />
@@ -315,20 +322,16 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-red-600">No team data available</p>
-                    {onBack && (
-                        <button onClick={onBack} className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg">
+
+                        <button onClick={handleBack} className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg">
                             Go Back
                         </button>
-                    )}
                 </div>
             </div>
         );
     }
 
     // Filtered bookings - handled by API
-    const filteredBookings = useMemo(() => {
-        return teamBookings?.results || [];
-    }, [teamBookings]);
 
     // Paginated tournaments
 
@@ -470,7 +473,7 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
             <div className="bg-white ">
                 <div className=" mx-auto  py-4">
                     <button
-                        onClick={onBack}
+                        onClick={handleBack}
                         className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors"
                     >
                         <ArrowIcon size={'lg'}/>
@@ -493,7 +496,7 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                                         {team.logo ? (
                                             <img
                                                 className="w-full h-full rounded-full object-cover"
-                                                src={team.logo}
+                                                src={IMAGE_BASE_URL + team.logo}
                                                 alt={team.name}
                                             />
                                         ) : (
@@ -578,7 +581,7 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
                                         <div className="flex items-center gap-3 mb-4">
                                             {team.team_leader.image ? (
                                                 <img
-                                                    src={team.team_leader.image}
+                                                    src={IMAGE_BASE_URL + team.team_leader.image}
                                                     alt={team.team_leader.name}
                                                     className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
                                                 />
@@ -738,7 +741,7 @@ const TeamDetailView = ({ team: initialTeam, onBack, onRefresh }) => {
 
                                                 {member.user_info?.image ? (
                                                     <img
-                                                        src={member.user_info.image}
+                                                        src={IMAGE_BASE_URL + member.user_info.image}
                                                         alt={member.user_info.name}
                                                         className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md mb-1"
                                                     />

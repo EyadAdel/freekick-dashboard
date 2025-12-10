@@ -43,6 +43,9 @@ import PitchOwnerDetails from "../components/pitchOwners/PitchOwnerDetails.jsx";
 import Reports from "../pages/Reports/Reports.jsx";
 import VenueEditRequests from "../pages/VenueEditRequests/VenueEditRequests.jsx";
 import VenueEditRequestDetails from "../components/venueEditRequestDetails/venueEditRequestDetails.jsx";
+import BookingDetailView from "../pages/Bookings/BookingDetailView.jsx";
+import PlayerDetailView from "../pages/players/playerDetailView.jsx";
+import TeamDetailsView from "../pages/Teams/TeamDetailsView.jsx";
 
 
 const router = createBrowserRouter([
@@ -68,6 +71,10 @@ const router = createBrowserRouter([
             {
                 path: 'bookings',
                 element: <Bookings />,
+            },
+            {
+                path: 'bookings/book-details',
+                element: <BookingDetailView />,
             },
             {
                 path: 'calendar',
@@ -141,8 +148,16 @@ const router = createBrowserRouter([
                 element: <Players />,
             },
             {
+                path: 'players/player-profile',
+                element: <PlayerDetailView />,
+            },
+            {
                 path: 'teams',
                 element: <Teams />,
+            },
+            {
+                path: 'teams/team-profile',
+                element: <TeamDetailsView />,
             },
             {
                 path: 'pitch-owner',

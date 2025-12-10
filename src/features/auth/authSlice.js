@@ -1,13 +1,25 @@
 // src/features/auth/authSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService.js';
+import {requestNotificationPermission} from "../../firebase/firebase.js";
 
-// Async thunks
 export const loginUser = createAsyncThunk(
     'auth/login',
     async ({ phone, password }, { rejectWithValue }) => {
         try {
-            const tokenResponse = await authService.login(phone, password);
+            // Request FCM token before login
+            let fcmToken = null;
+            try {
+                console.log('Requesting FCM token...');
+                fcmToken = await requestNotificationPermission();
+                console.log('FCM Token obtained:', fcmToken);
+            } catch (error) {
+                console.log('FCM token not available, proceeding with login without it:', error);
+            }
+
+            console.log('Logging in with payload:', { phone, fcmToken });
+
+            const tokenResponse = await authService.login(phone, password, fcmToken);
 
             if (!tokenResponse.data?.token) {
                 throw new Error('No token in response');
@@ -28,6 +40,7 @@ export const loginUser = createAsyncThunk(
         }
     }
 );
+
 
 export const getCurrentUser = createAsyncThunk(
     'auth/getCurrentUser',
