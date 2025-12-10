@@ -70,6 +70,74 @@ export const useBookings = (filters = {}, options = {}) => {
 };
 
 /**
+ * Custom hook specifically for calendar view bookings
+ * Uses the /booking/book/calender/ endpoint
+ *
+ * @param {Object} filters - Filter parameters for the API
+ * @param {Object} options - Additional options
+ * @returns {Object} - { bookings, isLoading, error, refetch }
+ */
+export const useCalendarBookings = (filters = {}, options = {}) => {
+    const [bookings, setBookings] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const {
+        autoFetch = true,
+        onSuccess,
+        onError
+    } = options;
+
+    const fetchCalendarBookings = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const cleanFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+                if (value !== null && value !== undefined && value !== '' && value !== 'all') {
+                    acc[key] = value;
+                }
+                return acc;
+            }, {});
+
+            const response = await bookingService.getCalendarBookings(cleanFilters);
+
+            // Extract data from API response wrapper
+            const data = response.data || response;
+            setBookings(data);
+
+            if (onSuccess) {
+                onSuccess(data);
+            }
+        } catch (err) {
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch calendar bookings';
+            setError(errorMessage);
+
+            if (onError) {
+                onError(errorMessage);
+            }
+
+            console.error('Error fetching calendar bookings:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (autoFetch) {
+            fetchCalendarBookings();
+        }
+    }, [JSON.stringify(filters)]);
+
+    return {
+        bookings,
+        isLoading,
+        error,
+        refetch: fetchCalendarBookings
+    };
+};
+
+/**
  * Hook to fetch a single booking by ID
  */
 export const useBooking = (id, options = {}) => {
@@ -119,57 +187,5 @@ export const useBooking = (id, options = {}) => {
         isLoading,
         error,
         refetch: fetchBooking
-    };
-};
-
-/**
- * Hook to fetch booking analytics
- */
-export const useBookingAnalytics = () => {
-    const [analytics, setAnalytics] = useState({
-        cardAnalytics: null,
-        revenueTrend: null,
-        topEmirates: null,
-        weeklyAnalytics: null
-    });
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    const fetchAnalytics = async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
-
-            const [cardData, revenueData, emiratesData, weeklyData] = await Promise.all([
-                bookingService.getCardAnalytics(),
-                bookingService.getRevenueTrend(),
-                bookingService.getTopEmirates(),
-                bookingService.getWeeklyBookingAnalytics()
-            ]);
-
-            setAnalytics({
-                cardAnalytics: cardData.data || cardData,
-                revenueTrend: revenueData.data || revenueData,
-                topEmirates: emiratesData.data || emiratesData,
-                weeklyAnalytics: weeklyData.data || weeklyData
-            });
-        } catch (err) {
-            const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch analytics';
-            setError(errorMessage);
-            console.error('Error fetching analytics:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchAnalytics();
-    }, []);
-
-    return {
-        analytics,
-        isLoading,
-        error,
-        refetch: fetchAnalytics
     };
 };

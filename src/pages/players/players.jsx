@@ -6,6 +6,8 @@ import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 import { ArrowLeft, User, Wallet, Calendar, Trophy, Phone, Mail } from "lucide-react";
 import PlayerDetailView from "./playerDetailView.jsx";
 import MainTable from "../../components/MainTable.jsx";
+import {useNavigate} from "react-router-dom";
+import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
 
 function Players() {
     const dispatch = useDispatch();
@@ -36,7 +38,7 @@ function Players() {
 
     // Fetch analytics for stats cards
     const { analytics, isLoading: analyticsLoading } = usePlayerAnalytics();
-
+      const  navigate = useNavigate()
     useEffect(() => {
         dispatch(setPageTitle('Players'));
     }, [dispatch]);
@@ -98,9 +100,11 @@ function Players() {
         return `$${amount.toLocaleString()}`;
     };
 
+// In Players.jsx - Update handleViewPlayer function
     const handleViewPlayer = (player) => {
-        setSelectedPlayer(player);
-        setViewMode('detail');
+        navigate(`/players/player-profile`, {
+            state: {player:player}
+        });
     };
 
     const handleBackToList = () => {
@@ -131,7 +135,7 @@ function Players() {
                 <div     onClick={() => handleViewPlayer(row)} className="flex cursor-pointer  items-center gap-3">
                     {row.image ? (
                         <img
-                            src={row.image}
+                            src={ IMAGE_BASE_URL + row.image}
                             alt="Player Avatar"
                             className="w-10 h-10 rounded-full object-cover"
                         />

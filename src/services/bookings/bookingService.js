@@ -23,6 +23,13 @@ export const bookingService = {
         return response.data;
     },
 
+    // Calendar view endpoint
+    getCalendarBookings: async (filters) => {
+        const response = await api.get('/booking/book/calender/', {
+            params: filters
+        });
+        return response.data;
+    },
 
     getAll: async (filters) => {
         const response = await api.get('/booking/book/', {

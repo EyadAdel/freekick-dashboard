@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useBookings, useBookingAnalytics } from '../../hooks/useBookings';
+import { useBookings} from '../../hooks/useBookings';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import {
     Clock, MapPin, DollarSign,
@@ -11,8 +11,9 @@ import {
 // Import your reusable components
 import MainTable from '../../components/MainTable';
 import BookingDetailView from "./BookingDetailView.jsx";
-import StatCard from '../../components/Charts/StatCards.jsx'; // Import your reusable StatCard
-
+import StatCard from '../../components/Charts/StatCards.jsx';
+import {useNavigate} from "react-router-dom"; // Import your reusable StatCard
+import  {IMAGE_BASE_URL} from '../../utils/ImageBaseURL.js'
 // Main Bookings Component with Server-Side Sorting
 const Bookings = () => {
     const dispatch = useDispatch();
@@ -39,9 +40,8 @@ const Bookings = () => {
 
     // Fetch bookings with filters
     const { bookings, isLoading, error, refetch } = useBookings(apiFilters);
+ const navigate =useNavigate()
 
-    // Fetch analytics for stats cards
-    const { analytics, isLoading: analyticsLoading } = useBookingAnalytics();
 
     useEffect(() => {
         dispatch(setPageTitle('Bookings'));
@@ -93,9 +93,18 @@ const Bookings = () => {
         });
     };
 
+    // const handleViewBooking = (booking) => {
+    //     setSelectedBooking(booking);
+    //     setViewMode('detail');
+    // };
     const handleViewBooking = (booking) => {
-        setSelectedBooking(booking);
-        setViewMode('detail');
+        // Navigate with booking data in state
+        navigate('/bookings/book-details', {
+            state: {
+                booking,
+                from: '/bookings'
+            }
+        });
     };
 
     const handleBackToList = () => {
@@ -123,10 +132,11 @@ const Bookings = () => {
             sortable: true,
             sortKey: 'name',
             render: (row) => (
-                <div className="flex items-center gap-3">
+                <div                     onClick={() => handleViewBooking(row)}
+                                         className="flex cursor-pointer items-center gap-3">
                     {row.pitch?.image ? (
                         <img
-                            src={row.pitch.image}
+                            src={IMAGE_BASE_URL + row.pitch.image}
                             alt="Pitch"
                             className="w-10 h-10 rounded-full object-cover"
                         />
@@ -238,10 +248,6 @@ const Bookings = () => {
     // Server returns paginated data directly - no client-side sorting needed
     const bookingData = bookings?.results || [];
 
-    // Get analytics data with fallback values
-    const cardAnalytics = analytics?.cardAnalytics || {};
-
-    // Calculate stats from booking analytics
     const confirmedCount = bookings?.confirmed || 0;
     const cancelledCount = bookings?.cancelled || 0;
 
@@ -253,7 +259,7 @@ const Bookings = () => {
         {
             title: 'Confirmed',
             value: confirmedCount,
-            percentChange: 12, // You can get this from analytics API or calculate dynamically
+            percentChange: 12,
             icon: CheckCircle,
             iconColor: 'text-green-600'
         },
@@ -313,7 +319,6 @@ const Bookings = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Stats Cards */}
-            <div className="lg:px-4 px-2 pb-0">
                 {/* Main Stats Row */}
                 <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2 xl:gap-8 mb-6">
                     {bookingStats.map((stat, index) => (
@@ -328,24 +333,9 @@ const Bookings = () => {
                     ))}
                 </div>
 
-                {/* Optional: Additional Stats Row (uncomment if needed) */}
-                {/*
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 mb-6">
-          {additionalStats.map((stat, index) => (
-            <StatCard
-              key={index}
-              title={stat.title}
-              value={stat.value}
-              percentChange={stat.percentChange}
-              icon={stat.icon}
-              iconColor={stat.iconColor}
-            />
-          ))}
-        </div>
-        */}
-            </div>
 
-            <h1 className="px-8 text-primary-700 lg:-mb-14 lg:text-xl lg:mt-8 font-bold">
+         <div  className={'py-5'}>
+            <h1 className="px-8 text-primary-700 lg:-mb-10 lg:text-xl lg:mt-8 font-bold">
                 Bookings list
             </h1>
 
@@ -363,6 +353,7 @@ const Bookings = () => {
                 onSort={handleSort}
                 isLoading={isLoading}
             />
+         </div>
         </div>
     );
 };

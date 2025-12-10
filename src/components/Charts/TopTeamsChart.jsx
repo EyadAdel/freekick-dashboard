@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { FaUsers, FaCalendar, FaBook, FaChartBar } from 'react-icons/fa';
 import {TrendingUp, ChevronDown, Calendar} from 'lucide-react';
 import useAnalytics from '../../hooks/useAnalytics.js';
+import {useNavigate} from "react-router-dom";
+import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
 
 const TopTeamsChart = ({
                            title = "Top 5 Teams",
@@ -13,7 +15,7 @@ const TopTeamsChart = ({
                        }) => {
     const { topTeams, isTopTeamsLoading, error, getTopTeams } = useAnalytics();
     const [period, setPeriod] = useState('this_week');
-
+    const navigate= useNavigate()
     const periodOptions = [
         { value: 'this_week', label: 'This Week' },
         { value: 'last_week', label: 'Last Week' },
@@ -123,7 +125,8 @@ const TopTeamsChart = ({
                                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 mr-3 flex-shrink-0">
                                     {team.logo ? (
                                         <img
-                                            src={ team.logo}
+                                            onClick={()=>navigate('/teams/team-profile',{state:{team:team}})}
+                                            src={IMAGE_BASE_URL +  team.logo}
                                             alt={team.name}
                                             className="w-8 h-8 rounded-full object-cover"
                                         />
@@ -141,7 +144,7 @@ const TopTeamsChart = ({
                                 <div className="flex items-center -space-x-2">
                                     {team.team_leader?.image ? (
                                         <img
-                                            src={team.team_leader.image}
+                                            src={IMAGE_BASE_URL + team.team_leader.image}
                                             alt={team.team_leader.name}
                                             className="w-7 h-7 rounded-full border-2 border-white object-cover"
                                         />

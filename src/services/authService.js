@@ -2,12 +2,22 @@
 import api from './api.js';
 
 export const authService = {
-    login: async (phone, password) => {
+    login: async (phone, password, fcmToken = null) => {
         try {
-            const response = await api.post('/auth/jwt/create/', {
+            const payload = {
                 phone,
                 password
-            });
+            };
+
+            // Add FCM token if available
+            if (fcmToken) {
+                payload.fcm_token = fcmToken;
+                payload.device_type = 'web';
+            }
+
+            console.log('Login API payload:', payload); // Debug log
+
+            const response = await api.post('/auth/jwt/create/', payload);
             return response.data;
         } catch (error) {
             const errorMessage = error.response?.data?.message
