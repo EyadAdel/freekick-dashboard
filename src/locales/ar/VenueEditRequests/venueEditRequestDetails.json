@@ -12,6 +12,7 @@
   },
   "venueType": {
     "indoor": "داخلي",
+    "outdoor": "خارجي",
     "general": "عام"
   },
   "profile": {
