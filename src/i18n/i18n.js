@@ -22,6 +22,10 @@ import enPitchDetails from '../locales/en/Pitches/pitchDetails.json';
 import arPitchDetails from '../locales/ar/Pitches/pitchDetails.json';
 import arPitchesPage from '../locales/ar/Pitches/pitchesPage.json';
 import enPitchesPage from '../locales/en/Pitches/pitchesPage.json';
+import enVenueEditRequests from '../locales/en/VenueEditRequests/venueEditRequests.json';
+import arVenueEditRequests from '../locales/ar/VenueEditRequests/venueEditRequests.json';
+import enVenueEditRequestDetails from '../locales/en/VenueEditRequests/venueEditRequestDetails.json';
+import arVenueEditRequestDetails from '../locales/ar/VenueEditRequests/venueEditRequestDetails.json';
 
 // Translation resources
 const resources = {
@@ -35,6 +39,8 @@ const resources = {
         pitchForm: enPitchForm,
         pitchDetails: enPitchDetails,
         pitchesPage: enPitchesPage,
+        venueEditRequests: enVenueEditRequests,
+        venueEditRequestDetails: enVenueEditRequestDetails,
 
     },
     ar: {
@@ -47,6 +53,8 @@ const resources = {
         pitchForm: arPitchForm,
         pitchDetails: arPitchDetails,
         pitchesPage: arPitchesPage,
+        venueEditRequests: arVenueEditRequests,
+        venueEditRequestDetails: arVenueEditRequestDetails,
 
 
     },
@@ -67,7 +75,7 @@ i18n
         lng: getInitialLanguage(),
         fallbackLng: 'en',
         defaultNS: 'common',
-        ns: ['common', 'sidebar','venueForm','venuesPage','venueDetails','statusManagement','pitchForm','pitchDetails','pitchesPage'],
+        ns: ['common', 'sidebar','venueForm','venuesPage','venueDetails','statusManagement','pitchForm','pitchDetails','pitchesPage','venueEditRequests','venueEditRequestDetails'],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {
             escapeValue: false,

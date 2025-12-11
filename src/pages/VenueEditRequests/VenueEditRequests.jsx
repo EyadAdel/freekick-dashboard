@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'; // Import i18n hook
 import MainTable from './../../components/MainTable';
 import StatCard from './../../components/Charts/StatCards.jsx';
 import { venuesEditRequestsService } from '../../services/venuesEditRequests/venuesEditRequestsService.js';
@@ -24,9 +25,7 @@ import {
 
 // --- HELPER COMPONENT: VENUE AVATAR ---
 const VenueAvatar = ({ images, name }) => {
-    // Attempt to get the first image filename from the array
     const imageFilename = images && images.length > 0 ? images[0].image : null;
-
     const imageSrc = imageFilename ? `${IMAGE_BASE_URL}${imageFilename}` : null;
 
     if (imageSrc) {
@@ -42,7 +41,6 @@ const VenueAvatar = ({ images, name }) => {
         );
     }
 
-    // Fallback if no image
     return (
         <div className="w-12 h-12 min-w-[48px] rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-400 border border-indigo-100">
             <FileText size={20} />
@@ -52,27 +50,33 @@ const VenueAvatar = ({ images, name }) => {
 
 // --- HELPER COMPONENT: TYPE BADGE ---
 const TypeBadge = ({ type }) => {
+    const { t } = useTranslation('venueEditRequests');
     const isIndoor = type === 'indoor';
     const style = isIndoor
         ? 'bg-purple-100 text-purple-800 border border-purple-200'
         : 'bg-orange-100 text-orange-800 border border-orange-200';
 
+    // Translate the type if it matches known keys, otherwise show raw
+    const label = type === 'indoor' ? t('types.indoor') :
+        type === 'outdoor' ? t('types.outdoor') : type;
+
     return (
         <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${style}`}>
-            {type}
+            {label}
         </span>
     );
 };
 
 // --- MAIN COMPONENT ---
 const VenueEditRequests = () => {
+    const { t, i18n } = useTranslation('venueEditRequests'); // Initialize translation
     const rowsPerPage = 10;
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
-        dispatch(setPageTitle('Venues Update Requests'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pageTitle')));
+    }, [dispatch, t]);
 
     // --- STATE MANAGEMENT ---
     const [requestsData, setRequestsData] = useState([]);
@@ -80,23 +84,35 @@ const VenueEditRequests = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
 
+    // Global stats state (for the cards at the top)
+    const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0 });
+
     // Filter State
-    const [activeFilters, setActiveFilters] = useState({
-        search: ''
+    const [filters, setFilters] = useState({
+        search: '',
+        status: 'all' // 'all', 'true' (Approved), 'false' (Pending/Rejected)
     });
 
-    // --- FETCH DATA ---
+    // --- API PARAMS CONSTRUCTION ---
+    const apiFilters = useMemo(() => ({
+        page: currentPage,
+        page_limit: rowsPerPage,
+        search: filters.search,
+        // Map status 'all' to undefined, otherwise pass the value
+        accepted: filters.status === 'all' ? undefined : filters.status
+    }), [currentPage, rowsPerPage, filters]);
+
+    // --- FETCH DATA (Main Table) ---
     const fetchRequests = async () => {
         setIsLoading(true);
         try {
-            const response = await venuesEditRequestsService.getAllRequests({
-                page: currentPage
-            });
+            const response = await venuesEditRequestsService.getAllRequests(apiFilters);
 
             if (response && response.results) {
                 setRequestsData(response.results);
                 setTotalCount(response.count);
             } else if (Array.isArray(response)) {
+                // Fallback if API doesn't support pagination format yet
                 setRequestsData(response);
                 setTotalCount(response.length);
             } else {
@@ -105,40 +121,57 @@ const VenueEditRequests = () => {
             }
         } catch (error) {
             console.error("Failed to fetch requests:", error);
-            toast.error("Failed to load requests");
+            toast.error(t('messages.loadError'));
         } finally {
             setIsLoading(false);
         }
     };
 
+    // --- FETCH DATA (Global Stats) ---
+    const fetchGlobalStats = async () => {
+        try {
+            const response = await venuesEditRequestsService.getAllRequests({ page_limit: 1000 });
+            const allResults = response.results || [];
+
+            setStats({
+                total: response.count || 0,
+                pending: allResults.filter(r => r.accepted !== true).length,
+                approved: allResults.filter(r => r.accepted === true).length
+            });
+        } catch (error) {
+            console.error("Failed to fetch stats");
+        }
+    };
+
+    // Initial Load & Filter Changes
     useEffect(() => {
         fetchRequests();
-    }, [currentPage]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [apiFilters]);
+
+    // Update stats when page loads or after an action
+    useEffect(() => {
+        fetchGlobalStats();
+    }, []);
 
     // --- HANDLERS ---
 
-    // 1. View Details (UPDATED LOGIC HERE)
     const handleViewRequest = async (row) => {
         try {
-            // Call the API to get the specific details
             const response = await venuesEditRequestsService.getRequestById(row.id);
-
-            // Navigate and pass the FRESH response data
             navigate(`/venue-edit-requests/venue-request-details`, {
                 state: { requestData: response }
             });
         } catch (error) {
             console.error("Error fetching request details:", error);
-            // Error toast is already handled in venuesEditRequestsService
         }
     };
 
-    // 2. Approve Request (Accept)
     const handleApprove = async (id, name) => {
         const isConfirmed = await showConfirm({
-            title: `Approve updates for "${name}"?`,
-            text: "This will apply the changes to the live venue.",
-            confirmButtonText: 'Yes, Approve',
+            title: t('confirm.approveTitle', { name }),
+            text: t('confirm.approveText'),
+            confirmButtonText: t('confirm.approveBtn'),
             icon: 'question'
         });
 
@@ -146,19 +179,18 @@ const VenueEditRequests = () => {
 
         try {
             await venuesEditRequestsService.acceptRequest(id);
-            // Refresh the list to update the status to "Approved"
             fetchRequests();
+            fetchGlobalStats();
         } catch (error) {
-            // Error handling is done in the service (toast)
+            // Error handling done in service
         }
     };
 
-    // 3. Reject Request (Delete)
     const handleReject = async (id, name) => {
         const isConfirmed = await showConfirm({
-            title: `Reject updates for "${name}"?`,
-            text: "This request will be permanently deleted.",
-            confirmButtonText: 'Yes, Reject',
+            title: t('confirm.rejectTitle', { name }),
+            text: t('confirm.rejectText'),
+            confirmButtonText: t('confirm.rejectBtn'),
             confirmButtonColor: '#d33'
         });
 
@@ -166,69 +198,62 @@ const VenueEditRequests = () => {
 
         try {
             await venuesEditRequestsService.deleteRequest(id);
-            // Optimistically remove from the UI
-            setRequestsData(prev => prev.filter(item => item.id !== id));
-            setTotalCount(prev => prev - 1);
+            fetchRequests();
+            fetchGlobalStats();
         } catch (error) {
-            // Error handling is done in the service
+            // Error handling done in service
         }
     };
 
+    // --- FILTER HANDLERS ---
     const handleSearch = (term) => {
-        setActiveFilters(prev => ({ ...prev, search: term }));
-        setCurrentPage(1);
+        setFilters(prev => ({ ...prev, search: term }));
+        setCurrentPage(1); // Reset to page 1 on search
     };
 
-    // --- FILTERING ---
-    const filteredData = useMemo(() => {
-        if (!requestsData) return [];
+    const handleFilterChange = (newFilters) => {
+        setFilters(prev => ({ ...prev, ...newFilters }));
+        setCurrentPage(1); // Reset to page 1 on filter change
+    };
 
-        let filtered = requestsData;
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
 
-        // Apply Search
-        if (activeFilters.search) {
-            const search = activeFilters.search.toLowerCase();
-            filtered = filtered.filter((item) => {
-                const name = (item.translations?.en?.name || '').toLowerCase();
-                const contact = (item.contact_name || '').toLowerCase();
-                const email = (item.email || '').toLowerCase();
-                const city = (item.city || '').toLowerCase();
-
-                return name.includes(search) ||
-                    contact.includes(search) ||
-                    email.includes(search) ||
-                    city.includes(search);
-            });
+    // --- FILTER CONFIGURATION (Dropdowns) ---
+    // Defined inside component to access 't'
+    const filterConfig = [
+        {
+            key: 'status',
+            label: t('filters.statusLabel'),
+            type: 'select',
+            options: [
+                { label: t('filters.all'), value: 'all' },
+                { label: t('filters.approved'), value: 'true' },
+                { label: t('filters.pending'), value: 'false' }
+            ],
+            value: filters.status
         }
-
-        return filtered;
-    }, [requestsData, activeFilters]);
-
-    // --- STATS CALCULATION ---
-    const stats = useMemo(() => {
-        return {
-            total: totalCount,
-            // Calculate pending based on current page data (approximate for UI)
-            pending: requestsData.filter(r => r.accepted !== true).length,
-            approved: requestsData.filter(r => r.accepted === true).length
-        };
-    }, [totalCount, requestsData]);
+    ];
 
     // --- TABLE COLUMNS ---
     const columns = [
         {
-            header: 'ID',
+            header: t('table.srNo'),
             accessor: 'id',
             width: '60px',
-            render: (row) => <span className="text-gray-500 text-xs">#{row.id}</span>
+            render: (row, index) => <span className="text-gray-500 text-xs">{index + 1}</span>
         },
         {
-            header: 'Venues Info',
+            header: t('table.venuesInfo'),
             accessor: 'name',
             width: '250px',
             render: (row) => {
-                const name = row.translations?.en?.name || "Untitled Venues";
-                const address = row.translations?.en?.address || "No Address";
+                // Determine language key for data (fallback to 'en')
+                const lang = i18n.language === 'ar' ? 'ar' : 'en';
+                const name = row.translations?.en?.name || row.translations?.en?.name || t('table.untitled');
+                const address = row.translations?.en?.address || row.translations?.en?.address || t('table.noAddress');
+
                 return (
                     <div className="flex items-start gap-3">
                         <VenueAvatar images={row.images_request} name={name} />
@@ -246,7 +271,7 @@ const VenueEditRequests = () => {
             }
         },
         {
-            header: 'Contact',
+            header: t('table.contact'),
             accessor: 'contact',
             render: (row) => (
                 <div className="flex flex-col gap-1">
@@ -263,7 +288,7 @@ const VenueEditRequests = () => {
             )
         },
         {
-            header: 'Details',
+            header: t('table.details'),
             accessor: 'details',
             render: (row) => (
                 <div className="flex flex-col gap-1.5">
@@ -274,72 +299,72 @@ const VenueEditRequests = () => {
                         </span>
                     </div>
                     <div className="text-xs font-mono text-gray-600">
-                        <span className="font-bold text-gray-800">{parseFloat(row.price_per_hour).toFixed(0)}</span> AED/hr
+                        <span className="font-bold text-gray-800">{parseFloat(row.price_per_hour).toFixed(0)}</span> {t('table.perHour')}
                     </div>
                 </div>
             )
         },
         {
-            header: 'Submitted',
+            header: t('table.submitted'),
             accessor: 'created_at',
             render: (row) => {
                 const dateObj = new Date(row.created_at);
+                // Use current locale for date formatting
                 return (
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1 text-gray-700 text-xs font-medium">
                             <Calendar size={12} />
-                            {dateObj.toLocaleDateString()}
+                            {dateObj.toLocaleDateString(i18n.language)}
                         </div>
                         <div className="flex items-center gap-1 text-gray-500 text-[11px]">
                             <Clock size={12} />
-                            {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {dateObj.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
                         </div>
                     </div>
                 );
             }
         },
         {
-            header: 'Actions',
+            header: t('table.actions'),
             align: 'right',
-            width: '180px', // Slightly wider for the text buttons
+            width: '180px',
             render: (row) => {
-                const name = row.translations?.en?.name;
+                const lang = i18n.language === 'ar' ? 'ar' : 'en';
+                const name = row.translations?.[lang]?.name || row.translations?.en?.name || "Venue";
                 const isApproved = row.accepted === true;
 
                 return (
                     <div className="flex justify-end items-center gap-2">
-                        {/* Always show View Button */}
                         <button
                             onClick={() => handleViewRequest(row)}
                             className="text-gray-500 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition-colors"
-                            title="View Full Details"
+                            title={t('buttons.view')}
                         >
                             <Eye size={18} />
                         </button>
 
-                        {/* Logic: If accepted show Label, else show Buttons */}
                         {isApproved ? (
                             <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-green-50 text-green-700 border border-green-200 select-none">
                                 <CheckCircle size={14} />
-                                <span className="text-xs font-semibold">Approved</span>
+                                <span className="text-xs font-semibold">{t('buttons.approvedBadge')}</span>
                             </div>
                         ) : (
                             <>
                                 <button
                                     onClick={() => handleApprove(row.id, name)}
                                     className="flex items-center justify-center gap-[2px] border border-green-200 text-green-600 hover:text-green-700 px-2 py-1 rounded-md bg-green-50 hover:bg-green-100 transition-colors text-xs font-medium"
-                                    title="Approve Request"
+                                    title={t('buttons.approveTooltip')}
                                 >
                                     <Check size={14} strokeWidth={2.5} />
-                                    Approve
+                                    {t('buttons.approve')}
                                 </button>
                                 <button
                                     onClick={() => handleReject(row.id, name)}
                                     className="flex items-center justify-center gap-[2px] border border-red-200 text-red-600 hover:text-red-700 px-2 py-1 rounded-md bg-red-50 hover:bg-red-100 transition-colors text-xs font-medium"
-                                    title="Reject Request"
+                                    title={t('buttons.rejectTooltip')}
                                 >
                                     <XCircle size={14} strokeWidth={2.5} />
-                                    Reject
+                                    {t('buttons.reject')}
                                 </button>
                             </>
                         )}
@@ -350,23 +375,23 @@ const VenueEditRequests = () => {
     ];
 
     return (
-        <div className="w-full px-2 sm:px-0">
+        <div className="w-full md:px-2 px-0 sm:px-0">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 my-6">
                 <StatCard
-                    title="Total Requests"
+                    title={t('stats.total')}
                     value={stats.total}
                     icon={FileText}
                     iconColor="text-white"
                 />
                 <StatCard
-                    title="Pending Action"
+                    title={t('stats.pending')}
                     value={stats.pending}
                     icon={Clock}
                     iconColor="text-white"
                 />
                 <StatCard
-                    title="Approved Requests"
+                    title={t('stats.approved')}
                     value={stats.approved}
                     icon={CheckCircle}
                     iconColor="text-white"
@@ -374,22 +399,22 @@ const VenueEditRequests = () => {
             </div>
 
             {/* Table Container */}
-            <div className='bg-white rounded-lg shadow-sm'>
+            <div className='bg-white rounded-lg shadow-sm md:p-5 p-1'>
                 {isLoading && requestsData.length === 0 ? (
-                    <div className="p-10 text-center text-gray-500">Loading Requests...</div>
+                    <div className="p-10 text-center text-gray-500">{t('messages.loading')}</div>
                 ) : (
                     <MainTable
-                        data={filteredData}
+                        data={requestsData}
                         columns={columns}
-                        filters={[]}
-                        searchPlaceholder="Search venue, contact, email..."
+                        filters={filterConfig}
+                        searchPlaceholder={t('filters.searchPlaceholder')}
                         topActions={[]}
                         currentPage={currentPage}
                         totalItems={totalCount}
                         itemsPerPage={rowsPerPage}
                         onSearch={handleSearch}
-                        onFilterChange={() => {}}
-                        onPageChange={(page) => setCurrentPage(page)}
+                        onFilterChange={handleFilterChange}
+                        onPageChange={handlePageChange}
                     />
                 )}
             </div>

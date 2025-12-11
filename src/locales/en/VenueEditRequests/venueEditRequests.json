@@ -1,0 +1,50 @@
+{
+  "pageTitle": "Venues Update Requests",
+  "stats": {
+    "total": "Total Requests",
+    "pending": "Pending Action",
+    "approved": "Approved Requests"
+  },
+  "filters": {
+    "searchPlaceholder": "Search venue, contact, email...",
+    "statusLabel": "Status",
+    "all": "All Requests",
+    "approved": "Approved",
+    "pending": "Pending / Action Needed"
+  },
+  "table": {
+    "srNo": "Sr.No",
+    "venuesInfo": "Venues Info",
+    "contact": "Contact",
+    "details": "Details",
+    "submitted": "Submitted",
+    "actions": "Actions",
+    "untitled": "Untitled Venues",
+    "noAddress": "No Address",
+    "perHour": "AED/hr"
+  },
+  "types": {
+    "indoor": "Indoor",
+    "outdoor": "Outdoor"
+  },
+  "buttons": {
+    "view": "View Full Details",
+    "approvedBadge": "Approved",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveTooltip": "Approve Request",
+    "rejectTooltip": "Reject Request"
+  },
+  "confirm": {
+    "approveTitle": "Approve updates for \"{{name}}\"?",
+    "approveText": "This will apply the changes to the live venue.",
+    "approveBtn": "Yes, Approve",
+    "rejectTitle": "Reject updates for \"{{name}}\"?",
+    "rejectText": "This request will be permanently deleted.",
+    "rejectBtn": "Yes, Reject"
+  },
+  "messages": {
+    "loading": "Loading Requests...",
+    "loadError": "Failed to load requests"
+  }
+}

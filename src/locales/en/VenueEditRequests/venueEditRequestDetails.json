@@ -1,0 +1,76 @@
+{
+  "header": {
+    "back": "Back to Requests",
+    "reject": "Reject",
+    "accept": "Accept Request"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "requestAccepted": "✓ Request Already Accepted",
+    "requestRejected": "✗ Request Rejected"
+  },
+  "venueType": {
+    "indoor": "Indoor",
+    "general": "General"
+  },
+  "profile": {
+    "availableFrom": "Available From",
+    "availableTo": "Available To",
+    "pricePerHour": "Price Per Hour",
+    "contactInfo": "Contact Info",
+    "contactPerson": "Contact Person",
+    "phone": "Phone",
+    "email": "Email"
+  },
+  "actions": {
+    "whatsapp": "WhatsApp",
+    "email": "Email"
+  },
+  "gallery": {
+    "title": "Requested Images",
+    "noImages": "No images submitted in this request."
+  },
+  "info": {
+    "title": "Basic Information",
+    "description": "Description",
+    "surface": "Surface",
+    "address": "Address",
+    "sports": "Sports / Play Types"
+  },
+  "addons": {
+    "title": "Available Add-ons",
+    "unknown": "Unknown Addon",
+    "minOrder": "Min Order"
+  },
+  "policies": {
+    "title": "Policies & Configuration",
+    "rules": "Venue Rules",
+    "configuration": "Booking Configuration",
+    "cancellation": "Cancellation Notice",
+    "advanceBooking": "Advance Booking",
+    "splitBooking": "Split Booking",
+    "recurringBooking": "Recurring Booking",
+    "allowed": "Allowed",
+    "denied": "Denied",
+    "hours": "Hours",
+    "days": "Days"
+  },
+  "alerts": {
+    "rejectTitle": "Reject Request?",
+    "rejectText": "Are you sure you want to reject this request? This will permanently delete the request.",
+    "confirmReject": "Yes, Reject it",
+    "noData": "No request data found",
+    "goBack": "Go Back"
+  },
+  "defaults": {
+    "noName": "No Name",
+    "loading": "Loading...",
+    "unknownType": "Unknown Type",
+    "noDescription": "No description provided.",
+    "noRules": "No specific rules provided."
+  },
+  "common": {
+    "currency": "AED"
+  }
+}
