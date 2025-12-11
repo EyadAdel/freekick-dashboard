@@ -30,8 +30,12 @@ const BookingDetailView = () => {
     const bookingId = bookingFromState?.id || location.state?.bookingId;
 
     // Fetch booking data - use booking from state if available, otherwise fetch by ID
-    const { booking: fetchedBooking, isLoading: isFetchingDetails, error: fetchError } = useBooking(bookingId);
-
+    const {
+        booking: fetchedBooking,
+        isLoading: isFetchingDetails,
+        error: fetchError,
+        refetch // Add this
+    } = useBooking(bookingId);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
     const { componentRef, handlePrint } = usePrint();
     const dispatch = useDispatch();
@@ -145,7 +149,32 @@ const BookingDetailView = () => {
             setIsActionLoading(false);
         }
     };
+    const handleFullPaid = async () => {
+        try {
+            const confirmed = await showConfirm({
+                title: "Mark as Full Paid",
+                text: "Are you sure you want to mark this booking as fully paid?",
+                confirmButtonText: "Yes, mark as paid",
+                cancelButtonText: "Cancel",
+                icon: "success"
+            });
 
+            if (confirmed) {
+                setIsActionLoading(true);
+                await bookingService.partialUpdate(booking.id, { mark_as_paid: true });
+
+                // Show success toast
+                toast.success('Booking marked as fully paid successfully!');
+
+                // Refetch booking data to update the UI
+                await refetch();
+            }
+        } catch (err) {
+            toast.error('Failed to mark as fully paid: ' + err.message);
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
     const totalAmount = parseFloat(booking.total_price || 0);
     const addonsTotal = booking.booking_addons?.reduce((sum, addon) => {
         return sum + (parseFloat(addon.addon_info?.price || 0) * addon.quantity);
@@ -178,7 +207,7 @@ const BookingDetailView = () => {
             {/* Header Section */}
             <div className="bg-white mx-4 rounded-xl">
                 <div className="mx-auto px-4 sm:px-4 lg:py-3 py-1">
-                    <div className="flex flex-col items-start justify-between gap-2">
+                    <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={handleBack}
@@ -187,6 +216,34 @@ const BookingDetailView = () => {
                                 <span className="font-medium">Back to Bookings</span>
                             </button>
                         </div>
+                        {role.is_admin || role.is_sub_admin ? (
+                            booking.mark_as_paid ? (
+                                <div className="flex-1 sm:flex-none px-4 py-2 bg-green-100 border border-green-300 text-green-700 rounded-2xl flex items-center justify-center gap-2">
+                                    <CheckCircle className="w-4 h-4" />
+                                    <span className="font-medium">Full Paid</span>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={handleFullPaid}
+                                    disabled={isActionLoading}
+                                    className={`flex-1 sm:flex-none px-4 py-2 bg-teal-500 text-white rounded-2xl transition-colors flex items-center justify-center gap-2 ${
+                                        isActionLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-teal-600'
+                                    }`}
+                                >
+                                    {isActionLoading ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            <span className="font-medium">Processing...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CreditCard className="w-4 h-4" />
+                                            <span className="font-medium">Mark As Full Paid</span>
+                                        </>
+                                    )}
+                                </button>
+                            )
+                        ) : null}
                     </div>
                 </div>
             </div>
