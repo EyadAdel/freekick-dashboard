@@ -1,0 +1,76 @@
+{
+  "pageTitle": "الملاعب",
+  "stats": {
+    "total": "إجمالي الملاعب",
+    "active": "الملاعب النشطة",
+    "inactive": "الملاعب غير النشطة"
+  },
+  "statusSection": {
+    "approvedTitle": "الملاعب المعتمدة",
+    "rejectedTitle": "الملاعب المرفوضة",
+    "groupName": "الملاعب",
+    "singleName": "ملعب",
+    "reject": "رفض",
+    "approve": "اعتماد",
+    "noApproved": "لا توجد ملاعب معتمدة",
+    "noRejected": "لا توجد ملاعب مرفوضة"
+  },
+  "tabs": {
+    "all": "كل الملاعب",
+    "approved": "المعتمدة",
+    "rejected": "المرفوضة"
+  },
+  "table": {
+    "srNo": "رقم التسلسل",
+    "image": "الصورة",
+    "pitchNameId": "اسم الملعب",
+    "venues": "المكان",
+    "status": "الحالة",
+    "type": "النوع",
+    "pricing": "السعر/ساعة",
+    "quickActions": "إجراءات سريعة"
+  },
+  "filters": {
+    "status": "الحالة",
+    "allStatus": "كل الحالات",
+    "filterVenues": "تصفية الأماكن",
+    "allVenues": "كل الأماكن",
+    "pricePerHour": "السعر بالساعة",
+    "pricePlaceholder": "مثال: 200",
+    "searchPlaceholder": "بحث عن ملعب"
+  },
+  "actions": {
+    "view": "عرض الملعب",
+    "edit": "تعديل الملعب",
+    "delete": "حذف الملعب",
+    "createPitch": "إضافة ملعب"
+  },
+  "modals": {
+    "approveTitle": "اعتماد \"{{name}}\"؟",
+    "approveText": "سيتم تعيين حالة هذا الملعب إلى نشط.",
+    "approveBtn": "نعم، اعتمد",
+    "rejectTitle": "رفض \"{{name}}\"؟",
+    "rejectText": "سيتم تعيين حالة هذا الملعب إلى غير نشط.",
+    "rejectBtn": "نعم، ارفض",
+    "deleteTitle": "حذف \"{{name}}\"؟",
+    "deleteText": "لا يمكن التراجع عن هذا الإجراء.",
+    "deleteBtn": "نعم، احذف"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "card": {
+    "venue": "المكان",
+    "price": "السعر"
+  },
+  "messages": {
+    "loadFailed": "فشل تحميل بيانات الملاعب",
+    "loading": "جار التحميل..."
+  },
+  "common": {
+    "aside": "لاعبين",
+    "currency": "درهم",
+    "hr": "ساعة"
+  }
+}

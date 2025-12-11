@@ -76,7 +76,7 @@ const PopularVenues = () => {
     const venuesWithData = popularVenues?.map((venue, index) => {
         return {
             id: venue.id,
-            name: venue.translations?.name || 'Unknown Venue',
+            name: venue.translations?.name || 'Unknown Venues',
             min_price: venue.min_price,
             rate: venue.rate,
             venue_type: venue.venue_type,
@@ -295,11 +295,13 @@ const PopularVenues = () => {
                         </div>
                     </div>
 
-                    {/* Legend with Venue Details - Arranged from top (highest) to bottom (lowest) */}
+                    {/* Legend with Venues Details - Arranged from top (highest) to bottom (lowest) */}
                     <div className="w-full space-y-4">
                         {sortedVenues.map((venue, index) => (
                             <div key={venue.id || index} className="flex items-start justify-between">
-                                <div className="flex items-start it gap-2">
+                                <div
+                                    onClick={()=>navigate('/teams/team-profile',{state:{team:team}})}
+                                    className="flex items-start it gap-2">
                                     {/* Color indicator and rank number */}
                                     <div className="flex flex-col items-center">
                                         {/*<div className="text-xs font-semibold text-gray-500 mb-1">*/}

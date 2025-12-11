@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice.js';
 import MainTable from './../../components/MainTable';
-import { Eye, Pencil, Trash2, TrendingUp, Plus, Users, CheckCircle, XCircle, MapPin, Image as ImageIcon } from 'lucide-react';
+import { Eye, Pencil, Trash2, TrendingUp, Plus, Users, CheckCircle, XCircle, MapPin, Image as ImageIcon, Calendar } from 'lucide-react';
 import { tournamentsService } from '../../services/tournaments/tournamentsService.js';
 import { venuesService } from '../../services/venues/venuesService.js';
 import { venueSportsService } from '../../services/venueSports/venueSportsService.js';
@@ -11,6 +11,10 @@ import { showConfirm } from '../../components/showConfirm.jsx';
 import TournamentsForm from '../../components/tournaments/TournamentsForm.jsx';
 import StatCard from './../../components/Charts/StatCards.jsx';
 import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
+
+// --- IMPORT THE NEW SECTION COMPONENT ---
+// Adjust the path based on where you saved StatusManagementSection
+import StatusManagementSection, { StatusBadge } from '../../components/StatusManagementSection';
 
 const Tournaments = () => {
     const rowsPerPage = 10;
@@ -86,7 +90,6 @@ const Tournaments = () => {
     // --- HANDLERS ---
     const handleViewDetails = (tournament) => {
         const resolvedVenueName = getVenueName(tournament.venue);
-
         navigate(`/tournaments/tournament-details`, {
             state: {
                 tournamentData: tournament,
@@ -134,6 +137,39 @@ const Tournaments = () => {
         }
     };
 
+    // --- NEW: HANDLE STATUS CHANGE VIA SECTION ---
+    const handleStatusUpdate = async (tournament, newStatus) => {
+        const actionWord = newStatus ? "Activate" : "Deactivate";
+        const isConfirmed = await showConfirm({
+            title: `${actionWord} Tournament?`,
+            text: `Are you sure you want to ${actionWord.toLowerCase()} "${tournament.name}"?`,
+            confirmButtonText: `Yes, ${actionWord}`
+        });
+
+        if (!isConfirmed) return;
+
+        try {
+            // Assuming update accepts ID and FormData or Object.
+            // We create a partial object or formData depending on your service implementation.
+            // Here we assume simple object update is supported, otherwise use FormData.
+            const updatedData = {
+                ...tournament,
+                is_active: newStatus
+            };
+
+            // Note: Adjust 'update' to match your exact service method signature
+            await tournamentsService.update(tournament.id, updatedData);
+
+            // Optimistic Update
+            setTournamentsData(prev => prev.map(t =>
+                t.id === tournament.id ? { ...t, is_active: newStatus } : t
+            ));
+
+        } catch (error) {
+            console.error(`Failed to ${actionWord.toLowerCase()} tournament:`, error);
+        }
+    };
+
     // --- FILTER & STATS ---
     const filteredData = useMemo(() => {
         if (!tournamentsData) return [];
@@ -156,6 +192,10 @@ const Tournaments = () => {
         });
     }, [tournamentsData, venuesData, activeFilters]);
 
+    // Derived Lists for Status Sections
+    const activeTournaments = useMemo(() => tournamentsData.filter(t => t.is_active), [tournamentsData]);
+    const inactiveTournaments = useMemo(() => tournamentsData.filter(t => !t.is_active), [tournamentsData]);
+
     const handleFilterChange = (newFilters) => {
         setActiveFilters(prev => ({ ...prev, ...newFilters }));
         setCurrentPage(1);
@@ -170,13 +210,37 @@ const Tournaments = () => {
 
     const stats = useMemo(() => {
         const total = tournamentsData.length;
-        const active = tournamentsData.filter(t => t.is_active).length;
-        const inactive = tournamentsData.filter(t => !t.is_active).length;
+        const active = activeTournaments.length;
+        const inactive = inactiveTournaments.length;
         const totalTeams = tournamentsData.reduce((acc, curr) => acc + (parseInt(curr.max_teams) || 0), 0);
         return { total, active, inactive, totalTeams };
-    }, [tournamentsData]);
+    }, [tournamentsData, activeTournaments, inactiveTournaments]);
 
-    // --- ACTIONS COMPONENT ---
+    // --- RENDER FUNCTIONS FOR STATUS SECTIONS ---
+    const renderTournamentIcon = (item) => (
+        <span className="text-white font-bold text-sm">{item.max_teams}</span>
+    );
+
+    const renderTournamentHeader = (item) => (
+        <span className="font-bold text-gray-800 text-sm line-clamp-1" title={item.name}>
+            {item.name}
+        </span>
+    );
+
+    const renderTournamentMeta = (item) => (
+        <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-1">
+                <MapPin size={10} />
+                <span className="truncate max-w-[150px]">{getVenueName(item.venue)}</span>
+            </div>
+            <div className="flex items-center gap-1 text-gray-400">
+                <Calendar size={10} />
+                <span>{new Date(item.start_date).toLocaleDateString()}</span>
+            </div>
+        </div>
+    );
+
+    // --- ACTIONS COMPONENT FOR TABLE ---
     const ActionButtons = ({ tournament }) => (
         <div className="flex justify-end items-center gap-1 sm:gap-2">
             <button
@@ -215,7 +279,6 @@ const Tournaments = () => {
             header: 'Tournament Info',
             accessor: 'name',
             align: 'left',
-            // UPDATED RENDER: Shows image if exists, otherwise shows Static Icon
             render: (row) => (
                 <div className="flex items-center gap-3">
                     {row.cover_image ? (
@@ -225,7 +288,7 @@ const Tournaments = () => {
                             className="w-12 h-12 rounded-lg object-cover border border-gray-100 shadow-sm flex-shrink-0 bg-gray-50"
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = 'https://placehold.co/100x100?text=No+Img'; // Fallback network image
+                                e.target.src = 'https://placehold.co/100x100?text=No+Img';
                             }}
                         />
                     ) : (
@@ -244,7 +307,7 @@ const Tournaments = () => {
             )
         },
         {
-            header: 'Venue',
+            header: 'Venues',
             accessor: 'venue',
             align: 'left',
             render: (row) => (
@@ -310,7 +373,7 @@ const Tournaments = () => {
             value: activeFilters.status
         },
         {
-            key: 'venue', label: 'Filter by Venue', type: 'select',
+            key: 'venue', label: 'Filter by Venues', type: 'select',
             options: [ { label: 'All Venues', value: 'all' }, ...venuesData.map(v => ({ label: v.translations?.name || v.name, value: v.id })) ],
             value: activeFilters.venue
         }
@@ -330,8 +393,9 @@ const Tournaments = () => {
                     />
                 </div>
             ) : (
-                // SHOW DASHBOARD (Stats + Table)
+                // SHOW DASHBOARD
                 <>
+                    {/* 1. Stat Cards */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 my-4 sm:my-8">
                         <StatCard
                             title="Total Tournaments"
@@ -359,6 +423,37 @@ const Tournaments = () => {
                         />
                     </div>
 
+                    {/* 2. Status Management Sections (Side by Side) */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                        {/* Active List (Approved) */}
+                        <StatusManagementSection
+                            title="Active Tournaments"
+                            name={{ single: 'Tournament', group: 'Tournaments' }}
+                            items={activeTournaments}
+                            statusType="approved"
+                            emptyMessage="No active tournaments found."
+                            onReject={(item) => handleStatusUpdate(item, false)} // Action: Deactivate
+                            rejectLabel="Reject"
+                            renderIcon={renderTournamentIcon}
+                            renderHeader={renderTournamentHeader}
+                            renderMeta={renderTournamentMeta}
+                        />
+                        {/* Inactive List (Pending Approval) */}
+                        <StatusManagementSection
+                            title="Inactive Tournaments"
+                            name={{ single: 'Tournament', group: 'Tournaments' }}
+                            items={inactiveTournaments}
+                            statusType="pending" // Or 'rejected', controls the icon color
+                            emptyMessage="No inactive tournaments found."
+                            onApprove={(item) => handleStatusUpdate(item, true)} // Action: Activate
+                            approveLabel="Approve"
+                            renderIcon={renderTournamentIcon}
+                            renderHeader={renderTournamentHeader}
+                            renderMeta={renderTournamentMeta}
+                        />
+                    </div>
+
+                    {/* 3. Main Table */}
                     {isLoading && tournamentsData.length === 0 ? (
                         <div className="p-6 sm:p-10 text-center text-gray-500 text-sm sm:text-base">Loading...</div>
                     ) : (
@@ -379,16 +474,6 @@ const Tournaments = () => {
                 </>
             )}
         </div>
-    );
-};
-
-const StatusBadge = ({ isActive }) => {
-    const style = isActive ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200';
-    return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${style}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}`}></span>
-            {isActive ? 'Active' : 'Inactive'}
-        </span>
     );
 };
 

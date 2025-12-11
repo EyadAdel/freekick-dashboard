@@ -1,0 +1,62 @@
+{
+  "header": {
+    "create_title": "إضافة ملعب جديد",
+    "edit_title": "تعديل الملعب",
+    "create_desc": "أدخل تفاصيل ملعب المنشأة.",
+    "edit_desc": "تحديث تفاصيل هذا الملعب."
+  },
+  "basic_info": {
+    "title": "المعلومات الأساسية",
+    "name_en_label": "اسم الملعب (إنجليزي)",
+    "name_ar_label": "اسم الملعب (عربي)",
+    "badge_en": "إنجليزي",
+    "badge_ar": "عربي",
+    "translating": "جاري الترجمة...",
+    "auto_btn": "تلقائي",
+    "reset_auto_tooltip": "إعادة للترجمة التلقائية"
+  },
+  "images": {
+    "title": "صورة الملعب",
+    "upload_label": "رفع صورة",
+    "click_to_select": "اضغط لاختيار ملف",
+    "valid_image_error": "يرجى اختيار ملف صورة صالح",
+    "upload_success": "تم رفع الصورة بنجاح",
+    "upload_fail": "فشل رفع الصورة",
+    "wait_upload": "يرجى انتظار انتهاء رفع الصورة."
+  },
+  "details": {
+    "title": "التفاصيل",
+    "price_label": "السعر للساعة",
+    "size_label": "حجم الملعب",
+    "select_size": "اختر الحجم",
+    "venue_label": "المنشأة",
+    "loading_venues": "جاري تحميل المنشآت...",
+    "select_venue": "اختر المنشأة",
+    "parent_pitch_label": "الملعب الرئيسي ",
+    "loading_pitches": "جاري تحميل الملاعب...",
+    "select_parent_pitch_optional": "اختر الملعب الرئيسي (اختياري)"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "is_active": "نشط؟",
+    "is_primary": "هل هو ملعب رئيسي؟"
+  },
+  "buttons": {
+    "cancel": "إلغاء",
+    "save": "حفظ الملعب",
+    "update": "تحديث الملعب"
+  },
+  "validation": {
+    "name_en_required": "اسم الملعب (إنجليزي) مطلوب",
+    "name_ar_required": "اسم الملعب (عربي) مطلوب",
+    "price_required": "السعر مطلوب",
+    "size_required": "الحجم مطلوب",
+    "venue_required": "المنشأة مطلوبة"
+  },
+  "messages": {
+    "load_venues_error": "تعذر تحميل قائمة المنشآت",
+    "create_success": "تم إنشاء الملعب بنجاح",
+    "update_success": "تم تحديث الملعب بنجاح",
+    "generic_error": "حدث خطأ ما أثناء الإرسال."
+  }
+}

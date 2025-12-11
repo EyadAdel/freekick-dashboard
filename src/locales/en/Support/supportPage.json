@@ -1,0 +1,45 @@
+{
+  "pageTitle": "Support Requests",
+  "stats": {
+    "total": "Total Requests",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "resolved": "Resolved"
+  },
+  "searchPlaceholder": "Search support request, name...",
+  "filters": {
+    "label": "Filter by Status",
+    "all": "All"
+  },
+  "table": {
+    "srNo": "Sr.No",
+    "name": "Name",
+    "phone": "Phone Number",
+    "title": "Title",
+    "message": "Message",
+    "dateTime": "Date/Time",
+    "status": "Status",
+    "actions": "Actions",
+    "unknown": "Unknown"
+  },
+  "status": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "resolved": "Resolved"
+  },
+  "actions": {
+    "delete": "Delete"
+  },
+  "confirm": {
+    "update": {
+      "title": "Mark as {{status}}?",
+      "text": "Change status of request #{{id}} to {{status}}?",
+      "btn": "Yes, Update it"
+    },
+    "delete": {
+      "title": "Delete Request #{{id}}?",
+      "text": "This action cannot be undone.",
+      "btn": "Yes, Delete it"
+    }
+  }
+}

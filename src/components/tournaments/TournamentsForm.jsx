@@ -200,7 +200,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
         if (!formData.name) newErrors.name = "Tournament Name is required";
         if (!formData.start_date) newErrors.start_date = "Start Date is required";
         if (!formData.end_date) newErrors.end_date = "End Date is required";
-        if (!formData.venue) newErrors.venue = "Venue is required";
+        if (!formData.venue) newErrors.venue = "Venues is required";
         if (!formData.max_teams) newErrors.max_teams = "Max Teams is required";
 
         // --- NEW REQUIRED FIELDS ---

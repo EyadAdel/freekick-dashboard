@@ -1,0 +1,62 @@
+{
+  "header": {
+    "create_title": "Create New Pitch",
+    "edit_title": "Edit Pitch",
+    "create_desc": "Fill in the details for the venue pitch.",
+    "edit_desc": "Update the details for this pitch."
+  },
+  "basic_info": {
+    "title": "Basic Information",
+    "name_en_label": "Pitch Name (EN)",
+    "name_ar_label": "Pitch Name (AR)",
+    "badge_en": "English",
+    "badge_ar": "Arabic",
+    "translating": "Translating...",
+    "auto_btn": "Auto",
+    "reset_auto_tooltip": "Reset to Auto-Translation"
+  },
+  "images": {
+    "title": "Pitch Image",
+    "upload_label": "Upload Image",
+    "click_to_select": "Click to select a file",
+    "valid_image_error": "Please select a valid image file",
+    "upload_success": "Image uploaded successfully",
+    "upload_fail": "Image upload failed",
+    "wait_upload": "Please wait for the image to finish uploading."
+  },
+  "details": {
+    "title": "Details",
+    "price_label": "Price Per Hour",
+    "size_label": "Size Type",
+    "select_size": "Select Size",
+    "venue_label": "Venue",
+    "loading_venues": "Loading Venues...",
+    "select_venue": "Select Venue",
+    "parent_pitch_label": "Parent Pitch",
+    "loading_pitches": "Loading Pitches...",
+    "select_parent_pitch_optional": "Select Parent Pitch (Optional)"
+  },
+  "settings": {
+    "title": "Settings",
+    "is_active": "Is Active?",
+    "is_primary": "Is Primary Pitch?"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "save": "Save Pitch",
+    "update": "Update Pitch"
+  },
+  "validation": {
+    "name_en_required": "Pitch Name (EN) is required",
+    "name_ar_required": "Pitch Name (AR) is required",
+    "price_required": "Price is required",
+    "size_required": "Size is required",
+    "venue_required": "Venue is required"
+  },
+  "messages": {
+    "load_venues_error": "Could not load venues list",
+    "create_success": "Pitch created successfully",
+    "update_success": "Pitch updated successfully",
+    "generic_error": "Something went wrong during submission."
+  }
+}

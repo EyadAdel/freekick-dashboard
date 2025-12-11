@@ -1,0 +1,77 @@
+{
+  "header": {
+    "back": "العودة إلى الطلبات",
+    "reject": "رفض",
+    "accept": "قبول الطلب"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "requestAccepted": "✓ تم قبول الطلب بالفعل",
+    "requestRejected": "✗ تم رفض الطلب"
+  },
+  "venueType": {
+    "indoor": "داخلي",
+    "outdoor": "خارجي",
+    "general": "عام"
+  },
+  "profile": {
+    "availableFrom": "متاح من",
+    "availableTo": "متاح إلى",
+    "pricePerHour": "السعر للساعة",
+    "contactInfo": "معلومات الاتصال",
+    "contactPerson": "الشخص المسؤول",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني"
+  },
+  "actions": {
+    "whatsapp": "واتساب",
+    "email": "البريد"
+  },
+  "gallery": {
+    "title": "الصور المرفقة",
+    "noImages": "لم يتم تقديم أي صور في هذا الطلب."
+  },
+  "info": {
+    "title": "المعلومات الأساسية",
+    "description": "الوصف",
+    "surface": "نوع الأرضية",
+    "address": "العنوان",
+    "sports": "الرياضات / أنواع اللعب"
+  },
+  "addons": {
+    "title": "الإضافات المتاحة",
+    "unknown": "إضافة غير معروفة",
+    "minOrder": "أقل كمية"
+  },
+  "policies": {
+    "title": "السياسات والإعدادات",
+    "rules": "قواعد الملعب",
+    "configuration": "إعدادات الحجز",
+    "cancellation": "إشعار الإلغاء",
+    "advanceBooking": "الحجز المسبق",
+    "splitBooking": "تقسيم الحجز",
+    "recurringBooking": "الحجز المتكرر",
+    "allowed": "مسموح",
+    "denied": "مرفوض",
+    "hours": "ساعات",
+    "days": "أيام"
+  },
+  "alerts": {
+    "rejectTitle": "رفض الطلب؟",
+    "rejectText": "هل أنت متأكد أنك تريد رفض هذا الطلب؟ سيؤدي هذا إلى حذف الطلب بشكل دائم.",
+    "confirmReject": "نعم، ارفضه",
+    "noData": "لم يتم العثور على بيانات للطلب",
+    "goBack": "رجوع"
+  },
+  "defaults": {
+    "noName": "بدون اسم",
+    "loading": "جار التحميل...",
+    "unknownType": "نوع غير معروف",
+    "noDescription": "لا يوجد وصف متاح.",
+    "noRules": "لم يتم تقديم قواعد محددة."
+  },
+  "common": {
+    "currency": "د.إ"
+  }
+}

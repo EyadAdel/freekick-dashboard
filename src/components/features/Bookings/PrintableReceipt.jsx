@@ -72,7 +72,7 @@ const PrintableReceipt = React.forwardRef(({ booking, logo }, ref) => {
                             </div>
                             <div style={{ padding: '20px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                                 <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '10px' }}>
-                                    {booking.venue_info?.translations?.name || 'Sports Venue'}
+                                    {booking.venue_info?.translations?.name || 'Sports Venues'}
                                 </div>
                                 <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.8' }}>
                                     <div>{booking.venue_info?.translations?.address || 'Address not available'}</div>
@@ -177,7 +177,7 @@ const PrintableReceipt = React.forwardRef(({ booking, logo }, ref) => {
                                     {booking.pitch?.translations?.name || 'Pitch Booking'}
                                 </div>
                                 <div style={{ fontSize: '12px', color: '#64748b' }}>
-                                    {booking.venue_info?.translations?.name || 'Venue'}
+                                    {booking.venue_info?.translations?.name || 'Venues'}
                                 </div>
                             </td>
                             <td style={{ padding: '16px 15px', textAlign: 'center', color: '#475569' }}>1</td>

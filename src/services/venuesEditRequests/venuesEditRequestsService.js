@@ -27,7 +27,7 @@ export const venuesEditRequestsService = {
     createRequest: async (data) => {
         try {
             const response = await api.post(BASE_URL, data);
-            toast.success('Venue update request created successfully.');
+            toast.success('Venues update request created successfully.');
             return response.data;
         } catch (error) {
             console.error(error);
@@ -106,7 +106,7 @@ export const venuesEditRequestsService = {
     acceptRequest: async (id, data = {}) => {
         try {
             const response = await api.patch(`${BASE_URL}${id}/accept_request/`, data);
-            toast.success('Venue update request accepted.');
+            toast.success('Venues update request accepted.');
             return response.data;
         } catch (error) {
             console.error(error);

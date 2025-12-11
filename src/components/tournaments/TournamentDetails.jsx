@@ -20,7 +20,7 @@ const TournamentDetails = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // 1. Initialize State with passed data (Tournament + Venue Name)
+    // 1. Initialize State with passed data (Tournament + Venues Name)
     const initialTournament = location.state?.tournamentData || null;
     const initialVenueName = location.state?.venueName || '';
 
@@ -54,7 +54,7 @@ const TournamentDetails = () => {
                     dispatch(setPageTitle(`${currentData.name}`));
                 }
 
-                // B. Fetch Venue Name ONLY if we don't have it (Fallback)
+                // B. Fetch Venues Name ONLY if we don't have it (Fallback)
                 if (currentData && currentData.venue && !venueName) {
                     const venuesRes = await venuesService.getAllVenues();
                     const venuesList = venuesRes.results || venuesRes || [];

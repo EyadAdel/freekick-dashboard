@@ -187,7 +187,7 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
                     <div>
                         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                             {initialData ? <Edit className="text-primary-100" /> : <Activity className="text-primary-100" />}
-                            {initialData ? "Edit Venue Sport" : "Create New Venue Sport"}
+                            {initialData ? "Edit Venues Sport" : "Create New Venues Sport"}
                         </h2>
                         <p className="text-primary-100 text-sm mt-1">
                             {initialData ? "Update the details for this sport." : "Fill in the details for the new sport."}

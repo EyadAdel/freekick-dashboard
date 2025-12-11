@@ -26,7 +26,7 @@ export const venueSportsService = {
     create: async (data) => {
         try {
             const response = await api.post(BASE_URL, data);
-            toast.success('Venue type created successfully');
+            toast.success('Venues type created successfully');
             return response.data;
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to create venue type');
@@ -55,7 +55,7 @@ export const venueSportsService = {
     update: async (id, data) => {
         try {
             const response = await api.put(`${BASE_URL}${id}/`, data);
-            toast.success('Venue type updated successfully');
+            toast.success('Venues type updated successfully');
             return response.data;
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to update venue type');
@@ -70,7 +70,7 @@ export const venueSportsService = {
     patch: async (id, data) => {
         try {
             const response = await api.patch(`${BASE_URL}${id}/`, data);
-            toast.success('Venue type updated successfully');
+            toast.success('Venues type updated successfully');
             return response.data;
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to update venue type');
@@ -85,7 +85,7 @@ export const venueSportsService = {
     delete: async (id) => {
         try {
             const response = await api.delete(`${BASE_URL}${id}/`);
-            toast.success('Venue type deleted successfully');
+            toast.success('Venues type deleted successfully');
             return response.data;
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to delete venue type');

@@ -1,0 +1,103 @@
+{
+  "titles": {
+    "create": "إضافة ملعب جديد",
+    "edit": "تعديل الملعب",
+    "createSubtitle": "أدخل التفاصيل للملعب الجديد",
+    "editSubtitle": "تحديث تفاصيل الملعب",
+    "basicInfo": "المعلومات الأساسية",
+    "policies": "السياسات والقواعد",
+    "locationContact": "الموقع والتواصل",
+    "details": "تفاصيل الملعب",
+    "features": "الميزات والمرافق",
+    "addons": "الإضافات (اختياري)",
+    "images": "صور الملعب"
+  },
+  "labels": {
+    "venueNameEn": "اسم الملعب (EN)",
+    "venueNameAr": "اسم الملعب (AR)",
+    "descriptionEn": "الوصف (EN)",
+    "descriptionAr": "الوصف (AR)",
+    "addressTextEn": "نص العنوان (EN)",
+    "addressTextAr": "نص العنوان (AR)",
+    "rulesEn": "القواعد واللوائح (EN)",
+    "rulesAr": "القواعد واللوائح (AR)",
+    "cancelPolicyEn": "سياسة الإلغاء (EN)",
+    "cancelPolicyAr": "سياسة الإلغاء (AR)",
+    "owner": "مالك الملعب",
+    "city": "المدينة",
+    "fullAddress": "العنوان بالكامل (الموقع)",
+    "contactName": "اسم جهة الاتصال",
+    "phone": "رقم الهاتف",
+    "email": "البريد الإلكتروني",
+    "venueType": "نوع الملعب",
+    "surfaceType": "نوع الأرضية",
+    "pricePerHour": "السعر في الساعة",
+    "availableFrom": "متاح من",
+    "availableTo": "متاح إلى",
+    "advanceDays": "أيام الحجز المسبق",
+    "minCancellation": "أقل مدة للإلغاء (ساعات)",
+    "mapLocation": "حدد الموقع على الخريطة",
+    "latitude": "خط العرض",
+    "longitude": "خط الطول",
+    "playTypes": "أنواع اللعب",
+    "amenities": "المرافق",
+    "closedDays": "أيام الإغلاق",
+    "price": "السعر",
+    "minNumber": "أقل عدد"
+  },
+  "placeholders": {
+    "descEn": "أدخل وصف المكان بالإنجليزية...",
+    "descAr": "أدخل وصف المكان...",
+    "rulesEn": "أدخل قواعد المكان بالإنجليزية...",
+    "rulesAr": "أدخل قواعد المكان...",
+    "policyEn": "أدخل سياسة الإلغاء بالإنجليزية...",
+    "policyAr": "أدخل سياسة الإلغاء...",
+    "selectOwner": "اختر المالك",
+    "selectCity": "اختر المدينة",
+    "selectType": "اختر النوع",
+    "selectSurface": "اختر الأرضية",
+    "selectMap": "حدد على الخريطة",
+    "pricePlaceholder": "٠.٠٠"
+  },
+  "badges": {
+    "english": "الإنجليزية",
+    "arabic": "العربية",
+    "englishPolicies": "السياسات بالإنجليزية",
+    "arabicPolicies": "السياسات بالعربية"
+  },
+  "options": {
+    "indoor": "داخلي (مغطى)",
+    "outdoor": "خارجي (مكشوف)",
+    "unknown": "غير معروف",
+    "noPitch": "لا يوجد ملعب"
+  },
+  "mapThemes": {
+    "standard": "قياسي",
+    "satellite": "قمر صناعي",
+    "dark": "الوضع الداكن",
+    "light": "الوضع الفاتح"
+  },
+  "toggles": {
+    "splitBooking": "السماح بتقسيم الحجز",
+    "recurringBooking": "السماح بالحجز المتكرر",
+    "isActive": "نشط",
+    "auto": "تلقائي",
+    "clickToUpload": "اضغط للرفع",
+    "selectMultiple": "اختر متعدد"
+  },
+  "messages": {
+    "translating": "جارِ الترجمة...",
+    "uploadWait": "يرجى انتظار انتهاء رفع الصور.",
+    "required": "مطلوب",
+    "fillRequired": "يرجى ملء الحقول المطلوبة",
+    "saveSuccess": "تم حفظ الملعب بنجاح!",
+    "saveFail": "فشل حفظ الملعب.",
+    "loadFail": "فشل تحميل بيانات التكوين.",
+    "optionsError": "فشل تحميل خيارات النموذج"
+  },
+  "buttons": {
+    "cancel": "إلغاء",
+    "create": "إضافة الملعب",
+    "update": "تحديث الملعب"
+  }
+}

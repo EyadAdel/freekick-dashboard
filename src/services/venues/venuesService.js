@@ -29,7 +29,7 @@ export const venuesService = {
         try {
             // If sending files (images), ensure 'data' is a FormData object
             const response = await api.post(`${BASE_URL}`, data);
-            toast.success("Venue created successfully");
+            toast.success("Venues created successfully");
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to create venue";
@@ -60,7 +60,7 @@ export const venuesService = {
     updateVenue: async (id, data) => {
         try {
             const response = await api.patch(`${BASE_URL}${id}/`, data);
-            toast.success("Venue updated successfully");
+            toast.success("Venues updated successfully");
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to update venue";
@@ -71,7 +71,7 @@ export const venuesService = {
     venueUpdateRequest: async (id, data) => {
         try {
             const response = await api.post(`${REQUEST_BASE_URL}`, data);
-            toast.success("Venue Edit Request Created successfully");
+            toast.success("Venues Edit Request Created successfully");
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to create venue edit request ";
@@ -87,7 +87,7 @@ export const venuesService = {
     deleteVenue: async (id) => {
         try {
             const response = await api.delete(`${BASE_URL}${id}/`);
-            toast.success("Venue deleted successfully");
+            toast.success("Venues deleted successfully");
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to delete venue";

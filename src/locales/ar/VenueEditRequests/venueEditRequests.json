@@ -1,0 +1,50 @@
+{
+  "pageTitle": "طلبات تحديث الملاعب",
+  "stats": {
+    "total": "إجمالي الطلبات",
+    "pending": "في انتظار الإجراء",
+    "approved": "الطلبات المقبولة"
+  },
+  "filters": {
+    "searchPlaceholder": "ابحث عن ملعب، جهة اتصال، بريد إلكتروني...",
+    "statusLabel": "الحالة",
+    "all": "جميع الطلبات",
+    "approved": "مقبول",
+    "pending": "معلق / يتطلب إجراء"
+  },
+  "table": {
+    "srNo": "م",
+    "venuesInfo": "معلومات الملعب",
+    "contact": "جهة الاتصال",
+    "details": "التفاصيل",
+    "submitted": "تاريخ التقديم",
+    "actions": "الإجراءات",
+    "untitled": "ملاعب بدون عنوان",
+    "noAddress": "لا يوجد عنوان",
+    "perHour": "درهم/ساعة"
+  },
+  "types": {
+    "indoor": "داخلي",
+    "outdoor": "خارجي"
+  },
+  "buttons": {
+    "view": "عرض التفاصيل الكاملة",
+    "approvedBadge": "تمت الموافقة",
+    "approve": "قبول",
+    "reject": "رفض",
+    "approveTooltip": "قبول الطلب",
+    "rejectTooltip": "رفض الطلب"
+  },
+  "confirm": {
+    "approveTitle": "هل تريد قبول التحديثات لـ \"{{name}}\"؟",
+    "approveText": "سيتم تطبيق التغييرات على الملعب المباشر.",
+    "approveBtn": "نعم، قبول",
+    "rejectTitle": "هل تريد رفض التحديثات لـ \"{{name}}\"؟",
+    "rejectText": "سيتم حذف هذا الطلب بشكل دائم.",
+    "rejectBtn": "نعم، رفض"
+  },
+  "messages": {
+    "loading": "جاري تحميل الطلبات...",
+    "loadError": "فشل تحميل الطلبات"
+  }
+}

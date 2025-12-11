@@ -141,7 +141,7 @@ const BannerForm = ({
     };
 
     const bannerTypeOptions = [
-        { label: 'Venue', value: 'venue' },
+        { label: 'Venues', value: 'venue' },
         { label: 'Text', value: 'text' },
         { label: 'Link', value: 'link' },
         { label: 'Tournaments', value: 'tournaments' }

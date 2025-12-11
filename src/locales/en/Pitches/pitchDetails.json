@@ -1,0 +1,42 @@
+{
+  "header": {
+    "backToPitches": "Back to Pitches",
+    "updatePitch": "Update Pitch"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "primary": "Primary Pitch"
+  },
+  "card": {
+    "players": "Players",
+    "venueId": "Venue ID",
+    "bookings": "Bookings",
+    "created": "Created",
+    "updated": "Last Updated",
+    "pricePerHour": "Price Per Hour",
+    "priceAED": "AED",
+
+    "playersCapacity": "Players Capacity",
+    "venue": "Venue",
+    "pitchSize": "Pitch Size"
+  },
+  "info": {
+    "title": "Pitch Details",
+    "description": "Description",
+    "noDescription": "No description provided for this pitch.",
+    "specifications": "Specifications",
+    "sizeLabel": "Pitch Size",
+    "typeLabel": "Type",
+    "mainPitch": "Main Pitch",
+    "subPitch": "Sub Pitch",
+    "parentPitch": "Parent Pitch"
+  },
+  "messages": {
+    "notFound": "Pitch not found",
+    "back": "Go Back"
+  },
+  "common": {
+    "max": "Max"
+  }
+}

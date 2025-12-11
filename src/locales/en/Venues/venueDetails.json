@@ -1,0 +1,58 @@
+{
+  "header": {
+    "backToVenues": "Back to Venues",
+    "updateVenue": "Update Venue"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "venueTypeIndoor": "Indoor",
+    "venueTypeOutdoor": "Outdoor"
+  },
+  "card": {
+    "opens": "Opens",
+    "closes": "Closes",
+    "pricePerHour": "Price per Hour",
+    "currency": "AED",
+    "contactInfo": "Contact Info",
+    "manager": "Manager",
+    "phone": "Phone",
+    "email": "Email",
+    "closedDays": "Closed Days",
+    "openMap": "Open Map",
+    "day": "Day"
+  },
+  "gallery": {
+    "title": "Venue Gallery"
+  },
+  "info": {
+    "title": "Description",
+    "noDescription": "No description provided for this venue.",
+    "surface": "Surface",
+    "unknownSurface": "Unknown Surface",
+    "size": "Size",
+    "sportsActivities": "Sports & Activities",
+    "facilities": "Facilities"
+  },
+  "addons": {
+    "title": "Available Add-ons",
+    "minOrder": "Min Order"
+  },
+  "policies": {
+    "title": "Policies & Rules",
+    "venueRules": "Venue Rules",
+    "noRules": "No specific rules.",
+    "bookingTerms": "Booking Terms",
+    "cancellationNotice": "Cancellation Notice",
+    "hours": "Hours",
+    "advanceBooking": "Advance Booking",
+    "days": "Days",
+    "splitPayment": "Split Payment",
+    "allowed": "Allowed",
+    "notAllowed": "Not Allowed"
+  },
+  "messages": {
+    "notFound": "Venue data not found.",
+    "back": "Back"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "pageTitle": "Venues",
+  "loading": "Loading...",
+  "entity": {
+    "venue": "venue",
+    "venues": "venues"
+  },
+  "stats": {
+    "totalFiltered": "Total Venues (Filtered)",
+    "active": "Active Venues",
+    "inactive": "Inactive Venues"
+  },
+  "statusSection": {
+    "activeTitle": "Active Venues",
+    "inactiveTitle": "Inactive Venues",
+    "noActive": "No active venues found",
+    "noInactive": "No inactive venues found",
+    "btnActivate": "Activate",
+    "btnDeactivate": "Deactivate"
+  },
+  "viewTabs": {
+    "all": "All Venues",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "filters": {
+    "searchPlaceholder": "Search venue",
+    "status": {
+      "label": "Status",
+      "all": "All Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "type": {
+      "label": "Venue Type",
+      "all": "All Venue Types",
+      "indoor": "Indoor",
+      "outdoor": "Outdoor"
+    }
+  },
+  "table": {
+    "headers": {
+      "srNo": "Sr.No",
+      "venue": "Venue",
+      "contactInfo": "Contact Info",
+      "location": "Location",
+      "playTypes": "Play Types",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "rows": {
+      "na": "N/A",
+      "noAddress": "No address",
+      "viewOnMap": "View on Map",
+      "none": "None"
+    }
+  },
+  "actions": {
+    "create": "Create Venue",
+    "view": "View Details",
+    "edit": "Edit Venue",
+    "delete": "Delete Venue"
+  },
+  "messages": {
+    "errorLoad": "Error loading venues",
+    "errorDetails": "Failed to load venue details"
+  },
+  "confirm": {
+    "activate": {
+      "title": "Activate \"{{name}}\"?",
+      "text": "This venue will be visible to users.",
+      "btn": "Yes, Activate it"
+    },
+    "deactivate": {
+      "title": "Deactivate \"{{name}}\"?",
+      "text": "This venue will be hidden from users.",
+      "btn": "Yes, Deactivate it"
+    },
+    "delete": {
+      "title": "Delete \"{{name}}\"?",
+      "text": "This action cannot be undone. The venue will be permanently removed.",
+      "btn": "Yes, Delete it"
+    }
+  }
+}

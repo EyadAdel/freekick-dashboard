@@ -1,0 +1,76 @@
+{
+  "pageTitle": "Pitches",
+  "stats": {
+    "total": "Total Pitches",
+    "active": "Active Pitches",
+    "inactive": "Inactive Pitches"
+  },
+  "statusSection": {
+    "approvedTitle": "Approved Pitches",
+    "rejectedTitle": "Rejected Pitches",
+    "groupName": "Pitches",
+    "singleName": "Pitch",
+    "reject": "Reject",
+    "approve": "Approve",
+    "noApproved": "No approved pitches",
+    "noRejected": "No rejected pitches"
+  },
+  "tabs": {
+    "all": "All Pitches",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "table": {
+    "srNo": "Sr.No",
+    "image": "Image",
+    "pitchNameId": "Pitch Name",
+    "venues": "Venues",
+    "status": "Status",
+    "type": "Type",
+    "pricing": "Pricing/hour",
+    "quickActions": "Quick Actions"
+  },
+  "filters": {
+    "status": "Status",
+    "allStatus": "All Status",
+    "filterVenues": "Filter Venues",
+    "allVenues": "All Venues",
+    "pricePerHour": "Price Per Hour",
+    "pricePlaceholder": "e.g. 200",
+    "searchPlaceholder": "Search pitch"
+  },
+  "actions": {
+    "view": "View Pitch",
+    "edit": "Edit Pitch",
+    "delete": "Delete Pitch",
+    "createPitch": "Create Pitch"
+  },
+  "modals": {
+    "approveTitle": "Approve \"{{name}}\"?",
+    "approveText": "This pitch will be set to active status.",
+    "approveBtn": "Yes, Approve it",
+    "rejectTitle": "Reject \"{{name}}\"?",
+    "rejectText": "This pitch will be set to inactive status.",
+    "rejectBtn": "Yes, Reject it",
+    "deleteTitle": "Delete \"{{name}}\"?",
+    "deleteText": "This action cannot be undone.",
+    "deleteBtn": "Yes, Delete it"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "card": {
+    "venue": "Venue",
+    "price": "Price"
+  },
+  "messages": {
+    "loadFailed": "Failed to load pitches data",
+    "loading": "Loading..."
+  },
+  "common": {
+    "aside": "a side",
+    "currency": "AED",
+    "hr": "hr"
+  }
+}

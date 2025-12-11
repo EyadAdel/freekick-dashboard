@@ -95,7 +95,7 @@ const BookingDetailView = () => {
     const handleCustomerEmail = () => {
         const email = booking.user_info?.email;
         const customerName = booking.user_info?.name || 'Customer';
-        const subject = `Booking #${String(booking.id).padStart(7, '0')} - ${booking.venue_info?.translations?.name || 'Venue'}`;
+        const subject = `Booking #${String(booking.id).padStart(7, '0')} - ${booking.venue_info?.translations?.name || 'Venues'}`;
         const body = `Dear ${customerName},\n\nRegarding your booking #${String(booking.id).padStart(7, '0')} at ${booking.venue_info?.translations?.name || 'our venue'}.\n\n`;
 
         handleEmailClick(email, subject, body);
@@ -368,7 +368,7 @@ const BookingDetailView = () => {
                         </div>
                     </div>
 
-                    {/* Right Column - Venue and Order Details */}
+                    {/* Right Column - Venues and Order Details */}
                     <div className="lg:col-span-2 bg-white rounded-xl shadow-md space-y-4 sm:space-y-2 order-1 lg:order-2">
                         <div className="bg-white rounded-xl p-4 sm:p-6">
                             <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
@@ -395,9 +395,9 @@ const BookingDetailView = () => {
                             </div>
                         </div>
 
-                        {/* Venue Information Card */}
+                        {/* Venues Information Card */}
                         <div className="bg-white rounded-xl   overflow-hidden">
-                            {/* Venue Image */}
+                            {/* Venues Image */}
                             <div className=" rounded-lg  ">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-center gap-4 sm:gap-8">
                                     <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -516,7 +516,7 @@ const BookingDetailView = () => {
                                             {booking.pitch?.translations?.name || 'Pitch Booking'}
                                         </p>
                                         <p className="text-xs text-gray-500 truncate">
-                                            {booking.venue_info?.translations?.name || 'Venue'}
+                                            {booking.venue_info?.translations?.name || 'Venues'}
                                         </p>
                                     </div>
                                     <div className="col-span-2 text-center">

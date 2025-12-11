@@ -1,0 +1,11 @@
+{
+  "active": "نشط",
+  "inactive": "غير نشط",
+  "approved": "مقبول",
+  "rejected": "مرفوض",
+  "pending": "قيد الانتظار",
+  "approve": "قبول",
+  "reject": "رفض",
+  "items_count": "عنصر {{count}}",
+  "items_count_plural": "{{count}} عناصر"
+}
