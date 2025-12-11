@@ -579,7 +579,7 @@ const VenueEditRequestDetails = () => {
     const { translations, available_addons } = request;
     const currentLang = i18n.language;
     // Fallback logic: Try current language -> Try 'en' -> Empty object
-    const displayData = translations?.[currentLang] || translations?.en || {};
+    const displayData = translations?.en || translations?.en || {};
 
     return (
         <div className="min-h-screen bg-gray-50 pb-10" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>

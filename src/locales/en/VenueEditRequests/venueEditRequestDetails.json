@@ -12,6 +12,7 @@
   },
   "venueType": {
     "indoor": "Indoor",
+    "outdoor": "Outdoor",
     "general": "General"
   },
   "profile": {
