@@ -49,7 +49,7 @@ class TicketsService {
      */
     async updateTicket(id, ticketData) {
         try {
-            const response = await api.patch(`${API_BASE_URL}/${id}`, ticketData);
+            const response = await api.patch(`${API_BASE_URL}/${id}/`, ticketData);
             return response.data;
         } catch (error) {
             throw this.handleError(error);

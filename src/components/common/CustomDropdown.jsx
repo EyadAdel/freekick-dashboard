@@ -57,7 +57,7 @@ const CustomDropdown = ({
                         <div
                             key={option.value}
                             onClick={() => handleSelect(option.value)}
-                            className={`px-4 py-3 cursor-pointer hover:bg-primary-50 transition-colors border-b border-primary-100 mx-2 last:border-b-0 ${
+                            className={`px-4 py-3 text-xs cursor-pointer hover:bg-primary-50 transition-colors border-b border-primary-100 mx-2 last:border-b-0 ${
                                 value === option.value
                                     ? `bg-primary-50 text-primary-700 font-medium ${selectedOptionClassName}`
                                     : `text-gray-700 ${optionClassName}`

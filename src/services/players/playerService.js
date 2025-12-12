@@ -83,9 +83,7 @@ export const playerService = {
     // Get player tournaments
     getPlayerTournaments: async (playerId, params = {}) => {
         try {
-            const response = await api.get(`/tournaments/tournaments/`, {
-                params: { ...params, user_id: playerId }
-            });
+            const response = await api.get(`/tournaments/tournaments/player/${playerId}`, );
 
             // Handle paginated response structure
             if (response.data && response.data.results) {

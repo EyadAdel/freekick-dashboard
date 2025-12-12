@@ -34,6 +34,7 @@ import TeamPointsTab from "./TeamPoints.jsx";
 import BookingCard from "../../components/players/BookingCard.jsx";
 import {useLocation, useNavigate} from "react-router-dom";
 import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
+import {getImageUrl} from "../../utils/imageUtils.js";
 
 
 
@@ -95,7 +96,7 @@ const TeamDetailView = () => {
                 <div className="flex items-center gap-3">
                     {tournament.images && tournament.images.length > 0 ? (
                         <img
-                            src={IMAGE_BASE_URL + tournament.images[0].image}
+                            src={getImageUrl(tournament.images[0].image)} // Use utility function here
                             alt={tournament.name}
                             className="w-10 h-10 rounded-lg object-cover"
                         />
@@ -186,7 +187,7 @@ const TeamDetailView = () => {
                             <div key={user.id} className="relative">
                                 {user.image ? (
                                     <img
-                                        src={ IMAGE_BASE_URL + user.image}
+                                        src={getImageUrl(user.image)} // Use utility function here
                                         alt={user.name}
                                         className="w-6 h-6 rounded-full border-2 border-white"
                                     />
@@ -496,7 +497,7 @@ const TeamDetailView = () => {
                                         {team.logo ? (
                                             <img
                                                 className="w-full h-full rounded-full object-cover"
-                                                src={IMAGE_BASE_URL + team.logo}
+                                                src={getImageUrl( team.logo)} // Use utility function here
                                                 alt={team.name}
                                             />
                                         ) : (
@@ -581,7 +582,7 @@ const TeamDetailView = () => {
                                         <div className="flex items-center gap-3 mb-4">
                                             {team.team_leader.image ? (
                                                 <img
-                                                    src={IMAGE_BASE_URL + team.team_leader.image}
+                                                    src={getImageUrl( team.team_leader.image)} // Use utility function here
                                                     alt={team.team_leader.name}
                                                     className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
                                                 />
@@ -741,7 +742,7 @@ const TeamDetailView = () => {
 
                                                 {member.user_info?.image ? (
                                                     <img
-                                                        src={IMAGE_BASE_URL + member.user_info.image}
+                                                        src={getImageUrl( member.user_info.image)} // Use utility function here
                                                         alt={member.user_info.name}
                                                         className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md mb-1"
                                                     />

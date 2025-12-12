@@ -7,6 +7,7 @@ import { ArrowLeft, Trophy, Users, Target, Award } from "lucide-react";
 import MainTable from "../../components/MainTable.jsx";
 import {useNavigate} from "react-router-dom";
 import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
+import {getImageUrl} from "../../utils/imageUtils.js";
 
 function Teams() {
     const dispatch = useDispatch();
@@ -122,7 +123,7 @@ function Teams() {
                     className="flex cursor-pointer items-center gap-3">
                     {row.logo ? (
                         <img
-                            src={ IMAGE_BASE_URL + row.logo}
+                            src={getImageUrl( row.logo)} // Use utility function here
                             alt="Team Logo"
                             className="w-10 h-10 rounded-full object-cover"
                         />
@@ -146,7 +147,7 @@ function Teams() {
                 <div className="flex items-center gap-2">
                     {row.team_leader?.image ? (
                         <img
-                            src={IMAGE_BASE_URL + row.team_leader.image}
+                            src={getImageUrl(row.team_leader.image)} // Use utility function here
                             alt={row.team_leader.name}
                             className="w-8 h-8 rounded-full object-cover"
                         />

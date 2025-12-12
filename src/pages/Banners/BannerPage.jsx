@@ -9,13 +9,15 @@ import ArrowIcon from "../../components/common/ArrowIcon.jsx";
 import {showConfirm} from "../../components/showConfirm.jsx";
 import {useDispatch} from "react-redux";
 import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
-import  {IMAGE_BASE_URL} from '../../utils/ImageBaseURL.js'
+import { getImageUrl, extractFilename } from '../../utils/imageUtils.js';
+
 const BannerPage = () => {
     const {
         banners,
         loading,
         error,
         currentBanner,
+        totalCount,
         getBanners,
         getBanner,
         addBanner,
@@ -37,12 +39,19 @@ const BannerPage = () => {
     useEffect(() => {
         dispatch(setPageTitle('Banners'));
     }, [dispatch]);
+
+    // Fetch banners with pagination
     useEffect(() => {
-        getBanners({
+        const params = {
+            page: currentPage,
+            page_limit: itemsPerPage,
             search: searchTerm || undefined,
             type: filters.type || undefined,
-        });
-    }, [searchTerm, filters]);
+            ordering: sortConfig.direction === 'desc' ? `-${sortConfig.key}` : sortConfig.key,
+        };
+
+        getBanners(params);
+    }, [currentPage, searchTerm, filters, sortConfig]);
 
     const handleCreate = () => {
         setEditingBanner(null);
@@ -53,6 +62,7 @@ const BannerPage = () => {
         setEditingBanner(banner);
         setViewMode('form');
     };
+
     const handleDelete = async (id) => {
         const confirmed = await showConfirm({
             title: "Delete Banner",
@@ -63,8 +73,13 @@ const BannerPage = () => {
         });
 
         if (confirmed) {
-            await removeBanner(id)
-                toast.success('banner deleted successfully')
+            await removeBanner(id);
+            toast.success('Banner deleted successfully');
+
+            // If we deleted the last item on the page and it's not page 1, go to previous page
+            if (banners.length === 1 && currentPage > 1) {
+                setCurrentPage(currentPage - 1);
+            }
         }
     };
 
@@ -85,7 +100,7 @@ const BannerPage = () => {
                 toast.success('Banner created successfully');
             }
 
-            setViewMode('list'); // Go back to list view after successful save
+            setViewMode('list');
             setEditingBanner(null);
             clearBanner();
         } catch (error) {
@@ -114,6 +129,32 @@ const BannerPage = () => {
         }
     };
 
+    const handleImageError = (e) => {
+        e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="48"><rect fill="%234F46E5" width="80" height="48"/><text x="50%" y="50%" fill="white" font-size="12" text-anchor="middle" dy=".3em">IMG</text></svg>';
+    };
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handleSearch = (term) => {
+        setSearchTerm(term);
+        setCurrentPage(1); // Reset to first page on search
+    };
+
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters);
+        setCurrentPage(1); // Reset to first page on filter change
+    };
+
+    const handleSort = (key) => {
+        setSortConfig(prev => ({
+            key,
+            direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+        }));
+        setCurrentPage(1); // Reset to first page on sort change
+    };
+
     // Table columns configuration
     const columns = [
         {
@@ -128,15 +169,17 @@ const BannerPage = () => {
             header: 'Image',
             accessor: 'image',
             align: 'left',
-            render: (row) => (
-                <img src={IMAGE_BASE_URL + row.image}
-                    alt={`Banner ${row.id}`}
-                    className="w-14 h-8 object-cover rounded"
-                    onError={(e) => {
-                        e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="48"><rect fill="%234F46E5" width="80" height="48"/><text x="50%" y="50%" fill="white" font-size="12" text-anchor="middle" dy=".3em">IMG</text></svg>';
-                    }}
-                />
-            )
+            render: (row) => {
+                const imageUrl = getImageUrl(row.image);
+                return (
+                    <img
+                        src={imageUrl || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="48"><rect fill="%234F46E5" width="80" height="48"/><text x="50%" y="50%" fill="white" font-size="12" text-anchor="middle" dy=".3em">IMG</text></svg>'}
+                        alt={`Banner ${row.id}`}
+                        className="w-14 h-8 object-cover rounded"
+                        onError={handleImageError}
+                    />
+                );
+            }
         },
         {
             header: 'Type',
@@ -252,7 +295,6 @@ const BannerPage = () => {
                     <div className="min-h-screen bg-gray-50">
                         <div className="container mx-auto px-6">
                             <div className="flex items-center justify-between lg:mb-6  ">
-
                                 <button
                                     onClick={() => setViewMode('slider')}
                                     className="flex items-center gap-2 text-xl bg-white p-5 py-3 rounded-lg w-full text-gray-600 hover:text-gray-900 lg:mb-4 transition-colors"
@@ -260,7 +302,6 @@ const BannerPage = () => {
                                     <ArrowIcon size={'xl'} direction={'left'} />
                                     <span className="font-medium">Back to Banners</span>
                                 </button>
-
                             </div>
 
                             <MainTable
@@ -270,17 +311,13 @@ const BannerPage = () => {
                                 filters={tableFilters}
                                 currentPage={currentPage}
                                 itemsPerPage={itemsPerPage}
-                                onSearch={setSearchTerm}
-                                onFilterChange={setFilters}
-                                onPageChange={setCurrentPage}
+                                totalItems={totalCount}
+                                onSearch={handleSearch}
+                                onFilterChange={handleFilterChange}
+                                onPageChange={handlePageChange}
                                 topActions={topActions}
                                 sortConfig={sortConfig}
-                                onSort={(key) => {
-                                    setSortConfig(prev => ({
-                                        key,
-                                        direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
-                                    }));
-                                }}
+                                onSort={handleSort}
                             />
                         </div>
                     </div>
@@ -291,20 +328,18 @@ const BannerPage = () => {
                 return (
                     <div className="min-h-screen bg-gray-50">
                         <div className="container mx-auto lg:px-4 px-2 md:px-8 pb-4">
-
-                        {/* Banner Slider Section */}
-                        <div className="bg-white shadow-sm p-4 rounded-lg border-b">
-
-                            <div className="flex bg-white  lg:p-3 rounded-lg justify-between items-center mb-2">
-                                <h2 className="lg:text-xl   font-bold text-primary-600">Uploaded Banners</h2>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className="lg:text-base  font-bold flex gap-2 items-center text-primary-700 hover:text-primary-600 font-medium"
-                                >
-                                    See all
-                                    <ArrowIcon direction={'right'} size={'md'}/>
-                                </button>
-                            </div>
+                            {/* Banner Slider Section */}
+                            <div className="bg-white shadow-sm p-4 rounded-lg border-b">
+                                <div className="flex bg-white  lg:p-3 rounded-lg justify-between items-center mb-2">
+                                    <h2 className="lg:text-xl   font-bold text-primary-600">Uploaded Banners</h2>
+                                    <button
+                                        onClick={() => setViewMode('list')}
+                                        className="lg:text-base  font-bold flex gap-2 items-center text-primary-700 hover:text-primary-600 "
+                                    >
+                                        See all
+                                        <ArrowIcon direction={'right'} size={'md'}/>
+                                    </button>
+                                </div>
                                 <BannerSlider
                                     banners={banners.filter(b => b.is_active)}
                                     onBannerClick={handleBannerClick}

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPopularVenues } from '../../features/dashboard/analyticsSlice';
 import stadiumIcon from '../../assets/stadiumIcon.svg'
+import {useNavigate} from "react-router-dom";
+import {daysOfWeekService} from "../../services/daysOfWeek/daysOfWeekService.js";
 
 const CITIES = [
     { value: 'Abu Dhabi', label: 'Abu Dhabi' },
@@ -29,6 +31,8 @@ const PopularVenues = () => {
         type: 'image',
         imageUrl: stadiumIcon
     });
+    const navigate= useNavigate()
+    const [daysList, setDaysList] = useState([]);
 
     const { popularVenues, loading } = useSelector((state) => ({
         popularVenues: state.analytics.popularVenues?.results || [],
@@ -152,7 +156,19 @@ const PopularVenues = () => {
 
     // Calculate total bookings for display
     const totalVenueBookings = sortedVenues.reduce((sum, venue) => sum + venue.bookingCount, 0);
-
+    const fetchFilterOptions = async () => {
+        try {
+            const daysRes = await daysOfWeekService.getAll({ all_languages: true });
+            if (daysRes && daysRes.results) {
+                setDaysList(daysRes.results);
+            }
+        } catch (error) {
+            console.error("Failed to fetch filter options:", error);
+        }
+    };
+    useEffect(() => {
+        fetchFilterOptions()
+    }, []);
     return (
         <div className="bg-white rounded-lg shadow-sm p-6">
             {/* Header */}
@@ -299,7 +315,13 @@ const PopularVenues = () => {
                     <div className="w-full space-y-4">
                         {sortedVenues.map((venue, index) => (
                             <div key={venue.id || index} className="flex items-start justify-between">
-                                <div className="flex items-start it gap-2">
+                                <div
+                                    onClick={()=>navigate('/venues/venue-details', {
+                                        state: {
+                                            venueId: venue.id,
+                                            daysList: daysList
+                                        }})}
+                                    className=" cursor-pointer flex items-start it gap-2">
                                     {/* Color indicator and rank number */}
                                     <div className="flex flex-col items-center">
                                         {/*<div className="text-xs font-semibold text-gray-500 mb-1">*/}

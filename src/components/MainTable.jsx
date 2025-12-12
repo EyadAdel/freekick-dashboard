@@ -109,12 +109,12 @@ const MainTable = ({
 
     return (
         <div className="  min-h-60 font-sans text-secondary-600">
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4 px-2">
+            <div className="flex flex-col xl:flex-row justify-between items-start  mb-6 gap-4 px-2">
 
                 {/* Dynamic Filters */}
-                <div className="flex flex-wrap gap-3 items-center w-full md:w-40">
+                <div className="flex flex-wrap gap-3 items-center w-full ">
                     {filters.map((filter, index) => (
-                        <div key={index} className='w-full'>
+                        <div key={index} className=''>
                             {/* CASE 1: SELECT DROPDOWN */}
                             {filter.type === 'select' ? (
                                 <TextField
@@ -125,7 +125,7 @@ const MainTable = ({
                                     value={filterValues[filter.key] || ''}
                                     onChange={(e) => handleFilterInput(filter.key, e.target.value)}
                                     sx={muiInputStyles}
-                                    className="text-secondary-600 !w-full"
+                                    className="text-secondary-600 "
                                 >
                                     <MenuItem value="">
                                         <span className="text-gray-400">All</span>

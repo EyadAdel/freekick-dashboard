@@ -1,5 +1,6 @@
 import { Trophy } from 'lucide-react';
 import { formatDate, formatAmount } from './formatters.js';
+import {getImageUrl} from "../../utils/imageUtils.js";
 
 export const getTournamentColumns = () => [
     {
@@ -11,7 +12,7 @@ export const getTournamentColumns = () => [
             <div className="flex items-center gap-3">
                 {tournament.images && tournament.images.length > 0 ? (
                     <img
-                        src={`https://pub-f8c5de66602c4f6f91311c6fd40e1794.r2.dev/${tournament.images[0].image}`}
+                        src={getImageUrl(tournament.images[0].image)} // Use utility function here
                         alt={tournament.name}
                         className="w-10 h-10 rounded-lg object-cover"
                         onError={(e) => {
@@ -116,7 +117,8 @@ export const getTournamentColumns = () => [
                         <div key={idx} className="relative">
                             {user.image ? (
                                 <img
-                                    src={user.image}
+                                    src={getImageUrl(user.image)} // Use utility function here
+
                                     alt={user.name}
                                     className="w-6 h-6 rounded-full border-2 border-white"
                                     onError={(e) => {

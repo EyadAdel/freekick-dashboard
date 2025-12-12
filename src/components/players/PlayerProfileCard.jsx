@@ -2,6 +2,7 @@ import React from 'react';
 import { Phone, Calendar, Wallet, User } from 'lucide-react';
 import { useContact } from '../../hooks/useContact';
 import {IMAGE_BASE_URL} from '../../utils/ImageBaseURL.js'
+import {getImageUrl} from "../../utils/imageUtils.js";
 const PlayerProfileCard = ({
                                player,
                                onStatusToggle,
@@ -20,7 +21,8 @@ const PlayerProfileCard = ({
                         {player.image ? (
                             <img
                                 className="w-full h-full rounded-full object-cover"
-                                src={IMAGE_BASE_URL + player.image}
+                                src={getImageUrl(player.image)} // Use utility function here
+
                                 alt={player.name}
                             />
                         ) : (

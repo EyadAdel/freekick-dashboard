@@ -4,7 +4,7 @@ import { useCalendarBookings } from '../../hooks/useBookings.js';
 import CustomDropdown from '../../components/common/CustomDropdown.jsx';
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
-import {venuesService} from "../../services/venues/venuesService.js";
+import {useNavigate} from "react-router-dom";
 
 // ============================================================================
 // UTILITY CLASSES
@@ -95,9 +95,14 @@ class BookingGrouper {
         bookings.forEach(booking => {
             const key = this.#generateKey(booking);
             if (!groups[key]) {
-                groups[key] = [];
+                groups[key] = {
+                    bookings: [],
+                    pitchImage: booking.pitch?.pitch_image || booking.pitch?.image || null,
+                    pitchName: booking.pitch?.translations?.name || 'Unknown Pitch',
+                    venueName: booking.venue?.translations?.name || `Venue ${booking.venue?.id}`
+                };
             }
-            groups[key].push(booking);
+            groups[key].bookings.push(booking);
         });
 
         return groups;
@@ -105,11 +110,44 @@ class BookingGrouper {
 
     static #generateKey(booking) {
         const pitchName = booking.pitch?.translations?.name || 'Unknown Pitch';
-        const venueId = booking.pitch?.venue || 'Unknown';
-        return `Venue ${venueId} - ${pitchName}`;
+        const venueId = booking.venue?.id;
+        const venueName = booking.venue?.translations?.name || `Venue ${venueId}`;
+
+        return `${venueName}\n${pitchName}`;
     }
 }
+const PitchImage = ({ imageUrl, pitchName }) => {
+    if (!imageUrl) {
+        return (
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+                <span className="text-sm font-bold text-white">
+                    {pitchName?.charAt(0) || 'P'}
+                </span>
+            </div>
+        );
+    }
 
+    return (
+        <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm">
+            <img
+                src={imageUrl}
+                alt={pitchName || 'Pitch'}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                    // Fallback to gradient background if image fails to load
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = `
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+                            <span class="text-sm font-bold text-white">
+                                ${pitchName?.charAt(0) || 'P'}
+                            </span>
+                        </div>
+                    `;
+                }}
+            />
+        </div>
+    );
+};
 class BookingPositionCalculator {
     constructor(timeSlots) {
         this.timeSlots = timeSlots;
@@ -165,49 +203,48 @@ const useDatePicker = (initialDate) => {
     const inputRef = useRef(null);
 
     const changeDate = (days) => {
-        const newDate = new Date();
+        const newDate = new Date(selectedDate);
         newDate.setDate(newDate.getDate() + days);
         setSelectedDate(newDate);
+        setTempDate(newDate);
         setShowPicker(false);
     };
 
     const setToday = () => {
-        setSelectedDate(new Date());
+        const today = new Date();
+        setSelectedDate(today);
+        setTempDate(today);
         setShowPicker(false);
     };
 
     const handleDateChange = (event) => {
-        setTempDate(new Date(event.target.value));
+        const newDate = new Date(event.target.value);
+        setTempDate(newDate);
+        setSelectedDate(newDate);
     };
 
     const handleDateBlur = () => {
-        setSelectedDate(tempDate);
         setTimeout(() => setShowPicker(false), 0);
     };
 
-    // Sync temp date when picker opens
+    // Sync temp date when selected date changes
     useEffect(() => {
-        if (showPicker) {
-            setTempDate(selectedDate);
-        }
-    }, [showPicker, selectedDate]);
+        setTempDate(selectedDate);
+    }, [selectedDate]);
 
     // Handle click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (pickerRef.current &&
-                !pickerRef.current.contains(event.target) &&
-                inputRef.current !== event.target) {
-                if (tempDate && DateFormatter.toInput(tempDate) !== DateFormatter.toInput(selectedDate)) {
-                    setSelectedDate(tempDate);
-                }
+            if (showPicker &&
+                pickerRef.current &&
+                !pickerRef.current.contains(event.target)) {
                 setShowPicker(false);
             }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [tempDate, selectedDate]);
+    }, [showPicker]);
 
     return {
         selectedDate,
@@ -223,21 +260,38 @@ const useDatePicker = (initialDate) => {
     };
 };
 
-const useVenueFilter = (bookings) => {
+const useVenueFilter = (bookings, selectedDate) => {
     const [selectedVenue, setSelectedVenue] = useState('all');
 
-    const venues = useMemo(() => {
-        if (!bookings?.length) return ['all'];
-        const venueIds = new Set(bookings.map(b => b.pitch?.venue).filter(Boolean));
-        return ['all', ...Array.from(venueIds)];
-    }, [bookings]);
+    // Reset venue selection when date changes
+    useEffect(() => {
+        setSelectedVenue('all');
+    }, [selectedDate]);
 
     const venueOptions = useMemo(() => {
-        return venues.map(venue => ({
-            value: venue,
-            label: venue === 'all' ? 'All Venues' : `Venue ${venue}`
-        }));
-    }, [venues]);
+        if (!bookings?.length) return [{ value: 'all', label: 'All Venues' }];
+
+        const options = [{ value: 'all', label: 'All Venues' }];
+        const venueMap = new Map();
+
+        // Extract unique venues from bookings
+        bookings.forEach(booking => {
+            if (booking.venue?.id && !venueMap.has(booking.venue.id)) {
+                venueMap.set(booking.venue.id, {
+                    value: booking.venue.id,
+                    label: booking.venue.translations?.name || `Venue ${booking.venue.id}`
+                });
+            }
+        });
+
+        // Add venues to options, sorted by label
+        const sortedVenues = Array.from(venueMap.values()).sort((a, b) =>
+            a.label.localeCompare(b.label)
+        );
+        options.push(...sortedVenues);
+
+        return options;
+    }, [bookings]);
 
     return { selectedVenue, setSelectedVenue, venueOptions };
 };
@@ -250,7 +304,7 @@ const LoadingOverlay = () => (
     <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg">
         <div className="flex flex-col items-center gap-2">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-            <span className="text-sm text-gray-600">Loading booking...</span>
+            <span className="text-sm text-gray-600">Loading bookings...</span>
         </div>
     </div>
 );
@@ -294,8 +348,8 @@ const DatePickerPopup = ({
 
     return (
         <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 p-4 z-50 min-w-[280px]">
-            <div className="mb-3 flex justify-end items-center">
-                <div className="grid grid-cols-3 gap-2">
+            <div className="mb-3 flex justify-between items-center">
+                <div className="grid grid-cols-2 gap-2">
                     <button
                         onClick={onYesterday}
                         className="px-2 py-1.5 text-xs bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
@@ -311,7 +365,7 @@ const DatePickerPopup = ({
                 </div>
                 <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 ml-2"
                 >
                     ✕
                 </button>
@@ -414,6 +468,7 @@ const BookingItem = ({ booking, calculator }) => {
     const endTime = new Date(booking.end_time);
     const top = calculator.getTopPosition(startTime);
     const height = calculator.getHeight(startTime, endTime);
+    const navigate= useNavigate()
 
     return (
         <div
@@ -423,10 +478,10 @@ const BookingItem = ({ booking, calculator }) => {
                 height: `${height}%`,
                 minHeight: '70px'
             }}
-            onClick={() => console.log('Booking clicked:', booking)}
+            onClick={()=>navigate('/bookings/book-details',{state:{booking:booking}})}
         >
             <div className="text-sm flex justify-between font-bold mb-1.5 truncate">
-                {booking.user_info?.name || 'Unknown Host'}
+                {booking.user?.name || 'Unknown Host'}
                 {booking.max_players && (
                     <div className="text-xs font-medium opacity-80">
                         👥 {booking.max_players} players
@@ -448,15 +503,61 @@ const BookingItem = ({ booking, calculator }) => {
 const CalendarGrid = ({ groupedBookings, timeSlots }) => {
     const venueCount = Object.keys(groupedBookings).length;
     const timeColumnWidth = '90px';
-    const venueColumnWidth = venueCount <= 2
+    const venueColumnWidth = venueCount <= 3
         ? `calc((100% - ${timeColumnWidth}) / ${venueCount})`
-        : '500px';
+        : '250px';
 
     const calculator = new BookingPositionCalculator(timeSlots);
+    const scrollContainerRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
+
+    const handleMouseDown = (e) => {
+        if (!scrollContainerRef.current) return;
+        setIsDragging(true);
+        setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+        setScrollLeft(scrollContainerRef.current.scrollLeft);
+        scrollContainerRef.current.style.cursor = 'grabbing';
+        scrollContainerRef.current.style.userSelect = 'none';
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging || !scrollContainerRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainerRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.style.cursor = 'grab';
+            scrollContainerRef.current.style.userSelect = 'auto';
+        }
+    };
+
+    const handleMouseLeave = () => {
+        if (isDragging) {
+            setIsDragging(false);
+            if (scrollContainerRef.current) {
+                scrollContainerRef.current.style.cursor = 'grab';
+                scrollContainerRef.current.style.userSelect = 'auto';
+            }
+        }
+    };
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
+            <div
+                ref={scrollContainerRef}
+                className="overflow-x-auto cursor-grab"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseLeave}
+            >
                 <div className="grid" style={{
                     gridTemplateColumns: `${timeColumnWidth} repeat(${venueCount}, ${venueColumnWidth})`,
                     minWidth: venueCount <= 2 ? '600px' : `calc(140px + ${venueCount} * 250px)`
@@ -470,24 +571,34 @@ const CalendarGrid = ({ groupedBookings, timeSlots }) => {
                         </div>
                     </div>
 
-                    {/* Venues Headers */}
-                    {Object.keys(groupedBookings).map((pitchKey) => (
-                        <div key={pitchKey} className="border-r border-gray-200">
-                            <div className="h-16 flex items-center justify-center px-4 border-b bg-primary-50">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-                                        <span className="text-sm font-bold text-white">
-                                            {pitchKey.charAt(pitchKey.length - 1)}
-                                        </span>
+
+                    {Object.entries(groupedBookings).map(([pitchKey, groupData]) => {
+                        // Split the key to get venue and pitch names
+                        const [venueName, pitchName] = pitchKey.split('\n');
+
+                        return (
+                            <div key={pitchKey} className="border-r border-gray-200">
+                                <div className="h-20 flex items-center justify-center px-3 border-b bg-primary-50">
+                                    <div className="flex  items-center  gap-2">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <PitchImage
+                                                imageUrl={groupData.pitchImage}
+                                                pitchName={pitchName}
+                                            />
+                                        </div>
+                                        <div className="flex flex-col items-center w-full px-1">
+                        <span className="text-xs font-semibold text-gray-900 truncate w-full">
+                            {venueName}
+                        </span>
+                                            <span className="text-xs text-gray-600 truncate w-full mt-0.5">
+                            {pitchName}
+                        </span>
+                                        </div>
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-900 truncate">
-                                        {pitchKey}
-                                    </span>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-
+                        );
+                    })}
                     {/* Time Column */}
                     <div className="border-r border-b border-gray-200 bg-gradient-to-br from-gray-100 text-secondary-600 sticky left-0 z-10">
                         {timeSlots.map((time) => (
@@ -500,7 +611,7 @@ const CalendarGrid = ({ groupedBookings, timeSlots }) => {
                     </div>
 
                     {/* Booking Columns */}
-                    {Object.entries(groupedBookings).map(([pitchKey, pitchBookings]) => (
+                    {Object.entries(groupedBookings).map(([pitchKey, groupData]) => (
                         <div key={pitchKey} className="border-r border-gray-200 last:border-r-0 relative bg-gradient-to-br from-gray-50/30 to-white">
                             {timeSlots.map((time, index) => (
                                 <div
@@ -509,7 +620,7 @@ const CalendarGrid = ({ groupedBookings, timeSlots }) => {
                                 />
                             ))}
 
-                            {pitchBookings.map((booking) => (
+                            {groupData.bookings.map((booking) => (
                                 <BookingItem
                                     key={booking.id}
                                     booking={booking}
@@ -523,7 +634,6 @@ const CalendarGrid = ({ groupedBookings, timeSlots }) => {
         </div>
     );
 };
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -535,20 +645,19 @@ const BookingCalendar = () => {
     const apiFilters = useMemo(() => {
         const filters = {
             start_time__date: DateFormatter.toAPI(datePicker.selectedDate),
+            no_pagination: true
         };
         return filters;
     }, [datePicker.selectedDate]);
 
-    // Use the new useCalendarBookings hook instead of useBookings
     const { bookings, isLoading, error, refetch } = useCalendarBookings(apiFilters);
     const bookingResults = bookings?.results || [];
-    const [currentPage, setCurrentPage] = useState(1);
-    const [venuesData, setVenuesData] = useState([]);
-    const venueFilter = useVenueFilter(venuesData);
+
+    const venueFilter = useVenueFilter(bookingResults, datePicker.selectedDate);
 
     const filteredBookings = useMemo(() => {
         if (venueFilter.selectedVenue === 'all') return bookingResults;
-        return bookingResults.filter(b => b.pitch?.venue === venueFilter.selectedVenue);
+        return bookingResults.filter(b => b.venue?.id === venueFilter.selectedVenue);
     }, [bookingResults, venueFilter.selectedVenue]);
 
     const timeSlots = useMemo(() =>
@@ -561,25 +670,10 @@ const BookingCalendar = () => {
         [filteredBookings]
     );
 
-
-    const fetchVenuesData = async () => {
-        try {
-
-            // Fetch main data
-            const response = await venuesService.getAllVenues({ page: currentPage });
-            if (response && response.results) {
-                setVenuesData(response.results);
-            }
-        } catch (error) {
-            console.error("Failed to fetch venues:", error);
-        }
-    };
     useEffect(() => {
         dispatch(setPageTitle('Calendar'));
     }, [dispatch]);
-    useEffect(() => {
-        fetchVenuesData()
-    }, []);
+
     if (error) {
         return <ErrorState error={error} onRetry={refetch} />;
     }

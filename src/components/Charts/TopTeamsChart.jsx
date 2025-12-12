@@ -3,7 +3,7 @@ import { FaUsers, FaCalendar, FaBook, FaChartBar } from 'react-icons/fa';
 import {TrendingUp, ChevronDown, Calendar} from 'lucide-react';
 import useAnalytics from '../../hooks/useAnalytics.js';
 import {useNavigate} from "react-router-dom";
-import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
+import {getImageUrl, extractFilename} from "../../utils/imageUtils.js"; // Import from imageUtils
 
 const TopTeamsChart = ({
                            title = "Top 5 Teams",
@@ -126,9 +126,14 @@ const TopTeamsChart = ({
                                     {team.logo ? (
                                         <img
                                             onClick={()=>navigate('/teams/team-profile',{state:{team:team}})}
-                                            src={IMAGE_BASE_URL +  team.logo}
+                                            src={getImageUrl(team.logo)}
                                             alt={team.name}
                                             className="w-8 h-8 rounded-full object-cover"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.parentElement.innerHTML =
+                                                    '<FaUsers className="w-4 h-4 text-gray-400" />';
+                                            }}
                                         />
                                     ) : (
                                         <FaUsers className="w-4 h-4 text-gray-400" />
@@ -144,9 +149,18 @@ const TopTeamsChart = ({
                                 <div className="flex items-center -space-x-2">
                                     {team.team_leader?.image ? (
                                         <img
-                                            src={IMAGE_BASE_URL + team.team_leader.image}
-                                            alt={team.team_leader.name}
+                                            src={getImageUrl(team.team_leader.image)}
+                                            alt={team.team_leader.name || 'Team Leader'}
                                             className="w-7 h-7 rounded-full border-2 border-white object-cover"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.parentElement.innerHTML =
+                                                    `<div class="w-7 h-7 rounded-full border-2 border-white bg-gray-300 flex items-center justify-center">
+                                                        <span class="text-xs text-gray-600">
+                                                            ${(team.team_leader?.name?.charAt(0) || '?')}
+                                                        </span>
+                                                    </div>`;
+                                            }}
                                         />
                                     ) : (
                                         <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-300 flex items-center justify-center">

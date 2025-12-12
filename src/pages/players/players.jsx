@@ -7,7 +7,7 @@ import { ArrowLeft, User, Wallet, Calendar, Trophy, Phone, Mail } from "lucide-r
 import PlayerDetailView from "./playerDetailView.jsx";
 import MainTable from "../../components/MainTable.jsx";
 import {useNavigate} from "react-router-dom";
-import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
+import { getImageUrl, isFullUrl, extractFilename } from "../../utils/imageUtils.js"; // Import the utility functions
 
 function Players() {
     const dispatch = useDispatch();
@@ -38,7 +38,8 @@ function Players() {
 
     // Fetch analytics for stats cards
     const { analytics, isLoading: analyticsLoading } = usePlayerAnalytics();
-      const  navigate = useNavigate()
+    const navigate = useNavigate()
+
     useEffect(() => {
         dispatch(setPageTitle('Players'));
     }, [dispatch]);
@@ -100,7 +101,7 @@ function Players() {
         return `$${amount.toLocaleString()}`;
     };
 
-// In Players.jsx - Update handleViewPlayer function
+    // In Players.jsx - Update handleViewPlayer function
     const handleViewPlayer = (player) => {
         navigate(`/players/player-profile`, {
             state: {player:player}
@@ -132,18 +133,22 @@ function Players() {
             sortable: true,
             sortKey: 'name',
             render: (row) => (
-                <div     onClick={() => handleViewPlayer(row)} className="flex cursor-pointer  items-center gap-3">
+                <div onClick={() => handleViewPlayer(row)} className="flex cursor-pointer items-center gap-3">
                     {row.image ? (
                         <img
-                            src={ IMAGE_BASE_URL + row.image}
+                            src={getImageUrl(row.image)} // Use utility function here
                             alt="Player Avatar"
                             className="w-10 h-10 rounded-full object-cover"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.style.display = 'none';
+                                e.target.parentElement.querySelector('.fallback-avatar').style.display = 'flex';
+                            }}
                         />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
-                            <User size={18} className="text-teal-600" />
-                        </div>
-                    )}
+                    ) : null}
+                    <div className={`w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center ${row.image ? 'hidden fallback-avatar' : ''}`}>
+                        <User size={18} className="text-teal-600" />
+                    </div>
                     <div>
                         <span className="font-medium text-gray-900 block">
                             {row.name || `Player ${row.id}`}
@@ -322,10 +327,8 @@ function Players() {
 
     // Show list view
     return (
-        <div className=" bg-white rounded-xl p-5">
-
-
-            <h1 className="px-8 text-primary-700 lg:-mb-8 lg:text-xl xl:text-2xl lg:mt-8  font-bold">
+        <div className="bg-white rounded-xl p-5">
+            <h1 className="px-8 text-primary-700 lg:-mb-8 lg:text-xl xl:text-2xl lg:mt-8 font-bold">
                 Players List
             </h1>
 

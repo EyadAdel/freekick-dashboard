@@ -5,7 +5,6 @@ import MainLayout from '../components/layout/MainLayout.jsx';
 // Import Pages
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Bookings from '../pages/Bookings/Booking.jsx';
-// import Calendar from '../pages/Calendar/Calendar';
 import Venues from '../pages/Venues/Venues';
 import Pitches from '../pages/Pitches/Pitches';
 import PitchDetails from '../components/pitches/PitchDetails.jsx';
@@ -17,16 +16,12 @@ import VenueSports from '../pages/VenueSports/VenueSports.jsx';
 import Tournaments from '../pages/Tournaments/Tournaments.jsx';
 import TournamentDetails from "../components/tournaments/TournamentDetails.jsx";
 import Tickets from '../pages/Tickets/Tickets.jsx';
-// import Revenue from '../pages/Revenue/Revenue';
-// import Reports from '../pages/Reports/Reports';
-// import Players from '../pages/Players/Players';
 import PitchOwners from '../pages/PitchOwners/PitchOwners';
-// import Settings from '../pages/Settings/Settings';
 import Login from '../pages/Login.jsx';
-// import NotFound from '../pages/NotFound/NotFound';
 
-// Protected Route Component
+// Protected Route Components
 import ProtectedRoute from './ProtectedRoute';
+import PermissionRoute from '../PermissionRoute.jsx';
 import ForgotPassword from "../pages/ ForgotPassword.jsx";
 import OTPVerification from "../pages/OTPVerification.jsx";
 import ChangePassword from "../pages/ChangePassword.jsx";
@@ -46,6 +41,8 @@ import VenueEditRequestDetails from "../components/venueEditRequestDetails/venue
 import BookingDetailView from "../pages/Bookings/BookingDetailView.jsx";
 import PlayerDetailView from "../pages/players/playerDetailView.jsx";
 import TeamDetailsView from "../pages/Teams/TeamDetailsView.jsx";
+import AccessDenied from "../pages/AccessDenied.jsx";
+import NotFound from "../pages/NotFound.jsx";
 
 
 const router = createBrowserRouter([
@@ -53,145 +50,270 @@ const router = createBrowserRouter([
         path: '/login',
         element: <Login />,
     },
-    { path:"/forgot-password", element:<ForgotPassword />},
-    { path:"/verify-otp" ,element:<OTPVerification />},
-    {path:"/change-password", element:<ChangePassword />} ,
+    { path: "/forgot-password", element: <ForgotPassword /> },
+    { path: "/verify-otp", element: <OTPVerification /> },
+    { path: "/change-password", element: <ChangePassword /> },
     {
         path: '/',
         element: (
             <ProtectedRoute>
                 <MainLayout />
-             </ProtectedRoute>
+            </ProtectedRoute>
         ),
         children: [
             {
                 index: true,
-                element: <Dashboard />,
+                element: (
+                    <PermissionRoute permission="except_sub_pitch">
+                        <Dashboard />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'bookings',
-                element: <Bookings />,
+                element: (
+                    <PermissionRoute permission="can_view_bookings">
+                        <Bookings />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'bookings/book-details',
-                element: <BookingDetailView />,
+                element: (
+                    <PermissionRoute permission="can_view_bookings">
+                        <BookingDetailView />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'calendar',
-                element: <BookingCalendar />,
+                element: (
+                    <PermissionRoute permission="can_view_calendar">
+                        <BookingCalendar />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'venues',
-                element: <Venues />,
+                element: (
+                    <PermissionRoute permission="can_view_venues">
+                        <Venues />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'venues/venue-details',
-                element: <VenueDetails />,
+                element: (
+                    <PermissionRoute permission="can_view_venues">
+                        <VenueDetails />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'venue-edit-requests',
-                element: <VenueEditRequests />,
+                element: (
+                    <PermissionRoute permission="can_view_venue_requests">
+                        <VenueEditRequests />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'venue-edit-requests/venue-request-details',
-                element: <VenueEditRequestDetails />,
+                element: (
+                    <PermissionRoute permission="can_view_venue_requests">
+                        <VenueEditRequestDetails />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'pitches',
-                element: <Pitches />,
+                element: (
+                    <PermissionRoute permission="can_view_pitches">
+                        <Pitches />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'pitches/pitch-details',
-                element: <PitchDetails />,
+                element: (
+                    <PermissionRoute permission="can_view_pitches">
+                        <PitchDetails />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'amenities',
-                element: <Amenities />,
+                element: (
+                    <PermissionRoute permission="can_view_amenities">
+                        <Amenities />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'surface-types',
-                element: <SurfaceTypes />,
+                element: (
+                    <PermissionRoute permission="can_view_surface_types">
+                        <SurfaceTypes />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'add-ons',
-                element: <AddOns />,
+                element: (
+                    <PermissionRoute permission="can_view_addons">
+                        <AddOns />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'venue-sports',
-                element: <VenueSports />,
+                element: (
+                    <PermissionRoute permission="can_view_venue_sports">
+                        <VenueSports />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'tournaments',
-                element: <Tournaments />,
-            },  {
+                element: (
+                    <PermissionRoute permission="can_view_tournaments">
+                        <Tournaments />
+                    </PermissionRoute>
+                ),
+            },
+            {
                 path: 'tournaments/tournament-details',
-                element: <TournamentDetails />,
+                element: (
+                    <PermissionRoute permission="can_view_tournaments">
+                        <TournamentDetails />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'tickets',
-                element: <Tickets />,
+                element: (
+                    <PermissionRoute permission="can_view_tickets">
+                        <Tickets />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'banners',
-                element: <BannersPage />,
+                element: (
+                    <PermissionRoute permission="can_view_banners">
+                        <BannersPage />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'revenue',
-                element: <RevenueOverview />,
+                element: (
+                    <PermissionRoute permission="can_view_revenue">
+                        <RevenueOverview />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'reports',
-                element: <Reports />,
+                element: (
+                    <PermissionRoute permission="can_view_reports">
+                        <Reports />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'players',
-                element: <Players />,
+                element: (
+                    <PermissionRoute permission="can_view_players">
+                        <Players />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'players/player-profile',
-                element: <PlayerDetailView />,
+                element: (
+                    <PermissionRoute permission="can_view_players">
+                        <PlayerDetailView />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'teams',
-                element: <Teams />,
+                element: (
+                    <PermissionRoute permission="can_view_teams">
+                        <Teams />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'teams/team-profile',
-                element: <TeamDetailsView />,
+                element: (
+                    <PermissionRoute permission="can_view_teams">
+                        <TeamDetailsView />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'pitch-owner',
-                element: <PitchOwners />,
+                element: (
+                    <PermissionRoute permission="can_view_pitch_owners">
+                        <PitchOwners />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'pitch-owner/pitch-owner-details',
-                element: <PitchOwnerDetails />,
+                element: (
+                    <PermissionRoute permission="can_view_pitch_owners">
+                        <PitchOwnerDetails />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'settings',
-                // element: <Settings />,
+                element: (
+                    <PermissionRoute permission="can_view_settings">
+                        {/* <Settings /> */}
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'support',
-                element: <Support />,
+                element: (
+                    <PermissionRoute permission="can_view_support">
+                        <Support />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'vouchers',
-                element: <Vouchers />,
-            },
-            {
-                path: 'profile',
-                element: <ProfileSettings />,
+                element: (
+                    <PermissionRoute permission="can_view_vouchers">
+                        <Vouchers />
+                    </PermissionRoute>
+                ),
             },
             {
                 path: 'notifications',
-                element: <AppsNotifications />,
+                element: (
+                    <PermissionRoute permission="can_view_notifications">
+                        <AppsNotifications />
+                    </PermissionRoute>
+                ),
+            },
+            {
+                path: 'profile',
+                element: <ProfileSettings />, // No permission needed - everyone can view their profile
+            },
+            {
+                path: '/access-denied',
+                element: <AccessDenied />,
             },
         ],
     },
     {
         path: '*',
-        // element: <NotFound />,
+        element: <NotFound />,
     },
 ]);
 

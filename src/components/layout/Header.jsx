@@ -1,4 +1,3 @@
-
 import { Bell, Settings, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +9,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { MdLogout } from "react-icons/md";
 import { Menu } from 'lucide-react';
 import NotificationDropdown from "../NotificationDropdown.jsx";
-import { useNotifications } from "../../hooks/useNotifications.js"; // ADD THIS IMPORT
+import { useNotifications } from "../../hooks/useNotifications.js";
+import { getImageUrl } from "../../utils/imageUtils.js";
 
 const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
     const { direction } = useSelector((state) => state.language);
@@ -34,6 +34,7 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [hasImageError, setHasImageError] = useState(false);
 
     // Detect screen size
     useEffect(() => {
@@ -63,6 +64,38 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
 
     const getDisplayName = () => {
         return user?.name || 'User';
+    };
+
+    // Function to get initials from name
+    const getUserInitials = () => {
+        if (!user?.name) return 'U';
+
+        const name = user.name.trim();
+        const nameParts = name.split(' ');
+
+        if (nameParts.length === 1) {
+            return name.charAt(0).toUpperCase();
+        }
+
+        return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+    };
+
+    // Function to generate a color based on user's name (for consistent avatar colors)
+    const getAvatarColor = () => {
+        const name = user?.name || 'User';
+        const colors = [
+
+            'from-primary-500 to-primary-600',
+        ];
+
+        // Simple hash function for consistent color selection
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+
+        const colorIndex = Math.abs(hash) % colors.length;
+        return colors[colorIndex];
     };
 
     const handleProfileClick = () => {
@@ -102,6 +135,11 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
         };
     };
 
+    // Reset image error state when user changes
+    useEffect(() => {
+        setHasImageError(false);
+    }, [user?.image]);
+
     // Loading state
     if (isLoading) {
         return (
@@ -121,8 +159,6 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
 
     return (
         <>
-
-
             {/* Click outside overlay */}
             {(showNotifications || showProfile) && (
                 <div className="fixed inset-0 z-30" onClick={handleClickOutside} />
@@ -199,12 +235,22 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
                                 }}
                                 className="flex items-center gap-2 lg:gap-3 hover:bg-gray-100 rounded-lg p-1 lg:p-2 transition-colors"
                             >
-                                <div className="w-8 h-8 lg:w-9 lg:h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center overflow-hidden">
-                                    <img
-                                        src={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSweN5K2yaBwZpz5W9CxY9S41DI-2LawmjzYw&s'}
-                                        alt={getDisplayName()}
-                                        className="w-full h-full object-cover"
-                                    />
+                                <div className={`w-8 h-8 lg:w-9 lg:h-9 bg-gradient-to-br ${getAvatarColor()} rounded-full flex items-center justify-center overflow-hidden`}>
+                                    {/* Show image if available and no error */}
+                                    {user?.image && !hasImageError ? (
+                                        <img
+                                            src={getImageUrl(user.image)}
+                                            alt={getDisplayName()}
+                                            className="w-full h-full object-cover"
+                                            onError={() => setHasImageError(true)}
+                                            loading="lazy"
+                                        />
+                                    ) : (
+                                        // Show initials or icon
+                                        <span className="text-white font-semibold text-sm lg:text-base">
+                                            {getUserInitials()}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className={`hidden lg:block ${isRtl ? 'text-right' : 'text-left'}`}>
                                     <p className="text-sm font-medium text-gray-800">

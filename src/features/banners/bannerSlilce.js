@@ -10,14 +10,13 @@ const initialState = {
     page: 1,
     hasNext: false,
     hasPrevious: false,
-    lastFetchParams: null, // Add this to store last fetch params
+    lastFetchParams: null,
 };
 
 export const fetchBanners = createAsyncThunk(
     'banners/fetchAll',
-    async (params, { getState }) => {
+    async (params) => {
         const response = await bannerService.getBanners(params);
-        // Store the params for later refetch
         return { ...response, params };
     }
 );
@@ -34,11 +33,9 @@ export const createBanner = createAsyncThunk(
     async (data, { dispatch, getState }) => {
         const newBanner = await bannerService.createBanner(data);
 
-        // Get the last used params from state
         const state = getState().banners;
         const lastParams = state.lastFetchParams || {};
 
-        // Refetch banners with the same params
         dispatch(fetchBanners(lastParams));
 
         return newBanner;
@@ -50,11 +47,9 @@ export const updateBanner = createAsyncThunk(
     async ({ id, data }, { dispatch, getState }) => {
         const updatedBanner = await bannerService.updateBanner(id, data);
 
-        // Get the last used params from state
         const state = getState().banners;
         const lastParams = state.lastFetchParams || {};
 
-        // Refetch banners with the same params
         dispatch(fetchBanners(lastParams));
 
         return updatedBanner;
@@ -66,11 +61,9 @@ export const deleteBanner = createAsyncThunk(
     async (id, { dispatch, getState }) => {
         await bannerService.deleteBanner(id);
 
-        // Get the last used params from state
         const state = getState().banners;
         const lastParams = state.lastFetchParams || {};
 
-        // Refetch banners with the same params
         dispatch(fetchBanners(lastParams));
 
         return id;
@@ -100,7 +93,7 @@ const bannerSlice = createSlice({
                 state.totalCount = action.payload.count;
                 state.hasNext = !!action.payload.next;
                 state.hasPrevious = !!action.payload.previous;
-                state.lastFetchParams = action.payload.params; // Store params
+                state.lastFetchParams = action.payload.params;
             })
             .addCase(fetchBanners.rejected, (state, action) => {
                 state.loading = false;
@@ -115,7 +108,6 @@ const bannerSlice = createSlice({
             })
             .addCase(createBanner.fulfilled, (state) => {
                 state.loading = false;
-                // Banners will be refetched automatically
             })
             .addCase(createBanner.rejected, (state, action) => {
                 state.loading = false;
@@ -127,7 +119,6 @@ const bannerSlice = createSlice({
             })
             .addCase(updateBanner.fulfilled, (state) => {
                 state.loading = false;
-                // Banners will be refetched automatically
             })
             .addCase(updateBanner.rejected, (state, action) => {
                 state.loading = false;
@@ -139,7 +130,6 @@ const bannerSlice = createSlice({
             })
             .addCase(deleteBanner.fulfilled, (state) => {
                 state.loading = false;
-                // Banners will be refetched automatically
             })
             .addCase(deleteBanner.rejected, (state, action) => {
                 state.loading = false;

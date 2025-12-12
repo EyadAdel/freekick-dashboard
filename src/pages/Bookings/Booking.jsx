@@ -1,20 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useBookings} from '../../hooks/useBookings';
+import { useBookings } from '../../hooks/useBookings';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import {
     Clock, MapPin, DollarSign,
     CheckCircle, XCircle, ArrowLeft,
     Users, Calendar, CreditCard
 } from 'lucide-react';
-
-// Import your reusable components
 import MainTable from '../../components/MainTable';
 import BookingDetailView from "./BookingDetailView.jsx";
 import StatCard from '../../components/Charts/StatCards.jsx';
-import {useNavigate} from "react-router-dom"; // Import your reusable StatCard
-import  {IMAGE_BASE_URL} from '../../utils/ImageBaseURL.js'
-// Main Bookings Component with Server-Side Sorting
+import { useNavigate } from "react-router-dom";
+import { getImageUrl } from '../../utils/imageUtils.js'; // Import image utility
 const Bookings = () => {
     const dispatch = useDispatch();
     const [currentPage, setCurrentPage] = useState(1);
@@ -25,10 +22,7 @@ const Bookings = () => {
         order: 'asc'
     });
     const [filters, setFilters] = useState({});
-
     const itemsPerPage = 10;
-
-    // Build API filters with pagination and sorting
     const apiFilters = {
         page: currentPage,
         page_limit: itemsPerPage,
@@ -38,16 +32,13 @@ const Bookings = () => {
         })
     };
 
-    // Fetch bookings with filters
     const { bookings, isLoading, error, refetch } = useBookings(apiFilters);
- const navigate =useNavigate()
-
+    const navigate = useNavigate();
 
     useEffect(() => {
         dispatch(setPageTitle('Bookings'));
     }, [dispatch]);
 
-    // Convert our sort keys to API ordering field names
     function getOrderingParam(key, order) {
         const orderingMap = {
             'name': 'pitch__translations__name',
@@ -75,9 +66,9 @@ const Bookings = () => {
 
         return (
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-        <Icon size={14} />
+                <Icon size={14} />
                 {status}
-      </span>
+            </span>
         );
     };
 
@@ -93,10 +84,6 @@ const Bookings = () => {
         });
     };
 
-    // const handleViewBooking = (booking) => {
-    //     setSelectedBooking(booking);
-    //     setViewMode('detail');
-    // };
     const handleViewBooking = (booking) => {
         // Navigate with booking data in state
         navigate('/bookings/book-details', {
@@ -125,31 +112,50 @@ const Bookings = () => {
         setCurrentPage(1); // Reset to first page when sorting
     };
 
+    // Helper function to handle image loading errors
+    const handleImageError = (e, fallbackContent) => {
+        e.target.style.display = 'none';
+        if (fallbackContent) {
+            e.target.parentElement.innerHTML = fallbackContent;
+        }
+    };
+
     const columns = [
         {
             header: 'Pitch Name',
             accessor: 'pitch',
             sortable: true,
             sortKey: 'name',
-            render: (row) => (
-                <div                     onClick={() => handleViewBooking(row)}
-                                         className="flex cursor-pointer items-center gap-3">
-                    {row.pitch?.image ? (
-                        <img
-                            src={IMAGE_BASE_URL + row.pitch.image}
-                            alt="Pitch"
-                            className="w-10 h-10 rounded-full object-cover"
-                        />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
-                            <MapPin size={18} className="text-teal-600" />
-                        </div>
-                    )}
-                    <span className="font-medium text-gray-900">
-            {row.pitch?.translations?.name || 'Pitch ' + row.id}
-          </span>
-                </div>
-            )
+            render: (row) => {
+                const imageUrl = getImageUrl(row.pitch?.image);
+                return (
+                    <div
+                        onClick={() => handleViewBooking(row)}
+                        className="flex cursor-pointer items-center gap-3"
+                    >
+                        {imageUrl ? (
+                            <img
+                                src={imageUrl}
+                                alt={row.pitch?.translations?.name || 'Pitch'}
+                                className="w-10 h-10 rounded-full object-cover"
+                                onError={(e) => handleImageError(
+                                    e,
+                                    '<div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">' +
+                                    '<MapPin size="18" class="text-teal-600" />' +
+                                    '</div>'
+                                )}
+                            />
+                        ) : (
+                            <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
+                                <MapPin size={18} className="text-teal-600" />
+                            </div>
+                        )}
+                        <span className="font-medium text-gray-900">
+                            {row.pitch?.translations?.name || 'Pitch ' + row.id}
+                        </span>
+                    </div>
+                );
+            }
         },
         {
             header: 'ID',
@@ -158,8 +164,8 @@ const Bookings = () => {
             sortKey: 'id',
             render: (row) => (
                 <span className="font-mono text-xs text-gray-500">
-          VN{String(row.id).padStart(5, '0')}
-        </span>
+                    VN{String(row.id).padStart(5, '0')}
+                </span>
             )
         },
         {
@@ -167,9 +173,36 @@ const Bookings = () => {
             accessor: 'user_info',
             sortable: true,
             sortKey: 'customer',
-            render: (row) => (
-                <span className="text-gray-900">{row.user_info?.name || 'Unknown'}</span>
-            )
+            render: (row) => {
+                const userImageUrl = getImageUrl(row.user_info?.image);
+                return (
+                    <div className="flex items-center gap-2">
+                        {userImageUrl ? (
+                            <img
+                                src={userImageUrl}
+                                alt={row.user_info?.name || 'Customer'}
+                                className="w-8 h-8 rounded-full object-cover"
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.parentElement.innerHTML =
+                                        `<div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                            <span class="text-xs text-gray-600">
+                                                ${row.user_info?.name?.charAt(0) || 'U'}
+                                            </span>
+                                        </div>`;
+                                }}
+                            />
+                        ) : (
+                            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span className="text-xs text-gray-600">
+                                    {row.user_info?.name?.charAt(0) || 'U'}
+                                </span>
+                            </div>
+                        )}
+                        <span className="text-gray-900">{row.user_info?.name || 'Unknown'}</span>
+                    </div>
+                );
+            }
         },
         {
             header: 'Payment type',
@@ -195,8 +228,8 @@ const Bookings = () => {
             sortKey: 'amount',
             render: (row) => (
                 <span className="font-medium text-gray-900">
-          {parseFloat(row.total_price || 0).toFixed(0)} AED
-        </span>
+                    {parseFloat(row.total_price || 0).toFixed(0)} AED
+                </span>
             )
         },
         {
@@ -252,7 +285,7 @@ const Bookings = () => {
     const cancelledCount = bookings?.cancelled || 0;
 
     const totalItems = bookings?.count || 0;
-    const pendingCount = bookings?.pending || 0
+    const pendingCount = bookings?.pending || 0;
 
     // Prepare stats for StatCard components
     const bookingStats = [
@@ -286,7 +319,6 @@ const Bookings = () => {
         }
     ];
 
-
     if (error) {
         return (
             <div className="p-6">
@@ -304,7 +336,6 @@ const Bookings = () => {
         );
     }
 
-    // Show detail view if a booking is selected
     if (viewMode === 'detail' && selectedBooking) {
         return (
             <BookingDetailView
@@ -315,45 +346,42 @@ const Bookings = () => {
         );
     }
 
-    // Show list view
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Stats Cards */}
-                {/* Main Stats Row */}
-                <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2 xl:gap-8 mb-6">
-                    {bookingStats.map((stat, index) => (
-                        <StatCard
-                            key={index}
-                            title={stat.title}
-                            value={stat.value}
-                            percentChange={stat.percentChange}
-                            icon={stat.icon}
-                            iconColor={stat.iconColor}
-                        />
-                    ))}
-                </div>
+            <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2 xl:gap-8 mb-6">
+                {bookingStats.map((stat, index) => (
+                    <StatCard
+                        key={index}
+                        title={stat.title}
+                        value={stat.value}
+                        percentChange={stat.percentChange}
+                        icon={stat.icon}
+                        iconColor={stat.iconColor}
+                    />
+                ))}
+            </div>
 
+            <div className={'py-5'}>
+                <h1 className="px-8 text-primary-700 lg:-mb-10 lg:text-xl lg:mt-8 font-bold">
+                    Bookings list
+                </h1>
 
-         <div  className={'py-5'}>
-            <h1 className="px-8 text-primary-700 lg:-mb-10 lg:text-xl lg:mt-8 font-bold">
-                Bookings list
-            </h1>
-
-            <MainTable
-                columns={columns}
-                data={bookingData}
-                searchPlaceholder="Search player, ID, venue, etc"
-                currentPage={currentPage}
-                itemsPerPage={itemsPerPage}
-                totalItems={totalItems}
-                onSearch={handleSearch}
-                onFilterChange={handleFilterChange}
-                onPageChange={handlePageChange}
-                sortConfig={sortConfig}
-                onSort={handleSort}
-                isLoading={isLoading}
-            />
-         </div>
+                <MainTable
+                    columns={columns}
+                    data={bookingData}
+                    searchPlaceholder="Search player, ID, venue, etc"
+                    currentPage={currentPage}
+                    itemsPerPage={itemsPerPage}
+                    totalItems={totalItems}
+                    onSearch={handleSearch}
+                    onFilterChange={handleFilterChange}
+                    onPageChange={handlePageChange}
+                    sortConfig={sortConfig}
+                    onSort={handleSort}
+                    isLoading={isLoading}
+                />
+            </div>
         </div>
     );
 };
