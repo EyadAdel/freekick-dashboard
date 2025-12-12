@@ -1,0 +1,64 @@
+{
+  "calendar": {
+    "pageTitle": "التقويم",
+    "header": {
+      "totalBookings": "إجمالي الحجوزات",
+      "today": "اليوم",
+      "selectVenue": "اختر الموقع",
+      "allVenues": "جميع المواقع"
+    },
+    "datePicker": {
+      "yesterday": "أمس",
+      "tomorrow": "غداً",
+      "close": "✕",
+      "previousDay": "Previous day",
+      "nextDay": "Next day"
+    },
+    "loading": {
+      "loadingBookings": "جاري تحميل الحجوزات..."
+    },
+    "emptyState": {
+      "title": "لا توجد حجوزات",
+      "description": "لا توجد حجوزات للتاريخ المحدد."
+    },
+    "errorState": {
+      "errorLoading": "خطأ في تحميل الحجوزات: {{error}}",
+      "retry": "إعادة المحاولة"
+    },
+    "grid": {
+      "time": "الوقت",
+      "unknownPitch": "ملعب غير معروف",
+      "venueFormat": "الموقع {{id}}"
+    },
+    "bookingCard": {
+      "unknownHost": "مضيف غير معروف",
+      "players": "👥 {{count}} لاعبين",
+      "playKind": "⚽ {{kind}}"
+    },
+    "status": {
+      "active": "نشط",
+      "pending": "قيد الانتظار",
+      "cancelled": "ملغي",
+      "completed": "مكتمل"
+    },
+    "dateFormats": {
+      "weekday": "short",
+      "day": "numeric",
+      "month": "short",
+      "year": "numeric",
+      "timeFormat": {
+        "hour": "numeric",
+        "minute": "2-digit",
+        "hour12": true
+      }
+    },
+    "timeSlots": {
+      "am": "ص",
+      "pm": "م"
+    },
+    "pitchImage": {
+      "alt": "ملعب"
+    }
+
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "pageTitle": "Tickets",
+  "table": {
+    "searchPlaceholder": "Search tickets by name, city, or place...",
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "date": "Date",
+      "city": "City",
+      "place": "Place",
+      "price": "Price",
+      "clicks": "Clicks",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "actions": {
+    "addTicket": "+ Add Ticket",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View"
+  },
+  "confirm": {
+    "delete": {
+      "title": "Delete Ticket?",
+      "text": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+      "confirmButton": "Yes, delete",
+      "cancelButton": "Cancel"
+    }
+  },
+  "messages": {
+    "success": {
+      "created": "Ticket created successfully",
+      "updated": "Ticket updated successfully",
+      "deleted": "Ticket deleted successfully"
+    },
+    "error": {
+      "deleteFailed": "Failed to delete ticket"
+    }
+  }
+}

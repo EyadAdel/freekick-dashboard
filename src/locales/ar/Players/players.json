@@ -1,0 +1,201 @@
+{
+  "playersPage": {
+    "title": "اللاعبين",
+    "playersListTitle": "قائمة اللاعبين",
+    "player": "اللاعب",
+    "phone": "الهاتف",
+    "email": "البريد الإلكتروني",
+    "walletBalance": "رصيد المحفظة",
+    "bookings": "الحجوزات",
+    "tournaments": "البطولات",
+    "points": "النقاط",
+    "status": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "viewDetails": "عرض تفاصيل اللاعب",
+    "searchPlaceholder": "البحث باسم اللاعب، الهاتف، البريد الإلكتروني...",
+    "loading": "جاري التحميل...",
+    "error": {
+      "loading": "خطأ في تحميل اللاعبين",
+      "tryAgain": "حاول مرة أخرى"
+    },
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "showing": "عرض {from} إلى {to} من {total} نتيجة"
+    },
+    "playerId": "الرقم: PL{id}",
+    "noEmail": "غير متوفر",
+    "noPhone": "غير متوفر",
+    "noDate": "غير متوفر",
+    "backToList": "العودة إلى القائمة",
+    "sort": {
+      "asc": "تصاعدي",
+      "desc": "تنازلي"
+    }
+  },
+  "playerPoints": {
+    "title": "النقاط",
+    "createPointButton": "إنشاء نقطة جديدة",
+    "noPoints": "لم يتم العثور على نقاط",
+    "createPoint": "إنشاء نقطة جديدة",
+    "reason": "السبب",
+    "points": "النقاط",
+    "type": "النوع",
+    "status": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "addition": "إضافة",
+    "subtraction": "خصم",
+    "required": "*",
+    "searchPlaceholder": "البحث حسب السبب...",
+    "filters": {
+      "minPoints": "أقل نقاط",
+      "maxPoints": "أكثر نقاط"
+    },
+    "modal": {
+      "title": "إنشاء نقطة جديدة",
+      "cancel": "إلغاء",
+      "create": "إنشاء نقطة",
+      "validation": {
+        "missingInfo": "يرجى ملء جميع الحقول المطلوبة",
+        "missingPlayerId": "معرف اللاعب مفقود"
+      },
+      "success": "تم إنشاء النقاط بنجاح",
+      "error": "فشل في إنشاء النقاط",
+      "fields": {
+        "reason": {
+          "label": "السبب",
+          "placeholder": "أدخل السبب"
+        },
+        "points": {
+          "label": "النقاط",
+          "placeholder": "أدخل النقاط"
+        },
+        "type": {
+          "label": "النوع",
+          "options": {
+            "addition": "إضافة",
+            "subtraction": "خصم"
+          }
+        },
+        "isActive": "نشط"
+      }
+    },
+    "loading": "جاري تحميل النقاط...",
+    "emptyState": {
+      "title": "لم يتم العثور على نقاط",
+      "description": "لم يحصل هذا اللاعب على أي نقاط بعد"
+    }
+  },
+  "format": {
+    "date": "يوم شهر، سنة",
+    "phone": "+١ XXX XXX XXXX",
+    "currency": "$٠,٠.٠٠",
+    "wallet": "${amount}",
+    "id": "PL{id}"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "badge": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    }
+  },
+  "icons": {
+    "user": "أيقونة المستخدم",
+    "wallet": "أيقونة المحفظة",
+    "calendar": "أيقونة التقويم",
+    "trophy": "أيقونة الكأس",
+    "phone": "أيقونة الهاتف",
+    "mail": "أيقونة البريد",
+    "arrowLeft": "سهم لليسار",
+    "plus": "أيقونة الزائد"
+  },
+  "table": {
+    "actions": "الإجراءات",
+    "sort": "فرز",
+    "filter": "تصفية",
+    "refresh": "تحديث",
+    "rowsPerPage": "صفوف لكل صفحة"
+  },
+  "buttons": {
+    "view": "عرض",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "close": "إغلاق",
+    "back": "رجوع"
+  },
+  "playersDetail": {
+    "title": "تفاصيل اللاعب",
+    "loading": "جاري تحميل تفاصيل اللاعب...",
+    "loadingBookings": "جاري تحميل الحجوزات...",
+    "sections": {
+      "bookings": "الحجوزات",
+      "tournaments": "البطولات"
+    },
+    "buttons": {
+      "backToPlayers": "العودة إلى اللاعبين",
+      "refresh": "تحديث الحجوزات",
+      "suspend": "تعليق",
+      "activate": "تفعيل",
+      "edit": "تعديل",
+      "save": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "bookingStatus": {
+      "all": "جميع الحالات",
+      "confirmed": "مؤكد",
+      "pending": "قيد الانتظار",
+      "cancelled": "ملغى"
+    },
+    "confirm": {
+      "title": "هل أنت متأكد؟",
+      "suspend": "هل تريد تعليق هذا اللاعب؟",
+      "activate": "هل تريد تفعيل هذا اللاعب؟"
+    },
+    "status": {
+      "suspended": "تم تعليق اللاعب بنجاح",
+      "activated": "تم تفعيل اللاعب بنجاح",
+      "updateError": "فشل في تحديث حالة اللاعب"
+    },
+    "noBookings": "لم يتم العثور على حجوزات بتاريخ {date}",
+    "noBookingsHint": "حاول اختيار تاريخ أو حالة مختلفة",
+    "noTournaments": "لم يتم العثور على بطولات",
+    "noTournamentsHint": "لم يشارك هذا اللاعب في أي بطولات بعد",
+    "searchTournaments": "البحث في البطولات...",
+    "tournaments": {
+      "total": "الإجمالي: {count} بطولة"
+    },
+    "filters": {
+      "status": {
+        "label": "الحالة",
+        "options": {
+          "upcoming": "قادمة",
+          "ongoing": "جارية",
+          "completed": "مكتملة",
+          "cancelled": "ملغاة",
+          "won": "فاز",
+          "qualify": "مؤهل",
+          "lost": "خسر"
+        }
+      },
+      "format": {
+        "label": "التنسيق",
+        "options": {
+          "roundRobin": "دور روبن",
+          "knockout": "إقصائي",
+          "doubleElimination": "إقصاء مزدوج",
+          "singleElimination": "إقصاء فردي"
+        }
+      }
+    },
+    "defaultPlayer": {
+      "name": "علي رحيم"
+    }
+  }
+}

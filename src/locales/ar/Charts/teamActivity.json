@@ -1,0 +1,25 @@
+{
+  "title": "نشاط الفريق",
+  "totalPoints": "إجمالي النقاط",
+  "loading": "جاري التحميل...",
+  "noLeader": "لا يوجد قائد",
+  "leader": "القائد",
+  "points": "نقاط",
+  "percentageOfTotal": "% من الإجمالي",
+  "members": "أعضاء",
+  "bookings": "حجوزات",
+  "noData": "لا توجد بيانات للفرق",
+  "fallbackInitials": "فريق",
+  "stats": {
+    "totalTeams": "إجمالي الفرق",
+    "totalPoints": "إجمالي النقاط"
+  },
+  "rank": "#{rank}",
+  "progressLabels": {
+    "veryHigh": "نشاط عالي جداً",
+    "high": "نشاط عالي",
+    "medium": "نشاط متوسط",
+    "low": "نشاط منخفض",
+    "veryLow": "نشاط منخفض جداً"
+  }
+}

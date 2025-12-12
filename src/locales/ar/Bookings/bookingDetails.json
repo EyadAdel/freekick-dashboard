@@ -1,0 +1,100 @@
+{
+  "back": "العودة إلى الحجوزات",
+  "loading": "جاري تحميل تفاصيل الحجز...",
+  "noData": "لا توجد بيانات للحجز",
+  "goBack": "العودة إلى الحجوزات",
+  "status": {
+    "pending": "قيد الانتظار",
+    "confirmed": "مؤكد",
+    "completed": "مكتمل",
+    "cancelled": "ملغى"
+  },
+  "contact": {
+    "title": "تفاصيل الاتصال",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "location": "الموقع",
+    "notProvided": "غير متوفر"
+  },
+  "bookingInfo": {
+    "title": "معلومات الحجز",
+    "customerType": "نوع العميل",
+    "bookingType": "نوع الحجز",
+    "paymentMethod": "طريقة الدفع",
+    "split": "دفع مشترك",
+    "individual": "فردي",
+    "online": "أونلاين",
+    "card": "بطاقة"
+  },
+  "actions": {
+    "email": "بريد إلكتروني",
+    "whatsapp": "واتساب",
+    "printReceipt": "طباعة الإيصال",
+    "markAsPaid": "تحديد كمكتمل الدفع",
+    "processing": "جاري المعالجة...",
+    "cancel": "إلغاء",
+    "sendInvoice": "إرسال الفاتورة",
+    "fullPaid": "مدفوع بالكامل"
+  },
+  "header": {
+    "bookingId": "رقم الحجز:",
+    "created": "تم الإنشاء:",
+    "updated": "تم التحديث:"
+  },
+  "bookingTime": {
+    "date": "تاريخ الحجز",
+    "time": "الوقت",
+    "notSet": "غير محدد"
+  },
+  "players": {
+    "title": "اللاعبون",
+    "count": "اللاعبون ({{count}})"
+  },
+  "customerNote": {
+    "title": "ملاحظة العميل"
+  },
+  "orderSummary": {
+    "title": "ملخص الطلب",
+    "description": "الوصف",
+    "quantity": "الكمية",
+    "price": "السعر",
+    "total": "الإجمالي",
+    "subtotal": "المجموع الفرعي",
+    "tax": "الضريبة",
+    "discount": "الخصم",
+    "totalAmount": "المبلغ الإجمالي",
+    "pitchBooking": "حجز الملعب",
+    "venue": "الملاعب",
+    "addon": "إضافات"
+  },
+  "confirm": {
+    "cancel": {
+      "title": "إلغاء الحجز",
+      "text": "هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟ لا يمكن التراجع عن هذا الإجراء.",
+      "confirmButton": "نعم، إلغاء الحجز",
+      "cancelButton": "الاحتفاظ بالحجز"
+    },
+    "markPaid": {
+      "title": "تحديد كمكتمل الدفع",
+      "text": "هل أنت متأكد من رغبتك في تحديد هذا الحجز كمكتمل الدفع؟",
+      "confirmButton": "نعم، تحديد كمكتمل",
+      "cancelButton": "إلغاء"
+    }
+  },
+  "messages": {
+    "cancelled": "تم إلغاء الحجز بنجاح",
+    "failedCancel": "فشل في إلغاء الحجز: ",
+    "markedPaid": "تم تحديد الحجز كمكتمل الدفع بنجاح!"
+  },
+  "venueInfo": {
+    "title": "معلومات الملعب",
+    "noInfo": "لا توجد معلومات عن الملعب",
+    "address": "بني ياس، أبو ظبي",
+    "sports": "كرة القدم، كرة السلة",
+    "phone": "+1 234 567 8901",
+    "email": "paris.milton@example.com",
+    "type": "7 ضد 7، {{type}}",
+    "indoor": "داخلي",
+    "outdoor": "خارجي"
+  }
+}

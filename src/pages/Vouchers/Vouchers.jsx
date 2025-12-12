@@ -9,8 +9,12 @@ import MainTable from "../../components/MainTable.jsx";
 import {useVouchers} from "../../hooks/useVouchers.js";
 import CreateVouchers from "../../components/Vouchers/CreateVouchers.jsx";
 import StatCard from "../../components/Charts/StatCards.jsx";
-import {Edit2, Trash2, TrendingUp, TrendingDown, TicketPercent, CheckCircle, XCircle, Users} from "lucide-react"
+import {Edit2, Trash2, TrendingUp, TrendingDown, TicketPercent, CheckCircle, XCircle, Users} from "lucide-react";
+import { useTranslation } from 'react-i18next';
+
 function Vouchers(props) {
+    const { t } = useTranslation(['vouchers', 'common']);
+
     const {
         vouchers,
         currentVoucher,
@@ -73,18 +77,18 @@ function Vouchers(props) {
             await getAnalytics();
         } catch (err) {
             console.error('Failed to fetch analytics:', err);
-            toast.error('Failed to load analytics data');
+            toast.error(t('vouchers:messages.loadAnalyticsError'));
         } finally {
             setAnalyticsLoading(false);
         }
-    }, []);
+    }, [t]);
 
     // Initial data fetch
     useEffect(() => {
-        dispatch(setPageTitle('Vouchers'));
+        dispatch(setPageTitle(t('vouchers:title')));
         fetchVouchers();
         fetchAnalyticsData();
-    }, [dispatch, fetchVouchers]);
+    }, [dispatch, fetchVouchers, t]);
 
     // Re-fetch vouchers when filters change
     useEffect(() => {
@@ -106,7 +110,6 @@ function Vouchers(props) {
     }, [error, success, resetError, resetSuccess]);
 
     // Format analytics data for charts
-// Format analytics data for charts
     const formatAnalyticsData = useCallback(() => {
         if (!analytics) {
             return {
@@ -114,13 +117,11 @@ function Vouchers(props) {
                 couponUsageData: []
             };
         }
-        console.log(analytics,'gggggg')
 
         // Format monthly usage data for line chart
         const monthUsageData = analytics.data.used_coupons_last_12_months?.map(item => {
-            // Extract month abbreviation from "2025-11" format
             const [year, month] = item.month.split('-');
-            const date = new Date(year, month - 1); // month is 0-indexed in Date
+            const date = new Date(year, month - 1);
             const monthAbbr = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
 
             return {
@@ -139,7 +140,6 @@ function Vouchers(props) {
     }, [analytics]);
 
     const { monthUsageData, couponUsageData } = formatAnalyticsData();
-    // const { clicksOverTimeData, emirateDistributionData } = formatAnalyticsData();
 
     // Handler functions
     const handleAddVoucher = () => {
@@ -156,27 +156,27 @@ function Vouchers(props) {
         setCurrentView('list');
         setEditingVoucher(null);
         fetchVouchers();
-        fetchAnalyticsData(); // Refresh analytics when coming back
+        fetchAnalyticsData();
     };
 
     const handleDelete = async (id) => {
         const voucherToDelete = vouchers.find(v => v.id === id);
-        const voucherName = voucherToDelete?.name || voucherToDelete?.code || 'this voucher';
+        const voucherName = voucherToDelete?.name || voucherToDelete?.code || t('vouchers:actions.deleteConfirm.voucherName');
 
         const isConfirmed = await showConfirm({
-            title: "Delete Voucher?",
-            text: `Are you sure you want to delete "${voucherName}"? This action cannot be undone.`,
-            confirmButtonText: "Yes, delete",
-            cancelButtonText: "Cancel",
+            title: t('vouchers:actions.deleteConfirm.title'),
+            text: t('vouchers:actions.deleteConfirm.text', { voucherName }),
+            confirmButtonText: t('vouchers:actions.deleteConfirm.confirm'),
+            cancelButtonText: t('vouchers:actions.deleteConfirm.cancel'),
             icon: 'warning'
         });
 
         if(isConfirmed){
             const result = await removeVoucher(id);
             if (result.type?.includes('fulfilled')) {
-                toast.success('Voucher deleted successfully');
+                toast.success(t('vouchers:messages.deleteSuccess'));
                 fetchVouchers();
-                fetchAnalyticsData(); // Refresh analytics after deletion
+                fetchAnalyticsData();
             }
         }
     };
@@ -185,7 +185,7 @@ function Vouchers(props) {
         setFilters(prev => ({
             ...prev,
             search: searchTerm,
-            page: 1, // Reset to first page when searching
+            page: 1,
         }));
     };
 
@@ -193,7 +193,7 @@ function Vouchers(props) {
         setFilters(prev => ({
             ...prev,
             ...newFilters,
-            page: 1, // Reset to first page when filters change
+            page: 1,
         }));
     };
 
@@ -208,7 +208,7 @@ function Vouchers(props) {
         setSortConfig({ key: sortKey, direction: sortDirection });
         setFilters(prev => ({
             ...prev,
-            page: 1, // Reset to first page when sorting
+            page: 1,
         }));
     };
 
@@ -218,23 +218,17 @@ function Vouchers(props) {
 
     const topActions = [
         {
-            label: '+ Add Voucher',
+            label: t('vouchers:addButton'),
             type: 'primary',
             onClick: handleAddVoucher,
         },
     ];
 
-    // Table columns configuration for vouchers (moved after all hooks)
+    // Table columns configuration
     const columns = [
+
         {
-            header: 'ID',
-            accessor: 'id',
-            align: 'left',
-            sortable: true,
-            sortKey: 'id',
-        },
-        {
-            header: 'Code',
+            header: t('vouchers:table.columns.code'),
             accessor: 'code',
             align: 'left',
             sortable: true,
@@ -244,27 +238,31 @@ function Vouchers(props) {
             ),
         },
         {
-            header: 'Name',
+            header: t('vouchers:table.columns.name'),
             accessor: 'name',
             align: 'left',
             sortable: true,
             sortKey: 'name',
         },
         {
-            header: 'Type',
+            header: t('vouchers:table.columns.type'),
             accessor: 'discount_type',
             align: 'left',
             sortable: true,
             sortKey: 'discount_type',
             render: (row) => (
                 <div className="text-gray-600">
-                    {row.discount_type === 'percentage' ? 'Percentage' :
-                        row.discount_type === 'fixed' ? 'Fixed Amount' : row.discount_type}
+                    {row.discount_type === 'percentage'
+                        ? t('vouchers:table.types.percentage')
+                        : row.discount_type === 'fixed'
+                            ? t('vouchers:table.types.fixed')
+                            : row.discount_type
+                    }
                 </div>
             ),
         },
         {
-            header: 'Discount',
+            header: t('vouchers:table.columns.discount'),
             accessor: 'discount_amount',
             align: 'right',
             sortable: true,
@@ -279,7 +277,7 @@ function Vouchers(props) {
             ),
         },
         {
-            header: 'Max Discount',
+            header: t('vouchers:table.columns.maxDiscount'),
             accessor: 'max_discount_amount',
             align: 'right',
             sortable: true,
@@ -288,13 +286,13 @@ function Vouchers(props) {
                 <div className="text-gray-600">
                     {row.max_discount_amount
                         ? `$${parseFloat(row.max_discount_amount).toFixed(2)}`
-                        : 'No limit'
+                        : t('vouchers:table.noLimit')
                     }
                 </div>
             ),
         },
         {
-            header: 'Usage',
+            header: t('vouchers:table.columns.usage'),
             accessor: 'used_count',
             align: 'center',
             sortable: true,
@@ -306,7 +304,7 @@ function Vouchers(props) {
             ),
         },
         {
-            header: 'Valid From',
+            header: t('vouchers:table.columns.validFrom'),
             accessor: 'valid_from',
             align: 'left',
             sortable: true,
@@ -319,13 +317,13 @@ function Vouchers(props) {
                             month: 'short',
                             day: 'numeric',
                         })
-                        : 'Immediate'
+                        : t('vouchers:table.immediate')
                     }
                 </div>
             ),
         },
         {
-            header: 'Valid To',
+            header: t('vouchers:table.columns.validTo'),
             accessor: 'valid_to',
             align: 'left',
             sortable: true,
@@ -338,13 +336,13 @@ function Vouchers(props) {
                             month: 'short',
                             day: 'numeric',
                         })
-                        : 'No expiry'
+                        : t('vouchers:table.noExpiry')
                     }
                 </div>
             ),
         },
         {
-            header: 'Last Used',
+            header: t('vouchers:table.columns.lastUsed'),
             accessor: 'last_used_on',
             align: 'left',
             sortable: true,
@@ -356,13 +354,13 @@ function Vouchers(props) {
                             month: 'short',
                             day: 'numeric',
                         })
-                        : 'Never'
+                        : t('vouchers:table.never')
                     }
                 </div>
             ),
         },
         {
-            header: 'Status',
+            header: t('vouchers:table.columns.status'),
             accessor: 'is_active',
             align: 'center',
             sortable: true,
@@ -375,12 +373,15 @@ function Vouchers(props) {
                             : 'bg-red-100 text-red-800'
                     }`}
                 >
-                    {row.is_active ? 'Active' : 'Inactive'}
+                    {row.is_active
+                        ? t('vouchers:table.status.active')
+                        : t('vouchers:table.status.inactive')
+                    }
                 </span>
             ),
         },
         {
-            header: 'Actions',
+            header: t('vouchers:table.columns.actions'),
             accessor: 'actions',
             align: 'center',
             render: (row) => (
@@ -388,14 +389,14 @@ function Vouchers(props) {
                     <button
                         onClick={() => handleEditClick(row)}
                         className="p-2 text-gray-600 hover:bg-gray-50 rounded transition-colors"
-                        title="Edit"
+                        title={t('vouchers:actions.edit')}
                     >
                         <Edit2 size={16} />
                     </button>
                     <button
                         onClick={() => handleDelete(row.id)}
                         className="p-2 text-gray-600 hover:bg-gray-50 rounded transition-colors"
-                        title="Delete"
+                        title={t('vouchers:actions.delete')}
                     >
                         <Trash2 size={18} />
                     </button>
@@ -416,42 +417,38 @@ function Vouchers(props) {
 
     // Render List view
     return (
-        <div className="container mx-auto  xl:px-4 px-1 ">
+        <div className="container mx-auto xl:px-4 px-1">
             {analytics && (
-                <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2  xl:grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
                     <StatCard
-                        title="Total Vouchers"
+                        title={t('vouchers:stats.totalVouchers')}
                         value={analytics?.data?.total_coupons || 0}
-                        // percentChange={statChanges.totalChange}
                         icon={TicketPercent}
                         iconColor="text-secondary-600"
                     />
 
                     <StatCard
-                        title="Active Vouchers"
+                        title={t('vouchers:stats.activeVouchers')}
                         value={analytics?.data?.active_coupons || 0}
-                        // percentChange={statChanges.activeChange}
                         icon={CheckCircle}
-
                         iconColor="text-secondary-600"
                     />
 
                     <StatCard
-                        title="Inactive Vouchers"
+                        title={t('vouchers:stats.inactiveVouchers')}
                         value={analytics?.data?.inactive_coupons || 0}
-                        // percentChange={statChanges.inactiveChange}
                         icon={XCircle}
                         iconColor="text-red-600"
                     />
 
                     <StatCard
-                        title="Total Usage"
+                        title={t('vouchers:stats.totalUsage')}
                         value={totalUsage}
-                        // percentChange={statChanges.usageChange}
                         icon={Users}
                         iconColor="text-secondary-600"
                     />
-                </div>            )}
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 {analyticsLoading ? (
@@ -464,11 +461,11 @@ function Vouchers(props) {
                             data={monthUsageData}
                             xAxisKey="month"
                             lineKeys={['used_count']}
-                            lineNames={['Used Count']}
+                            lineNames={[t('vouchers:charts.yAxisLabel')]}
                             colors={['#008c8c', '#00bfbf', '#2ACEF2']}
                             height={350}
-                            title="Voucher Usage "
-                            yAxisLabel="Usage Count"
+                            title={t('vouchers:charts.usageOverTime')}
+                            yAxisLabel={t('vouchers:charts.yAxisLabel')}
                             showLegend={true}
                             showGrid={true}
                             showGradientFill={true}
@@ -479,10 +476,10 @@ function Vouchers(props) {
                             data={couponUsageData}
                             colors={['#008c8c', '#00bfbf', '#2ACEF2', '#4DC9E6', '#8CE0FF']}
                             height={300}
-                            title="Usage by Voucher "
+                            title={t('vouchers:charts.usageByVoucher')}
                             showCenterMetric={true}
                             centerMetricValue={`${analytics?.data.total_coupons || 0}`}
-                            centerMetricLabel=" Vouchers"
+                            centerMetricLabel={t('vouchers:charts.centerMetricLabel')}
                             showPercentage={true}
                             showLegend={true}
                             showLabels={true}
@@ -500,7 +497,7 @@ function Vouchers(props) {
                 <MainTable
                     columns={columns}
                     data={vouchers}
-                    searchPlaceholder="Search vouchers by code, name..."
+                    searchPlaceholder={t('vouchers:searchPlaceholder')}
                     currentPage={filters.page}
                     itemsPerPage={filters.page_limit}
                     totalItems={pagination.count}
@@ -510,6 +507,7 @@ function Vouchers(props) {
                     topActions={topActions}
                     sortConfig={sortConfig}
                     onSort={onSort}
+                    noDataMessage={t('vouchers:noData')}
                 />
             )}
         </div>

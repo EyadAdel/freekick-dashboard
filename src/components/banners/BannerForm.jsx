@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import MainInput from '../MainInput.jsx';
 import { toast } from 'react-toastify';
 import { generateUniqueFileName } from '../../utils/fileUtils';
@@ -12,6 +13,7 @@ const BannerForm = ({
                         onCancel,
                         isLoading = false
                     }) => {
+    const { t } = useTranslation('bannersPage');
     const [formData, setFormData] = useState(editingBanner ? {
         image: editingBanner.image ? extractFilename(editingBanner.image) : null,
         imagePreview: editingBanner.image ? getImageUrl(editingBanner.image) : null,
@@ -36,13 +38,13 @@ const BannerForm = ({
         // Validate file type
         const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
         if (!validTypes.includes(file.type)) {
-            toast.error('Please upload JPG, PNG, or GIF images only');
+            toast.error(t('form.image.errors.invalidType'));
             return;
         }
 
         // Validate file size (5MB)
         if (file.size > 5 * 1024 * 1024) {
-            toast.error('Image size must be less than 5MB');
+            toast.error(t('form.image.errors.sizeLimit'));
             return;
         }
 
@@ -59,23 +61,18 @@ const BannerForm = ({
         // Upload image to R2
         try {
             setUploading(true);
-            console.log('📤 Starting banner image upload...');
 
             // Generate unique filename
             const uniqueName = generateUniqueFileName(file.name);
-            console.log('🏷️ Generated filename:', uniqueName);
 
             // Upload the file
             await uploadService.processFullUpload(
                 file,
                 uniqueName,
                 (loaded, total, percent) => {
-                    console.log(`📈 Upload progress: ${percent}%`);
+                    console.log(`Upload progress: ${percent}%`);
                 }
             );
-
-            console.log('✅ Banner image uploaded!');
-            console.log('📝 Filename:', uniqueName);
 
             // Store ONLY the filename (not the full URL)
             setFormData(prev => ({
@@ -86,8 +83,8 @@ const BannerForm = ({
 
             toast.success('Image uploaded successfully');
         } catch (error) {
-            console.error('❌ Failed to upload banner image:', error);
-            toast.error('Failed to upload image. Please try again.');
+            console.error('Failed to upload banner image:', error);
+            toast.error(t('messages.error.uploadFailed'));
 
             // Reset preview on error
             setFormData(prev => ({
@@ -133,26 +130,19 @@ const BannerForm = ({
 
         // Validation
         if (!formData.image) {
-            toast.error('Please upload an image');
+            toast.error(t('form.image.errors.required'));
             return;
         }
 
         if (!formData.type) {
-            toast.error('Please select a banner type');
+            toast.error(t('form.type.required'));
             return;
         }
 
         if (!formData.value.trim()) {
-            toast.error('Please enter a banner value');
+            toast.error(t('form.value.required'));
             return;
         }
-
-        console.log('💾 Submitting banner with data:', {
-            image: formData.image,  // Filename only
-            type: formData.type,
-            value: formData.value,
-            is_active: formData.is_active
-        });
 
         // Send to API with filename only
         onSubmit({
@@ -164,10 +154,10 @@ const BannerForm = ({
     };
 
     const bannerTypeOptions = [
-        { label: 'Venues', value: 'venue' },
-        { label: 'Text', value: 'text' },
-        { label: 'Link', value: 'link' },
-        { label: 'Tournaments', value: 'tournaments' }
+        { label: t('form.type.options.venue'), value: 'venue' },
+        { label: t('form.type.options.text'), value: 'text' },
+        { label: t('form.type.options.link'), value: 'link' },
+        { label: t('form.type.options.tournaments'), value: 'tournaments' }
     ];
 
     return (
@@ -177,20 +167,20 @@ const BannerForm = ({
                 className="flex items-center gap-2 text-xl bg-white mb-5 p-5 py-3 rounded-lg w-full text-gray-600 hover:text-gray-900 transition-colors"
             >
                 <ArrowIcon size={'xl'} direction={'left'} />
-                <span className="font-medium">Back to Banners</span>
+                <span className="font-medium">{t('view.list.backToBanners')}</span>
             </button>
 
             <form onSubmit={handleSubmit} className="space-y-6 rounded-lg p-6 shadow-sm bg-white">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-primary-700">
-                        {editingBanner ? 'Edit Banner' : 'Create New Banner'}
+                        {editingBanner ? t('form.editTitle') : t('form.createTitle')}
                     </h2>
                 </div>
 
                 {/* Image Upload - Enhanced with Ticket form styling */}
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Banner Image *
+                        {t('form.image.label')}
                     </label>
                     <div className="flex flex-col gap-4">
                         {/* Image Preview Area */}
@@ -212,7 +202,9 @@ const BannerForm = ({
                                     </button>
                                     {editingBanner?.image && !formData.image?.startsWith('data:') && (
                                         <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                                            {formData.image === extractFilename(editingBanner.image) ? 'Existing Image' : 'New Image'}
+                                            {formData.image === extractFilename(editingBanner.image)
+                                                ? t('form.image.upload.existingImage')
+                                                : t('form.image.upload.newImage')}
                                         </div>
                                     )}
                                 </div>
@@ -226,16 +218,16 @@ const BannerForm = ({
                                     {uploading ? (
                                         <>
                                             <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-                                            <p className="text-sm text-gray-500">Uploading...</p>
+                                            <p className="text-sm text-gray-500">{t('form.image.upload.uploading')}</p>
                                         </>
                                     ) : (
                                         <>
                                             <div className="text-4xl text-gray-400 mb-2">☁️</div>
                                             <p className="text-sm text-gray-500">
-                                                Drag & drop an image or click to select
+                                                {t('form.image.upload.dragDrop')}
                                             </p>
                                             <p className="text-xs text-gray-400 mt-1">
-                                                PNG, JPG, GIF up to 5MB
+                                                {t('form.image.upload.supported')}
                                             </p>
                                         </>
                                     )}
@@ -262,13 +254,15 @@ const BannerForm = ({
                                         (uploading || isLoading) ? 'opacity-50 cursor-not-allowed' : ''
                                     }`}
                                 >
-                                    ☁️ {formData.imagePreview ? 'Change Image' : 'Choose Image'}
+                                    ☁️ {formData.imagePreview
+                                    ? t('form.image.upload.change')
+                                    : t('form.image.upload.choose')}
                                 </label>
 
                                 {uploading && (
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                                        <span className="text-sm text-gray-600">Uploading...</span>
+                                        <span className="text-sm text-gray-600">{t('form.image.upload.uploading')}</span>
                                     </div>
                                 )}
                             </div>
@@ -294,9 +288,11 @@ const BannerForm = ({
                                                       editingBanner?.image ? '#2563eb' : '#16a34a'
                                               }}
                                         >
-                                            {formData.image.startsWith('data:') ? 'New Image' :
-                                                editingBanner?.image && formData.image === extractFilename(editingBanner.image)
-                                                    ? 'Existing Image' : 'Image Ready'}
+                                            {formData.image.startsWith('data:')
+                                                ? t('form.image.upload.newImage')
+                                                : editingBanner?.image && formData.image === extractFilename(editingBanner.image)
+                                                    ? t('form.image.upload.existingImage')
+                                                    : t('form.image.upload.ready')}
                                         </span>
                                     </div>
                                     <div className="text-xs text-gray-600 mt-1">
@@ -308,7 +304,7 @@ const BannerForm = ({
                             )}
 
                             <p className="text-xs text-gray-500">
-                                Image will be uploaded automatically when selected. Supported formats: JPG, PNG, GIF. Max size: 5MB
+                                {t('form.image.upload.uploadStatus')}
                             </p>
                         </div>
                     </div>
@@ -316,38 +312,38 @@ const BannerForm = ({
 
                 {/* Banner Type */}
                 <MainInput
-                    label="Banner Type"
+                    label={t('form.type.label')}
                     name="type"
                     type="select"
                     value={formData.type}
                     onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
                     options={bannerTypeOptions}
-                    placeholder="Select Type"
+                    placeholder={t('form.type.placeholder')}
                     required
                     disabled={isLoading}
                 />
 
                 {/* Banner Value */}
                 <MainInput
-                    label="Banner Value"
+                    label={t('form.value.label')}
                     name="value"
                     type="text"
                     value={formData.value}
                     onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
-                    placeholder="Enter value (URL, ID, or text)"
+                    placeholder={t('form.value.placeholder')}
                     required
                     disabled={isLoading}
                 />
 
                 {/* Is Active Toggle */}
                 <MainInput
-                    label="Is Active"
+                    label={t('form.isActive.label')}
                     name="is_active"
                     type="checkbox"
                     className={'!text-primary-700'}
                     checked={formData.is_active}
                     onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
-                    helperText="Enable or disable this banner"
+                    helperText={t('form.isActive.helperText')}
                     disabled={isLoading}
                 />
 
@@ -359,16 +355,16 @@ const BannerForm = ({
                         disabled={isLoading || uploading}
                         className="lg:px-6 px-2 py-2 border text-sm lg:text-base border-primary-600 text-primary-600 rounded-lg hover:bg-blue-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        CANCEL
+                        {t('form.buttons.cancel')}
                     </button>
                     <button
                         type="submit"
                         disabled={isLoading || uploading || !formData.image}
                         className="lg:px-6 px-2 py-2 bg-primary-600 text-sm lg:text-base text-white rounded-lg hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
                     >
-                        {isLoading ? 'SAVING...' :
-                            uploading ? 'UPLOADING...' :
-                                (editingBanner ? 'UPDATE BANNER' : 'CREATE BANNER')}
+                        {isLoading ? t('form.buttons.saving') :
+                            uploading ? t('form.buttons.uploading') :
+                                (editingBanner ? t('form.buttons.update') : t('form.buttons.create'))}
                     </button>
                 </div>
             </form>

@@ -4,7 +4,8 @@ import { useCalendarBookings } from '../../hooks/useBookings.js';
 import CustomDropdown from '../../components/common/CustomDropdown.jsx';
 import { useDispatch } from "react-redux";
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 // ============================================================================
 // UTILITY CLASSES
@@ -15,8 +16,8 @@ class DateFormatter {
         return date.toISOString().split('T')[0];
     }
 
-    static toDisplay(date) {
-        return date.toLocaleDateString('en-US', {
+    static toDisplay(date, locale = 'en-US') {
+        return date.toLocaleDateString(locale, {
             weekday: 'short',
             day: 'numeric',
             month: 'short',
@@ -33,11 +34,27 @@ class DateFormatter {
 
     static toAMPM(dateTime) {
         const date = new Date(dateTime);
-        return date.toLocaleTimeString('en-US', {
+        const timeString = date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
         });
+
+        // Force LTR for time strings
+        return this.#forceLTR(timeString);
+    }
+
+    // Static method to force LTR direction for time strings
+    static #forceLTR(text) {
+        // Unicode directional isolation characters
+        return `\u2066${text}\u2069`;
+    }
+
+    // Format time range with proper LTR isolation
+    static formatTimeRange(startTime, endTime) {
+        const start = this.toAMPM(startTime);
+        const end = this.toAMPM(endTime);
+        return `${start} - ${end}`;
     }
 }
 
@@ -77,11 +94,14 @@ class TimeSlotGenerator {
         for (let hour = start; hour <= end; hour++) {
             const displayHour = hour % 12 || 12;
             const period = hour >= 12 ? 'PM' : 'AM';
+            const timeString = `${displayHour}:00 ${period}`;
+
             slots.push({
                 hour24: hour,
                 hour12: displayHour,
                 period,
-                display: `${displayHour}:00 ${period}`
+                display: DateFormatter._forceLTR ? DateFormatter._forceLTR(timeString) : `\u2066${timeString}\u2069`,
+                key: `slot-${hour}`
             });
         }
         return slots;
@@ -89,17 +109,17 @@ class TimeSlotGenerator {
 }
 
 class BookingGrouper {
-    static byPitch(bookings) {
+    static byPitch(bookings, t) {
         const groups = {};
 
         bookings.forEach(booking => {
-            const key = this.#generateKey(booking);
+            const key = this.#generateKey(booking, t);
             if (!groups[key]) {
                 groups[key] = {
                     bookings: [],
                     pitchImage: booking.pitch?.pitch_image || booking.pitch?.image || null,
-                    pitchName: booking.pitch?.translations?.name || 'Unknown Pitch',
-                    venueName: booking.venue?.translations?.name || `Venue ${booking.venue?.id}`
+                    pitchName: booking.pitch?.translations?.name || t('calendar.grid.unknownPitch', 'Unknown Pitch'),
+                    venueName: booking.venue?.translations?.name || t('calendar.grid.venueFormat', { id: booking.venue?.id }, `Venue ${booking.venue?.id}`)
                 };
             }
             groups[key].bookings.push(booking);
@@ -108,15 +128,18 @@ class BookingGrouper {
         return groups;
     }
 
-    static #generateKey(booking) {
-        const pitchName = booking.pitch?.translations?.name || 'Unknown Pitch';
+    static #generateKey(booking, t) {
+        const pitchName = booking.pitch?.translations?.name || t('calendar.grid.unknownPitch', 'Unknown Pitch');
         const venueId = booking.venue?.id;
-        const venueName = booking.venue?.translations?.name || `Venue ${venueId}`;
+        const venueName = booking.venue?.translations?.name || t('calendar.grid.venueFormat', { id: venueId }, `Venue ${venueId}`);
 
-        return `${venueName}\n${pitchName}`;
+        return `${venueName}||${pitchName}`;
     }
 }
+
 const PitchImage = ({ imageUrl, pitchName }) => {
+    const { t } = useTranslation('calendar');
+
     if (!imageUrl) {
         return (
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
@@ -131,10 +154,9 @@ const PitchImage = ({ imageUrl, pitchName }) => {
         <div className="w-9 h-9 rounded-xl overflow-hidden border-2 border-white shadow-sm">
             <img
                 src={imageUrl}
-                alt={pitchName || 'Pitch'}
+                alt={pitchName || t('calendar.pitchImage.alt', 'Pitch')}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                    // Fallback to gradient background if image fails to load
                     e.target.style.display = 'none';
                     e.target.parentElement.innerHTML = `
                         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
@@ -148,6 +170,7 @@ const PitchImage = ({ imageUrl, pitchName }) => {
         </div>
     );
 };
+
 class BookingPositionCalculator {
     constructor(timeSlots) {
         this.timeSlots = timeSlots;
@@ -256,11 +279,13 @@ const useDatePicker = (initialDate) => {
         changeDate,
         setToday,
         handleDateChange,
-        handleDateBlur
+        handleDateBlur,
+        // Expose the state setter if needed elsewhere
+        updateDate: setSelectedDate
     };
 };
 
-const useVenueFilter = (bookings, selectedDate) => {
+const useVenueFilter = (bookings, selectedDate, t) => {
     const [selectedVenue, setSelectedVenue] = useState('all');
 
     // Reset venue selection when date changes
@@ -269,29 +294,28 @@ const useVenueFilter = (bookings, selectedDate) => {
     }, [selectedDate]);
 
     const venueOptions = useMemo(() => {
-        if (!bookings?.length) return [{ value: 'all', label: 'All Venues' }];
+        if (!bookings?.length) return [{ value: 'all', label: t('calendar.header.allVenues', 'All Venues') }];
 
-        const options = [{ value: 'all', label: 'All Venues' }];
+        const options = [{ value: 'all', label: t('calendar.header.allVenues', 'All Venues') }];
         const venueMap = new Map();
 
-        // Extract unique venues from bookings
         bookings.forEach(booking => {
             if (booking.venue?.id && !venueMap.has(booking.venue.id)) {
                 venueMap.set(booking.venue.id, {
                     value: booking.venue.id,
-                    label: booking.venue.translations?.name || `Venue ${booking.venue.id}`
+                    label: booking.venue.translations?.name ||
+                        t('calendar.grid.venueFormat', { id: booking.venue.id }, `Venue ${booking.venue.id}`)
                 });
             }
         });
 
-        // Add venues to options, sorted by label
         const sortedVenues = Array.from(venueMap.values()).sort((a, b) =>
             a.label.localeCompare(b.label)
         );
         options.push(...sortedVenues);
 
         return options;
-    }, [bookings]);
+    }, [bookings, t]);
 
     return { selectedVenue, setSelectedVenue, venueOptions };
 };
@@ -300,41 +324,102 @@ const useVenueFilter = (bookings, selectedDate) => {
 // COMPONENTS
 // ============================================================================
 
-const LoadingOverlay = () => (
-    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg">
-        <div className="flex flex-col items-center gap-2">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-            <span className="text-sm text-gray-600">Loading bookings...</span>
-        </div>
-    </div>
-);
+const LoadingOverlay = () => {
+    const { t } = useTranslation('calendar');
 
-const ErrorState = ({ error, onRetry }) => (
-    <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-700">Error loading bookings: {error}</p>
-                <button
-                    onClick={onRetry}
-                    className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                >
-                    Retry
-                </button>
+    return (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg">
+            <div className="flex flex-col items-center gap-2">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+                <span className="text-sm text-gray-600">
+                    {t('calendar.loading.loadingBookings', 'Loading bookings...')}
+                </span>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
-const EmptyState = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Calendar className="w-8 h-8 text-gray-400" />
+const ErrorState = ({ error, onRetry }) => {
+    const { t } = useTranslation('calendar');
+
+    return (
+        <div className="min-h-screen bg-gray-50 p-6">
+            <div className="max-w-7xl mx-auto">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-red-700">
+                        {t('calendar.errorState.errorLoading', { error }, `Error loading bookings: ${error}`)}
+                    </p>
+                    <button
+                        onClick={onRetry}
+                        className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    >
+                        {t('calendar.errorState.retry', 'Retry')}
+                    </button>
+                </div>
+            </div>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">No bookings found</h3>
-        <p className="text-gray-500">There are no bookings for the selected date.</p>
-    </div>
-);
+    );
+};
 
+const EmptyState = () => {
+    const { t } = useTranslation('calendar');
+
+    return (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {t('calendar.emptyState.title', 'No bookings found')}
+            </h3>
+            <p className="text-gray-500">
+                {t('calendar.emptyState.description', 'There are no bookings for the selected date.')}
+            </p>
+        </div>
+    );
+};
+const DirectionalArrow = ({ direction, onClick, disabled, className, size = "md" }) => {
+    const { t,i18n } = useTranslation();
+
+    // In RTL: left arrow means "next", right arrow means "previous"
+    // In LTR: left arrow means "previous", right arrow means "next"
+    const isRTL = i18n.language === 'ar';
+
+    let arrowDirection = direction;
+    if (isRTL) {
+        // Reverse the arrows for RTL
+        arrowDirection = direction === 'left' ? 'right' : 'left';
+    }
+
+    const sizeClasses = {
+        sm: "w-4 h-4",
+        md: "w-5 h-5 xl:w-6 xl:h-6",
+        lg: "w-6 h-6 xl:w-8 xl:h-8"
+    };
+
+    return (
+        <button
+            onClick={onClick}
+            disabled={disabled}
+            className={`p-2 rounded-lg transition-all disabled:opacity-50 ${className || ''}`}
+            aria-label={
+                direction === 'left'
+                    ? (isRTL
+                        ? t('calendar.datePicker.nextDay', 'Next day')
+                        : t('calendar.datePicker.previousDay', 'Previous day'))
+                    : (isRTL
+                        ? t('calendar.datePicker.previousDay', 'Previous day')
+                        : t('calendar.datePicker.nextDay', 'Next day'))
+            }
+        >
+            {arrowDirection === 'left' ? (
+                <ChevronLeft className={`${sizeClasses[size]} font-bold text-primary-700`} />
+            ) : (
+                <ChevronRight className={`${sizeClasses[size]} font-bold text-primary-700`} />
+            )}
+        </button>
+    );
+};
 const DatePickerPopup = ({
                              show,
                              tempDate,
@@ -344,6 +429,8 @@ const DatePickerPopup = ({
                              onTomorrow,
                              onClose
                          }) => {
+    const { t } = useTranslation('calendar');
+
     if (!show) return null;
 
     return (
@@ -354,20 +441,20 @@ const DatePickerPopup = ({
                         onClick={onYesterday}
                         className="px-2 py-1.5 text-xs bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                        Yesterday
+                        {t('calendar.datePicker.yesterday', 'Yesterday')}
                     </button>
                     <button
                         onClick={onTomorrow}
                         className="px-2 py-1.5 text-xs bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
-                        Tomorrow
+                        {t('calendar.datePicker.tomorrow', 'Tomorrow')}
                     </button>
                 </div>
                 <button
                     onClick={onClose}
                     className="text-gray-400 hover:text-gray-600 ml-2"
                 >
-                    ✕
+                    {t('calendar.datePicker.close', '✕')}
                 </button>
             </div>
             <input
@@ -381,94 +468,99 @@ const DatePickerPopup = ({
     );
 };
 
-const CalendarHeader = ({
-                            bookingCount,
-                            datePicker,
-                            venueFilter,
-                            isLoading
-                        }) => (
-    <div className="bg-white grid grid-cols-2 gap-5 xl:grid-cols-3 justify-between items-center rounded-xl border border-gray-100 p-4 xl:px-6 mb-4">
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-                <div className="hidden w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl lg:flex items-center justify-center shadow-lg shadow-primary-500/30">
-                    <Calendar className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                    <p className="xl:text-xl font-bold text-secondary-600 flex items-center gap-2">
-                        <span className="xl:text-4xl text-xl">{bookingCount}</span>
-                        Total Bookings
-                    </p>
-                </div>
-            </div>
-        </div>
+const CalendarHeader = React.memo(({
+                                       bookingCount,
+                                       datePicker,
+                                       venueFilter,
+                                       isLoading
+                                   }) => {
+    const { t, i18n } = useTranslation('calendar');
 
-        <div className="flex w-full order-3 col-span-2 xl:col-span-1 xl:order-2 items-center justify-center">
-            <div className="flex w-full items-center justify-center gap-3">
-                <div className="flex items-center gap-1 rounded-xl p-1 relative" ref={datePicker.pickerRef}>
-                    <button
-                        onClick={() => datePicker.changeDate(-1)}
-                        className="p-2 rounded-lg transition-all disabled:opacity-50"
-                        disabled={isLoading}
-                    >
-                        <ChevronLeft className="w-5 h-5 xl:w-8 xl:h-8 font-bold text-primary-700" />
-                    </button>
-
-                    <button
-                        onClick={() => datePicker.setShowPicker(!datePicker.showPicker)}
-                        className="text-lg font-semibold text-gray-900 min-w-[200px] text-center px-3 py-1 rounded-lg hover:bg-gray-100 transition-colors"
-                        disabled={isLoading}
-                    >
-                        {DateFormatter.toDisplay(datePicker.selectedDate)}
-                    </button>
-
-                    <DatePickerPopup
-                        show={datePicker.showPicker}
-                        tempDate={datePicker.tempDate}
-                        onDateChange={datePicker.handleDateChange}
-                        onDateBlur={datePicker.handleDateBlur}
-                        onYesterday={() => datePicker.changeDate(-1)}
-                        onTomorrow={() => datePicker.changeDate(1)}
-                        onClose={() => datePicker.setShowPicker(false)}
-                    />
-
-                    <button
-                        onClick={datePicker.setToday}
-                        className="px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-primary-500/30 transition-all disabled:opacity-50"
-                        disabled={isLoading}
-                    >
-                        Today
-                    </button>
-
-                    <button
-                        onClick={() => datePicker.changeDate(1)}
-                        className="p-2 rounded-lg transition-all disabled:opacity-50"
-                        disabled={isLoading}
-                    >
-                        <ChevronRight className="w-5 h-5 xl:w-8 xl:h-8 font-bold text-primary-700" />
-                    </button>
+    return (
+        <div className="bg-white grid grid-cols-2 gap-5 xl:grid-cols-3 justify-between items-center rounded-xl border border-gray-100 p-4 xl:px-6 mb-4">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="hidden w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl lg:flex items-center justify-center shadow-lg shadow-primary-500/30">
+                        <Calendar className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <p className="xl:text-xl font-bold text-secondary-600 flex items-center gap-2">
+                            <span className="xl:text-4xl text-xl">{bookingCount}</span>
+                            {t('calendar.header.totalBookings', 'Total Bookings')}
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div className="order-2 xl:order-3 flex justify-end">
-            <CustomDropdown
-                options={venueFilter.venueOptions}
-                value={venueFilter.selectedVenue}
-                onChange={venueFilter.setSelectedVenue}
-                placeholder="Select Venue"
-                disabled={isLoading}
-                buttonClassName="text-secondary-600 bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]"
-            />
-        </div>
-    </div>
-);
+            <div className="flex w-full order-3 col-span-2 xl:col-span-1 xl:order-2 items-center justify-center">
+                <div className="flex w-full items-center justify-center gap-3">
+                    <div className="flex items-center gap-1 rounded-xl p-1 relative" ref={datePicker.pickerRef}>
+                        <DirectionalArrow
+                            direction="left"
+                            onClick={() => datePicker.changeDate(-1)}
+                            disabled={isLoading}
+                            size="lg"
+                        />
 
-const BookingItem = ({ booking, calculator }) => {
+                        <button
+                            onClick={() => datePicker.setShowPicker(!datePicker.showPicker)}
+                            className="text-lg font-semibold text-gray-900 min-w-[200px] text-center px-3 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+                            disabled={isLoading}
+                        >
+                            {DateFormatter.toDisplay(datePicker.selectedDate, i18n.language === 'ar' ? 'ar-SA' : 'en-US')}
+                        </button>
+
+                        <DatePickerPopup
+                            show={datePicker.showPicker}
+                            tempDate={datePicker.tempDate}
+                            onDateChange={datePicker.handleDateChange}
+                            onDateBlur={datePicker.handleDateBlur}
+                            onYesterday={() => datePicker.changeDate(-1)}
+                            onTomorrow={() => datePicker.changeDate(1)}
+                            onClose={() => datePicker.setShowPicker(false)}
+                        />
+
+                        <button
+                            onClick={datePicker.setToday}
+                            className="px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-primary-500/30 transition-all disabled:opacity-50"
+                            disabled={isLoading}
+                        >
+                            {t('calendar.header.today', 'Today')}
+                        </button>
+
+                        <DirectionalArrow
+                            direction="right"
+                            onClick={() => datePicker.changeDate(1)}
+                            disabled={isLoading}
+                            size="lg"
+                        />
+                    </div>                </div>
+            </div>
+
+            <div className="order-2 xl:order-3 flex justify-end">
+                <CustomDropdown
+                    options={venueFilter.venueOptions}
+                    value={venueFilter.selectedVenue}
+                    onChange={venueFilter.setSelectedVenue}
+                    placeholder={t('calendar.header.selectVenue', 'Select Venue')}
+                    disabled={isLoading}
+                    buttonClassName="text-secondary-600 bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2]"
+                />
+            </div>
+        </div>
+    );
+});
+
+const BookingItem = React.memo(({ booking, calculator }) => {
+    const { t } = useTranslation('calendar');
+    const navigate = useNavigate();
+
     const startTime = new Date(booking.start_time);
     const endTime = new Date(booking.end_time);
     const top = calculator.getTopPosition(startTime);
     const height = calculator.getHeight(startTime, endTime);
-    const navigate= useNavigate()
+
+    const timeRange = DateFormatter.formatTimeRange(startTime, endTime);
 
     return (
         <div
@@ -478,29 +570,39 @@ const BookingItem = ({ booking, calculator }) => {
                 height: `${height}%`,
                 minHeight: '70px'
             }}
-            onClick={()=>navigate('/bookings/book-details',{state:{booking:booking}})}
+            onClick={() => navigate('/bookings/book-details', { state: { booking: booking } })}
         >
             <div className="text-sm flex justify-between font-bold mb-1.5 truncate">
-                {booking.user?.name || 'Unknown Host'}
+                <span>{booking.user?.name || t('calendar.bookingCard.unknownHost', 'Unknown Host')}</span>
                 {booking.max_players && (
-                    <div className="text-xs font-medium opacity-80">
-                        👥 {booking.max_players} players
+                    <div className="text-xs font-medium opacity-80 whitespace-nowrap">
+                        {t('calendar.bookingCard.players', { count: booking.max_players }, `👥 ${booking.max_players} players`)}
                     </div>
                 )}
             </div>
-            <div className="text-xs flex justify-between font-medium opacity-90 mb-1">
-                {DateFormatter.toAMPM(startTime)} - {DateFormatter.toAMPM(endTime)}
+            <div className="text-xs flex justify-between items-center">
+                <span
+                    className="font-medium opacity-90 font-mono"
+                    style={{
+                        direction: 'ltr',
+                        unicodeBidi: 'isolate'
+                    }}
+                >
+                    {timeRange}
+                </span>
                 {booking.play_kind?.translations?.name && (
-                    <div className="text-xs mt-1 font-medium opacity-75">
-                        ⚽ {booking.play_kind.translations.name}
+                    <div className="text-xs font-medium opacity-75 whitespace-nowrap">
+                        {t('calendar.bookingCard.playKind', { kind: booking.play_kind.translations.name }, `⚽ ${booking.play_kind.translations.name}`)}
                     </div>
                 )}
             </div>
         </div>
     );
-};
+});
 
-const CalendarGrid = ({ groupedBookings, timeSlots }) => {
+const CalendarGrid = React.memo(({ groupedBookings, timeSlots }) => {
+    const { t } = useTranslation('calendar');
+
     const venueCount = Object.keys(groupedBookings).length;
     const timeColumnWidth = '90px';
     const venueColumnWidth = venueCount <= 3
@@ -566,20 +668,18 @@ const CalendarGrid = ({ groupedBookings, timeSlots }) => {
                     <div className="bg-gradient-to-br from-gray-100 text-secondary-600 border-r border-b border-gray-200 sticky left-0 z-20">
                         <div className="h-16 flex items-center justify-center">
                             <span className="text-sm text-center font-semibold text-gray-700">
-                                Time
+                                {t('calendar.grid.time', 'Time')}
                             </span>
                         </div>
                     </div>
 
-
                     {Object.entries(groupedBookings).map(([pitchKey, groupData]) => {
-                        // Split the key to get venue and pitch names
-                        const [venueName, pitchName] = pitchKey.split('\n');
+                        const [venueName, pitchName] = pitchKey.split('||');
 
                         return (
                             <div key={pitchKey} className="border-r border-gray-200">
                                 <div className="h-20 flex items-center justify-center px-3 border-b bg-primary-50">
-                                    <div className="flex  items-center  gap-2">
+                                    <div className="flex items-center gap-2">
                                         <div className="flex items-center gap-2 mb-1">
                                             <PitchImage
                                                 imageUrl={groupData.pitchImage}
@@ -587,23 +687,30 @@ const CalendarGrid = ({ groupedBookings, timeSlots }) => {
                                             />
                                         </div>
                                         <div className="flex flex-col items-center w-full px-1">
-                        <span className="text-xs font-semibold text-gray-900 truncate w-full">
-                            {venueName}
-                        </span>
+                                            <span className="text-xs font-semibold text-gray-900 truncate w-full">
+                                                {venueName}
+                                            </span>
                                             <span className="text-xs text-gray-600 truncate w-full mt-0.5">
-                            {pitchName}
-                        </span>
+                                                {pitchName}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         );
                     })}
+
                     {/* Time Column */}
                     <div className="border-r border-b border-gray-200 bg-gradient-to-br from-gray-100 text-secondary-600 sticky left-0 z-10">
                         {timeSlots.map((time) => (
-                            <div key={time.display} className="h-[70px] border-b border-gray-200 flex items-center justify-center pr-3 pt-2">
-                                <span className="text-xs text-center font-medium text-secondary-600 py-1 rounded-md">
+                            <div key={time.key} className="h-[70px] border-b border-gray-200 flex items-center justify-center pr-3 pt-2">
+                                <span
+                                    className="text-xs text-center font-medium text-secondary-600 py-1 rounded-md font-mono"
+                                    style={{
+                                        direction: 'ltr',
+                                        unicodeBidi: 'isolate'
+                                    }}
+                                >
                                     {time.display}
                                 </span>
                             </div>
@@ -615,14 +722,14 @@ const CalendarGrid = ({ groupedBookings, timeSlots }) => {
                         <div key={pitchKey} className="border-r border-gray-200 last:border-r-0 relative bg-gradient-to-br from-gray-50/30 to-white">
                             {timeSlots.map((time, index) => (
                                 <div
-                                    key={time.display}
+                                    key={`${pitchKey}-${time.key}-${index}`}
                                     className={`h-[70px] border-b ${index % 2 === 0 ? 'border-gray-200' : 'border-gray-100'}`}
                                 />
                             ))}
 
                             {groupData.bookings.map((booking) => (
                                 <BookingItem
-                                    key={booking.id}
+                                    key={`${pitchKey}-${booking.id}`}
                                     booking={booking}
                                     calculator={calculator}
                                 />
@@ -633,14 +740,29 @@ const CalendarGrid = ({ groupedBookings, timeSlots }) => {
             </div>
         </div>
     );
-};
+});
+
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
 const BookingCalendar = () => {
     const dispatch = useDispatch();
+    const { t, i18n } = useTranslation(['calendar', 'common']);
+
+    // Use a ref to track previous language
+    const prevLanguageRef = useRef(i18n.language);
+
     const datePicker = useDatePicker(new Date());
+
+    // Update date picker display when language changes (but don't change the actual date)
+    useEffect(() => {
+        if (prevLanguageRef.current !== i18n.language) {
+            // Language changed, trigger a re-render of date display
+            // We don't need to update the date, just force component to re-render
+            prevLanguageRef.current = i18n.language;
+        }
+    }, [i18n.language]);
 
     const apiFilters = useMemo(() => {
         const filters = {
@@ -653,7 +775,7 @@ const BookingCalendar = () => {
     const { bookings, isLoading, error, refetch } = useCalendarBookings(apiFilters);
     const bookingResults = bookings?.results || [];
 
-    const venueFilter = useVenueFilter(bookingResults, datePicker.selectedDate);
+    const venueFilter = useVenueFilter(bookingResults, datePicker.selectedDate, t);
 
     const filteredBookings = useMemo(() => {
         if (venueFilter.selectedVenue === 'all') return bookingResults;
@@ -666,13 +788,13 @@ const BookingCalendar = () => {
     );
 
     const groupedBookings = useMemo(() =>
-            BookingGrouper.byPitch(filteredBookings),
-        [filteredBookings]
+            BookingGrouper.byPitch(filteredBookings, t),
+        [filteredBookings, t]
     );
 
     useEffect(() => {
-        dispatch(setPageTitle('Calendar'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('calendar.pageTitle', 'Calendar')));
+    }, [dispatch, t]);
 
     if (error) {
         return <ErrorState error={error} onRetry={refetch} />;

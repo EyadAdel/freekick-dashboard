@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft, Calendar, CheckCircle, Clock, CreditCard,
     Mail, MapPin, Phone, Printer, Send, Users, MoreVertical,
@@ -16,32 +17,28 @@ import {  clearCancelStatus } from "../../features/bookings/bookingSlice";
 import { showConfirm } from "../../components/showConfirm.jsx";
 import {toast} from "react-toastify";
 import {useLocation, useNavigate} from "react-router-dom";
-// 导入图像工具函数
 import { getImageUrl } from '../../utils/imageUtils.js';
 
 const BookingDetailView = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { user } = useSelector((state) => state.auth); // Get user from Redux
+    const { t, i18n } = useTranslation('bookingDetails');
+    const { user } = useSelector((state) => state.auth);
     const { role } = user;
-    // Get booking data from location state
     const bookingFromState = location.state?.booking;
-
-    // Get booking ID from state or try to extract from URL if needed
     const bookingId = bookingFromState?.id || location.state?.bookingId;
+    const isRTL = i18n.language === 'ar';
 
-    // Fetch booking data - use booking from state if available, otherwise fetch by ID
     const {
         booking: fetchedBooking,
         isLoading: isFetchingDetails,
         error: fetchError,
-        refetch // Add this
+        refetch
     } = useBooking(bookingId);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
     const { componentRef, handlePrint } = usePrint();
     const dispatch = useDispatch();
 
-    // Use booking from state if available, otherwise use fetched data
     const booking = fetchedBooking;
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [imageErrors, setImageErrors] = useState({});
@@ -49,28 +46,23 @@ const BookingDetailView = () => {
 
     useEffect(() => {
         if (cancelStatus === 'succeeded') {
-            alert('Booking cancelled successfully');
+            alert(t('messages.cancelled'));
             dispatch(clearCancelStatus());
-            // Navigate back after successful cancellation
             navigate('/bookings');
         } else if (cancelStatus === 'failed') {
-            alert('Failed to cancel booking: ' + cancelError);
+            alert(t('messages.failedCancel') + cancelError);
             dispatch(clearCancelStatus());
         }
-    }, [cancelStatus, cancelError, dispatch, navigate]);
+    }, [cancelStatus, cancelError, dispatch, navigate, t]);
 
     const handleBack = () => {
-        // Go back to bookings list
         navigate('/bookings');
     };
 
     const handleRefresh = () => {
-        // You can implement refresh logic if needed
-        // For now, we'll just go back to the list which will refresh automatically
         navigate('/bookings');
     };
 
-    // 辅助函数：处理图像加载失败 - FIXED VERSION
     const handleImageError = (imageKey) => {
         setImageErrors(prev => ({
             ...prev,
@@ -78,7 +70,6 @@ const BookingDetailView = () => {
         }));
     };
 
-    // 获取用户首字母
     const getInitials = (name) => {
         if (!name) return 'U';
         const nameParts = name.trim().split(' ');
@@ -86,7 +77,6 @@ const BookingDetailView = () => {
         return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
     };
 
-    // 获取头像颜色
     const getAvatarColor = (name) => {
         const nameStr = name || 'User';
         const colors = [
@@ -114,7 +104,7 @@ const BookingDetailView = () => {
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading booking details...</p>
+                    <p className="text-gray-600">{t('loading')}</p>
                 </div>
             </div>
         );
@@ -124,9 +114,9 @@ const BookingDetailView = () => {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-red-600">No booking data available</p>
+                    <p className="text-red-600">{t('noData')}</p>
                     <button onClick={handleBack} className="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg">
-                        Go Back to Bookings
+                        {t('goBack')}
                     </button>
                 </div>
             </div>
@@ -153,7 +143,7 @@ const BookingDetailView = () => {
     const formatDate = (dateTime) => {
         if (!dateTime) return 'N/A';
         const date = new Date(dateTime);
-        return date.toLocaleDateString('en-US', {
+        return date.toLocaleDateString(i18n.language, {
             month: 'short',
             day: 'numeric',
             year: 'numeric'
@@ -163,7 +153,7 @@ const BookingDetailView = () => {
     const formatTime = (dateTime) => {
         if (!dateTime) return 'N/A';
         const date = new Date(dateTime);
-        return date.toLocaleTimeString('en-US', {
+        return date.toLocaleTimeString(i18n.language, {
             hour: '2-digit',
             minute: '2-digit'
         });
@@ -172,20 +162,20 @@ const BookingDetailView = () => {
     const handleCancel = async () => {
         try {
             const confirmed = await showConfirm({
-                title: "Cancel Booking",
-                text: "Are you sure you want to cancel this booking? This action cannot be undone.",
-                confirmButtonText: "Yes, cancel booking",
-                cancelButtonText: "Keep booking",
+                title: t('confirm.cancel.title'),
+                text: t('confirm.cancel.text'),
+                confirmButtonText: t('confirm.cancel.confirmButton'),
+                cancelButtonText: t('confirm.cancel.cancelButton'),
                 icon: "warning"
             });
 
             if (confirmed) {
                 setIsActionLoading(true);
                 await bookingService.cancelBooking(booking.id);
-                handleRefresh(); // Refresh and go back to list
+                handleRefresh();
             }
         } catch (err) {
-            toast.error('Failed to cancel booking: ' + err.message);
+            toast.error(t('messages.failedCancel') + err.message);
         } finally {
             setIsActionLoading(false);
         }
@@ -194,10 +184,10 @@ const BookingDetailView = () => {
     const handleFullPaid = async () => {
         try {
             const confirmed = await showConfirm({
-                title: "Mark as Full Paid",
-                text: "Are you sure you want to mark this booking as fully paid?",
-                confirmButtonText: "Yes, mark as paid",
-                cancelButtonText: "Cancel",
+                title: t('confirm.markPaid.title'),
+                text: t('confirm.markPaid.text'),
+                confirmButtonText: t('confirm.markPaid.confirmButton'),
+                cancelButtonText: t('confirm.markPaid.cancelButton'),
                 icon: "success"
             });
 
@@ -205,10 +195,8 @@ const BookingDetailView = () => {
                 setIsActionLoading(true);
                 await bookingService.partialUpdate(booking.id, { mark_as_paid: true });
 
-                // Show success toast
-                toast.success('Booking marked as fully paid successfully!');
+                toast.success(t('messages.markedPaid'));
 
-                // Refetch booking data to update the UI
                 await refetch();
             }
         } catch (err) {
@@ -237,7 +225,7 @@ const BookingDetailView = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* ALWAYS render PrintableReceipt but keep it hidden */}
+            {/* Hidden PrintableReceipt */}
             <div style={{
                 position: 'fixed',
                 left: '-10000px',
@@ -255,15 +243,18 @@ const BookingDetailView = () => {
                             <button
                                 onClick={handleBack}
                                 className="flex items-center gap-2 text-primary-700 hover:text-primary-600 transition-colors">
-                                <ArrowIcon direction="left" size="lg" />
-                                <span className="font-medium">Back to Bookings</span>
+                                <ArrowIcon
+                                    direction={isRTL ? 'right' : 'left'}
+                                    size="lg"
+                                />
+                                <span className="font-medium">{t('back')}</span>
                             </button>
                         </div>
                         {role.is_admin || role.is_sub_admin ? (
                             booking.mark_as_paid ? (
                                 <div className="flex-1 sm:flex-none px-4 py-2 bg-green-100 border border-green-300 text-green-700 rounded-2xl flex items-center justify-center gap-2">
                                     <CheckCircle className="w-4 h-4" />
-                                    <span className="font-medium">Full Paid</span>
+                                    <span className="font-medium">{t('actions.fullPaid')}</span>
                                 </div>
                             ) : (
                                 <button
@@ -276,12 +267,12 @@ const BookingDetailView = () => {
                                     {isActionLoading ? (
                                         <>
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                            <span className="font-medium">Processing...</span>
+                                            <span className="font-medium">{t('actions.processing')}</span>
                                         </>
                                     ) : (
                                         <>
                                             <CreditCard className="w-4 h-4" />
-                                            <span className="font-medium">Mark As Full Paid</span>
+                                            <span className="font-medium">{t('actions.markAsPaid')}</span>
                                         </>
                                     )}
                                 </button>
@@ -334,15 +325,19 @@ const BookingDetailView = () => {
 
                             {/* Contact Information */}
                             <div className="space-y-4 mb-6 px-5 pb-6 border-b border-gray-100">
-                                <h4 className="font-semibold text-gray-900 text-xs sm:text-sm uppercase tracking-wide">Contact Details</h4>
+                                <h4 className="font-semibold text-gray-900 text-xs sm:text-sm uppercase tracking-wide">
+                                    {t('contact.title')}
+                                </h4>
                                 <div className="space-y-3">
                                     <div className="flex items-start gap-3">
                                         <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                             <Mail size={16} className="text-gray-600" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-gray-500 font-medium mb-0.5">Email</p>
-                                            <p className="text-xs sm:text-sm text-gray-900 truncate">{booking.user_info?.email || booking.venue_info?.owner_info?.email || 'Not provided'}</p>
+                                            <p className="text-xs text-gray-500 font-medium mb-0.5">{t('contact.email')}</p>
+                                            <p className="text-xs sm:text-sm text-gray-900 truncate">
+                                                {booking.user_info?.email || booking.venue_info?.owner_info?.email || t('contact.notProvided')}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
@@ -350,8 +345,10 @@ const BookingDetailView = () => {
                                             <Phone size={16} className="text-gray-600" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-xs text-gray-500 font-medium mb-0.5">Phone</p>
-                                            <p className="text-xs sm:text-sm text-gray-900">{booking.user_info?.phone || 'Not provided'}</p>
+                                            <p className="text-xs text-gray-500 font-medium mb-0.5">{t('contact.phone')}</p>
+                                            <p className="text-xs sm:text-sm text-gray-900">
+                                                {booking.user_info?.phone || t('contact.notProvided')}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-3">
@@ -359,8 +356,10 @@ const BookingDetailView = () => {
                                             <MapPin size={16} className="text-gray-600" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-xs text-gray-500 font-medium mb-0.5">Location</p>
-                                            <p className="text-xs sm:text-sm text-gray-900">{booking.venue_info?.translations?.address || booking.venue_info?.city || 'Not provided'}</p>
+                                            <p className="text-xs text-gray-500 font-medium mb-0.5">{t('contact.location')}</p>
+                                            <p className="text-xs sm:text-sm text-gray-900">
+                                                {booking.venue_info?.translations?.address || booking.venue_info?.city || t('contact.notProvided')}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -368,21 +367,23 @@ const BookingDetailView = () => {
 
                             {/* Booking Details */}
                             <div className="space-y-3 px-5 mb-6">
-                                <h4 className="font-semibold text-gray-900 text-xs sm:text-sm uppercase tracking-wide">Booking Information</h4>
+                                <h4 className="font-semibold text-gray-900 text-xs sm:text-sm uppercase tracking-wide">
+                                    {t('bookingInfo.title')}
+                                </h4>
                                 <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2.5">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs sm:text-sm text-gray-600">Customer Type</span>
+                                        <span className="text-xs sm:text-sm text-gray-600">{t('bookingInfo.customerType')}</span>
                                         <span className="text-xs sm:text-sm font-semibold text-teal-600">
-                                            {booking.split_payment ? 'Split Payment' : 'Individual'}
+                                            {booking.split_payment ? t('bookingInfo.split') : t('bookingInfo.individual')}
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs sm:text-sm text-gray-600">Booking Type</span>
-                                        <span className="text-xs sm:text-sm font-semibold text-teal-600">Online</span>
+                                        <span className="text-xs sm:text-sm text-gray-600">{t('bookingInfo.bookingType')}</span>
+                                        <span className="text-xs sm:text-sm font-semibold text-teal-600">{t('bookingInfo.online')}</span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs sm:text-sm text-gray-600">Payment Method</span>
-                                        <span className="text-xs sm:text-sm font-semibold text-teal-600">Card</span>
+                                        <span className="text-xs sm:text-sm text-gray-600">{t('bookingInfo.paymentMethod')}</span>
+                                        <span className="text-xs sm:text-sm font-semibold text-teal-600">{t('bookingInfo.card')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -394,14 +395,14 @@ const BookingDetailView = () => {
                                     className="px-4 py-2.5 text-xs sm:text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2"
                                 >
                                     <Mail size={16} />
-                                    <span className="hidden sm:inline">Email</span>
+                                    <span className="hidden sm:inline">{t('actions.email')}</span>
                                 </button>
                                 <button
                                     onClick={handleCustomerWhatsApp}
                                     className="px-4 py-2.5 text-xs sm:text-sm bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium flex items-center justify-center gap-2"
                                 >
                                     <Phone size={16} />
-                                    <span>WhatsApp</span>
+                                    <span>{t('actions.whatsapp')}</span>
                                 </button>
                             </div>
                         </div>
@@ -414,22 +415,22 @@ const BookingDetailView = () => {
                                 <div className="flex-1 w-full">
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                                         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                                            Booking ID: <span className="font-semibold text-gray-900">#{String(booking.id).padStart(7, '0')}</span>
+                                            {t('header.bookingId')} <span className="font-semibold text-gray-900">#{String(booking.id).padStart(7, '0')}</span>
                                         </h1>
                                         <span className={`w-fit px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold border ${getStatusColor(booking.status)}`}>
-                                            {booking.status?.toUpperCase() || 'PENDING'}
+                                            {t(`status.${booking.status?.toLowerCase()}`) || t('status.pending')}
                                         </span>
                                     </div>
                                     <div className="text-left flex gap-4 text-xs sm:text-sm text-gray-500 w-full sm:w-auto">
-                                        <p>Created: {formatDate(booking.created_at)}</p>
-                                        <p>Updated: {formatDate(booking.updated_at)}</p>
+                                        <p>{t('header.created')} {formatDate(booking.created_at)}</p>
+                                        <p>{t('header.updated')} {formatDate(booking.updated_at)}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={handlePrint}
                                     className="flex-1 sm:flex-none px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
                                     <Printer size={18} />
-                                    <span className="font-medium">Print Receipt</span>
+                                    <span className="font-medium">{t('actions.printReceipt')}</span>
                                 </button>
                             </div>
                         </div>
@@ -444,9 +445,9 @@ const BookingDetailView = () => {
                                             <Calendar className="text-teal-600" size={20} />
                                         </div>
                                         <div className={'flex gap-5'}>
-                                            <p className="text-xs text-gray-600 font-medium">Booking Date</p>
+                                            <p className="text-xs text-gray-600 font-medium">{t('bookingTime.date')}</p>
                                             <p className="text-sm font-bold text-gray-900">
-                                                {booking.start_time ? formatDate(booking.start_time) : 'Not set'}
+                                                {booking.start_time ? formatDate(booking.start_time) : t('bookingTime.notSet')}
                                             </p>
                                         </div>
                                     </div>
@@ -456,11 +457,11 @@ const BookingDetailView = () => {
                                             <Clock className="text-teal-600" size={20} />
                                         </div>
                                         <div className={'flex gap-5'}>
-                                            <p className="text-xs text-gray-600 font-medium">Time </p>
+                                            <p className="text-xs text-gray-600 font-medium">{t('bookingTime.time')}</p>
                                             <p className="text-sm font-bold text-gray-900">
                                                 {booking.start_time && booking.end_time
                                                     ? `${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}`
-                                                    : 'Not set'}
+                                                    : t('bookingTime.notSet')}
                                             </p>
                                         </div>
                                     </div>
@@ -494,7 +495,7 @@ const BookingDetailView = () => {
                             <div className="border-t border-gray-100 pt-4 p-4 sm:pt-6">
                                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 text-sm sm:text-base">
                                     <Users size={18} className="text-teal-600" />
-                                    Players ({booking.users.length})
+                                    {t('players.count', { count: booking.users.length })}
                                 </h4>
                                 <div className="flex items-center gap-2 overflow-x-auto pb-2">
                                     {booking.users.slice(0, 8).map((user, idx) => (
@@ -533,7 +534,7 @@ const BookingDetailView = () => {
 
                         {booking.notes && (
                             <div className="border-t border-gray-100 pt-4 sm:pt-6 mt-4 sm:mt-6">
-                                <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">Customer Note</h4>
+                                <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">{t('customerNote.title')}</h4>
                                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4">
                                     <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                                         {booking.notes}
@@ -544,21 +545,21 @@ const BookingDetailView = () => {
 
                         {/* Order Summary Card */}
                         <div className="bg-white border-t border-gray-100 rounded-xl p-4 sm:p-6">
-                            <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-4 sm:mb-6">Order Summary</h3>
+                            <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-4 sm:mb-6">{t('orderSummary.title')}</h3>
 
                             {/* Table Headers */}
                             <div className="grid grid-cols-12 gap-2 sm:gap-4 pb-3 border-b-2 border-gray-200 mb-3">
                                 <div className="col-span-5 sm:col-span-6">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Description</span>
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('orderSummary.description')}</span>
                                 </div>
                                 <div className="col-span-2 text-center">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Qty</span>
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('orderSummary.quantity')}</span>
                                 </div>
                                 <div className="col-span-2 sm:col-span-2 text-right">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Price</span>
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('orderSummary.price')}</span>
                                 </div>
                                 <div className="col-span-3 sm:col-span-2 text-right">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Total</span>
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('orderSummary.total')}</span>
                                 </div>
                             </div>
 
@@ -567,10 +568,10 @@ const BookingDetailView = () => {
                                 <div className="grid grid-cols-12 gap-2 sm:gap-4 py-2 border-b border-gray-100">
                                     <div className="col-span-5 sm:col-span-6">
                                         <p className="text-sm font-medium text-gray-900 truncate">
-                                            {booking.pitch?.translations?.name || 'Pitch Booking'}
+                                            {booking.pitch?.translations?.name || t('orderSummary.pitchBooking')}
                                         </p>
                                         <p className="text-xs text-gray-500 truncate">
-                                            {booking.venue_info?.translations?.name || 'Venues'}
+                                            {booking.venue_info?.translations?.name || t('orderSummary.venue')}
                                         </p>
                                     </div>
                                     <div className="col-span-2 text-center">
@@ -589,7 +590,7 @@ const BookingDetailView = () => {
                                     <div key={idx} className="grid grid-cols-12 gap-2 sm:gap-4 py-2 border-b border-gray-100">
                                         <div className="col-span-5 sm:col-span-6">
                                             <p className="text-sm font-medium text-gray-900 truncate">
-                                                {addon.addon_info?.addon?.translations?.name || 'Add-on'}
+                                                {addon.addon_info?.addon?.translations?.name || t('orderSummary.addon')}
                                             </p>
                                         </div>
                                         <div className="col-span-2 text-center">
@@ -609,15 +610,15 @@ const BookingDetailView = () => {
 
                             <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2.5 mb-4 sm:mb-6">
                                 <div className="flex justify-between text-xs sm:text-sm">
-                                    <span className="text-gray-600">Subtotal</span>
+                                    <span className="text-gray-600">{t('orderSummary.subtotal')}</span>
                                     <span className="font-semibold text-gray-900">{totalAmount.toFixed(0)} AED</span>
                                 </div>
                                 <div className="flex justify-between text-xs sm:text-sm">
-                                    <span className="text-gray-600">TAX</span>
+                                    <span className="text-gray-600">{t('orderSummary.tax')}</span>
                                     <span className="font-semibold text-gray-900">0 AED</span>
                                 </div>
                                 <div className="flex justify-between text-xs sm:text-sm">
-                                    <span className="text-gray-600">Discount</span>
+                                    <span className="text-gray-600">{t('orderSummary.discount')}</span>
                                     <span className="font-semibold text-red-600">-0 AED</span>
                                 </div>
                             </div>
@@ -625,7 +626,7 @@ const BookingDetailView = () => {
                             <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6 shadow-lg">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <p className="text-teal-100 text-xs sm:text-sm font-medium mb-1">Total Amount</p>
+                                        <p className="text-teal-100 text-xs sm:text-sm font-medium mb-1">{t('orderSummary.totalAmount')}</p>
                                         <p className="text-white text-xl sm:text-3xl font-bold">AED {totalAmount.toFixed(0)}</p>
                                     </div>
                                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -641,12 +642,12 @@ const BookingDetailView = () => {
                                     disabled={isActionLoading}
                                     className="px-4 py-2.5 sm:py-3 bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-xs sm:text-sm font-semibold disabled:opacity-50 order-3 sm:order-1"
                                 >
-                                    Cancel
+                                    {t('actions.cancel')}
                                 </button>
                                 <button onClick={handlePrint} className="px-4 py-2.5 sm:py-3 border-2 border-primary-500 text-primary-700 rounded-lg hover:bg-teal-50 transition-colors text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 order-1 sm:order-2">
                                     <Send size={16} />
-                                    <span className="hidden sm:inline">Invoice</span>
-                                    <span className="sm:hidden">Send Invoice</span>
+                                    <span className="hidden sm:inline">{t('actions.sendInvoice')}</span>
+                                    <span className="sm:hidden">{t('actions.sendInvoice')}</span>
                                 </button>
                             </div>
                         </div>
@@ -660,13 +661,18 @@ const BookingDetailView = () => {
 export default BookingDetailView;
 
 const VenueInfoCard = ({ booking }) => {
+    const { t } = useTranslation('bookingDetails');
+
     if (!booking?.venue_info) {
         return (
             <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
-                <p className="text-gray-500">No venue information available</p>
+                <p className="text-gray-500">{t('venueInfo.noInfo')}</p>
             </div>
         );
     }
+
+    const venueType = booking.venue_info?.venue_type === 'indoor' ?
+        t('venueInfo.indoor') : t('venueInfo.outdoor');
 
     return (
         <div className="w-full mx-auto rounded-xl overflow-hidden">
@@ -679,33 +685,33 @@ const VenueInfoCard = ({ booking }) => {
                     {/* Location */}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <MapPin size={16} className="text-gray-400 flex-shrink-0" />
-                        <span>{booking.venue_info?.translations?.address || booking.venue_info?.city || 'Bani Yas, Abu Dhabi'}</span>
+                        <span>{booking.venue_info?.translations?.address || booking.venue_info?.city || t('venueInfo.address')}</span>
                     </div>
 
                     {/* Sports */}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Globe size={16} className="text-gray-400 flex-shrink-0" />
                         <span>
-                            {booking.venue_info?.venue_play_type?.map(sport => sport.translations?.name).join(', ') || 'Soccer, Basketball'}
+                            {booking.venue_info?.venue_play_type?.map(sport => sport.translations?.name).join(', ') || t('venueInfo.sports')}
                         </span>
                     </div>
 
                     {/* Phone */}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Phone size={16} className="text-gray-400 flex-shrink-0" />
-                        <span>{booking.venue_info?.phone_number || '+1 234 567 8901'}</span>
+                        <span>{booking.venue_info?.phone_number || t('venueInfo.phone')}</span>
                     </div>
 
                     {/* Email */}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Mail size={16} className="text-gray-400 flex-shrink-0" />
-                        <span>{booking.venue_info?.owner_info?.email || 'paris.milton@example.com'}</span>
+                        <span>{booking.venue_info?.owner_info?.email || t('venueInfo.email')}</span>
                     </div>
 
                     {/* Type */}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Building size={16} className="text-gray-400 flex-shrink-0" />
-                        <span>{booking.venue_info?.venue_type === 'indoor' ? '7v7, Indoor' : '7v7, Outdoor'}</span>
+                        <span>{t('venueInfo.type', { type: venueType })}</span>
                     </div>
                 </div>
             </div>

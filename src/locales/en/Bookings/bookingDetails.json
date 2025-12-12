@@ -1,0 +1,100 @@
+{
+  "back": "Back to Bookings",
+  "loading": "Loading booking details...",
+  "noData": "No booking data available",
+  "goBack": "Go Back to Bookings",
+  "status": {
+    "pending": "PENDING",
+    "confirmed": "CONFIRMED",
+    "completed": "COMPLETED",
+    "cancelled": "CANCELLED"
+  },
+  "contact": {
+    "title": "Contact Details",
+    "email": "Email",
+    "phone": "Phone",
+    "location": "Location",
+    "notProvided": "Not provided"
+  },
+  "bookingInfo": {
+    "title": "Booking Information",
+    "customerType": "Customer Type",
+    "bookingType": "Booking Type",
+    "paymentMethod": "Payment Method",
+    "split": "Split Payment",
+    "individual": "Individual",
+    "online": "Online",
+    "card": "Card"
+  },
+  "actions": {
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "printReceipt": "Print Receipt",
+    "markAsPaid": "Mark As Full Paid",
+    "processing": "Processing...",
+    "cancel": "Cancel",
+    "sendInvoice": "Send Invoice",
+    "fullPaid": "Full Paid"
+  },
+  "header": {
+    "bookingId": "Booking ID:",
+    "created": "Created:",
+    "updated": "Updated:"
+  },
+  "bookingTime": {
+    "date": "Booking Date",
+    "time": "Time",
+    "notSet": "Not set"
+  },
+  "players": {
+    "title": "Players",
+    "count": "Players ({{count}})"
+  },
+  "customerNote": {
+    "title": "Customer Note"
+  },
+  "orderSummary": {
+    "title": "Order Summary",
+    "description": "Description",
+    "quantity": "Qty",
+    "price": "Price",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "tax": "TAX",
+    "discount": "Discount",
+    "totalAmount": "Total Amount",
+    "pitchBooking": "Pitch Booking",
+    "venue": "Venues",
+    "addon": "Add-on"
+  },
+  "confirm": {
+    "cancel": {
+      "title": "Cancel Booking",
+      "text": "Are you sure you want to cancel this booking? This action cannot be undone.",
+      "confirmButton": "Yes, cancel booking",
+      "cancelButton": "Keep booking"
+    },
+    "markPaid": {
+      "title": "Mark as Full Paid",
+      "text": "Are you sure you want to mark this booking as fully paid?",
+      "confirmButton": "Yes, mark as paid",
+      "cancelButton": "Cancel"
+    }
+  },
+  "messages": {
+    "cancelled": "Booking cancelled successfully",
+    "failedCancel": "Failed to cancel booking: ",
+    "markedPaid": "Booking marked as fully paid successfully!"
+  },
+  "venueInfo": {
+    "title": "Venue Information",
+    "noInfo": "No venue information available",
+    "address": "Bani Yas, Abu Dhabi",
+    "sports": "Soccer, Basketball",
+    "phone": "+1 234 567 8901",
+    "email": "paris.milton@example.com",
+    "type": "7v7, {{type}}",
+    "indoor": "Indoor",
+    "outdoor": "Outdoor"
+  }
+}

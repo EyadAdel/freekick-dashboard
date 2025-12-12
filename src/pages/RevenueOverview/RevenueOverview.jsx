@@ -1,17 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
-
+import { useTranslation } from 'react-i18next';
 import CustomLineChart from '../../components/Charts/LineChart.jsx';
 import MainTable from '../../components/MainTable.jsx';
 import analyticsService from '../../services/analyticsService.js';
 import TransactionReceipt from '../../components/common/TransactionReceipt.jsx';
-import logo from '../../assets/logo.svg'
+import logo from '../../assets/logo.svg';
 import { FaFilePdf, FaArrowUp, FaArrowDown, FaDollarSign, FaMoneyBillWave, FaBalanceScale } from "react-icons/fa";
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import StatCard from "../../components/Charts/StatCards.jsx";
-import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
-import {useDispatch} from "react-redux";
+import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
+import { useDispatch } from "react-redux";
 import Transactions from "./Transactions.jsx";
-
 
 function RevenueOverview() {
     const [revenueData, setRevenueData] = useState([]);
@@ -25,18 +24,17 @@ function RevenueOverview() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const { t } = useTranslation(['revenueOverview', 'common']);
     const dispatch = useDispatch();
+
     useEffect(() => {
-        dispatch(setPageTitle('Revenue Overview'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('revenueOverview:title')));
+    }, [dispatch, t]);
 
     useEffect(() => {
         fetchAnalytics();
         fetchChartsData();
     }, []);
-
-
-
 
     const fetchChartsData = async () => {
         try {
@@ -65,12 +63,11 @@ function RevenueOverview() {
             }
         } catch (err) {
             console.error('Error fetching charts data:', err);
-            setError('Failed to load charts data');
+            setError(t('revenueOverview:error.message'));
         } finally {
             setLoading(false);
         }
     };
-
 
     const fetchAnalytics = async () => {
         try {
@@ -88,10 +85,6 @@ function RevenueOverview() {
             console.error('Error fetching analytics:', err);
         }
     };
-
-
-
-
 
     if (loading) {
         return (
@@ -122,7 +115,7 @@ function RevenueOverview() {
     if (error) {
         return (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-                <p className="font-semibold">Error loading data</p>
+                <p className="font-semibold">{t('revenueOverview:error.title')}</p>
                 <p className="text-sm">{error}</p>
                 <button
                     onClick={() => {
@@ -131,7 +124,7 @@ function RevenueOverview() {
                     }}
                     className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
                 >
-                    Retry
+                    {t('revenueOverview:error.retry')}
                 </button>
             </div>
         );
@@ -139,34 +132,32 @@ function RevenueOverview() {
 
     return (
         <div className="space-y-6 bg-white rounded-lg p-4 lg:p-8">
-            {/* Hidden receipt for PDF generation */}
-
             {/* Stats Cards Section */}
             <div className="mb-8">
                 <div className="grid grid-cols-3 gap-4">
                     {/* Total Income */}
                     <StatCard
-                        title="Total Income"
+                        title={t('revenueOverview:stats.totalIncome')}
                         value={analytics.total_income}
-                        percentChange={analytics.total_income > 0 ? 12.5 : 0} // Example percentage
+                        percentChange={analytics.total_income > 0 ? 12.5 : 0}
                         icon={FaArrowUp}
                         iconColor="text-green-600"
                     />
 
                     {/* Total Expense */}
                     <StatCard
-                        title="Total Expense"
+                        title={t('revenueOverview:stats.totalExpense')}
                         value={analytics.total_expense}
-                        percentChange={analytics.total_expense > 0 ? -8.2 : 0} // Example percentage
+                        percentChange={analytics.total_expense > 0 ? -8.2 : 0}
                         icon={FaArrowDown}
                         iconColor="text-red-600"
                     />
 
                     {/* Net Balance */}
                     <StatCard
-                        title="Net Balance"
+                        title={t('revenueOverview:stats.netBalance')}
                         value={analytics.total}
-                        percentChange={analytics.total > 0 ? 5.7 : -5.7} // Example percentage
+                        percentChange={analytics.total > 0 ? 5.7 : -5.7}
                         icon={FaBalanceScale}
                         iconColor={analytics.total >= 0 ? "text-green-600" : "text-red-600"}
                     />
@@ -181,7 +172,7 @@ function RevenueOverview() {
                     lineKeys={['clicks']}
                     colors={['#2ACEF2']}
                     height={180}
-                    title="Monthly Revenue"
+                    title={t('revenueOverview:charts.monthlyRevenue')}
                     showGrid={true}
                     showLegend={false}
                     showGradientFill={true}
@@ -195,7 +186,7 @@ function RevenueOverview() {
                     lineKeys={['clicks']}
                     colors={['#84FAA4']}
                     height={180}
-                    title="Monthly Transfers"
+                    title={t('revenueOverview:charts.monthlyTransfers')}
                     showGrid={true}
                     showLegend={false}
                     showGradientFill={true}
@@ -205,7 +196,7 @@ function RevenueOverview() {
             </div>
 
             {/* Transactions Table Section */}
-          <Transactions/>
+            <Transactions />
         </div>
     );
 }

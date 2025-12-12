@@ -38,7 +38,38 @@ import enTournamentPage from '../locales/en/Tournaments/tournamentPage.json';
 import arTournamentPage from '../locales/ar/Tournaments/tournamentPage.json';
 import entournamentDetails from '../locales/en/Tournaments/tournamentDetails.json';
 import artournamentDetails from '../locales/ar/Tournaments/tournamentDetails.json';
-
+import enBookingsPage from '../locales/en/Bookings/bookings.json';
+import arBookingsPage from '../locales/ar/Bookings/bookings.json';
+import enBookingDetails from '../locales/en/Bookings/bookingDetails.json';
+import arBookingDetails from '../locales/ar/Bookings/bookingDetails.json';
+import enNotifications from '../locales/en/Notifications/notifications.json';
+import arNotifications from '../locales/ar/Notifications/notifications.json';
+import enBannersPage from '../locales/en/Banners/bannersPage.json';
+import arBannersPage from '../locales/ar/Banners/bannersPage.json';
+import enTicketsPage from '../locales/en/Tickets/ticketsPage.json';
+import arTicketsPage from '../locales/ar/Tickets/ticketsPage.json';
+import enCreateTicket from '../locales/en/Tickets/createTicket.json';
+import arCreateTicket from '../locales/ar/Tickets/createTicket.json';
+import enCalendar from '../locales/en/Calendar/calendar.json';
+import arCalendar from '../locales/ar/Calendar/calendar.json';
+import enRevenueOverview from '../locales/en/Revenue/revenueOverview.json';
+import arRevenueOverview from '../locales/ar/Revenue/revenueOverview.json';
+import enTransactions from '../locales/en/Transactions/transactions.json';
+import arTransactions from '../locales/ar/Transactions/transactions.json';
+import enReports from '../locales/en/Reports/reports.json';
+import arReports from '../locales/ar/Reports/reports.json';
+import enTeamActivity from '../locales/en/Charts/teamActivity.json';
+import arTeamActivity from '../locales/ar/Charts/teamActivity.json';
+import enPopularVenues from '../locales/en/Charts/popularVenues.json';
+import arPopularVenues from '../locales/ar/Charts/popularVenues.json';
+import enVouchers from '../locales/en/Vouchers/vouchers.json';
+import arVouchers from '../locales/ar/Vouchers/vouchers.json';
+import enCreateEditVoucher from '../locales/en/Vouchers/createEditVoucher.json';
+import arCreateEditVoucher from '../locales/ar/Vouchers/createEditVoucher.json';
+import enPieChart from '../locales/en/Charts/pieChart.json';
+import arPieChart from '../locales/ar/Charts/pieChart.json';
+import enPlayers from '../locales/en/Players/players.json';
+import arPlayers from '../locales/ar/Players/players.json';
 // Translation resources
 const resources = {
     en: {
@@ -59,7 +90,22 @@ const resources = {
         tournamentForm: enTournamentForm,
         tournamentPage: enTournamentPage,
         tournamentDetails: entournamentDetails,
-
+        booking: enBookingsPage,
+        bookingDetails: enBookingDetails,
+        notifications: enNotifications, // Add this
+        bannersPage: enBannersPage, // Add this
+        ticketsPage: enTicketsPage,
+        createTicket: enCreateTicket,
+        calendar: enCalendar,
+        revenueOverview: enRevenueOverview,
+        transactions: enTransactions,
+        reports: enReports,
+        teamActivity: enTeamActivity,
+        popularVenues: enPopularVenues,
+        vouchers: enVouchers,
+        createEditVoucher: enCreateEditVoucher,
+        pieChart: enPieChart,
+        players: enPlayers,
 
     },
     ar: {
@@ -80,7 +126,22 @@ const resources = {
         tournamentForm: arTournamentForm,
         tournamentPage: arTournamentPage,
         tournamentDetails: artournamentDetails,
-
+        booking: arBookingsPage,
+        bookingDetails: arBookingDetails,
+        notifications: arNotifications, // Add this
+        bannersPage: arBannersPage, // Add this
+        ticketsPage: arTicketsPage,
+        createTicket: arCreateTicket,
+        calendar: arCalendar,
+        revenueOverview: arRevenueOverview,
+        transactions: arTransactions,
+        reports: arReports,
+        teamActivity: arTeamActivity,
+        popularVenues: arPopularVenues,
+        vouchers: arVouchers,
+        createEditVoucher: arCreateEditVoucher,
+        pieChart: arPieChart,
+        players: arPlayers,
 
 
     },
@@ -118,8 +179,26 @@ i18n
             'amenitiesPage',
             'tournamentForm',
             'tournamentPage',
-            'tournamentDetails'
-        ],        debug: process.env.NODE_ENV === 'development',
+            'tournamentDetails',
+            ' booking',
+            'bookingDetails',
+            'notifications',
+            'bannersPage',
+            'ticketsPage',
+            'createTicket',
+            'calendar',
+            'revenueOverview',
+            'transactions',
+            'reports',
+            'teamActivity',
+            'popularVenues',
+            'vouchers',
+            'createEditVoucher',
+            'pieChart',
+            'players',
+
+        ],
+        debug: process.env.NODE_ENV === 'development',
         interpolation: {
             escapeValue: false,
         },

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, Cell
 } from 'recharts';
 import analyticsService from '../../services/analyticsService.js';
-import { ChevronDown, Calendar } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 const RevenueOverviewChart = ({
-                                  title = "Revenue Overview",
+                                  title = "revenueOverview:charts.monthlyRevenue",
                                   height = 300,
                                   className = ""
                               }) => {
@@ -18,6 +19,8 @@ const RevenueOverviewChart = ({
         revenue_overview: {}
     });
     const [isLoading, setIsLoading] = useState(true);
+
+    const { t } = useTranslation(['revenueOverview', 'common']);
 
     // Fetch analytics data
     const fetchAnalytics = async () => {
@@ -59,12 +62,11 @@ const RevenueOverviewChart = ({
     };
 
     const chartData = transformData();
-    console.log('Transformed Revenue Chart Data:', chartData);
 
     // Calculate total revenue from the data
     const totalRevenue = chartData.reduce((sum, item) => sum + (item.revenue || 0), 0);
 
-    // Calculate trend (you can modify this based on your actual trend data)
+    // Calculate trend
     const calculateTrend = () => {
         const values = chartData.map(item => item.revenue);
         if (values.length < 2) return { value: 0, isPositive: true };
@@ -142,7 +144,7 @@ const RevenueOverviewChart = ({
 
     // Function to get bar color based on value
     const getBarColor = (value) => {
-        if (value <= 0) return '#e2e8f0'; // Gray for zero/null values
+        if (value <= 0) return '#e2e8f0';
         if (value < maxRevenue * 0.33) return '#b3e6e6';
         if (value < maxRevenue * 0.66) return '#2ACEF2';
         return '#00bfbf';
@@ -151,17 +153,17 @@ const RevenueOverviewChart = ({
     // Determine bar width based on number of data points
     const getBarSize = () => {
         if (chartData.length <= 7) return 25;
-        return 15; // Smaller bars for monthly view (12 months)
+        return 15;
     };
-
-
 
     return (
         <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
             {/* Header with title and stats */}
             <div className="flex items-start justify-between mb-4">
                 <div>
-                    <h2 className="xl:text-xl font-bold text-gray-800 mb-2">{title}</h2>
+                    <h2 className="xl:text-xl font-bold text-gray-800 mb-2">
+                        {typeof title === 'string' && title.includes(':') ? t(title) : title}
+                    </h2>
                     <div className="flex items-center">
                         <span className="xl:text-xl font-bold text-gray-900">
                             ${totalRevenue.toLocaleString('en-US', {
@@ -176,11 +178,10 @@ const RevenueOverviewChart = ({
                         </div>
                     </div>
                     <p className="text-gray-500 text-sm mt-1">
-                        Net: ${analytics.total?.toFixed(2) || '0.00'}
-                        (Inc: ${analytics.total_income?.toFixed(2) || '0.00'} | Exp: ${analytics.total_expense?.toFixed(2) || '0.00'})
+                        {t('revenueOverview:netBalance')}: ${analytics.total?.toFixed(2) || '0.00'}
+                        ({t('revenueOverview:income')}: ${analytics.total_income?.toFixed(2) || '0.00'} | {t('revenueOverview:expense')}: ${analytics.total_expense?.toFixed(2) || '0.00'})
                     </p>
                 </div>
-
             </div>
 
             {/* Chart */}
@@ -245,7 +246,7 @@ const RevenueOverviewChart = ({
                     <div className="flex items-center justify-center h-full">
                         <div className="text-center">
                             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                            <p className="text-gray-500">No revenue data available</p>
+                            <p className="text-gray-500">{t('revenueOverview:noData')}</p>
                         </div>
                     </div>
                 )}
@@ -257,15 +258,15 @@ const RevenueOverviewChart = ({
                     <div className="flex items-center space-x-4">
                         <div className="flex items-center">
                             <div className="w-3 h-3 rounded-sm bg-[#b3e6e6] mr-2"></div>
-                            <span className="text-xs text-gray-600">Low revenue</span>
+                            <span className="text-xs text-gray-600">{t('revenueOverview:legend.lowRevenue')}</span>
                         </div>
                         <div className="flex items-center">
                             <div className="w-3 h-3 rounded-sm bg-[#2ACEF2] mr-2"></div>
-                            <span className="text-xs text-gray-600">Medium revenue</span>
+                            <span className="text-xs text-gray-600">{t('revenueOverview:legend.mediumRevenue')}</span>
                         </div>
                         <div className="flex items-center">
                             <div className="w-3 h-3 rounded-sm bg-[#00bfbf] mr-2"></div>
-                            <span className="text-xs text-gray-600">High revenue</span>
+                            <span className="text-xs text-gray-600">{t('revenueOverview:legend.highRevenue')}</span>
                         </div>
                     </div>
                 </div>

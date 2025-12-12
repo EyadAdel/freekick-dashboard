@@ -1,14 +1,15 @@
-// components/Charts/TeamLeaderboardActivity.jsx
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import analyticsService from '../../services/analyticsService';
-import {useNavigate} from "react-router-dom";
-import { getImageUrl } from "../../utils/imageUtils.js"; // Import the utility function
+import { useNavigate } from "react-router-dom";
+import { getImageUrl } from "../../utils/imageUtils.js";
 
 function TeamLeaderboardActivity() {
     const [teams, setTeams] = useState([]);
     const [loading, setLoading] = useState(true);
     const [totalPoints, setTotalPoints] = useState(0);
-    const navigate= useNavigate()
+    const navigate = useNavigate();
+    const { t } = useTranslation(['teamActivity', 'common']);
 
     useEffect(() => {
         fetchTeamData();
@@ -44,7 +45,7 @@ function TeamLeaderboardActivity() {
                     id: 1,
                     name: 'Team 1',
                     num_of_points: 90,
-                    logo: '/team-logos/team1.png' // Added logo for fallback
+                    logo: '/team-logos/team1.png'
                 },
                 {
                     id: 2,
@@ -94,7 +95,7 @@ function TeamLeaderboardActivity() {
 
     // Function to get team initials from team name
     const getTeamInitials = (teamName) => {
-        if (!teamName) return 'TM';
+        if (!teamName) return t('teamActivity:fallbackInitials');
         return teamName
             .split(' ')
             .map(word => word[0])
@@ -124,8 +125,9 @@ function TeamLeaderboardActivity() {
         return (
             <div className="p-6 bg-white rounded-lg shadow">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">Team Activity</h3>
-                    {/*<div className="text-sm text-gray-500">Mar 2025</div>*/}
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        {t('teamActivity:title')}
+                    </h3>
                 </div>
 
                 <div className="space-y-4">
@@ -150,10 +152,13 @@ function TeamLeaderboardActivity() {
         <div className="p-6 bg-white rounded-lg shadow">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Team Activity</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                    {t('teamActivity:title')}
+                </h3>
                 <div className="text-right">
-                    {/*<div className="text-sm text-gray-500">Mar 2025</div>*/}
-                    <div className="text-xs text-gray-400">{totalPoints} Total Points</div>
+                    <div className="text-xs text-gray-400">
+                        {totalPoints} {t('teamActivity:totalPoints')}
+                    </div>
                 </div>
             </div>
 
@@ -167,7 +172,7 @@ function TeamLeaderboardActivity() {
                         <div key={team.id || index} className="space-y-2">
                             {/* Team Header */}
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
+                                <div className="flex gap-2 items-center space-x-3">
                                     {/* Team Logo */}
                                     <div className="relative">
                                         {logoUrl ? (
@@ -210,7 +215,9 @@ function TeamLeaderboardActivity() {
                                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                                                 </svg>
-                                                <span>Leader: {team.team_leader?.name || 'No Leader'}</span>
+                                                <span>
+                                                    {t('teamActivity:leader')}: {team.team_leader?.name || t('teamActivity:noLeader')}
+                                                </span>
                                             </span>
                                         </div>
                                     </div>
@@ -219,10 +226,10 @@ function TeamLeaderboardActivity() {
                                 {/* Points and Percentage */}
                                 <div className="text-right">
                                     <div className="font-semibold text-gray-900 text-sm">
-                                        {team.num_of_points || 0} Points
+                                        {team.num_of_points || 0} {t('teamActivity:points')}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        {team.percentage}% of total
+                                        {team.percentage} {t('teamActivity:percentageOfTotal')}
                                     </div>
                                 </div>
                             </div>
@@ -242,13 +249,17 @@ function TeamLeaderboardActivity() {
                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                                         </svg>
-                                        <span>{team.number_of_members || 0} members</span>
+                                        <span>
+                                            {team.number_of_members || 0} {t('teamActivity:members')}
+                                        </span>
                                     </div>
                                     <div className="flex items-center space-x-1">
                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                                         </svg>
-                                        <span>{team.number_of_booking || 0} bookings</span>
+                                        <span>
+                                            {team.number_of_booking || 0} {t('teamActivity:bookings')}
+                                        </span>
                                     </div>
                                 </div>
 
@@ -263,11 +274,6 @@ function TeamLeaderboardActivity() {
                     );
                 })}
             </div>
-
-            {/* Optional: Summary Section (commented out in your code) */}
-            {/* <div className="mt-6 pt-6 border-t border-gray-200">
-                ... (rest of your commented code)
-            </div> */}
         </div>
     );
 }

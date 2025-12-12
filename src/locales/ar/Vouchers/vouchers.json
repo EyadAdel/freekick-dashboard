@@ -1,0 +1,61 @@
+{
+  "title": "القسائم ",
+  "loading": "جاري التحميل...",
+  "noData": "لم يتم العثور على قسائم",
+  "searchPlaceholder": "ابحث في القسائم بواسطة الرمز، الاسم...",
+  "addButton": "+ إضافة قسيمة",
+  "charts": {
+    "usageOverTime": "استخدام القسائم عبر الوقت",
+    "usageByVoucher": "الاستخدام حسب القسيمة",
+    "yAxisLabel": "عدد مرات الاستخدام",
+    "centerMetricLabel": "قسائم"
+  },
+  "stats": {
+    "totalVouchers": "إجمالي القسائم",
+    "activeVouchers": "الق سائم النشطة",
+    "inactiveVouchers": "الق سائم غير النشطة",
+    "totalUsage": "إجمالي الاستخدام"
+  },
+  "table": {
+    "columns": {
+      "id": "المعرف",
+      "code": "الرمز",
+      "name": "الاسم",
+      "type": "النوع",
+      "discount": "الخصم",
+      "maxDiscount": "الحد الأقصى للخصم",
+      "usage": "الاستخدام",
+      "validFrom": "صالحة من",
+      "validTo": "صالحة حتى",
+      "lastUsed": "آخر استخدام",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "types": {
+      "percentage": "نسبة مئوية",
+      "fixed": "مبلغ ثابت"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "noLimit": "لا يوجد حد",
+    "immediate": "فوري",
+    "noExpiry": "بدون انتهاء",
+    "never": "أبداً"
+  },
+  "actions": {
+    "edit": "تعديل",
+    "delete": "حذف",
+    "deleteConfirm": {
+      "title": "حذف القسيمة؟",
+      "text": "هل أنت متأكد من رغبتك في حذف \"{voucherName}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+      "confirm": "نعم، احذف",
+      "cancel": "إلغاء"
+    }
+  },
+  "messages": {
+    "deleteSuccess": "تم حذف القسيمة بنجاح",
+    "loadAnalyticsError": "فشل تحميل بيانات التحليلات"
+  }
+}

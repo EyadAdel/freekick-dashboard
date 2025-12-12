@@ -1,0 +1,29 @@
+{
+  "title": "Popular Venues",
+  "yearSelector": "Year {year}",
+  "allCities": "All Cities",
+  "loading": "Loading venues data...",
+  "noData": "No venue data available",
+  "noDataForYear": "No data for {year}",
+  "noVenuesInCity": "No venues found in {city} for {year}",
+  "totalBookings": "Total Bookings",
+  "bookings": "bookings",
+  "city": "City",
+  "venueType": {
+    "indoor": "🏠 Indoor",
+    "outdoor": "🌳 Outdoor"
+  },
+  "sports": "Sports",
+  "stats": {
+    "totalVenues": "Total Venues",
+    "totalBookings": "Total Bookings"
+  },
+  "legend": {
+    "percentage": "%",
+    "ofTotalBookings": "of total bookings"
+  },
+  "venueTypes": {
+    "indoor": "Indoor",
+    "outdoor": "Outdoor"
+  }
+}

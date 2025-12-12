@@ -1,0 +1,201 @@
+{
+  "playersPage": {
+    "title": "Players",
+    "playersListTitle": "Players List",
+    "player": "Player",
+    "phone": "Phone",
+    "email": "Email",
+    "walletBalance": "Wallet Balance",
+    "bookings": "Bookings",
+    "tournaments": "Tournaments",
+    "points": "points",
+    "status": "STATUS",
+    "active": "Active",
+    "inactive": "Inactive",
+    "viewDetails": "View player details",
+    "searchPlaceholder": "Search player name, phone, email...",
+    "loading": "Loading...",
+    "error": {
+      "loading": "Error loading players",
+      "tryAgain": "Try again"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showing": "Showing {from} to {to} of {total} results"
+    },
+    "playerId": "ID: PL{id}",
+    "noEmail": "N/A",
+    "noPhone": "N/A",
+    "noDate": "N/A",
+    "backToList": "Back to list",
+    "sort": {
+      "asc": "Ascending",
+      "desc": "Descending"
+    }
+  },
+  "playerPoints": {
+    "title": "Points",
+    "createPointButton": "Create New Point",
+    "noPoints": "No Points found",
+    "createPoint": "Create New Point",
+    "reason": "Reason",
+    "points": "Points",
+    "type": "Type",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "addition": "Addition",
+    "subtraction": "Subtraction",
+    "required": "*",
+    "searchPlaceholder": "Search by reason...",
+    "filters": {
+      "minPoints": "Min Points",
+      "maxPoints": "Max Points"
+    },
+    "modal": {
+      "title": "Create New Point",
+      "cancel": "Cancel",
+      "create": "Create Point",
+      "validation": {
+        "missingInfo": "Please fill in all required fields",
+        "missingPlayerId": "Player ID is missing"
+      },
+      "success": "Points created successfully",
+      "error": "Failed to create points",
+      "fields": {
+        "reason": {
+          "label": "Reason",
+          "placeholder": "Enter reason"
+        },
+        "points": {
+          "label": "Points",
+          "placeholder": "Enter points"
+        },
+        "type": {
+          "label": "Type",
+          "options": {
+            "addition": "Addition",
+            "subtraction": "Subtraction"
+          }
+        },
+        "isActive": "Active"
+      }
+    },
+    "loading": "Loading points...",
+    "emptyState": {
+      "title": "No Points found",
+      "description": "This player hasn't earned any points yet"
+    }
+  },
+  "format": {
+    "date": "MMM dd, yyyy",
+    "phone": "+1 XXX XXX XXXX",
+    "currency": "$0,0.00",
+    "wallet": "${amount}",
+    "id": "PL{id}"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "badge": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "icons": {
+    "user": "User icon",
+    "wallet": "Wallet icon",
+    "calendar": "Calendar icon",
+    "trophy": "Trophy icon",
+    "phone": "Phone icon",
+    "mail": "Mail icon",
+    "arrowLeft": "Arrow left",
+    "plus": "Plus icon"
+  },
+  "table": {
+    "actions": "Actions",
+    "sort": "Sort",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "rowsPerPage": "Rows per page"
+  },
+  "buttons": {
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back"
+  },
+  "playersDetail": {
+    "title": "Player Details",
+    "loading": "Loading player details...",
+    "loadingBookings": "Loading bookings...",
+    "sections": {
+      "bookings": "Bookings",
+      "tournaments": "Tournaments"
+    },
+    "buttons": {
+      "backToPlayers": "Back to Players",
+      "refresh": "Refresh bookings",
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "bookingStatus": {
+      "all": "All Status",
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    },
+    "confirm": {
+      "title": "Are you sure?",
+      "suspend": "Do you want to suspend this player?",
+      "activate": "Do you want to activate this player?"
+    },
+    "status": {
+      "suspended": "Player suspended successfully",
+      "activated": "Player activated successfully",
+      "updateError": "Failed to update player status"
+    },
+    "noBookings": "No bookings found for {date}",
+    "noBookingsHint": "Try selecting a different date or status",
+    "noTournaments": "No tournaments found",
+    "noTournamentsHint": "This player hasn't participated in any tournaments yet",
+    "searchTournaments": "Search tournaments...",
+    "tournaments": {
+      "total": "Total: {count} tournaments"
+    },
+    "filters": {
+      "status": {
+        "label": "Status",
+        "options": {
+          "upcoming": "Upcoming",
+          "ongoing": "Ongoing",
+          "completed": "Completed",
+          "cancelled": "Cancelled",
+          "won": "Won",
+          "qualify": "Qualified",
+          "lost": "Lost"
+        }
+      },
+      "format": {
+        "label": "Format",
+        "options": {
+          "roundRobin": "Round Robin",
+          "knockout": "Knockout",
+          "doubleElimination": "Double Elimination",
+          "singleElimination": "Single Elimination"
+        }
+      }
+    },
+    "defaultPlayer": {
+      "name": "Ali Raheem"
+    }
+  }
+}

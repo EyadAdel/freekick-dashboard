@@ -1,0 +1,8 @@
+{
+  "title": "Reports",
+  "charts": {
+    "revenueOverview": "Revenue Overview",
+    "bookingPerVenues": "Booking Per Venues",
+    "teamActivity": "Team Activity"
+  }
+}

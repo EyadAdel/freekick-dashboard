@@ -1,0 +1,23 @@
+{
+  "title": "الرسم البياني الدائري",
+  "tooltip": {
+    "value": "القيمة",
+    "percentage": "النسبة"
+  },
+  "legend": {
+    "noData": "لا توجد بيانات",
+    "label": "مفتاح الرسم"
+  },
+  "centerMetric": {
+    "defaultLabel": "الإجمالي",
+    "clicks": "النقرات",
+    "value": "القيمة"
+  },
+  "defaultLabels": {
+    "name": "الاسم",
+    "value": "القيمة"
+  },
+  "messages": {
+    "noData": "لا توجد بيانات للعرض"
+  }
+}

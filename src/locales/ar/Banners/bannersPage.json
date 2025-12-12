@@ -1,0 +1,127 @@
+{
+  "pageTitle": "اللافتات",
+  "view": {
+    "slider": {
+      "uploadedBanners": "اللافتات المرفوعة",
+      "seeAll": "عرض الكل",
+      "uploadNew": "رفع لافتة جديدة"
+    },
+    "list": {
+      "backToBanners": "العودة إلى اللافتات"
+    }
+  },
+  "table": {
+    "searchPlaceholder": "البحث في اللافتات...",
+    "columns": {
+      "id": "الرمز",
+      "image": "الصورة",
+      "type": "النوع",
+      "value": "القيمة",
+      "status": "الحالة",
+      "quickActions": "إجراءات سريعة"
+    },
+    "types": {
+      "venue": "الملاعب",
+      "text": "نص",
+      "link": "رابط",
+      "tournaments": "البطولات"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "filters": {
+      "type": {
+        "label": "النوع",
+        "options": {
+          "venue": "الملاعب",
+          "text": "نص",
+          "link": "رابط",
+          "tournaments": "البطولات"
+        }
+      }
+    }
+  },
+  "actions": {
+    "createBanner": "+ إنشاء لافتة",
+    "edit": "تعديل اللافتة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف"
+  },
+  "form": {
+    "createTitle": "إنشاء لافتة جديدة",
+    "editTitle": "تعديل اللافتة",
+    "image": {
+      "label": "صورة اللافتة *",
+      "upload": {
+        "choose": "اختر صورة",
+        "change": "تغيير الصورة",
+        "dragDrop": "اسحب وأفلت صورة أو انقر للاختيار",
+        "supported": "PNG, JPG, GIF حتى 5 ميجابايت",
+        "uploading": "جاري الرفع...",
+        "ready": "الصورة جاهزة",
+        "newImage": "صورة جديدة",
+        "existingImage": "صورة موجودة",
+        "uploadStatus": "سيتم رفع الصورة تلقائياً عند الاختيار. الصيغ المدعومة: JPG, PNG, GIF. الحد الأقصى: 5 ميجابايت"
+      },
+      "errors": {
+        "required": "الرجاء رفع صورة",
+        "invalidType": "الرجاء رفع صور بصيغة JPG أو PNG أو GIF فقط",
+        "sizeLimit": "يجب أن يكون حجم الصورة أقل من 5 ميجابايت"
+      }
+    },
+    "type": {
+      "label": "نوع اللافتة",
+      "placeholder": "اختر النوع",
+      "required": "الرجاء اختيار نوع اللافتة",
+      "options": {
+        "venue": "الملاعب",
+        "text": "نص",
+        "link": "رابط",
+        "tournaments": "البطولات"
+      }
+    },
+    "value": {
+      "label": "قيمة اللافتة",
+      "placeholder": "أدخل القيمة (رابط، رمز، أو نص)",
+      "required": "الرجاء إدخال قيمة اللافتة"
+    },
+    "isActive": {
+      "label": "نشط",
+      "helperText": "تفعيل أو تعطيل هذه اللافتة"
+    },
+    "buttons": {
+      "cancel": "إلغاء",
+      "create": "إنشاء لافتة",
+      "update": "تحديث اللافتة",
+      "saving": "جاري الحفظ...",
+      "uploading": "جاري الرفع..."
+    }
+  },
+  "confirm": {
+    "delete": {
+      "title": "حذف اللافتة",
+      "text": "هل أنت متأكد من رغبتك في حذف هذه اللافتة؟ لا يمكن التراجع عن هذا الإجراء.",
+      "confirmButton": "نعم، احذفها",
+      "cancelButton": "لا، احتفظ بها"
+    }
+  },
+  "messages": {
+    "success": {
+      "created": "تم إنشاء اللافتة بنجاح",
+      "updated": "تم تحديث اللافتة بنجاح",
+      "deleted": "تم حذف اللافتة بنجاح"
+    },
+    "error": {
+      "createFailed": "فشل في إنشاء اللافتة",
+      "updateFailed": "فشل في تحديث اللافتة",
+      "deleteFailed": "فشل في حذف اللافتة",
+      "uploadFailed": "فشل في رفع الصورة. الرجاء المحاولة مرة أخرى."
+    }
+  }
+}

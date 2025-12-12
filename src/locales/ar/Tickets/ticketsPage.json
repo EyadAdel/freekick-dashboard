@@ -1,0 +1,45 @@
+{
+  "pageTitle": "التذاكر",
+  "table": {
+    "searchPlaceholder": "البحث في التذاكر بالاسم، المدينة، أو المكان...",
+    "columns": {
+      "id": "الرمز",
+      "name": "الاسم",
+      "date": "التاريخ",
+      "city": "المدينة",
+      "place": "المكان",
+      "price": "السعر",
+      "clicks": "النقرات",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    }
+  },
+  "actions": {
+    "addTicket": "+ إضافة تذكرة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "view": "عرض"
+  },
+  "confirm": {
+    "delete": {
+      "title": "حذف التذكرة؟",
+      "text": "هل أنت متأكد من رغبتك في حذف \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+      "confirmButton": "نعم، احذف",
+      "cancelButton": "إلغاء"
+    }
+  },
+  "messages": {
+    "success": {
+      "created": "تم إنشاء التذكرة بنجاح",
+      "updated": "تم تحديث التذكرة بنجاح",
+      "deleted": "تم حذف التذكرة بنجاح"
+    },
+    "error": {
+      "deleteFailed": "فشل في حذف التذكرة"
+    }
+  }
+}

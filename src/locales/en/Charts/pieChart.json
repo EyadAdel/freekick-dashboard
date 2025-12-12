@@ -1,0 +1,23 @@
+{
+  "title": "Pie Chart",
+  "tooltip": {
+    "value": "Value",
+    "percentage": "Percentage"
+  },
+  "legend": {
+    "noData": "No data available",
+    "label": "Legend"
+  },
+  "centerMetric": {
+    "defaultLabel": "Total",
+    "clicks": "Clicks",
+    "value": "Value"
+  },
+  "defaultLabels": {
+    "name": "Name",
+    "value": "Value"
+  },
+  "messages": {
+    "noData": "No data to display"
+  }
+}
