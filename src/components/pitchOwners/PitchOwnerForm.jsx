@@ -72,8 +72,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
 
             setFormData({
                 // Map 'user' ID (int) from API to 'user_id'
-                user_id: data.user || data.user_info?.id || '',
-
+                user_id: data.user_id || data.user || data.user_info?.id || '',
                 // UPDATED: Set user_info input to the name from the user_info object
                 user_info: data.user_info?.name || '',
 
@@ -185,7 +184,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (!formData.name) newErrors.name = "Pitch Name is required";
         if (!formData.email) newErrors.email = "Email is required";
         if (!formData.contact_phone) newErrors.contact_phone = "Contact Phone is required";
-
+        if (!formData.commission_rate) newErrors.commission_rate = "Commission Rate is required";
         if (isImageUploading) {
             toast.warning("Please wait for image to finish uploading.");
             return;
@@ -401,9 +400,12 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                             type="number"
                             value={formData.commission_rate}
                             onChange={handleChange}
+                            error={errors.commission_rate}
                             icon={Percent}
                             placeholder="e.g. 10"
+                            required
                         />
+
                     </div>
                     {/* Status */}
                     <div className="bg-primary-50 p-6 rounded-lg space-y-4 border border-primary-100">

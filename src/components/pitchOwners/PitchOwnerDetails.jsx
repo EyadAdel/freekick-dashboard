@@ -1,34 +1,27 @@
-import React, {useState, useMemo, useEffect} from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import ArrowIcon from "../../components/common/ArrowIcon.jsx";
+import { useSelector } from 'react-redux';
+import {
+    MapPin, CheckCircle2, XCircle,
+    Users, Calendar,
+    LayoutGrid, User,
+    Mail, Phone, Clock, Globe,
+    TrendingUp, TrendingDown,
+    Wallet, Plus, FileText,
+    ArrowLeft, Percent
+} from 'lucide-react';
 
+// --- Services ---
 import { pitchOwnersService } from '../../services/pitchOwners/pitchOwnersService.js';
+
+// --- Components ---
 import MainTable from "../../components/MainTable.jsx";
 import AddActionModal from "../../components/pitchOwners/AddActionModal.jsx";
-import {  useSelector } from 'react-redux';
+
+// --- Hooks ---
 import { useContact } from "../../hooks/useContact.js";
-import {
-    Calendar,
-    Mail,
-    MapPin,
-    Phone,
-    Shield,
-    Clock,
-    CheckCircle,
-    XCircle,
-    Activity,
-    Globe,
-    DollarSign,
-    LayoutGrid,
-    User,
-    Plus,
-    FileText,
-    TrendingUp,
-    TrendingDown,
-    ListFilter,
-    Percent,
-    Wallet // <--- Imported Wallet Icon
-} from "lucide-react";
+import ArrowIcon from "../common/ArrowIcon.jsx";
+import {t} from "i18next";
 
 // ============================================================================
 // HELPERS
@@ -65,13 +58,225 @@ const getStatusBadge = (status) => {
 };
 
 // ============================================================================
-// PITCH OWNER DETAIL VIEW
+// SUB-COMPONENTS
+// ============================================================================
+
+
+// --- Header Component ---
+const Header = ({ onBack }) => (
+    <div className="bg-white shadow-sm   top-0">
+        <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors group"
+            >
+                <div className="p-1 rounded-full group-hover:bg-primary-50 transition-colors">
+                    <ArrowIcon className="w-6 h-6 sm:w-8 sm:h-8 transform rotate-90 rtl:-rotate-90" />
+                </div>
+                <span className="font-medium text-sm sm:text-base">Back to Pitch Owners</span>
+            </button>
+
+        </div>
+    </div>
+);
+
+// --- OwnerProfileCard Component ---
+const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookingsCount, onEmail, onWhatsapp, isAdmin }) => {
+    // FIX: Changed from via.placeholder.com to placehold.co
+    const placeholderImg = 'https://placehold.co/400x300?text=No+Image';
+    const mainImage = ownerData.profile_image || placeholderImg;
+
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group h-full flex flex-col">
+            {/* Image & Overlay */}
+            <div className="relative h-56 sm:h-64 lg:h-72 w-full shrink-0">
+                <img
+                    src={mainImage}
+                    alt="Owner Profile"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = placeholderImg;
+                    }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+
+                {/* Status Badge */}
+                <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 z-10">
+                    <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm ${
+                        ownerData.is_active
+                            ? 'bg-green-500/90 text-white'
+                            : 'bg-red-500/90 text-white'
+                    }`}>
+                        {ownerData.is_active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                        {ownerData.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                </div>
+
+                {/* City Badge */}
+                <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4 z-10">
+                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm bg-blue-500/90 text-white">
+                        <Globe size={12} />
+                        {ownerData.city || 'UAE'}
+                    </span>
+                </div>
+
+                {/* Title & Contact Name */}
+                <div className="absolute bottom-4 left-4 right-4 text-white rtl:text-right">
+                    <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-1 drop-shadow-md line-clamp-2">
+                        {ownerData.pitch_name}
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm opacity-90 rtl:justify-end">
+                        <div className="flex items-center gap-1">
+                            <Users size={14} />
+                            <span className="font-semibold">{ownerData.contact_name || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 border-b border-gray-100 divide-x divide-gray-100 rtl:divide-x-reverse">
+                <div className="p-3 sm:p-4 flex flex-col items-center justify-center text-center">
+                    <span className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">Bookings</span>
+                    <span className="text-base sm:text-lg font-bold text-gray-900">{totalBookingsCount}</span>
+                </div>
+                <div className="p-3 sm:p-4 flex flex-col items-center justify-center text-center">
+                    <span className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">Pitches</span>
+                    <span className="text-base sm:text-lg font-bold text-gray-900">{totalPitches}</span>
+                </div>
+            </div>
+
+            {/* Financial Highlight (Revenue & Commission) */}
+            <div className="px-4 p-3 sm:px-6 bg-gray-50/50 border-b border-gray-100">
+                <div className="flex flex-col gap-4">
+                    {/* Est Revenue */}
+                    <div className="text-center">
+                        <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">Est. Revenue</p>
+                        <div className="text-2xl sm:text-3xl font-extrabold text-primary-600 flex items-center justify-center gap-1">
+                            {formatAmount(totalRevenue)}
+                        </div>
+                    </div>
+
+                    {/* Commission Rate (Admin Only) */}
+                    {isAdmin && (
+                        <div className="flex items-center justify-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm mx-auto w-fit">
+                            <Percent className="w-4 h-4 text-gray-400" />
+                            <span className="text-xs text-gray-500 font-semibold uppercase">Commission:</span>
+                            <span className="text-sm font-bold text-gray-900">{ownerData.commission_rate ?? 0}%</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {/* --- Info Row / Actions --- */}
+            <div className="px-4 pt-4 pb-2 sm:px-6   bg-white flex-grow">
+                {/* Contact Info */}
+
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contact Person</h4>
+                <div className="flex items-center gap-3   p-2 rounded-lg">
+                    <div
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 ">
+                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"/>
+                    </div>
+
+                    <div className="flex-1 min-w-0"><p
+                        className="text-sm font-semibold text-gray-900 truncate">{ownerData.contact_name || 'N/A'}</p>
+                        <p className="text-xs text-gray-500 truncate">{ownerData.email}</p></div>
+                </div>
+
+
+
+                {/* Email Action */}
+                <div className="flex items-center gap-3  p-2 rounded-lg ">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0 ">
+                        <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500">Email Address</p>
+                        <p className="text-sm font-medium truncate text-primary-600">
+                            {ownerData.email || 'No email provided'}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Phone Action */}
+                <div className="flex items-center gap-3  p-2 rounded-lg ">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0 ">
+                        <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500">WhatsApp / Phone</p>
+                        <p className="text-sm font-medium truncate text-gray-900">
+                            {ownerData.contact_phone || 'No phone provided'}
+                        </p>
+                    </div>
+                </div>
+
+
+            </div>
+
+            {/* --- Buttons & Details --- */}
+            <div className="px-4 sm:px-6 sm:pb-6 space-y-4 bg-white flex-grow">
+                {/* Contact Buttons (Restored Old Style) */}
+                <div className="space-y-2">
+                    {ownerData.email && (
+                        <button
+                            onClick={onEmail}
+                            className="w-full px-3 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors border border-gray-200"
+                        >
+                            <Mail className="w-4 h-4" />
+                            Send Email
+                        </button>
+                    )}
+                    {ownerData.contact_phone && (
+                        <button
+                            onClick={onWhatsapp}
+                            className="w-full px-3 py-2.5 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors border border-primary-100"
+                        >
+                            <Phone className="w-4 h-4" />
+                            WhatsApp
+                        </button>
+                    )}
+                </div>
+
+                <div className="w-full h-px bg-gray-100"></div>
+
+                {/* Address */}
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                        <MapPin className="w-4 h-4 text-gray-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500">Location</p>
+                        <p className="text-sm font-medium truncate">{`${ownerData.pitch_address}, ${ownerData.city}` || 'Address not available'}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Joined Date */}
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                        <Calendar className="w-4 h-4 text-gray-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500">Joined Date</p>
+                        <p className="text-sm font-medium">
+                            {formatDate(ownerData.created_at)}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ============================================================================
+// MAIN COMPONENT
 // ============================================================================
 const PitchOwnerDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
-
     const { handleEmailClick, handleWhatsAppClick } = useContact();
 
     // 1. Retrieve Data
@@ -85,7 +290,7 @@ const PitchOwnerDetails = () => {
     // Staff Actions State
     const [actionsData, setActionsData] = useState([]);
     const [totalActions, setTotalActions] = useState(0);
-    const [actionsTotalBalance, setActionsTotalBalance] = useState(0); // <--- New State for Global Total
+    const [actionsTotalBalance, setActionsTotalBalance] = useState(0);
     const [currentActionPage, setCurrentActionPage] = useState(1);
     const [loadingActions, setLoadingActions] = useState(false);
     const [actionsLimit, setActionsLimit] = useState(10);
@@ -122,7 +327,6 @@ const PitchOwnerDetails = () => {
                 if (response && response.status) {
                     setActionsData(response.results);
                     setTotalActions(response.count);
-                    // Set the global total balance from the API response
                     setActionsTotalBalance(response.total);
                 }
             } catch (error) {
@@ -134,19 +338,18 @@ const PitchOwnerDetails = () => {
         fetchActions();
     }, [ownerData.id, currentActionPage, actionsLimit, refreshTrigger]);
 
-    // Early return
-    if (!ownerData || !ownerData.id) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <p className="text-red-600">No Pitch Owner data available.</p>
-                    <button onClick={() => navigate(-1)} className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg">Go Back</button>
-                </div>
-            </div>
-        );
-    }
+    // Handlers
+    const handleContactEmail = () => { if(ownerData.email) handleEmailClick(ownerData.email, `Inquiry regarding ${ownerData.pitch_name}`, "Hello,"); };
+    const handleContactPhone = () => { if(ownerData.contact_phone) handleWhatsAppClick(ownerData.contact_phone, "Hello, I have a question regarding your venue."); };
+    const handleAddAction = () => setIsActionModalOpen(true);
+    const handleActionSuccess = () => { setRefreshTrigger(prev => prev + 1); setCurrentActionPage(1); };
 
-    // Table Configurations
+    // Derived Stats
+    const totalRevenue = (ownerData.booking || []).reduce((acc, curr) => acc + parseFloat(curr.total_price || 0), 0);
+    const totalPitches = ownerData.my_pitches?.length || 0;
+    const totalBookingsCount = ownerData.booking?.length || 0;
+
+    // Table Column Definitions
     const pitchColumns = [
         { header: 'Pitch Code', accessor: 'id', align: 'left', render: (pitch) => <span className="text-sm font-semibold text-primary-600">{`P${pitch.id}`}</span> },
         { header: 'Pitch Name', accessor: 'translations.name', render: (pitch) => (
@@ -164,8 +367,7 @@ const PitchOwnerDetails = () => {
 
     const actionColumns = [
         { header: 'SR.No', accessor: 'id', align: 'left', render: (row, index) => <span className="text-gray-500">{index + 1}</span> },
-        { header: 'Description', accessor: 'description', align: 'left', render: (row) => <span className="text-gray-700 text-sm truncate max-w-[300px] block" title={row.description}>{row.description}</span> },
-
+        { header: 'Description', accessor: 'description', align: 'left', render: (row) => <span className="text-gray-700 text-sm truncate max-w-[200px] block" title={row.description}>{row.description}</span> },
         { header: 'Type', accessor: 'kind', align: 'center', render: (row) => {
                 const isPositive = ['add', 'addition'].includes(row.kind?.toLowerCase());
                 return (<div className={`flex items-center justify-center gap-2 font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>{isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}<span className="capitalize">{row.kind}</span></div>);
@@ -174,211 +376,189 @@ const PitchOwnerDetails = () => {
                 const isPositive = ['add', 'addition'].includes(row.kind?.toLowerCase());
                 return (<span className={`font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>{isPositive ? '+' : '-'} {formatAmount(row.amount)}</span>);
             }},
-
-        // --- NEW BALANCE COLUMN ---
-        {
-            header: 'Balance',
-            accessor: 'balance',
-            align: 'center',
-            render: (row) => {
+        { header: 'Balance', accessor: 'balance', align: 'center', render: (row) => {
                 const isPositive = ['add', 'addition'].includes(row.kind?.toLowerCase());
                 const amount = parseFloat(row.amount || 0);
                 const lastTotal = parseFloat(row.last_total || 0);
-                // Calculate Balance: Last Total +/- Amount
                 const currentBalance = isPositive ? lastTotal + amount : lastTotal - amount;
-
                 return <span className="text-sm font-bold text-gray-800">{formatAmount(currentBalance)}</span>
-            }
-        },
-        // --------------------------
-
+            }},
         { header: 'Date', accessor: 'created_at', align: 'right', render: (row) => <span className="text-gray-500 text-sm">{formatDateTime(row.created_at)}</span> }
     ];
 
-    // Stats
-    const totalRevenue = (ownerData.booking || []).reduce((acc, curr) => acc + parseFloat(curr.total_price || 0), 0);
-    const totalPitches = ownerData.my_pitches?.length || 0;
-    const totalBookingsCount = ownerData.booking?.length || 0;
-
-    // Handlers
-    const handleContactEmail = () => { if(ownerData.email) handleEmailClick(ownerData.email, `Inquiry regarding ${ownerData.pitch_name}`, "Hello,"); };
-    const handleContactPhone = () => { if(ownerData.contact_phone) handleWhatsAppClick(ownerData.contact_phone, "Hello, I have a question regarding your venue."); };
-    const handleAddAction = () => setIsActionModalOpen(true);
-    const handleActionSuccess = () => { setRefreshTrigger(prev => prev + 1); setCurrentActionPage(1); };
-    const handleBack = () => navigate(-1);
-
-    if (!user || !user.role) return false;
-
-    const { role } = user;
+    // Validation
+    if (!ownerData || !ownerData.id) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+                <p className="text-gray-500 mb-4">Pitch Owner data not found</p>
+                <button onClick={() => navigate(-1)} className="px-4 py-2 bg-primary-600 text-white rounded-lg">Go Back</button>
+            </div>
+        );
+    }
+    if (!user || !user.role) return null;
 
     return (
-        <div className="min-h-screen xl:px-5 bg-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200">
-                <div className="mx-auto py-4">
-                    <button onClick={handleBack} className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors">
-                        <ArrowIcon size={'lg'}/> Back to Pitch Owners
-                    </button>
-                </div>
-            </div>
+        <div className="min-h-screen bg-gray-50 pb-10">
+            {/* --- Header --- */}
+            <Header onBack={() => navigate(-1)} />
 
-            {/* Main Content Wrapper */}
-            <div className="mx-auto py-8 space-y-8">
+            <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                {/* --- Grid Layout (Top Section) --- */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 
-                {/* 1. Top Section: Sidebar + Bookings + Pitches */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-
-                    {/* LEFT SIDEBAR - Owner Info */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 sticky top-6">
-                            {/* Logo & Name */}
-                            <div className="text-center mb-6">
-                                {ownerData.profile_image ? ( <img src={ownerData.profile_image} alt={ownerData.pitch_name} className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-primary-100 object-cover" /> ) : ( <div className="w-20 h-20 rounded-full bg-primary-500 flex items-center justify-center mx-auto mb-4"><Shield className="w-10 h-10 text-white" /></div> )}
-                                <h2 className="text-xl font-bold text-gray-900 mb-1">{ownerData.pitch_name}</h2>
-                                <div className="flex flex-col items-center gap-3 my-4">
-                                    <div className="flex items-center gap-2">
-                                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm border ${ownerData.is_active ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'}`}>{ownerData.is_active ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}{ownerData.is_active ? 'Active' : 'Inactive'}</div>
-                                        <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 flex items-center gap-1 border border-gray-200"><Globe className="w-3 h-3" />{ownerData.city || 'UAE'}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Stats */}
-                            <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
-                                <div className="flex items-center justify-between"><div className="flex items-center gap-2"><LayoutGrid className="w-4 h-4 text-gray-400" /><span className="text-sm text-gray-600">Total Pitches</span></div><span className="text-sm font-semibold text-gray-900">{totalPitches}</span></div>
-                                <div className="flex items-center justify-between"><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-gray-400" /><span className="text-sm text-gray-600">Total Bookings</span></div><span className="text-sm font-semibold text-gray-900">{totalBookingsCount}</span></div>
-                                <div className="flex items-center justify-between"><div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-gray-400" /><span className="text-sm text-gray-600">Est. Revenue</span></div><span className="text-sm font-semibold text-green-600">{formatAmount(totalRevenue)}</span></div>
-                                {role.is_admin &&
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Percent className="w-4 h-4 text-gray-400" />
-                                            <span className="text-sm text-gray-600">Commission Rate</span>
-                                        </div>
-                                        <span className="text-sm font-semibold text-gray-900">
-                                        {ownerData.commission_rate ?? 0}%
-                                    </span>
-                                    </div>
-                                }
-                            </div>
-
-                            {/* Contact Info */}
-                            <div className="mb-6">
-                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contact Person</h4>
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-semibold"><User className="w-5 h-5" /></div>
-                                    <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-gray-900 truncate">{ownerData.contact_name || 'N/A'}</p><p className="text-xs text-gray-500 truncate">{ownerData.email}</p></div>
-                                </div>
-                                <div className="space-y-2">
-                                    {ownerData.email && ( <button onClick={handleContactEmail} className="w-full px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors border border-gray-200"><Mail className="w-4 h-4" />Send Email</button> )}
-                                    {ownerData.contact_phone && ( <button onClick={handleContactPhone} className="w-full px-3 py-2 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors border border-primary-100"><Phone className="w-4 h-4" />WhatsApp</button> )}
-                                </div>
-                            </div>
-                            {/* Details */}
-                            <div className="space-y-3 text-sm text-gray-600">
-                                <div className="flex items-start gap-2"><MapPin className="w-4 h-4 mt-0.5 text-gray-400" /><span>{ownerData.pitch_address}, {ownerData.city}</span></div>
-                                <div className="flex items-center gap-2 text-xs text-gray-500 pt-3 border-t border-gray-100"><Calendar className="w-3 h-3" />Joined {formatDate(ownerData.created_at)}</div>
-                            </div>
+                    {/* --- Left Column: Profile Card (Sticky) --- */}
+                    <div className="col-span-1">
+                        <div className="lg:sticky lg:top-24 h-fit space-y-6">
+                            <OwnerProfileCard
+                                ownerData={ownerData}
+                                totalRevenue={totalRevenue}
+                                totalPitches={totalPitches}
+                                totalBookingsCount={totalBookingsCount}
+                                onEmail={handleContactEmail}
+                                onWhatsapp={handleContactPhone}
+                                isAdmin={user.role.is_admin}
+                            />
                         </div>
                     </div>
 
-                    {/* RIGHT CONTENT AREA - Bookings & Pitches */}
-                    <div className="lg:col-span-2 2xl:col-span-3 space-y-6">
+                    {/* --- Right Column: Details & Tables --- */}
+                    <div className="lg:col-span-2 space-y-6">
 
-                        {/* BOOKINGS SECTION */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-                            <div className="p-3 px-5 w-full flex flex-wrap justify-between items-center border-b border-gray-100">
-                                <div className="flex items-baseline gap-2"><h3 className="text-lg font-bold text-gray-900">Bookings</h3><span className="text-sm text-gray-500">({filteredBookings.length} total)</span></div>
-                                <div className="flex items-center gap-3">
-                                    <select value={bookingStatus} onChange={(e) => setBookingStatus(e.target.value)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
-                                        <option value="all">All Status</option><option value="completed">Completed</option><option value="pending">Pending</option><option value="cancelled">Cancelled</option>
+                        {/* 1. Bookings Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <Clock className="w-5 h-5 text-primary-500" /> Bookings
+                                    <span className="text-xs font-normal text-gray-500 bg-white px-2 py-0.5 rounded-full border border-gray-200">
+                                        {filteredBookings.length}
+                                    </span>
+                                </h3>
+                                {/* Filter Dropdown */}
+                                <select
+                                    value={bookingStatus}
+                                    onChange={(e) => setBookingStatus(e.target.value)}
+                                    className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white cursor-pointer"
+                                >
+                                    <option value="all">All Status</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+
+                            <div className="p-4 sm:p-6 max-h-[400px] overflow-y-auto custom-scrollbar space-y-3">
+                                {filteredBookings.length > 0 ? (
+                                    filteredBookings.map((booking) => (
+                                        <div key={booking.id} className="border border-gray-100 rounded-lg p-4 hover:border-primary-300 transition-colors bg-white shadow-sm group">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="font-bold text-gray-900 text-sm">#{booking.id}</span>
+                                                        {getStatusBadge(booking.status)}
+                                                    </div>
+                                                    <p className="text-xs text-gray-500">
+                                                        User: <span className="font-medium text-gray-700">{booking.user_info?.name || 'Unknown'}</span>
+                                                    </p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-base font-extrabold text-primary-600">{formatAmount(booking.total_price)}</p>
+                                                </div>
+                                            </div>
+                                            <div className="w-full h-px bg-gray-50 my-2"></div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                                <div className="flex items-center gap-2 text-gray-600">
+                                                    <LayoutGrid className="w-3 h-3 text-gray-400" />
+                                                    <span className="truncate">{booking.pitch?.translations?.name || 'Pitch'} ({booking.pitch?.size}s)</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-gray-600">
+                                                    <Calendar className="w-3 h-3 text-gray-400" />
+                                                    <span>{formatDateTime(booking.start_time)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-400 text-sm">No bookings found for this filter.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 2. Pitches Table Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50">
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <LayoutGrid className="w-5 h-5 text-primary-500" /> Registered Pitches
+                                </h3>
+                            </div>
+                            <div className="p-4">
+                                {(ownerData.my_pitches && ownerData.my_pitches.length > 0) ? (
+                                    <MainTable
+                                        columns={pitchColumns}
+                                        data={paginatedPitches}
+                                        currentPage={currentPitchPage}
+                                        itemsPerPage={pitchesPerPage}
+                                        totalItems={ownerData.my_pitches.length}
+                                        onPageChange={setCurrentPitchPage}
+                                        showSearch={false}
+                                    />
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500 text-sm">No pitches registered yet.</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Staff Actions Section (Admin Only) - MOVED OUTSIDE GRID */}
+                {user.role.is_admin && (
+                    <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full">
+                        <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex flex-wrap justify-between items-center gap-3">
+
+                            {/* Left Side: Title & Balance */}
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <FileText className="w-5 h-5 text-gray-700" />
+                                    <h3 className="text-lg font-bold text-gray-900">Staff Actions</h3>
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 rounded-full border border-primary-100">
+                                    <Wallet className="w-4 h-4 text-primary-600" />
+                                    <span className="text-sm text-primary-700">Total Balance:</span>
+                                    <span className="text-sm font-bold text-primary-800">{formatAmount(actionsTotalBalance)}</span>
+                                </div>
+                            </div>
+
+                            {/* Right Side: Rows & Add Button */}
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                    <select
+                                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-700 cursor-pointer"
+                                        value={actionsLimit}
+                                        onChange={(e) => {
+                                            setActionsLimit(Number(e.target.value));
+                                            setCurrentActionPage(1);
+                                        }}
+                                    >
+                                        <option value={10}>10 / page</option>
+                                        <option value={20}>20 / page</option>
+                                        <option value={50}>50 / page</option>
+                                        <option value={100}>100 / page</option>
+                                        <option value={200}>200 / page</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div className="p-4 max-h-[300px] overflow-y-auto custom-scrollbar">
-                                {filteredBookings.length > 0 ? (
-                                    <div className="space-y-3">{filteredBookings.map((booking) => (
-                                        <div key={booking.id} className="border border-gray-100 rounded-lg p-4 hover:border-primary-300 transition-colors bg-white shadow-sm">
-                                            <div className="flex items-start justify-between mb-3">
-                                                <div><div className="flex items-center gap-2 mb-1"><h4 className="font-semibold text-gray-900">Booking #{booking.id}</h4>{getStatusBadge(booking.status)}</div><p className="text-sm text-gray-500">Booked by: <span className="font-medium text-gray-700">{booking.user_info?.name || 'Unknown User'}</span></p></div>
-                                                <div className="text-right"><p className="text-lg font-bold text-primary-600">{formatAmount(booking.total_price)}</p></div>
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                                                <div className="flex items-center gap-2 text-gray-600"><LayoutGrid className="w-4 h-4 text-gray-400" />Name : {booking.pitch?.translations?.name || 'Unknown Pitch'} , Size :{booking.pitch?.size || '?'} aside</div>
-                                                <div className="flex items-center gap-2 text-gray-600"><Clock className="w-4 h-4 text-gray-400" />{formatDateTime(booking.start_time)}</div>
-                                            </div>
-                                        </div>
-                                    ))}</div>
-                                ) : ( <div className="text-center py-12"><Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" /><p className="text-gray-500">No bookings found</p></div> )}
+
+                                <button
+                                    onClick={handleAddAction}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add Action
+                                </button>
                             </div>
                         </div>
 
-                        {/* PITCHES TABLE SECTION */}
-                        <div className="bg-white px-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="pt-5 lg:px-6 flex justify-between items-center">
-                                <h3 className="text-lg font-bold text-gray-900">My Pitches</h3>
-                                <p className="text-sm text-gray-500 mt-1">Total: {ownerData.my_pitches?.length || 0} pitches</p>
-                            </div>
-                            {(ownerData.my_pitches && ownerData.my_pitches.length > 0) ? (
-                                <MainTable columns={pitchColumns} data={paginatedPitches} currentPage={currentPitchPage} itemsPerPage={pitchesPerPage} totalItems={ownerData.my_pitches.length} onPageChange={setCurrentPitchPage} showSearch={false} />
-                            ) : ( <div className="text-center py-12"><LayoutGrid className="w-12 h-12 text-gray-300 mx-auto mb-3" /><p className="text-gray-500">No pitches registered yet</p></div> )}
-                        </div>
-
-                    </div>
-                </div>
-
-
-                {/* 2. STAFF ACTIONS TABLE SECTION */}
-                {role.is_admin &&
-
-                    <div className="w-full">
-                        <div className="bg-white px-4 rounded-lg shadow-sm border border-gray-100">
-                            <div className="pt-5 lg:px-6 flex flex-wrap justify-between items-center mb-2 gap-4">
-
-                                {/* Title & Total Balance */}
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="w-5 h-5 text-gray-700" />
-                                        <h3 className="text-lg font-bold text-gray-900">Staff Actions</h3>
-                                    </div>
-                                    {/* DISPLAY TOTAL BALANCE HERE */}
-                                    <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 rounded-full border border-primary-100">
-                                        <Wallet className="w-4 h-4 text-primary-600" />
-                                        <span className="text-sm text-primary-700">Total Balance:</span>
-                                        <span className="text-sm font-bold text-primary-800">{formatAmount(actionsTotalBalance)}</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-3">
-                                    {/* Action Limit Dropdown */}
-                                    <div className="flex items-center gap-2">
-                                        <ListFilter className="w-4 h-4 text-gray-400" />
-                                        <select
-                                            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-700 cursor-pointer"
-                                            value={actionsLimit}
-                                            onChange={(e) => {
-                                                setActionsLimit(Number(e.target.value));
-                                                setCurrentActionPage(1);
-                                            }}
-                                        >
-                                            <option value={10}>10 / page</option>
-                                            <option value={20}>20 / page</option>
-                                            <option value={50}>50 / page</option>
-                                            <option value={100}>100 / page</option>
-                                            <option value={500}>500 / page</option>
-                                            <option value={1000}>1000 / page</option>
-                                        </select>
-                                    </div>
-
-                                    <button
-                                        onClick={handleAddAction}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                        Add Action
-                                    </button>
-                                </div>
-                            </div>
-
+                        <div className="p-4">
                             <MainTable
                                 columns={actionColumns}
                                 data={actionsData}
@@ -387,11 +567,11 @@ const PitchOwnerDetails = () => {
                                 totalItems={totalActions}
                                 onPageChange={setCurrentActionPage}
                                 showSearch={false}
+                                loading={loadingActions}
                             />
                         </div>
                     </div>
-                }
-
+                )}
             </div>
 
             {/* Modal */}
