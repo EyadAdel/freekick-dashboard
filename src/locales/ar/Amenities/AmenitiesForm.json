@@ -1,0 +1,40 @@
+{
+  "header": {
+    "createTitle": "إضافة ميزة جديدة",
+    "editTitle": "تعديل الميزة",
+    "createSubtitle": "املأ التفاصيل للميزة الجديدة.",
+    "editSubtitle": "تحديث تفاصيل هذه الميزة."
+  },
+  "sections": {
+    "basicInfo": "المعلومات الأساسية",
+    "iconImage": "أيقونة/صورة الميزة"
+  },
+  "form": {
+    "nameEn": "اسم الميزة (الإنجليزية)",
+    "nameAr": "اسم الميزة (العربية)",
+    "englishLabel": "الإنجليزية",
+    "arabicLabel": "العربية",
+    "translating": "جاري الترجمة...",
+    "auto": "تلقائي",
+    "resetTooltip": "إعادة تعيين إلى الترجمة التلقائية",
+    "uploadIcon": "رفع الأيقونة",
+    "browseFiles": "اضغط لاستعراض ملفاتك",
+    "imageHelp": "الحجم الموصى به: 200x200px. يدعم JPG، PNG، SVG."
+  },
+  "buttons": {
+    "cancel": "إلغاء",
+    "save": "حفظ الميزة",
+    "update": "تحديث الميزة"
+  },
+  "messages": {
+    "uploadValidImage": "يرجى تحميل ملف صورة صالح",
+    "imageSuccess": "تم رفع الصورة بنجاح",
+    "imageFail": "فشل رفع الصورة",
+    "waitUpload": "يرجى الانتظار حتى انتهاء رفع الصورة.",
+    "nameEnRequired": "الاسم باللغة الإنجليزية مطلوب",
+    "nameArRequired": "الاسم باللغة العربية مطلوب",
+    "createSuccess": "تم إنشاء الميزة بنجاح",
+    "updateSuccess": "تم تحديث الميزة بنجاح",
+    "saveFail": "فشل حفظ الميزة."
+  }
+}

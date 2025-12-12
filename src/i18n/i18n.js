@@ -28,6 +28,10 @@ import enVenueEditRequestDetails from '../locales/en/VenueEditRequests/venueEdit
 import arVenueEditRequestDetails from '../locales/ar/VenueEditRequests/venueEditRequestDetails.json';
 import enSupport from '../locales/en/Support/supportPage.json';
 import arSupport from '../locales/ar/Support/supportPage.json';
+import enAmenitiesForm from '../locales/en/Amenities/AmenitiesForm.json';
+import arAmenitiesForm from '../locales/ar/Amenities/AmenitiesForm.json';
+import enAmenitiesPage from '../locales/en/Amenities/AmenitiesPage.json';
+import arAmenitiesPage from '../locales/ar/Amenities/AmenitiesPage.json';
 
 // Translation resources
 const resources = {
@@ -44,6 +48,8 @@ const resources = {
         venueEditRequests: enVenueEditRequests,
         venueEditRequestDetails: enVenueEditRequestDetails,
         support: enSupport,
+        amenitiesForm: enAmenitiesForm,
+        amenitiesPage: enAmenitiesPage,
 
     },
     ar: {
@@ -59,6 +65,8 @@ const resources = {
         venueEditRequests: arVenueEditRequests,
         venueEditRequestDetails: arVenueEditRequestDetails,
         support: arSupport,
+        amenitiesForm: arAmenitiesForm,
+        amenitiesPage: arAmenitiesPage,
 
 
     },
@@ -91,7 +99,9 @@ i18n
             'pitchesPage',
             'venueEditRequests',
             'venueEditRequestDetails',
-            'support' // Added
+            'support',
+            'amenitiesForm',
+            'amenitiesPage'
         ],        debug: process.env.NODE_ENV === 'development',
         interpolation: {
             escapeValue: false,

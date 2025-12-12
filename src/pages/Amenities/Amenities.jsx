@@ -6,47 +6,89 @@ import { Pencil, Trash2, Plus } from 'lucide-react';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import { amenitiesService } from '../../services/amenities/amenitiesService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
-import logo from "./../../assets/logo.svg"
+import logo from "./../../assets/logo.svg";
+import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
+import { useTranslation } from 'react-i18next'; // Import translation hook
+
+// --- Helper: Image Component for Amenities ---
+const AmenityIcon = ({ iconPath, alt }) => {
+    const [hasError, setHasError] = useState(false);
+
+    if (!iconPath || hasError) {
+        return (
+            <div className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                <img src={logo} alt="Default Logo" className="w-8 h-8 opacity-50" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+            <img
+                src={`${IMAGE_BASE_URL}${iconPath}`}
+                alt={alt}
+                className="w-full h-full object-cover"
+                onError={() => setHasError(true)}
+            />
+        </div>
+    );
+};
 
 const Amenities = () => {
+    const { t } = useTranslation('amenitiesPage'); // Initialize translation
     const rowsPerPage = 10;
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(setPageTitle('Amenities'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pageTitle')));
+    }, [dispatch, t]);
 
-    // State Management
+    // ================= STATE MANAGEMENT =================
+
+    // 1. Table Data
     const [amenitiesData, setAmenitiesData] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Form & Edit States
+    // 2. Filters
+    const [filters, setFilters] = useState({
+        search: '',
+    });
+
+    // 3. Form & Edit States
     const [showForm, setShowForm] = useState(false);
     const [selectedAmenity, setSelectedAmenity] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
-    // Search State
-    const [searchTerm, setSearchTerm] = useState('');
+    // ================= API CALLS =================
 
-    // Fetch All Data
+    const apiFilters = useMemo(() => ({
+        page: currentPage,
+        page_limit: rowsPerPage,
+        search: filters.search,
+    }), [currentPage, rowsPerPage, filters]);
+
     const fetchAmenitiesData = async () => {
         setIsLoading(true);
         try {
-            const response = await amenitiesService.getAllAmenities();
+            const response = await amenitiesService.getAllAmenities(apiFilters);
+
             if (response && response.results) {
                 setAmenitiesData(response.results);
+                setTotalItems(response.count || 0);
             } else if (Array.isArray(response)) {
                 setAmenitiesData(response);
+                setTotalItems(response.length);
             }
         } catch (error) {
             console.error("Failed to fetch amenities:", error);
+            setAmenitiesData([]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Fetch Single Amenity Data
     const fetchAmenityData = async (id) => {
         try {
             const response = await amenitiesService.getAmenityById(id);
@@ -59,9 +101,23 @@ const Amenities = () => {
 
     useEffect(() => {
         fetchAmenitiesData();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [apiFilters]);
 
-    // Form Handlers
+    // ================= HANDLERS =================
+
+    const handleSearch = (term) => {
+        setFilters(prev => ({ ...prev, search: term }));
+        setCurrentPage(1);
+    };
+
+    const handleFilterChange = (newFilters) => {
+        setFilters(prev => ({ ...prev, ...newFilters }));
+        setCurrentPage(1);
+    };
+
+    const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+
     const handleCreateAmenities = () => {
         setSelectedAmenity(null);
         setIsEditing(false);
@@ -71,11 +127,9 @@ const Amenities = () => {
     const handleEditAmenity = async (amenity) => {
         try {
             setIsEditing(true);
-            // Show loading state or form immediately
             setShowForm(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // Fetch the latest data for this amenity
             const amenityData = await fetchAmenityData(amenity.id);
             setSelectedAmenity(amenityData);
         } catch (error) {
@@ -100,74 +154,39 @@ const Amenities = () => {
 
     const handleDeleteAmenity = async (id, amenityName) => {
         const isConfirmed = await showConfirm({
-            title: `Delete "${amenityName}"?`,
-            text: "This action cannot be undone. The amenity will be permanently removed.",
-            confirmButtonText: 'Yes, Delete it'
+            title: t('dialogs.deleteTitle', { name: amenityName }),
+            text: t('dialogs.deleteText'),
+            confirmButtonText: t('dialogs.confirmButton')
         });
 
         if (!isConfirmed) return;
 
         try {
             await amenitiesService.deleteAmenity(id);
-            fetchAmenitiesData();
+            if (amenitiesData.length === 1 && currentPage > 1) {
+                setCurrentPage(prev => prev - 1);
+            } else {
+                fetchAmenitiesData();
+            }
         } catch (error) {
             console.error("Failed to delete amenity:", error);
         }
     };
 
-    // Enhanced Filter Logic
-    const filteredData = useMemo(() => {
-        if (!amenitiesData || amenitiesData.length === 0) return [];
-
-        if (!searchTerm.trim()) return amenitiesData;
-
-        const term = searchTerm.toLowerCase().trim();
-
-        return amenitiesData.filter((item) => {
-            // Check all possible name locations
-            const nameEn = item.translations?.en?.name?.toLowerCase() || '';
-            const nameAr = item.translations?.ar?.name?.toLowerCase() || '';
-            const name = item.translations?.name?.toLowerCase() || '';
-            const directName = item.name?.toLowerCase() || '';
-
-            // Check all possible name fields
-            return nameEn.includes(term) ||
-                nameAr.includes(term) ||
-                name.includes(term) ||
-                directName.includes(term);
-        });
-    }, [amenitiesData, searchTerm]);
-
-    // Handlers
-    const handleSearch = (term) => {
-        setSearchTerm(term);
-        setCurrentPage(1);
-    };
-
-    const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
-
-    // Calculate paginated data
-    const paginatedData = useMemo(() => {
-        const startIndex = (currentPage - 1) * rowsPerPage;
-        const endIndex = startIndex + rowsPerPage;
-        return filteredData.slice(startIndex, endIndex);
-    }, [filteredData, currentPage]);
-
-    // Function to get display name (for table and search)
     const getDisplayName = (row) => {
-        // Try different possible name locations
         return row.translations?.name ||
             row.translations?.en?.name ||
             row.name ||
             `Amenity ${row.id}`;
     };
 
-    // Action Buttons
+    // ================= TABLE CONFIG =================
+
     const ActionButtons = ({ amenity }) => (
         <div className="flex justify-end items-center gap-1 sm:gap-2">
             <button
                 className="text-gray-500 hover:text-blue-600 p-1 rounded transition-colors hover:bg-gray-50"
-                title="Edit Amenity"
+                title={t('actions.edit')}
                 onClick={() => handleEditAmenity(amenity)}
             >
                 <Pencil size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -175,7 +194,7 @@ const Amenities = () => {
             <button
                 className="text-gray-500 hover:text-red-600 p-1 rounded transition-colors hover:bg-gray-50"
                 onClick={() => handleDeleteAmenity(amenity.id, getDisplayName(amenity))}
-                title="Delete Amenity"
+                title={t('actions.delete')}
             >
                 <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
@@ -184,7 +203,7 @@ const Amenities = () => {
 
     const columns = [
         {
-            header: 'Sr.No',
+            header: t('table.srNo'),
             accessor: 'id',
             align: 'left',
             width: '80px',
@@ -198,42 +217,31 @@ const Amenities = () => {
             }
         },
         {
-            header: 'Icon',
+            header: t('table.icon'),
             accessor: 'icon',
             align: 'center',
-            width: '80px',
+            width: '100px',
             render: (row) => (
                 <div className="flex justify-center">
-                    {!row.icon ? (
-                        <div
-                            className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden">
-                            <img src={logo} alt="Default Logo" className="w-8 h-8"/>
-
-                        </div>
-                    ) : (
-                        <div className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded-lg">
-                            <span className="text-lg">
-                                <img src={logo} alt="Default Logo" className="w-8 h-8" />
-                            </span>
-                        </div>
-                    )}
+                    <AmenityIcon
+                        iconPath={row.icon}
+                        alt={getDisplayName(row)}
+                    />
                 </div>
             )
         },
         {
-            header: 'Amenity Name',
-            accessor: 'name_en',
+            header: t('table.name'),
+            accessor: 'name',
             align: 'center',
-            width: '150px',
             render: (row) => (
                 <div className="font-medium text-gray-900 text-sm">
                     {getDisplayName(row)}
                 </div>
             )
         },
-
         {
-            header: 'Actions',
+            header: t('table.actions'),
             align: 'right',
             width: '100px',
             render: (row) => <ActionButtons amenity={row} />
@@ -242,17 +250,19 @@ const Amenities = () => {
 
     const topActions = [
         {
-            label: 'Create Amenity',
+            label: t('actions.create'),
             onClick: handleCreateAmenities,
             type: 'primary',
             icon: <Plus size={18} />
         }
     ];
 
-    return (
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-            {/* Form Section */}
-            {showForm && (
+    // ================= CONDITIONAL RENDER =================
+
+    // 1. If showing form, return ONLY the form
+    if (showForm) {
+        return (
+            <div className="w-full px-4 sm:px-6 lg:px-8">
                 <AmenitiesForm
                     onCancel={handleCancelForm}
                     onSuccess={handleFormSuccess}
@@ -260,34 +270,38 @@ const Amenities = () => {
                     isEditing={isEditing}
                     isLoading={isEditing && !selectedAmenity}
                 />
-            )}
+            </div>
+        );
+    }
 
-            {/* Main Table Section */}
+    // 2. Otherwise, show the table
+    return (
+        <div className="w-full px-4 sm:px-6 lg:px-8">
             {isLoading && amenitiesData.length === 0 ? (
                 <div className="bg-white rounded-lg shadow border border-gray-200 p-8 text-center">
                     <div className="animate-pulse">
                         <div className="h-4 bg-gray-200 rounded w-1/4 mx-auto mb-4"></div>
                         <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
                     </div>
+                    <p className="mt-4 text-gray-500">{t('messages.loading')}</p>
                 </div>
             ) : (
                 <MainTable
-                    data={paginatedData}
+                    data={amenitiesData}
                     columns={columns}
                     filters={[]}
-                    searchPlaceholder="Search amenities by name..."
+                    searchPlaceholder={t('messages.searchPlaceholder')}
                     topActions={topActions}
                     currentPage={currentPage}
-                    totalItems={filteredData.length}
+                    totalItems={totalItems}
                     itemsPerPage={rowsPerPage}
                     onSearch={handleSearch}
-                    onFilterChange={() => {}}
+                    onFilterChange={handleFilterChange}
                     onPageChange={handlePageChange}
-                    hideFilterBar={true}
                     emptyStateMessage={
-                        searchTerm ?
-                            `No amenities found matching "${searchTerm}"` :
-                            "No amenities available. Create your first amenity!"
+                        filters.search ?
+                            t('messages.noResults', { search: filters.search }) :
+                            t('messages.noData')
                     }
                 />
             )}
