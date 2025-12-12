@@ -1,0 +1,40 @@
+{
+  "header": {
+    "createTitle": "Create New Amenity",
+    "editTitle": "Edit Amenity",
+    "createSubtitle": "Fill in the details for the new amenity.",
+    "editSubtitle": "Update the details for this amenity."
+  },
+  "sections": {
+    "basicInfo": "Basic Information",
+    "iconImage": "Amenity Icon/Image"
+  },
+  "form": {
+    "nameEn": "Amenity Name (English)",
+    "nameAr": "Amenity Name (Arabic)",
+    "englishLabel": "English",
+    "arabicLabel": "Arabic",
+    "translating": "Translating...",
+    "auto": "Auto",
+    "resetTooltip": "Reset to auto-translation",
+    "uploadIcon": "Upload Icon",
+    "browseFiles": "Click to browse your files",
+    "imageHelp": "Recommended size: 200x200px. Supports JPG, PNG, SVG."
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "save": "Save Amenity",
+    "update": "Update Amenity"
+  },
+  "messages": {
+    "uploadValidImage": "Please upload a valid image file",
+    "imageSuccess": "Image uploaded successfully",
+    "imageFail": "Image upload failed",
+    "waitUpload": "Please wait for the image to finish uploading.",
+    "nameEnRequired": "English name is required",
+    "nameArRequired": "Arabic name is required",
+    "createSuccess": "Amenity created successfully",
+    "updateSuccess": "Amenity updated successfully",
+    "saveFail": "Failed to save amenity."
+  }
+}

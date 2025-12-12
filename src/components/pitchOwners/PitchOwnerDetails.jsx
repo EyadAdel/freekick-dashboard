@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
+
 import {
     MapPin, CheckCircle2, XCircle,
     Users, Calendar,
@@ -355,7 +357,7 @@ const PitchOwnerDetails = () => {
         { header: 'Pitch Name', accessor: 'translations.name', render: (pitch) => (
                 <div className="flex items-center gap-3">
                     {pitch.image ? (
-                        <img src={`https://pub-f8c5de66602c4f6f91311c6fd40e1794.r2.dev/${pitch.image}`} alt={pitch.translations.name} className="w-10 h-10 rounded-lg object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/40"; }} />
+                        <img src={`${IMAGE_BASE_URL}${pitch.image}`} alt={pitch.translations.name} className="w-10 h-10 rounded-lg object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/40"; }} />
                     ) : ( <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center"><LayoutGrid className="w-5 h-5 text-primary-600" /></div> )}
                     <div><p className="text-sm font-semibold text-gray-900">{pitch.translations?.name || 'Unknown'}</p><p className="text-xs text-gray-500">Size: {pitch.size}</p></div>
                 </div>

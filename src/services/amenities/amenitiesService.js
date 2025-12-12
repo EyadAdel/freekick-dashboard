@@ -2,10 +2,11 @@ import api from '../api.js';
 import { toast } from 'react-toastify';
 
 export const amenitiesService = {
-    // View all Amenities
-    getAllAmenities: async () => {
+    // View all Amenities (Updated to support pagination and search params)
+    getAllAmenities: async (params = {}) => {
         try {
-            const response = await api.get('/listing/venue-data/amenities/');
+            // Pass params (page, page_limit, search) to the API call
+            const response = await api.get('/listing/venue-data/amenities/', { params });
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to load Amenities";

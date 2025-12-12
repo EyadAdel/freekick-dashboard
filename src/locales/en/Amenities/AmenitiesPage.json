@@ -1,0 +1,25 @@
+{
+  "pageTitle": "Amenities",
+  "actions": {
+    "create": "Create Amenity",
+    "edit": "Edit Amenity",
+    "delete": "Delete Amenity"
+  },
+  "table": {
+    "srNo": "Sr.No",
+    "icon": "Icon",
+    "name": "Amenity Name",
+    "actions": "Actions"
+  },
+  "dialogs": {
+    "deleteTitle": "Delete \"{{name}}\"?",
+    "deleteText": "This action cannot be undone. The amenity will be permanently removed.",
+    "confirmButton": "Yes, Delete it"
+  },
+  "messages": {
+    "loading": "Loading amenities...",
+    "searchPlaceholder": "Search amenities by name...",
+    "noResults": "No amenities found matching \"{{search}}\"",
+    "noData": "No amenities available. Create your first amenity!"
+  }
+}
