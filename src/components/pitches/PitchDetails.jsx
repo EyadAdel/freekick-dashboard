@@ -4,12 +4,16 @@ import { useTranslation } from 'react-i18next';
 import {
     MapPin, CheckCircle2, XCircle,
     Info, Users, Calendar,
-    Edit, LayoutGrid, Layers, Crown, Building2, Maximize
+    Edit, LayoutGrid, Layers, Crown, Building2, Maximize,
+    Clock, Save, Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 // --- Services ---
 import { pitchesService } from '../../services/pitches/pitchesService.js';
 import { venuesService } from '../../services/venues/venuesService.js';
+import { specialPricingService } from '../../services/specialPricingService.js';
+import { daysOfWeekService } from '../../services/daysOfWeek/daysOfWeekService.js';
+import { bookingService } from '../../services/bookings/bookingService.js';
 
 // --- Components ---
 import ArrowIcon from '../../components/common/ArrowIcon';
@@ -25,9 +29,550 @@ const getTrans = (obj, lang = 'en') => {
     return obj?.[lang] || obj?.en || {};
 };
 
+// --- Helper: Generate Time Options (00:00 - 23:00) ---
+const generateTimeOptions = () => {
+    const times = [];
+    for (let i = 0; i < 24; i++) {
+        const hour = i;
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+        const formatted = `${String(displayHour).padStart(2, '0')}:00 ${period}`;
+        const value = `${String(hour).padStart(2, '0')}:00`;
+        times.push({ value, label: formatted });
+    }
+    return times;
+};
+
+// --- Helper: Date Formatting for Calendar ---
+const formatDateForApi = (date) => date.toISOString().split('T')[0]; // YYYY-MM-DD
+
+const formatTimeLabel = (hour) => {
+    const h = hour % 12 || 12;
+    const ampm = hour < 12 ? 'AM' : 'PM';
+    const nextH = (hour + 1) % 12 || 12;
+    const nextAmpm = (hour + 1) < 12 || (hour + 1) === 24 ? 'AM' : 'PM';
+    return `${String(h).padStart(2, '0')}:00 ${ampm} - ${String(nextH).padStart(2, '0')}:00 ${nextAmpm}`;
+};
+
+// ==========================================
+// COMPONENT: LiveSlotCalendar
+// ==========================================
+// ==========================================
+// COMPONENT: LiveSlotCalendar
+// ==========================================
+const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [viewMode, setViewMode] = useState('day'); // 'day' | 'week'
+    const [activeTab, setActiveTab] = useState('booked');
+
+    const [bookings, setBookings] = useState([]);
+    const [availability, setAvailability] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // --- Helper: Get Visible Week Days ---
+    // Generates the 5 days shown in the UI (2 days before + selected + 2 days after)
+    const getWeekDays = (baseDate) => {
+        const days = [];
+        const start = new Date(baseDate);
+        start.setDate(baseDate.getDate() - 2);
+        for (let i = 0; i < 5; i++) {
+            const d = new Date(start);
+            d.setDate(start.getDate() + i);
+            days.push(d);
+        }
+        return days;
+    };
+
+    const weekDays = getWeekDays(selectedDate);
+
+    // --- Helper: Check if dates match (ignoring time) ---
+    const isSameDate = (date1, date2) => {
+        return date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate();
+    };
+
+    // --- Fetch Data ---
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!pitchId) return;
+            setLoading(true);
+            try {
+                // 1. Determine Start and End Range based on View Mode
+                let startDateRange = new Date(selectedDate);
+                let endDateRange = new Date(selectedDate);
+
+                if (viewMode === 'week') {
+                    // Fetch data for the entire visible range (first day of strip to last day of strip)
+                    startDateRange = new Date(weekDays[0]);
+                    endDateRange = new Date(weekDays[weekDays.length - 1]);
+                }
+
+                // Set times to absolute start (00:00:00) and end (23:59:59) of the range
+                startDateRange.setHours(0, 0, 0, 0);
+                endDateRange.setHours(23, 59, 59, 999);
+
+                // 2. Prepare API Parameters using __gte and __lte
+                const bookingsParams = {
+                    pitch__id: pitchId,
+                    start_time__gte: startDateRange.toISOString(),
+                    start_time__lte: endDateRange.toISOString(),
+                    page_size: 1000
+                };
+
+                // Note: Availability usually needs a specific date, or a range if the API supports it.
+                // Assuming availability API still needs a single specific date for the slot generation:
+                const queryDateForAvailability = formatDateForApi(selectedDate);
+
+                const [bookingsRes, availabilityRes] = await Promise.all([
+                    bookingService.getAll(bookingsParams),
+                    pitchesService.getPitchAvailableTime(pitchId, queryDateForAvailability)
+                ]);
+
+                const bookingData = bookingsRes.results || bookingsRes || [];
+                setBookings(bookingData);
+
+                const availData = availabilityRes.data?.available_times || [];
+                setAvailability(availData);
+
+            } catch (error) {
+                console.error("Error fetching calendar data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [selectedDate, pitchId, viewMode]); // Re-fetch when Date or Mode changes
+
+    // --- Calculate Slots Logic ---
+    const slots = [];
+    for (let i = 0; i < 24; i++) {
+        const startHour = i;
+
+        // 1. Check if Booked
+        // CRITICAL UPDATE: Since we might have fetched a whole week of bookings,
+        // we must filter to find bookings that match the currently Selected Date AND the specific Hour.
+        const booking = bookings.find(b => {
+            if (!b.start_time) return false;
+            const bookingDate = new Date(b.start_time);
+
+            // Check if booking is for the currently selected display date
+            const onSelectedDay = isSameDate(bookingDate, selectedDate);
+
+            // Check hour
+            const atCurrentHour = bookingDate.getHours() === startHour;
+
+            return onSelectedDay && atCurrentHour &&
+                (b.status === 'completed' || b.status === 'pending');
+        });
+
+        // 2. Check Availability (remains same)
+        const availSlot = availability.find(item => {
+            const timeStr = item[0];
+            if (!timeStr) return false;
+            const h = parseInt(timeStr.split(':')[0], 10);
+            return h === startHour;
+        });
+
+        let status = 'blocked';
+
+        if (booking) {
+            status = 'booked';
+        } else if (availSlot) {
+            const isAvailable = availSlot[3];
+            if (isAvailable === true) {
+                status = 'empty';
+            } else {
+                status = 'blocked';
+            }
+        } else {
+            status = 'blocked';
+        }
+
+        // Filter based on active tab
+        if (activeTab === 'booked' && status !== 'booked') continue;
+        if (activeTab === 'empty' && status !== 'empty') continue;
+        if (activeTab === 'blocked' && status !== 'blocked') continue;
+
+        slots.push({
+            hour: i,
+            label: formatTimeLabel(i),
+            status,
+            data: booking || availSlot
+        });
+    }
+
+    const handleDateChange = (daysToAdd) => {
+        const newDate = new Date(selectedDate);
+        newDate.setDate(newDate.getDate() + daysToAdd);
+        setSelectedDate(newDate);
+    };
+
+    const getStatusLabel = (status) => {
+        switch(status) {
+            case 'booked': return t('calendar.status.booked', 'Slot Booked');
+            case 'empty': return t('calendar.status.open', 'Slot Open');
+            case 'blocked': return t('calendar.status.blocked', 'Slot Blocked');
+            default: return status;
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+            {/* Top Header */}
+            <div className="p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-primary-600" />
+                    {t('calendar.title', 'Live Slot Calendar')}
+                </h3>
+
+                {/* View Switcher: Week / Day */}
+                <div className="flex bg-gray-100 p-1 rounded-lg">
+                    <button
+                        onClick={() => setViewMode('week')}
+                        className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                            viewMode === 'week'
+                                ? 'bg-white text-primary-700 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                    >
+                        {t('calendar.viewWeek', 'Week')}
+                    </button>
+                    <button
+                        onClick={() => setViewMode('day')}
+                        className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                            viewMode === 'day'
+                                ? 'bg-white text-primary-700 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                    >
+                        {t('calendar.viewDay', 'Day')}
+                    </button>
+                </div>
+            </div>
+
+            {/* Date Navigator */}
+            <div className="bg-gray-50/50 border-b border-gray-100">
+                <div className="flex items-center justify-between p-2 sm:px-4">
+                    <button onClick={() => handleDateChange(-1)} className="p-2 hover:bg-white rounded-full transition-colors rtl:rotate-180">
+                        <ChevronLeft size={20} />
+                    </button>
+                    <span className="font-bold text-gray-800">
+                        {selectedDate.toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'default', { month: 'short', year: 'numeric' })}
+                    </span>
+                    <button onClick={() => handleDateChange(1)} className="p-2 hover:bg-white rounded-full transition-colors rtl:rotate-180">
+                        <ChevronRight size={20} />
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-5 gap-2 px-2 pb-2">
+                    {weekDays.map((date, idx) => {
+                        const isSelected = formatDateForApi(date) === formatDateForApi(selectedDate);
+                        return (
+                            <button
+                                key={idx}
+                                onClick={() => setSelectedDate(date)}
+                                className={`flex flex-col items-center p-2 rounded-xl transition-all ${
+                                    isSelected
+                                        ? 'bg-primary-600 text-white shadow-md'
+                                        : 'hover:bg-white text-gray-500'
+                                }`}
+                            >
+                                <span className={`text-[10px] uppercase font-bold ${isSelected ? 'opacity-100' : 'opacity-80'}`}>
+                                    {date.toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'short' })}
+                                </span>
+                                <span className="text-lg font-bold">
+                                    {date.getDate().toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US')}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-gray-100">
+                {['booked', 'empty', 'blocked'].map(tab => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`flex-1 py-3 text-sm font-bold capitalize border-b-2 transition-colors ${
+                            activeTab === tab
+                                ? 'border-primary-600 text-primary-600'
+                                : 'border-transparent text-gray-400 hover:bg-gray-50'
+                        }`}
+                    >
+                        {t(`calendar.tabs.${tab}`, `${tab} Slots`)}
+                    </button>
+                ))}
+            </div>
+
+            {/* Slots List */}
+            <div className="p-4 sm:p-6 space-y-3 max-h-[500px] overflow-y-auto scrollbar-thin">
+                {loading ? (
+                    <div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary-500" /></div>
+                ) : slots.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400 text-sm italic bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                        {t('calendar.noSlots', { status: t(`calendar.tabs.${activeTab}`) })}
+                    </div>
+                ) : (
+                    slots.map((slot) => (
+                        <div
+                            key={slot.hour}
+                            className={`rounded-xl p-4 border transition-all ${
+                                slot.status === 'booked' ? 'bg-orange-50/60 border-orange-100' :
+                                    slot.status === 'blocked' ? 'bg-gray-100 border-gray-200 opacity-75' :
+                                        'bg-white border-gray-100 hover:border-primary-200'
+                            }`}
+                        >
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className={`text-xs font-bold uppercase tracking-wide ${
+                                            slot.status === 'booked' ? 'text-orange-600' :
+                                                slot.status === 'blocked' ? 'text-gray-600' : 'text-green-600'
+                                        }`}>
+                                            {getStatusLabel(slot.status)}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm font-bold text-gray-900">{slot.label}</p>
+
+                                    {/* User Info (Only for Booked slots) */}
+                                    {slot.status === 'booked' && slot.data?.user_info && (
+                                        <div className="flex items-center mt-3 gap-3">
+                                            {/* Main User Avatar */}
+                                            <div className="relative">
+                                                {slot.data.user_info.image ? (
+                                                    <img
+                                                        src={slot.data.user_info.image}
+                                                        alt={slot.data.user_info.name}
+                                                        className="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-8 h-8 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-xs font-bold text-blue-600">
+                                                        {slot.data.user_info.name ? slot.data.user_info.name.substring(0, 2).toUpperCase() : 'US'}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* User Name */}
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-bold text-gray-800">{slot.data.user_info.name}</span>
+                                                <span className="text-[10px] text-gray-500">{slot.data.user_info.phone}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+        </div>
+    );
+};
+// ==========================================
+// COMPONENT: PricingEditor
+// ==========================================
+const PricingEditor = ({ pitchId, t, currentLang }) => {
+    const timeOptions = generateTimeOptions();
+
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [daysList, setDaysList] = useState([]);
+    const [schedule, setSchedule] = useState({});
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [daysRes, pricingRes] = await Promise.all([
+                    daysOfWeekService.getAll(),
+                    specialPricingService.getAll({ pitch__id: pitchId })
+                ]);
+                const daysData = daysRes.results || daysRes || [];
+                daysData.sort((a, b) => a.id - b.id);
+                setDaysList(daysData);
+
+                const pricingData = pricingRes.results || pricingRes || [];
+                const initialSchedule = {};
+
+                pricingData.forEach(item => {
+                    if (item.day_of_week) {
+                        initialSchedule[item.day_of_week] = {
+                            id: item.id,
+                            start_time: item.start_time ? item.start_time.slice(0, 5) : '13:00',
+                            end_time: item.end_time ? item.end_time.slice(0, 5) : '23:00',
+                            price: item.special_price_per_hour,
+                            is_active: true
+                        };
+                    }
+                });
+                setSchedule(initialSchedule);
+            } catch (error) {
+                console.error("Error loading pricing editor data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        if (pitchId) fetchData();
+    }, [pitchId]);
+
+    const getEntry = (dayId) => {
+        return schedule[dayId] || {
+            id: null,
+            start_time: '13:00',
+            end_time: '23:00',
+            price: '',
+            is_active: false
+        };
+    };
+
+    const handleInputChange = (dayId, field, value) => {
+        setSchedule(prev => {
+            const current = getEntry(dayId);
+            return {
+                ...prev,
+                [dayId]: {
+                    ...current,
+                    [field]: value,
+                    is_active: field === 'price' && value !== '' ? true : current.is_active
+                }
+            };
+        });
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const promises = daysList.map(async (day) => {
+                const entry = getEntry(day.id);
+                const payload = {
+                    is_active: true,
+                    start_time: `${entry.start_time}:00`,
+                    end_time: `${entry.end_time}:00`,
+                    special_price_per_hour: entry.price,
+                    pitch: pitchId,
+                    day_of_week: day.id
+                };
+
+                if (entry.is_active && entry.price) {
+                    if (entry.id) {
+                        return specialPricingService.update(entry.id, payload);
+                    } else {
+                        const res = await specialPricingService.create(payload);
+                        setSchedule(prev => ({
+                            ...prev,
+                            [day.id]: { ...prev[day.id], id: res.id }
+                        }));
+                        return res;
+                    }
+                } else if (entry.id && !entry.price) {
+                    await specialPricingService.delete(entry.id);
+                    setSchedule(prev => ({
+                        ...prev,
+                        [day.id]: { ...prev[day.id], id: null, is_active: false }
+                    }));
+                }
+            });
+            await Promise.all(promises);
+        } catch (error) {
+            console.error("Error saving pricing:", error);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-primary-600" /></div>;
+
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900">{t('pricing.title', 'Pricing Editor')}</h3>
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-primary-600 text-primary-600 text-sm font-medium rounded-lg hover:bg-primary-50 transition-colors disabled:opacity-50"
+                >
+                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                    {t('pricing.update', 'Update Price Changes')}
+                </button>
+            </div>
+
+            <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <div className="col-span-3">{t('pricing.headers.day', 'Day')}</div>
+                <div className="col-span-3">{t('pricing.headers.from', 'Time Range From')}</div>
+                <div className="col-span-3">{t('pricing.headers.to', 'Time Range To')}</div>
+                <div className="col-span-3">{t('pricing.headers.price', 'Price')}</div>
+            </div>
+
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-2">
+                {daysList.map((day) => {
+                    const entry = getEntry(day.id);
+                    const dayName = getTrans(day.translations, currentLang)?.name || day.name || day.day || t('pricing.unknownDay', "Unknown Day");
+
+                    return (
+                        <div key={day.id} className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-center pb-4 sm:pb-0 border-b sm:border-0 border-gray-100 last:border-0">
+                            <div className="sm:col-span-3 flex items-center justify-between sm:justify-start">
+                                <span className="font-medium text-gray-900">{dayName}</span>
+                            </div>
+                            <div className="sm:col-span-3">
+                                <label className="sm:hidden text-xs text-gray-400 mb-1 block">{t('pricing.headers.from', 'From')}</label>
+                                <div className="relative">
+                                    <select
+                                        value={entry.start_time}
+                                        onChange={(e) => handleInputChange(day.id, 'start_time', e.target.value)}
+                                        className="w-full pl-3 pr-8 rtl:pr-3 rtl:pl-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500 appearance-none bg-white"
+                                    >
+                                        {timeOptions.map(opt => (
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))}
+                                    </select>
+                                    <Clock className="absolute right-3 rtl:right-auto rtl:left-3 top-2.5 text-gray-400 pointer-events-none" size={14} />
+                                </div>
+                            </div>
+                            <div className="sm:col-span-3">
+                                <label className="sm:hidden text-xs text-gray-400 mb-1 block">{t('pricing.headers.to', 'To')}</label>
+                                <div className="relative">
+                                    <select
+                                        value={entry.end_time}
+                                        onChange={(e) => handleInputChange(day.id, 'end_time', e.target.value)}
+                                        className="w-full pl-3 pr-8 rtl:pr-3 rtl:pl-8 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500 appearance-none bg-white"
+                                    >
+                                        {timeOptions.map(opt => (
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))}
+                                    </select>
+                                    <Clock className="absolute right-3 rtl:right-auto rtl:left-3 top-2.5 text-gray-400 pointer-events-none" size={14} />
+                                </div>
+                            </div>
+                            <div className="sm:col-span-3">
+                                <label className="sm:hidden text-xs text-gray-400 mb-1 block">{t('pricing.headers.price', 'Price')}</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 pl-3 rtl:pr-3 flex items-center pointer-events-none">
+                                        <span className="text-gray-500 sm:text-sm">{t('card.priceAED', 'AED')}</span>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        placeholder="0.00"
+                                        value={entry.price}
+                                        onChange={(e) => handleInputChange(day.id, 'price', e.target.value)}
+                                        className="w-full pl-12 pr-3 rtl:pl-3 rtl:pr-12 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
 // --- Header Component ---
 const Header = ({ onBack, onUpdate, isEditing, t }) => (
-    <div className="bg-white shadow-sm   top-0">
+    <div className="bg-white shadow-sm top-0">
         <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <button
                 onClick={onBack}
@@ -62,7 +607,6 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group h-full flex flex-col">
-            {/* Image & Overlay */}
             <div className="relative h-56 sm:h-64 lg:h-72 w-full shrink-0">
                 <img
                     src={mainImage}
@@ -70,20 +614,14 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-
-                {/* Status Badge */}
                 <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 z-10">
                     <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm ${
-                        pitch.is_active
-                            ? 'bg-green-500/90 text-white'
-                            : 'bg-red-500/90 text-white'
+                        pitch.is_active ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
                     }`}>
                         {pitch.is_active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                         {pitch.is_active ? t('status.active', 'Active') : t('status.inactive', 'Inactive')}
                     </span>
                 </div>
-
-                {/* Primary Badge */}
                 {pitch.is_primary && (
                     <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4 z-10">
                         <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm bg-yellow-500/90 text-white">
@@ -92,8 +630,6 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
                         </span>
                     </div>
                 )}
-
-                {/* Title & Size */}
                 <div className="absolute bottom-4 left-4 right-4 text-white rtl:text-right">
                     <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-1 drop-shadow-md line-clamp-2">
                         {backendTrans.name}
@@ -114,8 +650,6 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
                     </div>
                 </div>
             </div>
-
-            {/* Stats Grid */}
             <div className="grid grid-cols-2 border-b border-gray-100 divide-x divide-gray-100 rtl:divide-x-reverse">
                 <div className="p-3 sm:p-4 flex flex-col items-center justify-center text-center">
                     <span className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">{t('card.bookings', 'Bookings')}</span>
@@ -128,8 +662,6 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
                     </span>
                 </div>
             </div>
-
-            {/* Price */}
             <div className="p-4 sm:p-6 text-center bg-gray-50/50">
                 <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">{t('card.pricePerHour', 'Price Per Hour')}</p>
                 <div className="text-2xl sm:text-3xl font-extrabold text-primary-600 flex items-center justify-center gap-1">
@@ -138,8 +670,6 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
                     <span className="text-xs text-gray-400 font-normal self-end mb-1">.00</span>
                 </div>
             </div>
-
-            {/* --- Info Row --- */}
             <div className="p-4 sm:px-6 sm:pb-6 space-y-3 sm:space-y-4 bg-white flex-grow">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
@@ -152,7 +682,6 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
                         </p>
                     </div>
                 </div>
-
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                         <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
@@ -164,7 +693,6 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
                         </p>
                     </div>
                 </div>
-
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                         <Maximize className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
@@ -190,9 +718,7 @@ const PitchInfoSection = ({ pitch, parentPitchName, t, currentLang }) => {
                     <Info className="w-5 h-5 text-primary-500" /> {t('info.title', 'Pitch Details')}
                 </h3>
             </div>
-
             <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
-                {/* 1. Description Text */}
                 <div>
                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                         {t('info.description', 'Description')}
@@ -201,18 +727,12 @@ const PitchInfoSection = ({ pitch, parentPitchName, t, currentLang }) => {
                         {backendTrans.description || t('info.noDescription', 'No description provided for this pitch.')}
                     </p>
                 </div>
-
                 <div className="w-full h-px bg-gray-100"></div>
-
-                {/* 2. Technical Specs */}
                 <div>
                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
                         {t('info.specifications', 'Specifications')}
                     </h4>
-                    {/* Changed grid for better mobile response */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-
-                        {/* Size / Capacity */}
                         <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
                             <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 shrink-0">
                                 <Users size={16} />
@@ -222,8 +742,6 @@ const PitchInfoSection = ({ pitch, parentPitchName, t, currentLang }) => {
                                 <p className="text-sm font-semibold text-gray-900 truncate">{pitch.size}-a-side</p>
                             </div>
                         </div>
-
-                        {/* Primary Status */}
                         <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-100">
                             <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-purple-700 shrink-0">
                                 <LayoutGrid size={16} />
@@ -235,8 +753,6 @@ const PitchInfoSection = ({ pitch, parentPitchName, t, currentLang }) => {
                                 </p>
                             </div>
                         </div>
-
-                        {/* Parent Pitch Info */}
                         {pitch.parent_pitch && (
                             <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
                                 <div className="w-8 h-8 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 shrink-0">
@@ -252,10 +768,7 @@ const PitchInfoSection = ({ pitch, parentPitchName, t, currentLang }) => {
                         )}
                     </div>
                 </div>
-
                 <div className="w-full h-px bg-gray-100"></div>
-
-                {/* 3. Dates */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm text-gray-500">
                     <div className="flex items-center gap-2">
                         <Calendar size={14} className="shrink-0" />
@@ -275,12 +788,11 @@ const PitchInfoSection = ({ pitch, parentPitchName, t, currentLang }) => {
 const PitchDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { t, i18n } = useTranslation('pitchDetails'); // Use specific namespace
+    const { t, i18n } = useTranslation('pitchDetails');
     const currentLang = i18n.language;
 
     const { pitchId } = location.state || {};
 
-    // --- State ---
     const [pitch, setPitch] = useState(null);
     const [venueName, setVenueName] = useState(null);
     const [parentPitchName, setParentPitchName] = useState(null);
@@ -288,24 +800,19 @@ const PitchDetails = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    // --- Data Fetching: Pitch Details ---
     useEffect(() => {
         const fetchPitchDetails = async () => {
             if (!pitchId) {
                 setLoading(false);
                 return;
             }
-
             setLoading(true);
             try {
-                // 1. Fetch Pitch Data
                 const response = await pitchesService.getPitchById(pitchId);
-
                 if (response && response.data) {
                     const pitchData = response.data;
                     setPitch(pitchData);
 
-                    // 2. Fetch Venues Data (for Display Name)
                     if (pitchData.venue) {
                         try {
                             const venueRes = await venuesService.getVenueById(pitchData.venue);
@@ -317,7 +824,6 @@ const PitchDetails = () => {
                         }
                     }
 
-                    // 3. Fetch Parent Pitch Data (for Display Name)
                     if (pitchData.parent_pitch) {
                         try {
                             const parentRes = await pitchesService.getPitchById(pitchData.parent_pitch);
@@ -339,13 +845,11 @@ const PitchDetails = () => {
         fetchPitchDetails();
     }, [pitchId, refreshKey, currentLang]);
 
-    // --- Handlers ---
     const handleUpdateSuccess = () => {
         setIsEditing(false);
-        setRefreshKey(prev => prev + 1); // Trigger re-fetch of details
+        setRefreshKey(prev => prev + 1);
     };
 
-    // --- Render ---
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -365,7 +869,6 @@ const PitchDetails = () => {
         );
     }
 
-    // --- Edit Mode (Shows VenuesForm) ---
     if (isEditing) {
         return (
             <div className="min-h-screen bg-gray-50">
@@ -381,7 +884,6 @@ const PitchDetails = () => {
         );
     }
 
-    // --- View Mode ---
     return (
         <div className="min-h-screen bg-gray-50 pb-10">
             <Header
@@ -392,21 +894,29 @@ const PitchDetails = () => {
             />
 
             <div className=" mx-auto py-6 ">
-                {/*
-                    Mobile: Stacked (grid-cols-1)
-                    Tablet/Desktop: 2/3 columns (grid-cols-1 lg:grid-cols-3)
-                */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                     {/* Left Column (Sticky on Large Screens) */}
                     <div className="col-span-1">
                         <div className="lg:sticky lg:top-24 h-fit space-y-6">
                             <PitchProfileCard pitch={pitch} venueName={venueName} t={t} currentLang={currentLang} />
+
+                            {/* MOVED: Info Section is now here on the left */}
+                            <PitchInfoSection pitch={pitch} parentPitchName={parentPitchName} t={t} currentLang={currentLang} />
                         </div>
                     </div>
 
                     {/* Right Column (Scrollable Content) */}
                     <div className="lg:col-span-2 space-y-6">
-                        <PitchInfoSection pitch={pitch} parentPitchName={parentPitchName} t={t} currentLang={currentLang} />
+
+                        {/* Live Slot Calendar */}
+                        <LiveSlotCalendar
+                            pitchId={pitch.id}
+                            t={t}
+                            currentLang={currentLang}
+                        />
+
+                        {/* Pricing Editor */}
+                        <PricingEditor pitchId={pitch.id} t={t} currentLang={currentLang} />
                     </div>
                 </div>
             </div>

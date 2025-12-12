@@ -1,7 +1,8 @@
 {
   "header": {
     "backToPitches": "العودة للملاعب",
-    "updatePitch": "تحديث الملعب"
+    "updatePitch": "تحديث الملعب",
+    "update": "تحديث"
   },
   "status": {
     "active": "نشط",
@@ -30,6 +31,33 @@
     "mainPitch": "ملعب رئيسي",
     "subPitch": "ملعب فرعي",
     "parentPitch": "الملعب الأصلي"
+  },
+  "calendar": {
+    "title": "تقويم الحجوزات المباشر",
+    "viewWeek": "أسبوع",
+    "viewDay": "يوم",
+    "tabs": {
+      "booked": "محجوز",
+      "empty": "متاح",
+      "blocked": "مغلق"
+    },
+    "noSlots": "لا توجد فترات {{status}} في هذا التاريخ.",
+    "status": {
+      "booked": "محجوز",
+      "open": "متاح",
+      "blocked": "مغلق"
+    }
+  },
+  "pricing": {
+    "title": "تعديل الأسعار",
+    "update": "تحديث الأسعار",
+    "headers": {
+      "day": "اليوم",
+      "from": "من الساعة",
+      "to": "إلى الساعة",
+      "price": "السعر"
+    },
+    "unknownDay": "يوم غير معروف"
   },
   "messages": {
     "notFound": "الملعب غير موجود",
