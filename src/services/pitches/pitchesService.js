@@ -2,14 +2,13 @@ import api from '../api.js';
 import { toast } from 'react-toastify';
 
 export const pitchesService = {
-    // View all pitches (Updated to accept params for pagination/filtering)
+    // View all pitches
     getAllPitchess: async (params = {}) => {
         try {
             const response = await api.get('/venue/pitch/pitches/', { params });
             return response.data;
         } catch (error) {
             const message = error.response?.data?.message || "Failed to load pitches";
-            // Only show toast on specific errors to avoid spamming on every filter change
             console.error(message);
             throw error;
         }
@@ -26,6 +25,22 @@ export const pitchesService = {
             throw error;
         }
     },
+
+    // --- NEW API ADDED HERE ---
+    // Check pitch availability (Expects 'date' as YYYY-MM-DD)
+    getPitchAvailableTime: async (id, date) => {
+        try {
+            const response = await api.get(`/venue/pitch/pitches/${id}/available_time/`, {
+                params: { date } // Pass date as a query parameter
+            });
+            return response.data;
+        } catch (error) {
+            const message = error.response?.data?.message || "Failed to check availability";
+            toast.error(message);
+            throw error;
+        }
+    },
+    // --------------------------
 
     // Add new pitch
     addPitch: async (pitchData) => {
