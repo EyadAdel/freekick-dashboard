@@ -55,8 +55,34 @@ const formatTimeLabel = (hour) => {
 };
 
 // ==========================================
-// COMPONENT: LiveSlotCalendar
+// COMPONENT: Simple Status Toggle
 // ==========================================
+const SimpleToggle = ({ isActive, onToggle, isLoading, t }) => {
+    return (
+        <div className="flex items-center gap-3">
+            <span className={`text-sm font-medium transition-colors ${isActive ? 'text-green-600' : 'text-gray-500'}`}>
+                {isActive ? t('status.active', 'Active') : t('status.inactive', 'Inactive')}
+            </span>
+            <button
+                type="button"
+                onClick={onToggle}
+                disabled={isLoading}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 ${
+                    isActive ? 'bg-green-600' : 'bg-gray-200'
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+                <span className="sr-only">Use setting</span>
+                <span
+                    aria-hidden="true"
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        isActive ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                />
+            </button>
+        </div>
+    );
+};
+
 // ==========================================
 // COMPONENT: LiveSlotCalendar
 // ==========================================
@@ -70,7 +96,6 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
     const [loading, setLoading] = useState(false);
 
     // --- Helper: Get Visible Week Days ---
-    // Generates the 5 days shown in the UI (2 days before + selected + 2 days after)
     const getWeekDays = (baseDate) => {
         const days = [];
         const start = new Date(baseDate);
@@ -98,21 +123,17 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
             if (!pitchId) return;
             setLoading(true);
             try {
-                // 1. Determine Start and End Range based on View Mode
                 let startDateRange = new Date(selectedDate);
                 let endDateRange = new Date(selectedDate);
 
                 if (viewMode === 'week') {
-                    // Fetch data for the entire visible range (first day of strip to last day of strip)
                     startDateRange = new Date(weekDays[0]);
                     endDateRange = new Date(weekDays[weekDays.length - 1]);
                 }
 
-                // Set times to absolute start (00:00:00) and end (23:59:59) of the range
                 startDateRange.setHours(0, 0, 0, 0);
                 endDateRange.setHours(23, 59, 59, 999);
 
-                // 2. Prepare API Parameters using __gte and __lte
                 const bookingsParams = {
                     pitch__id: pitchId,
                     start_time__gte: startDateRange.toISOString(),
@@ -120,8 +141,6 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
                     page_size: 1000
                 };
 
-                // Note: Availability usually needs a specific date, or a range if the API supports it.
-                // Assuming availability API still needs a single specific date for the slot generation:
                 const queryDateForAvailability = formatDateForApi(selectedDate);
 
                 const [bookingsRes, availabilityRes] = await Promise.all([
@@ -143,31 +162,22 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
         };
 
         fetchData();
-    }, [selectedDate, pitchId, viewMode]); // Re-fetch when Date or Mode changes
+    }, [selectedDate, pitchId, viewMode]);
 
     // --- Calculate Slots Logic ---
     const slots = [];
     for (let i = 0; i < 24; i++) {
         const startHour = i;
 
-        // 1. Check if Booked
-        // CRITICAL UPDATE: Since we might have fetched a whole week of bookings,
-        // we must filter to find bookings that match the currently Selected Date AND the specific Hour.
         const booking = bookings.find(b => {
             if (!b.start_time) return false;
             const bookingDate = new Date(b.start_time);
-
-            // Check if booking is for the currently selected display date
             const onSelectedDay = isSameDate(bookingDate, selectedDate);
-
-            // Check hour
             const atCurrentHour = bookingDate.getHours() === startHour;
-
             return onSelectedDay && atCurrentHour &&
                 (b.status === 'completed' || b.status === 'pending');
         });
 
-        // 2. Check Availability (remains same)
         const availSlot = availability.find(item => {
             const timeStr = item[0];
             if (!timeStr) return false;
@@ -190,7 +200,6 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
             status = 'blocked';
         }
 
-        // Filter based on active tab
         if (activeTab === 'booked' && status !== 'booked') continue;
         if (activeTab === 'empty' && status !== 'empty') continue;
         if (activeTab === 'blocked' && status !== 'blocked') continue;
@@ -220,14 +229,12 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
-            {/* Top Header */}
             <div className="p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-gray-100">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-primary-600" />
                     {t('calendar.title', 'Live Slot Calendar')}
                 </h3>
 
-                {/* View Switcher: Week / Day */}
                 <div className="flex bg-gray-100 p-1 rounded-lg">
                     <button
                         onClick={() => setViewMode('week')}
@@ -252,7 +259,6 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
                 </div>
             </div>
 
-            {/* Date Navigator */}
             <div className="bg-gray-50/50 border-b border-gray-100">
                 <div className="flex items-center justify-between p-2 sm:px-4">
                     <button onClick={() => handleDateChange(-1)} className="p-2 hover:bg-white rounded-full transition-colors rtl:rotate-180">
@@ -291,7 +297,6 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
                 </div>
             </div>
 
-            {/* Tabs */}
             <div className="flex border-b border-gray-100">
                 {['booked', 'empty', 'blocked'].map(tab => (
                     <button
@@ -308,7 +313,6 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
                 ))}
             </div>
 
-            {/* Slots List */}
             <div className="p-4 sm:p-6 space-y-3 max-h-[500px] overflow-y-auto scrollbar-thin">
                 {loading ? (
                     <div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary-500" /></div>
@@ -338,10 +342,8 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
                                     </div>
                                     <p className="text-sm font-bold text-gray-900">{slot.label}</p>
 
-                                    {/* User Info (Only for Booked slots) */}
                                     {slot.status === 'booked' && slot.data?.user_info && (
                                         <div className="flex items-center mt-3 gap-3">
-                                            {/* Main User Avatar */}
                                             <div className="relative">
                                                 {slot.data.user_info.image ? (
                                                     <img
@@ -355,8 +357,6 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
                                                     </div>
                                                 )}
                                             </div>
-
-                                            {/* User Name */}
                                             <div className="flex flex-col">
                                                 <span className="text-xs font-bold text-gray-800">{slot.data.user_info.name}</span>
                                                 <span className="text-[10px] text-gray-500">{slot.data.user_info.phone}</span>
@@ -372,6 +372,7 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
         </div>
     );
 };
+
 // ==========================================
 // COMPONENT: PricingEditor
 // ==========================================
@@ -570,29 +571,46 @@ const PricingEditor = ({ pitchId, t, currentLang }) => {
     );
 };
 
-// --- Header Component ---
-const Header = ({ onBack, onUpdate, isEditing, t }) => (
-    <div className="bg-white shadow-sm top-0">
-        <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+// --- Updated Header Component (Normal Scroll, Simple Design) ---
+const Header = ({ onBack, onUpdate, isEditing, t, isActive, onToggleStatus, isToggling }) => (
+    <div className="bg-white shadow-sm mb-6 z-10 relative">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+
+            {/* Back Button */}
             <button
                 onClick={onBack}
-                className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors group"
+                className="flex items-center gap-3 group text-gray-500 hover:text-primary-700 transition-colors self-start sm:self-auto"
             >
-                <div className="p-1 rounded-full group-hover:bg-primary-50 transition-colors">
-                    <ArrowIcon className="w-6 h-6 sm:w-8 sm:h-8 transform rotate-90 rtl:-rotate-90" />
+                <div className="w-10 h-10 rounded-full bg-gray-50 group-hover:bg-primary-50 flex items-center justify-center transition-colors">
+                    <ArrowIcon className="w-6 h-6 transform rotate-90 text-gray-400 group-hover:text-primary-600 rtl:-rotate-90" />
                 </div>
-                <span className="font-medium text-sm sm:text-base">{t('header.backToPitches', 'Back to Pitches')}</span>
+                <div>
+                    <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">{t('header.backToPitches', 'Back to Pitches')}</span>
+                    <span className="block font-bold text-gray-900 leading-tight">{t('header.pitchDetails', 'Pitch Details')}</span>
+                </div>
             </button>
 
             {!isEditing && (
-                <button
-                    onClick={onUpdate}
-                    className="flex items-center gap-2 px-3 py-2 sm:px-4 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm active:scale-95 transform duration-150"
-                >
-                    <Edit size={16} />
-                    <span className="hidden sm:inline">{t('header.updatePitch', 'Update Pitch')}</span>
-                    <span className="sm:hidden">{t('header.update', 'Update')}</span>
-                </button>
+                <div className="flex items-center gap-5 self-end sm:self-auto">
+                    {/* Active/Inactive Simple Toggle */}
+                    <SimpleToggle
+                        isActive={isActive}
+                        onToggle={onToggleStatus}
+                        isLoading={isToggling}
+                        t={t}
+                    />
+
+                    <div className="h-8 w-px bg-gray-200 hidden sm:block"></div>
+
+                    {/* Update Button */}
+                    <button
+                        onClick={onUpdate}
+                        className="flex items-center gap-2 px-5 py-2 bg-primary-600 text-white text-sm font-bold rounded-xl hover:bg-primary-700 hover:shadow-lg transition-all duration-300"
+                    >
+                        <Edit size={16} />
+                        <span>{t('header.updatePitch', 'Update Pitch')}</span>
+                    </button>
+                </div>
             )}
         </div>
     </div>
@@ -614,6 +632,8 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+
+                {/* Status Badge */}
                 <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 z-10">
                     <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm ${
                         pitch.is_active ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
@@ -622,6 +642,7 @@ const PitchProfileCard = ({ pitch, venueName, t, currentLang }) => {
                         {pitch.is_active ? t('status.active', 'Active') : t('status.inactive', 'Inactive')}
                     </span>
                 </div>
+
                 {pitch.is_primary && (
                     <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4 z-10">
                         <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm bg-yellow-500/90 text-white">
@@ -800,6 +821,9 @@ const PitchDetails = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
+    // Toggle for IsActive loading state
+    const [isTogglingStatus, setIsTogglingStatus] = useState(false);
+
     useEffect(() => {
         const fetchPitchDetails = async () => {
             if (!pitchId) {
@@ -850,6 +874,28 @@ const PitchDetails = () => {
         setRefreshKey(prev => prev + 1);
     };
 
+    // Handler for status toggling
+    const handleToggleStatus = async () => {
+        if (!pitch || isTogglingStatus) return;
+
+        setIsTogglingStatus(true);
+        try {
+            const newStatus = !pitch.is_active;
+            // Call the update service
+            await pitchesService.updatePitch(pitch.id, { is_active: newStatus });
+
+            // Update local state immediately for better UX
+            setPitch(prev => ({
+                ...prev,
+                is_active: newStatus
+            }));
+        } catch (error) {
+            console.error("Failed to update status:", error);
+        } finally {
+            setIsTogglingStatus(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -891,6 +937,9 @@ const PitchDetails = () => {
                 onUpdate={() => setIsEditing(true)}
                 isEditing={isEditing}
                 t={t}
+                isActive={pitch.is_active}
+                onToggleStatus={handleToggleStatus}
+                isToggling={isTogglingStatus}
             />
 
             <div className=" mx-auto py-6 ">
@@ -900,14 +949,13 @@ const PitchDetails = () => {
                         <div className="lg:sticky lg:top-24 h-fit space-y-6">
                             <PitchProfileCard pitch={pitch} venueName={venueName} t={t} currentLang={currentLang} />
 
-                            {/* MOVED: Info Section is now here on the left */}
+                            {/* Info Section */}
                             <PitchInfoSection pitch={pitch} parentPitchName={parentPitchName} t={t} currentLang={currentLang} />
                         </div>
                     </div>
 
                     {/* Right Column (Scrollable Content) */}
                     <div className="lg:col-span-2 space-y-6">
-
                         {/* Live Slot Calendar */}
                         <LiveSlotCalendar
                             pitchId={pitch.id}

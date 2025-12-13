@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import MainTable from './../../components/MainTable';
 import { Pencil, Trash2, Puzzle, Plus } from 'lucide-react';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
@@ -7,14 +8,18 @@ import AddonsForm from '../../components/addons/AddonsForm.jsx';
 import { addonsService } from '../../services/addons/addonsService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
 import { toast } from 'react-toastify';
+// Import the utility function
+import { getImageUrl } from '../../utils/imageUtils';
 
-// --- CRITICAL FIX: Safe Image Component ---
-// This prevents the "removeChild" crash by using State instead of direct DOM manipulation
+// --- Safe Image Component ---
 const AddonImage = ({ src }) => {
     const [hasError, setHasError] = useState(false);
 
+    // Convert the raw filename/path to a full URL using the utility
+    const fullImageUrl = getImageUrl(src);
+
     // If no source or if an error occurred, show the fallback icon
-    if (!src || hasError) {
+    if (!fullImageUrl || hasError) {
         return (
             <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
                 <Puzzle size={20} />
@@ -25,7 +30,7 @@ const AddonImage = ({ src }) => {
     return (
         <div className="w-10 h-10 bg-gray-50 rounded-lg p-1 border border-gray-200">
             <img
-                src={src}
+                src={fullImageUrl}
                 alt="icon"
                 className="w-full h-full object-contain"
                 onError={() => setHasError(true)}
@@ -35,54 +40,84 @@ const AddonImage = ({ src }) => {
 };
 
 const AddOns = () => {
-    const rowsPerPage = 10;
     const dispatch = useDispatch();
+    const { t } = useTranslation('addOnsPage'); // Initialize translation hook with namespace
+    const rowsPerPage = 10;
 
+    // Update page title when language changes
     useEffect(() => {
-        dispatch(setPageTitle('Add Ons'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pageTitle')));
+    }, [dispatch, t]);
 
-    // --- STATE ---
+    // ================= STATE MANAGEMENT =================
+
+    // 1. Table Data
     const [addonsData, setAddonsData] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalCount, setTotalCount] = useState(0);
 
-    // Form & Edit States
+    // 2. Form & Selection
     const [showForm, setShowForm] = useState(false);
     const [selectedAddon, setSelectedAddon] = useState(null);
 
-    // Filter State
-    const [activeFilters, setActiveFilters] = useState({
-        globalSearch: ''
+    // 3. Filters
+    const [filters, setFilters] = useState({
+        search: '',
+        // Add specific filters here if needed later (e.g., status: 'all')
     });
 
-    // --- FETCH DATA ---
+    // ================= API CALLS =================
+
+    // Construct API params like in Pitches
+    const apiFilters = useMemo(() => ({
+        page: currentPage,
+        page_limit: rowsPerPage, // Ensure your backend accepts this or 'limit'
+        search: filters.search,
+    }), [currentPage, rowsPerPage, filters]);
+
     const fetchAddonsData = async () => {
         setIsLoading(true);
         try {
-            const response = await addonsService.getAll({ page: currentPage });
+            const response = await addonsService.getAll(apiFilters);
 
             if (response && response.results) {
                 setAddonsData(response.results);
-                setTotalCount(response.count);
+                setTotalItems(response.count);
             } else if (Array.isArray(response)) {
+                // Fallback if API doesn't return pagination object
                 setAddonsData(response);
-                setTotalCount(response.length);
+                setTotalItems(response.length);
             }
         } catch (error) {
             console.error("Failed to fetch addons:", error);
-            toast.error("Failed to load addons data.");
+            toast.error(t('messages.fetchError'));
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Fetch data whenever apiFilters change
     useEffect(() => {
         fetchAddonsData();
-    }, [currentPage]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [apiFilters]);
 
-    // --- CRUD HANDLERS ---
+    // ================= HANDLERS =================
+
+    const handleSearch = (term) => {
+        setFilters(prev => ({ ...prev, search: term }));
+        setCurrentPage(1); // Reset to page 1 on search
+    };
+
+    // Generic filter handler matching Pitches structure
+    const handleFilterChange = (newFilters) => {
+        setFilters(prev => ({ ...prev, ...newFilters }));
+        setCurrentPage(1);
+    };
+
+    const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+
     const handleCreateAddon = () => {
         setSelectedAddon(null);
         setShowForm(true);
@@ -96,17 +131,21 @@ const AddOns = () => {
 
     const handleDeleteAddon = async (id, name) => {
         const isConfirmed = await showConfirm({
-            title: `Delete "${name}"?`,
-            text: "This action cannot be undone. The addon will be permanently removed.",
-            confirmButtonText: 'Yes, Delete it'
+            title: t('messages.deleteConfirm.title', { name: name }),
+            text: t('messages.deleteConfirm.text'),
+            confirmButtonText: t('messages.deleteConfirm.confirmButton')
         });
 
         if (!isConfirmed) return;
 
         try {
             await addonsService.delete(id);
-            setAddonsData(prev => prev.filter(item => item.id !== id));
-            setTotalCount(prev => prev - 1);
+            // If deleting the last item on a page > 1, go back a page
+            if (addonsData.length === 1 && currentPage > 1) {
+                setCurrentPage(prev => prev - 1);
+            } else {
+                fetchAddonsData();
+            }
         } catch (error) {
             console.error("Failed to delete addon:", error);
         }
@@ -123,48 +162,24 @@ const AddOns = () => {
         fetchAddonsData();
     };
 
-    // --- FILTER LOGIC ---
-    const filteredData = useMemo(() => {
-        if (!addonsData) return [];
+    // ================= TABLE CONFIG =================
 
-        return addonsData.filter((item) => {
-            if (activeFilters.globalSearch) {
-                const search = activeFilters.globalSearch.toLowerCase();
-                const nameEn = item.translations?.en?.name?.toLowerCase() || '';
-                const nameAr = item.translations?.ar?.name?.toLowerCase() || '';
+    // Define filters configuration (currently empty, but structure is ready for expansion)
+    const filterConfig = [];
 
-                if (!nameEn.includes(search) && !nameAr.includes(search)) return false;
-            }
-            return true;
-        });
-    }, [addonsData, activeFilters]);
-
-    const handleSearch = (term) => {
-        setActiveFilters(prev => ({ ...prev, globalSearch: term }));
-    };
-
-    const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
-
-    const stats = useMemo(() => {
-        return {
-            total: totalCount,
-        };
-    }, [totalCount]);
-
-    // --- TABLE CONFIG ---
     const ActionButtons = ({ addon }) => (
         <div className="flex justify-end items-center gap-1 sm:gap-2">
             <button
                 className="text-gray-500 hover:text-blue-600 p-1 rounded transition-colors hover:bg-gray-50"
-                title="Edit Addon"
+                title={t('actions.editTooltip')}
                 onClick={() => handleEditAddon(addon)}
             >
                 <Pencil size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button
                 className="text-gray-500 hover:text-red-600 p-1 rounded transition-colors hover:bg-gray-50"
-                onClick={() => handleDeleteAddon(addon.id, addon.translations?.en?.name || "this item")}
-                title="Delete Addon"
+                onClick={() => handleDeleteAddon(addon.id, addon.translations?.en?.name || t('messages.deleteConfirm.fallbackItemName'))}
+                title={t('actions.deleteTooltip')}
             >
                 <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
@@ -173,7 +188,7 @@ const AddOns = () => {
 
     const columns = [
         {
-            header: 'Sr.No',
+            header: t('table.headers.srNo'),
             accessor: 'id',
             align: 'left',
             width: '80px',
@@ -184,19 +199,18 @@ const AddOns = () => {
             )
         },
         {
-            header: 'Icon',
+            header: t('table.headers.icon'),
             accessor: 'icon',
             align: 'center',
             width: '100px',
             render: (row) => (
                 <div className="flex justify-center">
-                    {/* Using the safe AddonImage component with direct row.icon */}
                     <AddonImage src={row.icon} />
                 </div>
             )
         },
         {
-            header: 'Name (EN)',
+            header: t('table.headers.nameEn'),
             accessor: 'name_en',
             align: 'center',
             render: (row) => (
@@ -206,7 +220,7 @@ const AddOns = () => {
             )
         },
         {
-            header: 'Name (AR)',
+            header: t('table.headers.nameAr'),
             accessor: 'name_ar',
             align: 'center',
             render: (row) => (
@@ -216,7 +230,7 @@ const AddOns = () => {
             )
         },
         {
-            header: 'Quick Actions',
+            header: t('table.headers.actions'),
             align: 'right',
             render: (row) => <ActionButtons addon={row} />
         }
@@ -224,40 +238,40 @@ const AddOns = () => {
 
     const topActions = [
         {
-            label: '+ Create Addon',
+            label: t('actions.create'),
             onClick: handleCreateAddon,
             type: 'primary',
             icon: <Plus size={18} />
         }
     ];
 
+    // ================= RENDER =================
+
+    if (showForm) {
+        return (
+            <div className="w-full p-4 mb-6 sm:mb-8">
+                <AddonsForm
+                    initialData={selectedAddon}
+                    onCancel={handleCancelForm}
+                    onSuccess={handleFormSuccess}
+                />
+            </div>
+        );
+    }
 
     return (
-        <div className="w-full p-4 ">
-
-
-            {/* Form Section */}
-            {showForm && (
-                <div className='mb-6 sm:mb-8'>
-                    <AddonsForm
-                        initialData={selectedAddon}
-                        onCancel={handleCancelForm}
-                        onSuccess={handleFormSuccess}
-                    />
-                </div>
-            )}
-
-            {/* Main Table Section */}
+        <div className="w-full p-4">
             <MainTable
-                data={filteredData}
+                data={addonsData}
                 columns={columns}
-                filters={[]}
-                searchPlaceholder="Search by name..."
+                filters={filterConfig}
+                searchPlaceholder={t('table.searchPlaceholder')}
                 topActions={topActions}
                 currentPage={currentPage}
-                totalItems={totalCount}
+                totalItems={totalItems}
                 itemsPerPage={rowsPerPage}
                 onSearch={handleSearch}
+                onFilterChange={handleFilterChange}
                 onPageChange={handlePageChange}
                 isLoading={isLoading}
             />

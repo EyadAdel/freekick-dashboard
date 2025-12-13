@@ -1,0 +1,27 @@
+{
+  "pageTitle": "Add Ons",
+  "actions": {
+    "create": "+ Create Addon",
+    "editTooltip": "Edit Addon",
+    "deleteTooltip": "Delete Addon"
+  },
+  "table": {
+    "headers": {
+      "srNo": "Sr.No",
+      "icon": "Icon",
+      "nameEn": "Name (EN)",
+      "nameAr": "Name (AR)",
+      "actions": "Quick Actions"
+    },
+    "searchPlaceholder": "Search by name..."
+  },
+  "messages": {
+    "fetchError": "Failed to load addons data.",
+    "deleteConfirm": {
+      "title": "Delete \"{{name}}\"?",
+      "text": "This action cannot be undone. The addon will be permanently removed.",
+      "confirmButton": "Yes, Delete it",
+      "fallbackItemName": "this item"
+    }
+  }
+}

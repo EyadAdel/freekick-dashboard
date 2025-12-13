@@ -38,6 +38,10 @@ import enTournamentPage from '../locales/en/Tournaments/tournamentPage.json';
 import arTournamentPage from '../locales/ar/Tournaments/tournamentPage.json';
 import entournamentDetails from '../locales/en/Tournaments/tournamentDetails.json';
 import artournamentDetails from '../locales/ar/Tournaments/tournamentDetails.json';
+import enAddOnsForm from '../locales/en/AddOns/addOnsForm.json';
+import arAddOnsForm from '../locales/ar/AddOns/addOnsForm.json';
+import enAddOnsPage from '../locales/en/AddOns/addOnsPage.json';
+import arAddOnsPage from '../locales/ar/AddOns/addOnsPage.json';
 
 // Translation resources
 const resources = {
@@ -59,6 +63,8 @@ const resources = {
         tournamentForm: enTournamentForm,
         tournamentPage: enTournamentPage,
         tournamentDetails: entournamentDetails,
+        addOnsForm: enAddOnsForm,
+        addOnsPage: enAddOnsPage,
 
 
     },
@@ -80,6 +86,9 @@ const resources = {
         tournamentForm: arTournamentForm,
         tournamentPage: arTournamentPage,
         tournamentDetails: artournamentDetails,
+        addOnsForm: arAddOnsForm,
+        addOnsPage: arAddOnsPage,
+
 
 
 
@@ -118,7 +127,9 @@ i18n
             'amenitiesPage',
             'tournamentForm',
             'tournamentPage',
-            'tournamentDetails'
+            'tournamentDetails',
+            'addOnsForm',
+            'addOnsPage'
         ],        debug: process.env.NODE_ENV === 'development',
         interpolation: {
             escapeValue: false,

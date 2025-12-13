@@ -4,12 +4,13 @@ import { uploadService } from '../../services/upload/uploadService.js';
 import { authService } from '../../services/authService.js';
 import { pitchOwnersService } from '../../services/pitchOwners/pitchOwnersService.js';
 import { generateUniqueFileName } from '../../utils/fileUtils';
+import { getImageUrl, extractFilename } from '../../utils/imageUtils'; // Imported new utils
 import { citiesList } from '../../services/citiesList/citiesListService.js';
 
 import {
     Save, X, UploadCloud, Trash2, Loader2,
     Edit, User, Mail, Phone, MapPin, Percent,
-    FileText, ToggleLeft, ToggleRight, Building, CreditCard
+    FileText, Building, CreditCard, Image as ImageIcon
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -18,7 +19,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     // --- STATE ---
     const [formData, setFormData] = useState({
         user_id: '',
-        user_info: '', // This will hold the name (or notes)
+        user_info: '',
         name: '',
         address: '',
         email: '',
@@ -34,16 +35,23 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
 
-    // Image States
+    // --- PROFILE IMAGE STATES ---
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [finalImageName, setFinalImageName] = useState('');
     const [isImageUploading, setIsImageUploading] = useState(false);
+    const fileInputRef = useRef(null);
+
+    // --- COVER IMAGE STATES ---
+    const [selectedCoverImage, setSelectedCoverImage] = useState(null);
+    const [coverImagePreview, setCoverImagePreview] = useState(null);
+    const [finalCoverImageName, setFinalCoverImageName] = useState('');
+    const [isCoverImageUploading, setIsCoverImageUploading] = useState(false);
+    const coverInputRef = useRef(null);
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const fileInputRef = useRef(null);
 
     // --- FETCH USERS FOR DROPDOWN ---
     useEffect(() => {
@@ -67,21 +75,13 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     // --- POPULATE FORM WITH API DATA ---
     useEffect(() => {
         if (initialData) {
-            // Handle if the data is wrapped in { data: ... } or passed directly
             const data = initialData.data || initialData;
 
             setFormData({
-                // Map 'user' ID (int) from API to 'user_id'
                 user_id: data.user_id || data.user || data.user_info?.id || '',
-                // UPDATED: Set user_info input to the name from the user_info object
                 user_info: data.user_info?.name || '',
-
-                // Map 'pitch_name' from API to 'name'
                 name: data.pitch_name || data.name || (data.translations?.en?.name) || '',
-
-                // Map 'pitch_address' from API to 'address'
                 address: data.pitch_address || data.address || '',
-
                 email: data.email || '',
                 contact_name: data.contact_name || '',
                 contact_phone: data.contact_phone || '',
@@ -92,11 +92,18 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 is_active: data.is_active !== undefined ? data.is_active : true,
             });
 
-            // Handle Image (API returns 'profile_image', form logic uses 'image')
+            // Handle Profile Image using Utils
             const img = data.profile_image || data.image;
             if (img) {
-                setImagePreview(img);
-                setFinalImageName(img);
+                setImagePreview(getImageUrl(img)); // Resolve full URL for display
+                setFinalImageName(extractFilename(img)); // Ensure we store just the filename for updates
+            }
+
+            // Handle Cover Image using Utils
+            const cover = data.cover_image;
+            if (cover) {
+                setCoverImagePreview(getImageUrl(cover)); // Resolve full URL for display
+                setFinalCoverImageName(extractFilename(cover)); // Ensure we store just the filename for updates
             }
         }
     }, [initialData]);
@@ -104,24 +111,14 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     // --- HANDLERS ---
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-
         setFormData((prev) => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
         }));
-
-        if (name === 'user_id') {
-            const selectedUser = users.find(u => u.id === value || u.id === parseInt(value));
-            // Optional: Auto-fill user_info with user name when selecting from dropdown if needed
-            // if (selectedUser) {
-            //     setFormData(prev => ({ ...prev, user_info: selectedUser.name }));
-            // }
-        }
-
         if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
-    // --- IMAGE UPLOAD LOGIC ---
+    // --- PROFILE IMAGE UPLOAD LOGIC ---
     const handleImageSelect = async (file) => {
         if (!file) return;
         if (!file.type.startsWith('image/')) {
@@ -139,16 +136,15 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
             const generatedName = generateUniqueFileName(file.name);
             const result = await uploadService.processFullUpload(file, generatedName);
             const uploadedName = result.key || result.fileName || generatedName;
-
             setFinalImageName(uploadedName);
-            toast.success("Image uploaded successfully");
+            toast.success("Profile image uploaded successfully");
         } catch (error) {
             console.error("Image upload failed", error);
             setSelectedImage(null);
             setImagePreview(null);
             setFinalImageName('');
             if (fileInputRef.current) fileInputRef.current.value = '';
-            toast.error("Image upload failed.");
+            toast.error("Profile image upload failed.");
         } finally {
             setIsImageUploading(false);
         }
@@ -159,20 +155,69 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (file) handleImageSelect(file);
     };
 
-    const handleDrop = (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const file = e.dataTransfer.files[0];
-        if (file) handleImageSelect(file);
-    };
-
-    const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); };
-
     const removeImage = (e) => {
         e.stopPropagation();
         setSelectedImage(null);
         setImagePreview(null);
         setFinalImageName('');
         if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    // --- COVER IMAGE UPLOAD LOGIC ---
+    const handleCoverSelect = async (file) => {
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            toast.error("Please upload a valid image file");
+            return;
+        }
+
+        const previewUrl = URL.createObjectURL(file);
+        setSelectedCoverImage(file);
+        setCoverImagePreview(previewUrl);
+
+        setIsCoverImageUploading(true);
+        try {
+            const generatedName = generateUniqueFileName(file.name);
+            const result = await uploadService.processFullUpload(file, generatedName);
+            const uploadedName = result.key || result.fileName || generatedName;
+            setFinalCoverImageName(uploadedName);
+            toast.success("Cover image uploaded successfully");
+        } catch (error) {
+            console.error("Cover upload failed", error);
+            setSelectedCoverImage(null);
+            setCoverImagePreview(null);
+            setFinalCoverImageName('');
+            if (coverInputRef.current) coverInputRef.current.value = '';
+            toast.error("Cover image upload failed.");
+        } finally {
+            setIsCoverImageUploading(false);
+        }
+    };
+
+    const onCoverFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) handleCoverSelect(file);
+    };
+
+    const removeCoverImage = (e) => {
+        e.stopPropagation();
+        setSelectedCoverImage(null);
+        setCoverImagePreview(null);
+        setFinalCoverImageName('');
+        if (coverInputRef.current) coverInputRef.current.value = "";
+    };
+
+    // Drag & Drop Helpers
+    const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); };
+    const handleDropProfile = (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const file = e.dataTransfer.files[0];
+        if (file) handleImageSelect(file);
+    };
+    const handleDropCover = (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const file = e.dataTransfer.files[0];
+        if (file) handleCoverSelect(file);
     };
 
     // --- SUBMIT ---
@@ -185,8 +230,9 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (!formData.email) newErrors.email = "Email is required";
         if (!formData.contact_phone) newErrors.contact_phone = "Contact Phone is required";
         if (!formData.commission_rate) newErrors.commission_rate = "Commission Rate is required";
-        if (isImageUploading) {
-            toast.warning("Please wait for image to finish uploading.");
+
+        if (isImageUploading || isCoverImageUploading) {
+            toast.warning("Please wait for images to finish uploading.");
             return;
         }
 
@@ -196,29 +242,24 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         setIsSubmitting(true);
 
         try {
-            // Prepare payload
             const payload = {
                 ...formData,
                 kind: 'pitch_owner',
                 pitch_name: formData.name,
                 pitch_address: formData.address,
-
-                // Translations structure
                 translations: {
                     en: { name: formData.name },
                     ar: { name: formData.name }
                 },
-
-                profile_image: finalImageName || null
+                profile_image: finalImageName || null,
+                cover_image: finalCoverImageName || null
             };
 
             const targetId = initialData?.data?.id || initialData?.id;
 
             if (targetId) {
-                // UPDATE
                 await pitchOwnersService.updateStaff(targetId, payload);
             } else {
-                // CREATE
                 await pitchOwnersService.createStaff(payload);
             }
 
@@ -286,7 +327,6 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                             {errors.user_id && <p className="text-xs text-red-500 mt-1">{errors.user_id}</p>}
                         </div>
 
-                        {/* User Info (Text Input) */}
                         <MainInput
                             label="User Info / Notes"
                             name="user_info"
@@ -304,28 +344,24 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                         <MapPin size={20} /> Pitch Details
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="">
-                            <MainInput
-                                label="Pitch Name"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                error={errors.name}
-                                icon={Building}
-                                required
-                            />
-                        </div>
+                        <MainInput
+                            label="Pitch Name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            error={errors.name}
+                            icon={Building}
+                            required
+                        />
 
-                        <div className="">
-                            <MainInput
-                                label="Pitch Address"
-                                name="address"
-                                value={formData.address}
-                                onChange={handleChange}
-                                icon={MapPin}
-                                placeholder="Full street address"
-                            />
-                        </div>
+                        <MainInput
+                            label="Pitch Address"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            icon={MapPin}
+                            placeholder="Full street address"
+                        />
 
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-gray-700">City</label>
@@ -405,7 +441,6 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                             placeholder="e.g. 10"
                             required
                         />
-
                     </div>
                     {/* Status */}
                     <div className="bg-primary-50 p-6 rounded-lg space-y-4 border border-primary-100">
@@ -413,52 +448,94 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                             <MainInput type="checkbox" label="Is Active ?" name="is_active" value={formData.is_active} onChange={handleChange} />
                         </div>
                     </div>
-
-
                 </div>
 
-                {/* Section 4: Image Upload */}
-                <div className="space-y-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Pitch Image <span className="text-gray-400 font-normal">(Optional)</span>
-                    </label>
-                    <div
-                        onClick={() => !isImageUploading && fileInputRef.current.click()}
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop}
-                        className={`relative w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors 
-                        ${errors.image ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-primary-500'}
-                        ${isImageUploading ? 'cursor-wait bg-gray-50' : 'cursor-pointer'}`}
-                    >
-                        <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={onFileChange}
-                               disabled={isImageUploading}/>
+                {/* Section 4: Images (Profile & Cover) */}
+                <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
+                        <ImageIcon size={20} /> Media
+                    </h3>
 
-                        {isImageUploading ? (
-                            <div className="flex flex-col items-center justify-center">
-                                <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
-                                <p className="text-sm font-medium text-gray-600">Uploading...</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* 1. Profile/Pitch Image */}
+                        <div className="space-y-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                 Logo  <span className="text-gray-400 font-normal">(Optional)</span>
+                            </label>
+                            <div
+                                onClick={() => !isImageUploading && fileInputRef.current.click()}
+                                onDragOver={handleDragOver}
+                                onDrop={handleDropProfile}
+                                className={`relative w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors 
+                                ${errors.image ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-primary-500'}
+                                ${isImageUploading ? 'cursor-wait bg-gray-50' : 'cursor-pointer'}`}
+                            >
+                                <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={onFileChange}
+                                       disabled={isImageUploading}/>
+
+                                {isImageUploading ? (
+                                    <div className="flex flex-col items-center justify-center">
+                                        <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
+                                        <p className="text-sm font-medium text-gray-600">Uploading...</p>
+                                    </div>
+                                ) : imagePreview ? (
+                                    <div className="relative w-full h-full p-2 group">
+                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-contain rounded-md" />
+                                        <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
+                                            <button type="button" onClick={removeImage} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"><Trash2 size={20} /></button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center p-4">
+                                        <div className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3"><UploadCloud size={24} /></div>
+                                        <p className="text-sm font-medium text-gray-700">Upload Logo</p>
+                                    </div>
+                                )}
                             </div>
-                        ) : imagePreview ? (
-                            <div className="relative w-full h-full p-2 group">
-                                <img src={imagePreview} alt="Preview" className="w-full h-full object-contain rounded-md" />
-                                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
-                                    <button type="button" onClick={removeImage} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"><Trash2 size={20} /></button>
-                                </div>
+                        </div>
+
+                        {/* 2. Cover Image */}
+                        <div className="space-y-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Profile Image <span className="text-gray-400 font-normal">(Optional)</span>
+                            </label>
+                            <div
+                                onClick={() => !isCoverImageUploading && coverInputRef.current.click()}
+                                onDragOver={handleDragOver}
+                                onDrop={handleDropCover}
+                                className={`relative w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors border-gray-300 hover:border-primary-500
+                                ${isCoverImageUploading ? 'cursor-wait bg-gray-50' : 'cursor-pointer'}`}
+                            >
+                                <input type="file" hidden ref={coverInputRef} accept="image/*" onChange={onCoverFileChange}
+                                       disabled={isCoverImageUploading}/>
+
+                                {isCoverImageUploading ? (
+                                    <div className="flex flex-col items-center justify-center">
+                                        <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
+                                        <p className="text-sm font-medium text-gray-600">Uploading...</p>
+                                    </div>
+                                ) : coverImagePreview ? (
+                                    <div className="relative w-full h-full p-2 group">
+                                        <img src={coverImagePreview} alt="Cover Preview" className="w-full h-full object-cover rounded-md" />
+                                        <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
+                                            <button type="button" onClick={removeCoverImage} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"><Trash2 size={20} /></button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center p-4">
+                                        <div className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3"><UploadCloud size={24} /></div>
+                                        <p className="text-sm font-medium text-gray-700">Upload Cover</p>
+                                    </div>
+                                )}
                             </div>
-                        ) : (
-                            <div className="text-center p-4">
-                                <div className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3"><UploadCloud size={24} /></div>
-                                <p className="text-sm font-medium text-gray-700">Click to upload pitch image</p>
-                                <p className="text-xs text-gray-500 mt-1">SVG, PNG, JPG or GIF (max. 800x400px)</p>
-                            </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 
                 {/* Buttons */}
                 <div className="flex gap-4 pt-4">
                     <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">Cancel</button>
-                    <button type="submit" disabled={isSubmitting || isImageUploading} className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg">
+                    <button type="submit" disabled={isSubmitting || isImageUploading || isCoverImageUploading} className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg">
                         {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? "Update Pitch Owner" : "Save Pitch Owner"}</>}
                     </button>
                 </div>

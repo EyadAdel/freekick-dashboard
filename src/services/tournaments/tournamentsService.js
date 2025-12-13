@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 
 // Matches the base path shown in the screenshot
 const BASE_URL = '/tournaments/tournaments/';
+const JOINED_TEAMS_URL = '/tournaments/joined-teams/';
 
 export const tournamentsService = {
 
@@ -42,6 +43,21 @@ export const tournamentsService = {
         } catch (error) {
             console.error(error);
             toast.error('Failed to fetch tournament details.');
+            throw error;
+        }
+    },
+
+    // GET: /tournaments/joined-teams/?tournament__id={id}
+    // Fetch teams that have joined a specific tournament
+    getJoinedTeams: async (tournamentId) => {
+        try {
+            const response = await api.get(JOINED_TEAMS_URL, {
+                params: { tournament__id: tournamentId }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to fetch joined teams.');
             throw error;
         }
     },

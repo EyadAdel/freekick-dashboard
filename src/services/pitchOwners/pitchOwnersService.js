@@ -47,14 +47,15 @@ export const pitchOwnersService = {
     },
 
     // PATCH /user/staff/{id}/
+    // Use this for updating commission_rate
     updateStaff: async (id, data) => {
         try {
             const response = await api.patch(`${BASE_URL}${id}/`, data);
-            toast.success('Staff member updated successfully!');
+            toast.success('Updated successfully!');
             return response.data;
         } catch (error) {
             console.error(error);
-            toast.error(error.response?.data?.message || 'Failed to update staff member.');
+            toast.error(error.response?.data?.message || 'Failed to update details.');
             throw error;
         }
     },
@@ -77,13 +78,13 @@ export const pitchOwnersService = {
     // ==========================
 
     // GET /user/staff-actions/
-    getAllStaffActions: async (id, page = 1,actionsLimit) => {
+    getAllStaffActions: async (id, page = 1, actionsLimit) => {
         try {
             const response = await api.get(ACTIONS_BASE_URL, {
                 params: {
                     stuff: id,
                     page: page,
-                    page_limit:actionsLimit
+                    page_limit: actionsLimit
                 }
             });
             return response.data;
@@ -107,9 +108,6 @@ export const pitchOwnersService = {
         }
     },
 
-    // GET /user/staff-actions/analytics/
-    // Note: Specific paths usually come before dynamic {id} paths in routing,
-    // but in frontend service calls, the order doesn't matter.
     getStaffActionAnalytics: async (params = {}) => {
         try {
             const response = await api.get(`${ACTIONS_BASE_URL}analytics/`, { params });
@@ -121,7 +119,6 @@ export const pitchOwnersService = {
         }
     },
 
-    // GET /user/staff-actions/{id}/
     getStaffActionById: async (id) => {
         try {
             const response = await api.get(`${ACTIONS_BASE_URL}${id}/`);

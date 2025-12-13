@@ -6,7 +6,7 @@ import {
     MapPin, Star, Phone, Mail, User,
     Trophy, Coffee, LayoutGrid, Shield, Info,
     CheckCircle2, XCircle, Image as ImageIcon,
-    Clock, Calendar, Layers, Edit // Added Edit icon
+    Clock, Calendar, Layers, Edit, Loader2
 } from 'lucide-react';
 
 // --- Services ---
@@ -26,26 +26,75 @@ const getTrans = (obj, lang = 'en') => {
     return obj?.[lang] || obj?.en || {};
 };
 
-// --- Header Component ---
-const Header = ({ onBack, onUpdate, isEditing, t }) => (
-    <div className="bg-white shadow-sm z-10 relative">
-        <div className="mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+// ==========================================
+// COMPONENT: Simple Status Toggle
+// ==========================================
+const SimpleToggle = ({ isActive, onToggle, isLoading, t }) => {
+    return (
+        <div className="flex items-center gap-3">
+            <span className={`text-sm font-medium transition-colors ${isActive ? 'text-green-600' : 'text-gray-500'}`}>
+                {isActive ? t('status.active', 'Active') : t('status.inactive', 'Inactive')}
+            </span>
+            <button
+                type="button"
+                onClick={onToggle}
+                disabled={isLoading}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 ${
+                    isActive ? 'bg-green-600' : 'bg-gray-200'
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+                <span className="sr-only">Use setting</span>
+                <span
+                    aria-hidden="true"
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        isActive ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                />
+            </button>
+        </div>
+    );
+};
+
+// --- Updated Header Component (Normal Scroll, Simple Design) ---
+const Header = ({ onBack, onUpdate, isEditing, t, isActive, onToggleStatus, isToggling }) => (
+    <div className="bg-white shadow-sm mb-6 z-10 relative">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+
+            {/* Back Button */}
             <button
                 onClick={onBack}
-                className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors"
+                className="flex items-center gap-3 group text-gray-500 hover:text-primary-700 transition-colors self-start sm:self-auto"
             >
-                <ArrowIcon className="w-8 h-8 transform rotate-90" />
-                <span className="font-medium">{t('header.backToVenues')}</span>
+                <div className="w-10 h-10 rounded-full bg-gray-50 group-hover:bg-primary-50 flex items-center justify-center transition-colors">
+                    <ArrowIcon className="w-6 h-6 transform rotate-90 text-gray-400 group-hover:text-primary-600 rtl:-rotate-90" />
+                </div>
+                <div>
+                    <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">{t('header.backToVenues', 'Back to Venues')}</span>
+                    <span className="block font-bold text-gray-900 leading-tight">{t('header.venueDetails', 'Venue Details')}</span>
+                </div>
             </button>
 
             {!isEditing && (
-                <button
-                    onClick={onUpdate}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
-                >
-                    <Edit size={16} />
-                    <span>{t('header.updateVenue')}</span>
-                </button>
+                <div className="flex items-center gap-5 self-end sm:self-auto">
+                    {/* Active/Inactive Simple Toggle */}
+                    <SimpleToggle
+                        isActive={isActive}
+                        onToggle={onToggleStatus}
+                        isLoading={isToggling}
+                        t={t}
+                    />
+
+                    <div className="h-8 w-px bg-gray-200 hidden sm:block"></div>
+
+                    {/* Update Button */}
+                    <button
+                        onClick={onUpdate}
+                        className="flex items-center gap-2 px-5 py-2 bg-primary-600 text-white text-sm font-bold rounded-xl hover:bg-primary-700 hover:shadow-lg transition-all duration-300"
+                    >
+                        <Edit size={16} />
+                        <span>{t('header.updateVenue', 'Update Venue')}</span>
+                    </button>
+                </div>
             )}
         </div>
     </div>
@@ -484,6 +533,9 @@ const VenueDetails = () => {
     // Key to force refresh after update
     const [refreshKey, setRefreshKey] = useState(0);
 
+    // Toggle for IsActive loading state
+    const [isTogglingStatus, setIsTogglingStatus] = useState(false);
+
     // --- Data Fetching ---
     useEffect(() => {
         const fetchAllDetails = async () => {
@@ -536,6 +588,27 @@ const VenueDetails = () => {
         setRefreshKey(prev => prev + 1); // Trigger useEffect to reload data
     };
 
+    const handleToggleStatus = async () => {
+        if (!venue || isTogglingStatus) return;
+
+        setIsTogglingStatus(true);
+        try {
+            const newStatus = !venue.is_active;
+            // Call the update service
+            await venuesService.updateVenue(venue.id, { is_active: newStatus });
+
+            // Update local state immediately for better UX
+            setVenue(prev => ({
+                ...prev,
+                is_active: newStatus
+            }));
+        } catch (error) {
+            console.error("Failed to update status:", error);
+        } finally {
+            setIsTogglingStatus(false);
+        }
+    };
+
     // --- Render Conditions ---
 
     if (loading) {
@@ -582,6 +655,9 @@ const VenueDetails = () => {
                 onUpdate={() => setIsEditing(true)}
                 isEditing={isEditing}
                 t={t}
+                isActive={venue.is_active}
+                onToggleStatus={handleToggleStatus}
+                isToggling={isTogglingStatus}
             />
 
             <div className="mx-auto py-6 px-4 md:px-8">

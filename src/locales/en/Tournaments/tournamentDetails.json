@@ -15,13 +15,18 @@
     "entry_fee": "Entry Fee",
     "currency": "AED",
     "free": "Free",
-    "registered_teams": "Registered Teams",
+    "registered_teams": "Registered",
     "code": "Code",
     "share": "Share Tournament",
     "venue_id": "Venue ID: {{id}}"
   },
   "gallery": {
     "title": "Gallery"
+  },
+  "participants": {
+    "title": "Participants",
+    "teams": "Teams",
+    "players": "Players"
   },
   "info": {
     "title": "About Tournament",

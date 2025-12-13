@@ -22,6 +22,9 @@ import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import { pitchOwnersService } from '../../services/pitchOwners/pitchOwnersService.js';
 import { bePartnerService } from '../../services/bePartner/bePartnerService.js';
 
+// --- Utils ---
+import { getImageUrl } from '../../utils/imageUtils.js'; // Import image utility
+
 // --- HELPER COMPONENT: AVATAR ---
 const OwnerAvatar = ({ image, name }) => {
     const getInitials = (n) => {
@@ -31,13 +34,15 @@ const OwnerAvatar = ({ image, name }) => {
         return (parts[0][0] + parts[1][0]).toUpperCase();
     };
 
-    const isValidImage = image && image !== "Null" && image !== "null";
+    // Sanitize input to handle "Null" strings from backend before getting full URL
+    const cleanImage = (image && image !== "Null" && image !== "null") ? image : null;
+    const imageUrl = getImageUrl(cleanImage);
 
-    if (isValidImage) {
+    if (imageUrl) {
         return (
             <div className="w-10 h-10 min-w-[40px] rounded-full border border-gray-200 overflow-hidden shadow-sm">
                 <img
-                    src={image}
+                    src={imageUrl}
                     alt={name}
                     className="w-full h-full object-cover"
                     onError={(e) => { e.target.style.display = 'none'; }}
@@ -70,7 +75,7 @@ const StatusBadge = ({ isActive }) => {
 const PitchOwners = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { t } = useTranslation(); // You might want to pass a namespace here like 'pitchOwnersPage'
+    const { t } = useTranslation();
     const { user } = useSelector((state) => state.auth);
     const rowsPerPage = 10;
 
@@ -203,6 +208,10 @@ const PitchOwners = () => {
 
     const handleApprovePartner = (item) => {
         setConvertingRequestId(item.id);
+
+        // Sanitize before getting URL
+        const rawImage = (item.cover_photo && item.cover_photo !== "Null" && item.cover_photo !== "null") ? item.cover_photo : null;
+
         const prefilledData = {
             name: item.club_name,
             address: item.address,
@@ -214,7 +223,8 @@ const PitchOwners = () => {
             eid: item.emirates_id,
             user_id: item.user.id,
             is_active: true,
-            profile_image: (item.cover_photo && item.cover_photo !== "Null") ? item.cover_photo : null,
+            // Use getImageUrl to ensure the form gets a correct URL or null
+            profile_image: getImageUrl(rawImage),
         };
         setSelectedOwner(prefilledData);
         setShowForm(true);
@@ -264,7 +274,6 @@ const PitchOwners = () => {
     };
 
     const handleViewOwner = async (id) => {
-        // Option 1: Fetch details then navigate
         setIsLoading(true);
         try {
             const response = await pitchOwnersService.getStaffById(id);
@@ -496,9 +505,10 @@ const PitchOwners = () => {
                         idKey="id"
                         isActiveKey="is_active"
                         renderIcon={(item) => {
-                            const hasImage = item.cover_photo && item.cover_photo !== "Null" && item.cover_photo !== "null";
-                            return hasImage ? (
-                                <img src={item.cover_photo} alt="Cover" className="w-full h-full object-cover rounded-lg" />
+                            const cleanCover = (item.cover_photo && item.cover_photo !== "Null" && item.cover_photo !== "null") ? item.cover_photo : null;
+                            const imageUrl = getImageUrl(cleanCover);
+                            return imageUrl ? (
+                                <img src={imageUrl} alt="Cover" className="w-full h-full object-cover rounded-lg" />
                             ) : <ImageIcon className="text-white w-5 h-5" />;
                         }}
                         renderHeader={(item) => (

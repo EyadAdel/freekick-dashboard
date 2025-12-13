@@ -5,10 +5,11 @@ import {
     Calendar, Clock, MapPin, Trophy,
     Share2, Award, BookOpen, LayoutGrid,
     CheckCircle, Edit, Shield, CheckCircle2,
-    XCircle, Image as ImageIcon, Users, Activity
+    XCircle, Image as ImageIcon, Users, Activity,
+    User, UserCircle
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { useTranslation } from 'react-i18next'; // Import Hook
+import { useTranslation } from 'react-i18next';
 
 // --- Services ---
 import { tournamentsService } from '../../services/tournaments/tournamentsService';
@@ -17,7 +18,8 @@ import { venueSportsService } from '../../services/venueSports/venueSportsServic
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 
 // --- Utils ---
-import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
+// UPDATED: Imported getImageUrl instead of IMAGE_BASE_URL
+import { getImageUrl } from '../../utils/imageUtils';
 
 // --- Components ---
 import ArrowIcon from '../../components/common/ArrowIcon';
@@ -62,16 +64,25 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
         return timeString.substring(0, 5);
     };
 
-    const registered = tournament.joined_user_data?.length || 0;
+    // Calculate total participants (Teams + Individuals)
+    const teamsCount = tournament.joined_data?.filter(i => i.kind === 'team').length || 0;
+
+    // Combine joined_data(users) and joined_user_data, then dedup by ID to get accurate count
+    const soloFromMixed = tournament.joined_data?.filter(item => item.kind === 'user') || [];
+    const directUsers = tournament.joined_user_data || [];
+    const allPlayers = [...soloFromMixed, ...directUsers];
+    const uniquePlayersCount = new Set(allPlayers.map(p => p.id)).size;
+
+    const totalRegistered = teamsCount + uniquePlayersCount;
     const max = tournament.max_teams || 0;
-    const percentage = max > 0 ? (registered / max) * 100 : 0;
+    const percentage = max > 0 ? (totalRegistered / max) * 100 : 0;
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group">
             <div className="relative h-64 w-full">
                 {tournament.cover_image ? (
                     <img
-                        src={`${IMAGE_BASE_URL}${tournament.cover_image}`}
+                        src={getImageUrl(tournament.cover_image)}
                         alt={tournament.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
@@ -164,7 +175,7 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
                         <Users size={14} className="text-blue-500"/> {t('card.registered_teams')}
                     </h3>
                     <span className="text-xs font-bold text-primary-600">
-                        {registered} / {max}
+                        {totalRegistered} / {max}
                     </span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2.5">
@@ -208,7 +219,7 @@ const TournamentGallery = ({ images, t }) => {
             <div className="bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
                 <div className="relative h-[400px] w-full rounded-xl overflow-hidden group bg-gray-100">
                     <img
-                        src={activeImage ? `${IMAGE_BASE_URL}${activeImage}` : ''}
+                        src={getImageUrl(activeImage)}
                         alt="Tournament Main"
                         className="w-full h-full object-contain md:object-cover transition-transform duration-700 group-hover:scale-105"
                     />
@@ -227,7 +238,7 @@ const TournamentGallery = ({ images, t }) => {
                                 }`}
                             >
                                 <img
-                                    src={`${IMAGE_BASE_URL}${img.image}`}
+                                    src={getImageUrl(img.image)}
                                     alt={`Thumb ${idx}`}
                                     className="w-full h-full object-cover"
                                 />
@@ -240,7 +251,87 @@ const TournamentGallery = ({ images, t }) => {
     );
 };
 
-// --- INFO SECTION: Shows Sport Name ---
+const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
+    // 1. Extract Teams (from joined_data where kind is team)
+    const teams = joinedData?.filter(item => item.kind === 'team') || [];
+
+    // 2. Extract Users (Merge joined_data users and joined_user_data, prevent duplicates)
+    const soloFromMixed = joinedData?.filter(item => item.kind === 'user') || [];
+    const directUsers = joinedUserData || [];
+
+    // Combine arrays
+    const allPlayers = [...soloFromMixed, ...directUsers];
+
+    // Remove duplicates based on ID
+    const uniquePlayers = Array.from(new Map(allPlayers.map(item => [item.id, item])).values());
+
+    if (teams.length === 0 && uniquePlayers.length === 0) return null;
+
+    return (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+            <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-500" /> {t('participants.title') || "Participants"}
+                </h3>
+            </div>
+
+            <div className="p-6 space-y-8">
+                {/* Teams List */}
+                {teams.length > 0 && (
+                    <div>
+                        <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <Trophy size={14} /> {t('participants.teams') || "Teams"} ({teams.length})
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {teams.map((team) => (
+                                <div key={`team-${team.id}`} className="flex flex-col items-center p-3 rounded-xl border border-gray-100 bg-gray-50 hover:shadow-md transition-all">
+                                    <div className="w-16 h-16 rounded-full overflow-hidden bg-white border border-gray-200 mb-2">
+                                        {team.image ? (
+                                            <img src={getImageUrl(team.image)} alt={team.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                                                <Trophy size={24} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <span className="text-sm font-semibold text-gray-800 text-center line-clamp-1">{team.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {teams.length > 0 && uniquePlayers.length > 0 && <div className="h-px bg-gray-100 w-full"></div>}
+
+                {/* Players List */}
+                {uniquePlayers.length > 0 && (
+                    <div>
+                        <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <User size={14} /> {t('participants.players') || "Players"} ({uniquePlayers.length})
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {uniquePlayers.map((user) => (
+                                <div key={`user-${user.id}`} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white hover:border-primary-200 transition-all">
+                                    <div className="w-10 h-10 flex-shrink-0 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+                                        {user.image ? (
+                                            <img src={getImageUrl(user.image)} alt={user.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                                                <UserCircle size={20} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700 line-clamp-1">{user.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const TournamentInfoSection = ({ tournament, sportName, t, currentLang }) => {
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
@@ -449,7 +540,6 @@ const TournamentDetails = () => {
 
     // --- RENDER: EDIT MODE ---
     if (isEditing) {
-        // Format lists for the generic Select components
         const formattedVenues = venuesList.map(v => ({
             label: v.translations?.[i18n.language]?.name || v.translations?.name || v.name,
             value: v.id
@@ -505,9 +595,17 @@ const TournamentDetails = () => {
                     {/* Right Column */}
                     <div className="lg:col-span-2 space-y-6">
                         <TournamentGallery images={allImages} t={t} />
+
+                        {/* Participants Section */}
+                        <TournamentParticipantsSection
+                            joinedData={tournament.joined_data}
+                            joinedUserData={tournament.joined_user_data}
+                            t={t}
+                        />
+
                         <TournamentInfoSection
                             tournament={tournament}
-                            sportName={getSportName(tournament.sport)} // Pass sport name here
+                            sportName={getSportName(tournament.sport)}
                             t={t}
                             currentLang={i18n.language}
                         />
