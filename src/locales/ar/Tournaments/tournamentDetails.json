@@ -18,7 +18,11 @@
     "registered_teams": "المسجلين",
     "code": "الرمز",
     "share": "مشاركة البطولة",
-    "venue_id": "رقم الملعب: {{id}}"
+    "venue_id": "رقم الملعب: {{id}}",
+    "contact_details": "بيانات التواصل",
+    "role_organizer": "منظم البطولة",
+    "whatsapp": "واتساب",
+    "email": "البريد الإلكتروني"
   },
   "gallery": {
     "title": "معرض الصور"

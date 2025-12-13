@@ -25,6 +25,7 @@ const StatusManagementSection = ({
                                      emptyMessage,
                                      onApprove,
                                      onReject,
+                                     onItemClick, // <--- Added Prop
                                      rejectLabel,
                                      approveLabel,
                                      renderIcon,
@@ -85,7 +86,8 @@ const StatusManagementSection = ({
                         {items.map((item) => (
                             <div
                                 key={item[idKey]}
-                                className="bg-white rounded-lg border border-primary-100 p-2.5 sm:p-3 hover:shadow-md hover:border-primary-300 transition-all duration-200"
+                                onClick={() => onItemClick && onItemClick(item)} // <--- Handle Item Click
+                                className={`bg-white rounded-lg border border-primary-100 p-2.5 sm:p-3 hover:shadow-md hover:border-primary-300 transition-all duration-200 ${onItemClick ? 'cursor-pointer' : ''}`} // <--- Add cursor-pointer
                             >
                                 <div className="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-2 sm:gap-0">
                                     <div className="flex items-center gap-3 flex-1 w-full sm:w-auto">
@@ -120,7 +122,10 @@ const StatusManagementSection = ({
                                             {(statusType === 'pending' || statusType === 'rejected') && (
                                                 <button
                                                     className="flex items-center gap-1 sm:gap-1.5 bg-primary-500 hover:bg-primary-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
-                                                    onClick={() => onApprove(item)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); // <--- Prevent navigation when clicking action
+                                                        onApprove(item);
+                                                    }}
                                                 >
                                                     <CheckCircle size={12} className="sm:w-3.5 sm:h-3.5" />
                                                     {/* Fallback to t('approve') if prop not provided */}
@@ -131,7 +136,10 @@ const StatusManagementSection = ({
                                             {(statusType === 'approved') && (
                                                 <button
                                                     className="flex items-center gap-1 sm:gap-1.5 bg-red-500 hover:bg-red-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 shadow-sm hover:shadow-md whitespace-nowrap"
-                                                    onClick={() => onReject(item)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); // <--- Prevent navigation when clicking action
+                                                        onReject(item);
+                                                    }}
                                                 >
                                                     <XCircle size={12} className="sm:w-3.5 sm:h-3.5" />
                                                     {/* Fallback to t('reject') if prop not provided */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next'; // Import i18n hook
+import { useTranslation } from 'react-i18next';
 import MainTable from './../../components/MainTable';
 import { Eye, Pencil, Trash2, CheckCircle, XCircle, TrendingUp, Image as ImageIcon } from 'lucide-react';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
@@ -514,6 +514,7 @@ const Pitches = () => {
                         rejectLabel={t('statusSection.reject', "Reject")}
                         emptyMessage={t('statusSection.noApproved', "No approved pitches")}
                         onReject={handleRejectPitch}
+                        onItemClick={handleViewPitch}
                         renderIcon={renderPitchIcon}
                         renderHeader={renderPitchHeader}
                         renderMeta={renderPitchMeta}
@@ -527,6 +528,7 @@ const Pitches = () => {
                         approveLabel={t('statusSection.approve', "Approve")}
                         emptyMessage={t('statusSection.noRejected', "No rejected pitches")}
                         onApprove={handleApprovePitch}
+                        onItemClick={handleViewPitch}
                         renderIcon={renderPitchIcon}
                         renderHeader={renderPitchHeader}
                         renderMeta={renderPitchMeta}

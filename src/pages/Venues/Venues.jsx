@@ -524,6 +524,7 @@ const Venues = () => {
                         statusType="approved"
                         emptyMessage={t('statusSection.noActive')}
                         onReject={handleDeactivateVenue}
+                        onItemClick={handleViewVenue} /* Added navigation handler */
                         rejectLabel={t('statusSection.btnDeactivate')}
                         renderIcon={renderVenueIcon}
                         renderHeader={renderVenueHeader}
@@ -538,6 +539,7 @@ const Venues = () => {
                         statusType="rejected"
                         emptyMessage={t('statusSection.noInactive')}
                         onApprove={handleActivateVenue}
+                        onItemClick={handleViewVenue} /* Added navigation handler */
                         approveLabel={t('statusSection.btnActivate')}
                         renderIcon={renderVenueIcon}
                         renderHeader={renderVenueHeader}

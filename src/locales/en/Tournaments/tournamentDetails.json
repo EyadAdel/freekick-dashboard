@@ -18,7 +18,11 @@
     "registered_teams": "Registered",
     "code": "Code",
     "share": "Share Tournament",
-    "venue_id": "Venue ID: {{id}}"
+    "venue_id": "Venue ID: {{id}}",
+    "contact_details": "Contact Details",
+    "role_organizer": "Tournament Organizer",
+    "whatsapp": "WhatsApp",
+    "email": "Email"
   },
   "gallery": {
     "title": "Gallery"
@@ -30,12 +34,12 @@
   },
   "info": {
     "title": "About Tournament",
-    "no_description": "No description provided.",
+    "no_description": "No description available.",
     "system": "System",
     "sport": "Sport",
-    "deadline": "Deadline",
+    "deadline": "Registration Deadline",
     "format": "Format",
-    "teams_max": "{{count}} Teams Max",
+    "teams_max": "Max {{count}} Teams",
     "standard_system": "Standard",
     "sport_id": "Sport ID: {{id}}",
     "unknown_sport": "Unknown"
@@ -43,7 +47,7 @@
   "rules": {
     "title": "Rules & Prizes",
     "prizes_title": "Prizes",
-    "no_prizes": "No specific prizes listed.",
+    "no_prizes": "No prizes specified.",
     "regulations_title": "Regulations",
     "default_rules": "Standard tournament rules apply."
   },
