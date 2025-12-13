@@ -1,0 +1,57 @@
+{
+  "pageTitle": "الحجوزات",
+  "listTitle": "قائمة الحجوزات",
+  "searchPlaceholder": "بحث عن لاعب، رمز، ملعب، إلخ",
+  "stats": {
+    "confirmed": "مؤكد",
+    "pending": "قيد الانتظار",
+    "cancelled": "ملغى",
+    "total": "إجمالي الحجوزات"
+  },
+  "table": {
+    "pitchName": "اسم الملعب",
+    "id": "الرمز",
+    "customer": "العميل",
+    "paymentType": "طريقة الدفع",
+    "dateAdded": "تاريخ الإضافة",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "actions": "",
+    "unknown": "غير معروف",
+    "pitch": "ملعب",
+    "customer": "عميل"
+  },
+  "status": {
+    "pending": "قيد الانتظار",
+    "confirmed": "مؤكد",
+    "completed": "مكتمل",
+    "cancelled": "ملغى"
+  },
+  "paymentTypes": {
+    "split": "مجموعة",
+    "solo": "فردي"
+  },
+  "filters": {
+    "label": "تصفية حسب الحالة",
+    "all": "جميع الحالات",
+    "pending": "قيد الانتظار",
+    "confirmed": "مؤكد",
+    "completed": "مكتمل",
+    "cancelled": "ملغى"
+  },
+  "confirm": {
+    "refresh": {
+      "title": "تحديث البيانات",
+      "text": "هل أنت متأكد من رغبتك في تحديث بيانات الحجوزات؟",
+      "btn": "تحديث"
+    }
+  },
+  "errors": {
+    "loading": "خطأ في تحميل الحجوزات",
+    "tryAgain": "حاول مرة أخرى"
+  },
+  "details": {
+    "view": "عرض تفاصيل الحجز",
+    "back": "العودة للقائمة"
+  }
+}

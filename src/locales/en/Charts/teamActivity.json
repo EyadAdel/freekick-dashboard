@@ -1,0 +1,25 @@
+{
+  "title": "Team Activity",
+  "totalPoints": "Total Points",
+  "loading": "Loading...",
+  "noLeader": "No Leader",
+  "leader": "Leader",
+  "points": "Points",
+  "percentageOfTotal": "% of total",
+  "members": "members",
+  "bookings": "bookings",
+  "noData": "No team data available",
+  "fallbackInitials": "TM",
+  "stats": {
+    "totalTeams": "Total Teams",
+    "totalPoints": "Total Points"
+  },
+  "rank": "#{rank}",
+  "progressLabels": {
+    "veryHigh": "Very High Activity",
+    "high": "High Activity",
+    "medium": "Medium Activity",
+    "low": "Low Activity",
+    "veryLow": "Very Low Activity"
+  }
+}

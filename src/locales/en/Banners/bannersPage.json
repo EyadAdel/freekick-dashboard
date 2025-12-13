@@ -1,0 +1,127 @@
+{
+  "pageTitle": "Banners",
+  "view": {
+    "slider": {
+      "uploadedBanners": "Uploaded Banners",
+      "seeAll": "See all",
+      "uploadNew": "Upload New Banner"
+    },
+    "list": {
+      "backToBanners": "Back to Banners"
+    }
+  },
+  "table": {
+    "searchPlaceholder": "Search banners...",
+    "columns": {
+      "id": "ID",
+      "image": "Image",
+      "type": "Type",
+      "value": "Value",
+      "status": "Status",
+      "quickActions": "Quick Actions"
+    },
+    "types": {
+      "venue": "Venues",
+      "text": "Text",
+      "link": "Link",
+      "tournaments": "Tournaments"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "filters": {
+      "type": {
+        "label": "Type",
+        "options": {
+          "venue": "Venues",
+          "text": "Text",
+          "link": "Link",
+          "tournaments": "Tournaments"
+        }
+      }
+    }
+  },
+  "actions": {
+    "createBanner": "+ Create Banner",
+    "edit": "Edit Banner",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "form": {
+    "createTitle": "Create New Banner",
+    "editTitle": "Edit Banner",
+    "image": {
+      "label": "Banner Image *",
+      "upload": {
+        "choose": "Choose Image",
+        "change": "Change Image",
+        "dragDrop": "Drag & drop an image or click to select",
+        "supported": "PNG, JPG, GIF up to 5MB",
+        "uploading": "Uploading...",
+        "ready": "Image Ready",
+        "newImage": "New Image",
+        "existingImage": "Existing Image",
+        "uploadStatus": "Image will be uploaded automatically when selected. Supported formats: JPG, PNG, GIF. Max size: 5MB"
+      },
+      "errors": {
+        "required": "Please upload an image",
+        "invalidType": "Please upload JPG, PNG, or GIF images only",
+        "sizeLimit": "Image size must be less than 5MB"
+      }
+    },
+    "type": {
+      "label": "Banner Type",
+      "placeholder": "Select Type",
+      "required": "Please select a banner type",
+      "options": {
+        "venue": "Venues",
+        "text": "Text",
+        "link": "Link",
+        "tournaments": "Tournaments"
+      }
+    },
+    "value": {
+      "label": "Banner Value",
+      "placeholder": "Enter value (URL, ID, or text)",
+      "required": "Please enter a banner value"
+    },
+    "isActive": {
+      "label": "Is Active",
+      "helperText": "Enable or disable this banner"
+    },
+    "buttons": {
+      "cancel": "CANCEL",
+      "create": "CREATE BANNER",
+      "update": "UPDATE BANNER",
+      "saving": "SAVING...",
+      "uploading": "UPLOADING..."
+    }
+  },
+  "confirm": {
+    "delete": {
+      "title": "Delete Banner",
+      "text": "Are you sure you want to delete this banner? This action cannot be undone.",
+      "confirmButton": "Yes, delete it",
+      "cancelButton": "No, keep it"
+    }
+  },
+  "messages": {
+    "success": {
+      "created": "Banner created successfully",
+      "updated": "Banner updated successfully",
+      "deleted": "Banner deleted successfully"
+    },
+    "error": {
+      "createFailed": "Failed to create banner",
+      "updateFailed": "Failed to update banner",
+      "deleteFailed": "Failed to delete banner",
+      "uploadFailed": "Failed to upload image. Please try again."
+    }
+  }
+}

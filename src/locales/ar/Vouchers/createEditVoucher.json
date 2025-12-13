@@ -1,0 +1,64 @@
+{
+  "title": {
+    "create": "إنشاء قسيمة جديدة",
+    "edit": "تعديل القسيمة"
+  },
+  "backButton": "العودة إلى القسائم",
+  "form": {
+    "labels": {
+      "code": "رمز القسيمة",
+      "name": "اسم القسيمة",
+      "description": "الوصف (اختياري)",
+      "discountType": "نوع الخصم",
+      "discountAmount": "مقدار الخصم {type}",
+      "maxDiscountAmount": "الحد الأقصى لمبلغ الخصم (اختياري)",
+      "validFrom": "صالحة من (اختياري)",
+      "validTo": "صالحة حتى (اختياري)",
+      "usageLimit": "الحد الأقصى للاستخدام (اختياري)",
+      "activeStatus": "قسيمة نشطة"
+    },
+    "placeholders": {
+      "code": "أدخل رمز القسيمة",
+      "name": "أدخل اسم القسيمة",
+      "description": "أدخل وصف القسيمة",
+      "percentage": "0",
+      "fixed": "0.00",
+      "usageLimit": "اتركه فارغاً ليكون غير محدود"
+    },
+    "helperText": {
+      "description": "وصف اختياري للقسيمة",
+      "maxDiscount": "أقصى مبلغ للخصم عند استخدام النسبة المئوية (اتركه فارغاً ليكون بلا حد)",
+      "validFrom": "اتركه فارغاً لتكون سارية فوراً",
+      "validTo": "اتركه فارغاً ليكون بلا تاريخ انتهاء",
+      "usageLimit": "أقصى عدد مرات استخدام هذه القسيمة",
+      "activeStatus": "لا يمكن استخدام القسائم غير النشطة"
+    },
+    "options": {
+      "discountTypes": [
+        { "value": "percentage", "label": "نسبة مئوية (%)" },
+        { "value": "fixed", "label": "مبلغ ثابت ($)" }
+      ]
+    },
+    "buttons": {
+      "regenerate": "إعادة إنشاء الرمز",
+      "cancel": "إلغاء",
+      "submit": {
+        "create": "إنشاء قسيمة",
+        "edit": "تحديث القسيمة"
+      }
+    },
+    "messages": {
+      "success": {
+        "create": "تم إنشاء القسيمة بنجاح",
+        "edit": "تم تحديث القسيمة بنجاح"
+      },
+      "errors": {
+        "required": "{field} مطلوب",
+        "minLength": "يجب أن يكون {field} على الأقل {min} أحرف",
+        "positive": "يجب أن يكون المبلغ موجباً",
+        "percentageExceed": "لا يمكن أن تتجاوز النسبة المئوية 100%",
+        "minUsage": "يجب أن يكون على الأقل 1"
+      }
+    }
+  }
+}

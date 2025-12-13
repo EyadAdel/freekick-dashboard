@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import analyticsService from "../../services/analyticsService.js";
 import stadiumIcon from "../../assets/stadiumIcon.svg";
+import {useTranslation} from "react-i18next";
 
 const COLORS = [
     '#22D3EE', // cyan
@@ -28,6 +29,7 @@ const PopularVenues = () => {
     useEffect(() => {
         fetchVenuesAnalytics();
     }, [year]);
+    const { t } = useTranslation(['popularVenues', 'common']);
 
     const fetchVenuesAnalytics = async () => {
         try {
@@ -204,8 +206,9 @@ const PopularVenues = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
             {/* Header with Year Selector and City Filter */}
             <div className="flex items-center justify-between mb-6">
-                <h2 className="xl:text-lg font-bold text-gray-800">Popular Venues</h2>
-
+                <h2 className="xl:text-lg font-bold text-gray-800">
+                    {t('popularVenues:title')}
+                </h2>
                 <div className="flex items-center gap-4">
                     {/* City Filter Dropdown */}
 

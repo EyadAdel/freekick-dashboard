@@ -5,8 +5,10 @@ import {toast} from "react-toastify";
 import ArrowIcon from "../common/ArrowIcon.jsx";
 import MainInput from "../MainInput.jsx";
 import {Loader2} from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
-const CreateVouchers =  ({ onBack, editVoucher = null }) => {
+const CreateVouchers = ({ onBack, editVoucher = null }) => {
+    const { t, i18n } = useTranslation(['createEditVoucher', 'common']);
     const { addVoucher, editVoucher: updateVoucher, loading } = useVouchers();
 
     const {
@@ -31,6 +33,7 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
     });
 
     const watchDiscountType = watch('discount_type');
+    const isRTL = i18n.language === 'ar';
 
     // Generate random voucher code
     const generateVoucherCode = () => {
@@ -68,7 +71,7 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
 
     // Handle form submission
     const onSubmit = async (data) => {
-        // Prepare the data for submission - convert to strings as expected by backend
+        // Prepare the data for submission
         const formData = {
             is_active: Boolean(data.is_active),
             code: String(data.code),
@@ -78,21 +81,18 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
             discount_amount: String(data.discount_amount || "0"),
             valid_from: data.valid_from ? `${data.valid_from}T00:00:00.000Z` : null,
             valid_to: data.valid_to ? `${data.valid_to}T23:59:59.999Z` : null,
-            num_of_uses: data.num_of_uses ? parseInt(data.num_of_uses) : 9223372036854776000, // Max int for unlimited
+            num_of_uses: data.num_of_uses ? parseInt(data.num_of_uses) : 9223372036854776000,
             max_discount_amount: data.max_discount_amount ? String(data.max_discount_amount) : "",
         };
 
-        // Remove completely empty optional fields if backend doesn't accept them
+        // Remove empty optional fields
         const cleanedData = {
             ...formData,
-            // For optional fields that should be omitted when empty
             ...(formData.description === "" && { description: undefined }),
             ...(formData.max_discount_amount === "" && { max_discount_amount: undefined }),
             ...(formData.valid_from === null && { valid_from: undefined }),
             ...(formData.valid_to === null && { valid_to: undefined }),
         };
-
-        console.log('Submitting voucher data:', cleanedData);
 
         try {
             let result;
@@ -103,7 +103,10 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
             }
 
             if (result.success || result.type?.includes('fulfilled')) {
-                toast.success(editVoucher ? 'Voucher updated successfully' : 'Voucher created successfully');
+                toast.success(editVoucher
+                    ? t('createEditVoucher:form.messages.success.edit')
+                    : t('createEditVoucher:form.messages.success.create')
+                );
                 setTimeout(() => onBack(), 1000);
             } else {
                 const errorMsg = result.error || result.payload?.message || 'Operation failed';
@@ -114,10 +117,18 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
             toast.error(error.message || 'An error occurred');
         }
     };
+
     // Regenerate code
     const handleRegenerateCode = () => {
         const newCode = generateVoucherCode();
         reset(prev => ({ ...prev, code: newCode }));
+    };
+
+    // Helper function to get discount type label
+    const getDiscountTypeLabel = () => {
+        return watchDiscountType === 'percentage'
+            ? t('createEditVoucher:form.labels.discountAmount', { type: t('createEditVoucher:form.options.discountTypes[0].label') })
+            : t('createEditVoucher:form.labels.discountAmount', { type: t('createEditVoucher:form.options.discountTypes[1].label') });
     };
 
     return (
@@ -125,10 +136,10 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
             {/* Header */}
             <button
                 onClick={onBack}
-                className="flex items-center gap-2 text-xl bg-white p-5 py-3 rounded-lg w-full text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+                className={`flex items-center gap-2 text-xl bg-white p-5 py-3 rounded-lg w-full text-gray-600 hover:text-gray-900 mb-4 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
             >
-                <ArrowIcon size={'xl'} direction={'left'} />
-                <span className="font-medium">Back to Vouchers</span>
+                <ArrowIcon size={'xl'} direction={isRTL ? 'left' : 'left'} />
+                <span className="font-medium">{t('createEditVoucher:backButton')}</span>
             </button>
 
             {/* Form */}
@@ -137,10 +148,16 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                     {/* Header */}
                     <div className="mb-6">
                         <h1 className="text-xl lg:text-2xl font-bold text-primary-700">
-                            {editVoucher ? 'Edit Voucher' : 'Create New Voucher'}
+                            {editVoucher
+                                ? t('createEditVoucher:title.edit')
+                                : t('createEditVoucher:title.create')
+                            }
                         </h1>
                         <p className="text-gray-400 mt-2 text-xs">
-                            {editVoucher ? 'Update voucher information' : 'Fill in the details to create a new voucher'}
+                            {editVoucher
+                                ? t('createEditVoucher:form.helperText.description')
+                                : t('createEditVoucher:form.helperText.description')
+                            }
                         </p>
                     </div>
                     <div className="my-6"></div>
@@ -152,14 +169,20 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                                 name="code"
                                 control={control}
                                 rules={{
-                                    required: 'Voucher code is required',
-                                    minLength: { value: 3, message: 'Code must be at least 3 characters' }
+                                    required: t('createEditVoucher:form.messages.errors.required', { field: t('createEditVoucher:form.labels.code') }),
+                                    minLength: {
+                                        value: 3,
+                                        message: t('createEditVoucher:form.messages.errors.minLength', {
+                                            field: t('createEditVoucher:form.labels.code'),
+                                            min: 3
+                                        })
+                                    }
                                 }}
                                 render={({ field }) => (
                                     <MainInput
-                                        label="Voucher Code"
+                                        label={t('createEditVoucher:form.labels.code')}
                                         type="text"
-                                        placeholder="Enter voucher code"
+                                        placeholder={t('createEditVoucher:form.placeholders.code')}
                                         required
                                         error={errors.code?.message}
                                         disabled={loading}
@@ -173,7 +196,7 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                                     onClick={handleRegenerateCode}
                                     className="text-sm text-primary-600 hover:text-primary-800 font-medium"
                                 >
-                                    Regenerate Code
+                                    {t('createEditVoucher:form.buttons.regenerate')}
                                 </button>
                             )}
                         </div>
@@ -182,14 +205,20 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                             name="name"
                             control={control}
                             rules={{
-                                required: 'Voucher name is required',
-                                minLength: { value: 3, message: 'Name must be at least 3 characters' }
+                                required: t('createEditVoucher:form.messages.errors.required', { field: t('createEditVoucher:form.labels.name') }),
+                                minLength: {
+                                    value: 3,
+                                    message: t('createEditVoucher:form.messages.errors.minLength', {
+                                        field: t('createEditVoucher:form.labels.name'),
+                                        min: 3
+                                    })
+                                }
                             }}
                             render={({ field }) => (
                                 <MainInput
-                                    label="Voucher Name"
+                                    label={t('createEditVoucher:form.labels.name')}
                                     type="text"
-                                    placeholder="Enter voucher name"
+                                    placeholder={t('createEditVoucher:form.placeholders.name')}
                                     required
                                     error={errors.name?.message}
                                     disabled={loading}
@@ -206,13 +235,13 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                             control={control}
                             render={({ field }) => (
                                 <MainInput
-                                    label="Description (Optional)"
+                                    label={t('createEditVoucher:form.labels.description')}
                                     type="textarea"
                                     rows="2"
-                                    placeholder="Enter voucher description"
+                                    placeholder={t('createEditVoucher:form.placeholders.description')}
                                     error={errors.description?.message}
                                     disabled={loading}
-                                    helperText="Optional description for the voucher"
+                                    helperText={t('createEditVoucher:form.helperText.description')}
                                     {...field}
                                 />
                             )}
@@ -224,15 +253,14 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                         <Controller
                             name="discount_type"
                             control={control}
-                            rules={{ required: 'Discount type is required' }}
+                            rules={{
+                                required: t('createEditVoucher:form.messages.errors.required', { field: t('createEditVoucher:form.labels.discountType') })
+                            }}
                             render={({ field }) => (
                                 <MainInput
-                                    label="Discount Type"
+                                    label={t('createEditVoucher:form.labels.discountType')}
                                     type="select"
-                                    options={[
-                                        { value: 'percentage', label: 'Percentage (%)' },
-                                        { value: 'fixed', label: 'Fixed Amount ($)' }
-                                    ]}
+                                    options={t('createEditVoucher:form.options.discountTypes', { returnObjects: true })}
                                     required
                                     error={errors.discount_type?.message}
                                     disabled={loading}
@@ -245,20 +273,27 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                             name="discount_amount"
                             control={control}
                             rules={{
-                                required: 'Discount amount is required',
-                                min: { value: 0, message: 'Amount must be positive' },
+                                required: t('createEditVoucher:form.messages.errors.required', { field: getDiscountTypeLabel() }),
+                                min: {
+                                    value: 0,
+                                    message: t('createEditVoucher:form.messages.errors.positive')
+                                },
                                 validate: (value, formValues) => {
                                     if (formValues.discount_type === 'percentage' && value > 100) {
-                                        return 'Percentage cannot exceed 100%';
+                                        return t('createEditVoucher:form.messages.errors.percentageExceed');
                                     }
                                     return true;
                                 }
                             }}
                             render={({ field }) => (
                                 <MainInput
-                                    label={`Discount ${watchDiscountType === 'percentage' ? 'Percentage' : 'Amount'}`}
+                                    label={getDiscountTypeLabel()}
                                     type="number"
-                                    placeholder={watchDiscountType === 'percentage' ? "0" : "0.00"}
+                                    placeholder={
+                                        watchDiscountType === 'percentage'
+                                            ? t('createEditVoucher:form.placeholders.percentage')
+                                            : t('createEditVoucher:form.placeholders.fixed')
+                                    }
                                     required
                                     error={errors.discount_amount?.message}
                                     disabled={loading}
@@ -278,16 +313,19 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                                 name="max_discount_amount"
                                 control={control}
                                 rules={{
-                                    min: { value: 0, message: 'Amount must be positive' }
+                                    min: {
+                                        value: 0,
+                                        message: t('createEditVoucher:form.messages.errors.positive')
+                                    }
                                 }}
                                 render={({ field }) => (
                                     <MainInput
-                                        label="Maximum Discount Amount (Optional)"
+                                        label={t('createEditVoucher:form.labels.maxDiscountAmount')}
                                         type="number"
-                                        placeholder="0.00"
+                                        placeholder={t('createEditVoucher:form.placeholders.fixed')}
                                         error={errors.max_discount_amount?.message}
                                         disabled={loading}
-                                        helperText="Maximum discount amount when using percentage (leave empty for no limit)"
+                                        helperText={t('createEditVoucher:form.helperText.maxDiscount')}
                                         step={0.01}
                                         min={0}
                                         {...field}
@@ -304,11 +342,11 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                             control={control}
                             render={({ field }) => (
                                 <MainInput
-                                    label="Valid From (Optional)"
+                                    label={t('createEditVoucher:form.labels.validFrom')}
                                     type="date"
                                     error={errors.valid_from?.message}
                                     disabled={loading}
-                                    helperText="Leave empty for immediate validity"
+                                    helperText={t('createEditVoucher:form.helperText.validFrom')}
                                     {...field}
                                 />
                             )}
@@ -319,11 +357,11 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                             control={control}
                             render={({ field }) => (
                                 <MainInput
-                                    label="Valid Until (Optional)"
+                                    label={t('createEditVoucher:form.labels.validTo')}
                                     type="date"
                                     error={errors.valid_to?.message}
                                     disabled={loading}
-                                    helperText="Leave empty for no expiry"
+                                    helperText={t('createEditVoucher:form.helperText.validTo')}
                                     {...field}
                                 />
                             )}
@@ -336,16 +374,19 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                             name="num_of_uses"
                             control={control}
                             rules={{
-                                min: { value: 1, message: 'Must be at least 1' }
+                                min: {
+                                    value: 1,
+                                    message: t('createEditVoucher:form.messages.errors.minUsage')
+                                }
                             }}
                             render={({ field }) => (
                                 <MainInput
-                                    label="Maximum Usage Limit (Optional)"
+                                    label={t('createEditVoucher:form.labels.usageLimit')}
                                     type="number"
-                                    placeholder="Leave empty for unlimited"
+                                    placeholder={t('createEditVoucher:form.placeholders.usageLimit')}
                                     error={errors.num_of_uses?.message}
                                     disabled={loading}
-                                    helperText="Maximum number of times this voucher can be used"
+                                    helperText={t('createEditVoucher:form.helperText.usageLimit')}
                                     min={1}
                                     {...field}
                                 />
@@ -360,13 +401,13 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                             control={control}
                             render={({ field: { value, onChange, ...field } }) => (
                                 <MainInput
-                                    label="Active Voucher"
+                                    label={t('createEditVoucher:form.labels.activeStatus')}
                                     type="checkbox"
                                     className={'flex py-5 flex-col-reverse'}
                                     checked={value}
                                     onChange={(e) => onChange(e.target.checked)}
                                     disabled={loading}
-                                    helperText="Inactive vouchers cannot be used"
+                                    helperText={t('createEditVoucher:form.helperText.activeStatus')}
                                     {...field}
                                 />
                             )}
@@ -374,14 +415,14 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                     </div>
 
                     {/* Form Actions */}
-                    <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
+                    <div className={`flex items-center justify-end gap-4 pt-6 border-t border-gray-200 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <button
                             type="button"
                             onClick={onBack}
                             disabled={loading}
                             className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
                         >
-                            Cancel
+                            {t('createEditVoucher:form.buttons.cancel')}
                         </button>
                         <button
                             type="submit"
@@ -389,7 +430,10 @@ const CreateVouchers =  ({ onBack, editVoucher = null }) => {
                             className="lg:px-6 text-sm lg:text-base px-2 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
                         >
                             {loading && <Loader2 size={18} className="animate-spin" />}
-                            {editVoucher ? 'Update Voucher' : 'Create Voucher'}
+                            {editVoucher
+                                ? t('createEditVoucher:form.buttons.submit.edit')
+                                : t('createEditVoucher:form.buttons.submit.create')
+                            }
                         </button>
                     </div>
                 </div>

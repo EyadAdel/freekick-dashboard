@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBanners } from '../../hooks/useBanners';
 import BannerSlider from '../../components/banners/BannerSlider.jsx';
 import MainTable from '../../components/MainTable';
@@ -12,6 +13,7 @@ import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 import { getImageUrl, extractFilename } from '../../utils/imageUtils.js';
 
 const BannerPage = () => {
+    const { t, i18n } = useTranslation('bannersPage');
     const {
         banners,
         loading,
@@ -35,10 +37,11 @@ const BannerPage = () => {
 
     const itemsPerPage = 10;
     const dispatch = useDispatch();
+    const isRTL = i18n.language === 'ar';
 
     useEffect(() => {
-        dispatch(setPageTitle('Banners'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pageTitle')));
+    }, [dispatch, t]);
 
     // Fetch banners with pagination
     useEffect(() => {
@@ -65,16 +68,16 @@ const BannerPage = () => {
 
     const handleDelete = async (id) => {
         const confirmed = await showConfirm({
-            title: "Delete Banner",
-            text: "Are you sure you want to delete this banner? This action cannot be undone.",
-            confirmButtonText: "Yes, delete it",
-            cancelButtonText: "No, keep it",
+            title: t('confirm.delete.title'),
+            text: t('confirm.delete.text'),
+            confirmButtonText: t('confirm.delete.confirmButton'),
+            cancelButtonText: t('confirm.delete.cancelButton'),
             icon: "warning"
         });
 
         if (confirmed) {
             await removeBanner(id);
-            toast.success('Banner deleted successfully');
+            toast.success(t('messages.success.deleted'));
 
             // If we deleted the last item on the page and it's not page 1, go to previous page
             if (banners.length === 1 && currentPage > 1) {
@@ -94,17 +97,17 @@ const BannerPage = () => {
 
             if (editingBanner) {
                 await editBanner(editingBanner.id, submitData);
-                toast.success('Banner updated successfully');
+                toast.success(t('messages.success.updated'));
             } else {
                 await addBanner(submitData);
-                toast.success('Banner created successfully');
+                toast.success(t('messages.success.created'));
             }
 
             setViewMode('list');
             setEditingBanner(null);
             clearBanner();
         } catch (error) {
-            toast.error('Failed to save banner');
+            toast.error(editingBanner ? t('messages.error.updateFailed') : t('messages.error.createFailed'));
         }
     };
 
@@ -158,7 +161,7 @@ const BannerPage = () => {
     // Table columns configuration
     const columns = [
         {
-            header: 'ID',
+            header: t('table.columns.id'),
             accessor: 'id',
             align: 'left',
             sortable: true,
@@ -166,7 +169,7 @@ const BannerPage = () => {
             render: (row) => <span className="font-semibold">#{row.id}</span>
         },
         {
-            header: 'Image',
+            header: t('table.columns.image'),
             accessor: 'image',
             align: 'left',
             render: (row) => {
@@ -182,7 +185,7 @@ const BannerPage = () => {
             }
         },
         {
-            header: 'Type',
+            header: t('table.columns.type'),
             accessor: 'type',
             align: 'left',
             sortable: true,
@@ -194,12 +197,12 @@ const BannerPage = () => {
                             row.type === 'tournaments' ? 'bg-green-100 text-green-800' :
                                 'bg-gray-100 text-gray-800'
                 }`}>
-                    {row.type}
+                    {t(`table.types.${row.type}`) || row.type}
                 </span>
             )
         },
         {
-            header: 'Value',
+            header: t('table.columns.value'),
             accessor: 'value',
             align: 'left',
             render: (row) => (
@@ -209,7 +212,7 @@ const BannerPage = () => {
             )
         },
         {
-            header: 'Status',
+            header: t('table.columns.status'),
             accessor: 'is_active',
             align: 'center',
             sortable: true,
@@ -218,12 +221,12 @@ const BannerPage = () => {
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                     row.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                 }`}>
-                    {row.is_active ? 'Active' : 'Inactive'}
+                    {row.is_active ? t('table.status.active') : t('table.status.inactive')}
                 </span>
             )
         },
         {
-            header: 'Quick Actions',
+            header: t('table.columns.quickActions'),
             accessor: 'actions',
             align: 'center',
             render: (row) => (
@@ -231,14 +234,14 @@ const BannerPage = () => {
                     <button
                         onClick={() => handleEdit(row)}
                         className="p-2 text-gray-600 hover:bg-gray-50 rounded transition-colors"
-                        title="Edit"
+                        title={t('table.actions.edit')}
                     >
                         <Edit2 size={16} />
                     </button>
                     <button
                         onClick={() => handleDelete(row.id)}
                         className="p-2 text-gray-600 hover:bg-gray-500 rounded transition-colors"
-                        title="Delete"
+                        title={t('table.actions.delete')}
                     >
                         <Trash2 size={16} />
                     </button>
@@ -251,13 +254,13 @@ const BannerPage = () => {
     const tableFilters = [
         {
             type: 'select',
-            label: 'Type',
+            label: t('table.filters.type.label'),
             key: 'type',
             options: [
-                { label: 'Venues', value: 'venue' },
-                { label: 'Text', value: 'text' },
-                { label: 'Link', value: 'link' },
-                { label: 'Tournaments', value: 'tournaments' }
+                { label: t('table.filters.type.options.venue'), value: 'venue' },
+                { label: t('table.filters.type.options.text'), value: 'text' },
+                { label: t('table.filters.type.options.link'), value: 'link' },
+                { label: t('table.filters.type.options.tournaments'), value: 'tournaments' }
             ]
         }
     ];
@@ -265,7 +268,7 @@ const BannerPage = () => {
     // Top actions for table view
     const topActions = [
         {
-            label: '+ Create Banner',
+            label: t('actions.createBanner'),
             type: 'primary',
             onClick: handleCreate
         }
@@ -299,15 +302,16 @@ const BannerPage = () => {
                                     onClick={() => setViewMode('slider')}
                                     className="flex items-center gap-2 text-xl bg-white p-5 py-3 rounded-lg w-full text-gray-600 hover:text-gray-900 lg:mb-4 transition-colors"
                                 >
-                                    <ArrowIcon size={'xl'} direction={'left'} />
-                                    <span className="font-medium">Back to Banners</span>
+                                    <ArrowIcon size={'xl'} direction={isRTL ? 'right' : 'left'} />
+
+                                    <span className="font-medium">{t('view.list.backToBanners')}</span>
                                 </button>
                             </div>
 
                             <MainTable
                                 columns={columns}
                                 data={banners}
-                                searchPlaceholder="Search banners..."
+                                searchPlaceholder={t('table.searchPlaceholder')}
                                 filters={tableFilters}
                                 currentPage={currentPage}
                                 itemsPerPage={itemsPerPage}
@@ -331,13 +335,13 @@ const BannerPage = () => {
                             {/* Banner Slider Section */}
                             <div className="bg-white shadow-sm p-4 rounded-lg border-b">
                                 <div className="flex bg-white  lg:p-3 rounded-lg justify-between items-center mb-2">
-                                    <h2 className="lg:text-xl   font-bold text-primary-600">Uploaded Banners</h2>
+                                    <h2 className="lg:text-xl   font-bold text-primary-600">{t('view.slider.uploadedBanners')}</h2>
                                     <button
                                         onClick={() => setViewMode('list')}
                                         className="lg:text-base  font-bold flex gap-2 items-center text-primary-700 hover:text-primary-600 "
                                     >
-                                        See all
-                                        <ArrowIcon direction={'right'} size={'md'}/>
+                                        {t('view.slider.seeAll')}
+                                        <ArrowIcon direction={isRTL ? 'left' : 'right'}  size={'md'}/>
                                     </button>
                                 </div>
                                 <BannerSlider
@@ -350,7 +354,7 @@ const BannerPage = () => {
                                     className="w-full mt-8 bg-primary-500 hover:bg-primary-600 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                                 >
                                     <span className="text-xl">+</span>
-                                    Upload New Banner
+                                    {t('view.slider.uploadNew')}
                                 </button>
                             </div>
                         </div>

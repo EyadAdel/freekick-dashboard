@@ -1,0 +1,69 @@
+{
+  "title": "المعاملات",
+  "searchPlaceholder": "بحث في المعاملات...",
+  "loading": "جاري التحميل...",
+  "noData": "لا توجد معاملات",
+  "table": {
+    "columns": {
+      "id": "رقم المعاملة",
+      "description": "الوصف",
+      "amount": "المبلغ",
+      "type": "النوع",
+      "bookingAction": "إجراء الحجز",
+      "date": "التاريخ",
+      "receipt": "الإيصال"
+    },
+    "actions": {
+      "printPDF": "طباعة PDF",
+      "generatingPDF": "جاري الإنشاء...",
+      "downloadReceipt": "تحميل الإيصال"
+    }
+  },
+  "filters": {
+    "transactionType": "نوع المعاملة",
+    "exactAmount": "المبلغ المحدد",
+    "minAmount": "الحد الأدنى للمبلغ",
+    "maxAmount": "الحد الأقصى للمبلغ",
+    "dateRange": "نطاق التاريخ",
+    "allTypes": "جميع الأنواع",
+    "from": "من",
+    "to": "إلى"
+  },
+  "types": {
+    "credit": "ائتمان",
+    "debit": "مدين",
+    "add": "ائتمان",
+    "deduct": "مدين"
+  },
+  "receipt": {
+    "title": "إيصال المعاملة",
+    "generating": "جاري إنشاء الإيصال...",
+    "failed": "فشل إنشاء الإيصال",
+    "transactionId": "رقم المعاملة",
+    "date": "التاريخ",
+    "description": "الوصف",
+    "amount": "المبلغ",
+    "type": "النوع",
+    "bookingAction": "إجراء الحجز",
+    "total": "الإجمالي",
+    "thankYou": "شكراً لمعاملتك!"
+  },
+  "messages": {
+    "pdfGenerated": "تم إنشاء ملف PDF بنجاح",
+    "pdfFailed": "فشل إنشاء ملف PDF. يرجى المحاولة مرة أخرى.",
+    "receiptDownloaded": "تم تحميل الإيصال"
+  },
+  "pagination": {
+    "showing": "عرض",
+    "to": "إلى",
+    "of": "من",
+    "results": "نتيجة",
+    "previous": "السابق",
+    "next": "التالي"
+  },
+  "format": {
+    "amount": "د.إ {amount}",
+    "date": "dd MMM yyyy hh:mm",
+    "id": "#{id}"
+  }
+}

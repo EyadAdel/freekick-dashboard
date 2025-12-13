@@ -1,0 +1,28 @@
+
+{
+  "title": "Revenue Overview",
+  "loading": "Loading data...",
+  "error": {
+    "title": "Error loading data",
+    "message": "Failed to load charts data",
+    "retry": "Retry"
+  },
+  "stats": {
+    "totalIncome": "Total Income",
+    "totalExpense": "Total Expense",
+    "netBalance": "Net Balance"
+  },
+  "charts": {
+    "monthlyRevenue": "Monthly Revenue",
+    "monthlyTransfers": "Monthly Transfers"
+  },
+  "transactions": "Transactions",
+  "income": "Inc",
+  "expense": "Exp",
+  "noData": "No revenue data available",
+  "legend": {
+    "lowRevenue": "Low revenue",
+    "mediumRevenue": "Medium revenue",
+    "highRevenue": "High revenue"
+  }
+}

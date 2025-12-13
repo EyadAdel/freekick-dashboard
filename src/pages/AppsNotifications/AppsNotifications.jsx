@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Send, Users, Bell, User, ChevronDown } from 'lucide-react';
 import { notificationService } from "../../services/notificationService.js";
 import { toast } from 'react-toastify';
@@ -6,6 +7,7 @@ import {useDispatch} from "react-redux";
 import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 
 function AppsNotifications() {
+    const { t } = useTranslation('notifications');
     const [formData, setFormData] = useState({
         send_kind: 'all_users',
         users: [],
@@ -25,9 +27,10 @@ function AppsNotifications() {
 
     const dropdownRef = useRef(null);
     const dispatch = useDispatch();
+
     useEffect(() => {
-        dispatch(setPageTitle('Apps Notification'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pageTitle')));
+    }, [dispatch, t]);
 
     useEffect(() => {
         if (formData.send_kind === 'other') {
@@ -58,7 +61,7 @@ function AppsNotifications() {
             const data = await notificationService.fetchUsers();
             setUsers(data || []);
         } catch (error) {
-            toast.error('Failed to fetch users. Please try again.');
+            toast.error(t('errors.fetchUsers'));
         } finally {
             setFetchingUsers(false);
         }
@@ -95,17 +98,17 @@ function AppsNotifications() {
 
     const handleSubmit = async () => {
         if (!formData.title.trim()) {
-            toast.error('Please enter a notification title');
+            toast.error(t('errors.titleRequired'));
             return;
         }
 
         if (!formData.message.trim()) {
-            toast.error('Please enter a notification message');
+            toast.error(t('errors.messageRequired'));
             return;
         }
 
         if (formData.send_kind === 'other' && selectedUsers.length === 0) {
-            toast.error('Please select at least one user');
+            toast.error(t('errors.usersRequired'));
             return;
         }
 
@@ -118,7 +121,7 @@ function AppsNotifications() {
             };
 
             await notificationService.sendNotification(payload);
-            toast.success('Notification sent successfully!');
+            toast.success(t('success.sent'));
 
             // Reset state
             setFormData({
@@ -134,7 +137,7 @@ function AppsNotifications() {
             setSelectedUsers([]);
             setShowUserSelect(false);
         } catch (error) {
-            toast.error(error.message || 'Failed to send notification. Please try again.');
+            toast.error(error.message || t('errors.sendFailed'));
         } finally {
             setLoading(false);
         }
@@ -142,7 +145,7 @@ function AppsNotifications() {
 
     return (
         <div className="min-h-screen bg-gray-50 px-3 sm:px-6 lg:px-8">
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-7xl mx-auto">
                 <div className="bg-white rounded-lg shadow-sm ">
                     {/* Header */}
                     <div className="border-b border-gray-200 px-4 mx-5 sm:px-6 py-4 sm:py-5">
@@ -151,8 +154,8 @@ function AppsNotifications() {
                                 <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
                             </div>
                             <div>
-                                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Send Notification</h1>
-                                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Notify your users instantly</p>
+                                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">{t('header.title')}</h1>
+                                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{t('header.subtitle')}</p>
                             </div>
                         </div>
                     </div>
@@ -161,7 +164,7 @@ function AppsNotifications() {
                         {/* Send Type */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">
-                                Select Recipients
+                                {t('recipients.label')}
                             </label>
                             <div className="space-y-2">
                                 <label className="flex items-start gap-3 cursor-pointer group">
@@ -174,8 +177,8 @@ function AppsNotifications() {
                                         className="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500"
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <span className="block text-sm font-medium text-gray-900">All Users</span>
-                                        <span className="block text-xs text-gray-500 mt-0.5">Send to everyone</span>
+                                        <span className="block text-sm font-medium text-gray-900">{t('recipients.allUsers.title')}</span>
+                                        <span className="block text-xs text-gray-500 mt-0.5">{t('recipients.allUsers.description')}</span>
                                     </div>
                                 </label>
 
@@ -189,8 +192,8 @@ function AppsNotifications() {
                                         className="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500"
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <span className="block text-sm font-medium text-gray-900">Pitch Users</span>
-                                        <span className="block text-xs text-gray-500 mt-0.5">Pitch users only</span>
+                                        <span className="block text-sm font-medium text-gray-900">{t('recipients.pitchUsers.title')}</span>
+                                        <span className="block text-xs text-gray-500 mt-0.5">{t('recipients.pitchUsers.description')}</span>
                                     </div>
                                 </label>
 
@@ -204,8 +207,8 @@ function AppsNotifications() {
                                         className="mt-0.5 w-4 h-4 text-primary-600 focus:ring-primary-500"
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <span className="block text-sm font-medium text-gray-900">Specific Users</span>
-                                        <span className="block text-xs text-gray-500 mt-0.5">Choose manually</span>
+                                        <span className="block text-sm font-medium text-gray-900">{t('recipients.specificUsers.title')}</span>
+                                        <span className="block text-xs text-gray-500 mt-0.5">{t('recipients.specificUsers.description')}</span>
                                     </div>
                                 </label>
                             </div>
@@ -216,10 +219,10 @@ function AppsNotifications() {
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200" ref={dropdownRef}>
                                 <label className="block text-sm font-medium text-gray-700 mb-3">
                                     <Users className="inline w-4 h-4 mr-1.5 mb-0.5" />
-                                    Select Users
+                                    {t('userSelection.label')}
                                     {selectedUsers.length > 0 && (
                                         <span className="ml-2 text-xs font-normal text-primary-600">
-                                            ({selectedUsers.length} selected)
+                                            ({t('userSelection.selected', { count: selectedUsers.length })})
                                         </span>
                                     )}
                                 </label>
@@ -231,8 +234,8 @@ function AppsNotifications() {
                                     <span className="flex items-center gap-2 text-gray-700 truncate">
                                         <User className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                         {selectedUsers.length > 0
-                                            ? `${selectedUsers.length} user(s) selected`
-                                            : 'Click to select users'}
+                                            ? t('userSelection.usersSelected', { count: selectedUsers.length })
+                                            : t('userSelection.placeholder')}
                                     </span>
                                     <ChevronDown className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${showUserSelect ? 'transform rotate-180' : ''}`} />
                                 </button>
@@ -242,12 +245,12 @@ function AppsNotifications() {
                                         {fetchingUsers ? (
                                             <div className="p-6 text-center">
                                                 <div className="inline-block w-6 h-6 border-3 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-                                                <p className="mt-2 text-sm text-gray-500">Loading users...</p>
+                                                <p className="mt-2 text-sm text-gray-500">{t('userSelection.loading')}</p>
                                             </div>
                                         ) : users.length === 0 ? (
                                             <div className="p-6 text-center text-gray-500">
                                                 <Users className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-                                                <p className="text-sm">No users available</p>
+                                                <p className="text-sm">{t('userSelection.noUsers')}</p>
                                             </div>
                                         ) : (
                                             <div className="divide-y divide-gray-100">
@@ -282,7 +285,7 @@ function AppsNotifications() {
                         {/* Title */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Notification Title <span className="text-red-500">*</span>
+                                {t('form.title.label')} <span className="text-red-500">{t('form.title.required')}</span>
                             </label>
                             <input
                                 type="text"
@@ -290,14 +293,14 @@ function AppsNotifications() {
                                 value={formData.title}
                                 onChange={handleInputChange}
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-sm text-gray-900 placeholder-gray-400"
-                                placeholder="Enter notification title"
+                                placeholder={t('form.title.placeholder')}
                             />
                         </div>
 
                         {/* Message */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Notification Message <span className="text-red-500">*</span>
+                                {t('form.message.label')} <span className="text-red-500">{t('form.message.required')}</span>
                             </label>
                             <textarea
                                 name="message"
@@ -305,14 +308,14 @@ function AppsNotifications() {
                                 onChange={handleInputChange}
                                 rows="4"
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-sm text-gray-900 placeholder-gray-400 resize-none"
-                                placeholder="Write your notification message..."
+                                placeholder={t('form.message.placeholder')}
                             />
                         </div>
 
                         {/* Delivery Options */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">
-                                Delivery Channels
+                                {t('form.channels.label')}
                             </label>
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2.5 cursor-pointer group">
@@ -323,7 +326,7 @@ function AppsNotifications() {
                                         onChange={handleInputChange}
                                         className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                                     />
-                                    <span className="text-sm text-gray-700">📱 App Notification</span>
+                                    <span className="text-sm text-gray-700">{t('form.channels.app')}</span>
                                 </label>
                                 <label className="flex items-center gap-2.5 cursor-pointer group">
                                     <input
@@ -333,7 +336,7 @@ function AppsNotifications() {
                                         onChange={handleInputChange}
                                         className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                                     />
-                                    <span className="text-sm text-gray-700">💬 SMS</span>
+                                    <span className="text-sm text-gray-700">{t('form.channels.sms')}</span>
                                 </label>
                                 <label className="flex items-center gap-2.5 cursor-pointer group">
                                     <input
@@ -343,7 +346,7 @@ function AppsNotifications() {
                                         onChange={handleInputChange}
                                         className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                                     />
-                                    <span className="text-sm text-gray-700">📞 WhatsApp</span>
+                                    <span className="text-sm text-gray-700">{t('form.channels.whatsapp')}</span>
                                 </label>
                             </div>
                         </div>
@@ -358,7 +361,7 @@ function AppsNotifications() {
                                     onChange={handleInputChange}
                                     className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                                 />
-                                <span className="text-sm text-gray-700">Activate notification immediately</span>
+                                <span className="text-sm text-gray-700">{t('form.activeStatus')}</span>
                             </label>
                         </div>
 
@@ -371,12 +374,12 @@ function AppsNotifications() {
                             {loading ? (
                                 <>
                                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    <span className="text-sm sm:text-base">Sending...</span>
+                                    <span className="text-sm sm:text-base">{t('buttons.sending')}</span>
                                 </>
                             ) : (
                                 <>
                                     <Send className="w-5 h-5" />
-                                    <span className="text-sm sm:text-base">Send Notification</span>
+                                    <span className="text-sm sm:text-base">{t('buttons.send')}</span>
                                 </>
                             )}
                         </button>

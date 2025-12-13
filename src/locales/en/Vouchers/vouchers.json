@@ -1,0 +1,61 @@
+{
+  "title": "Vouchers",
+  "loading": "Loading...",
+  "noData": "No vouchers found",
+  "searchPlaceholder": "Search vouchers by code, name...",
+  "addButton": "+ Add Voucher",
+  "charts": {
+    "usageOverTime": "Voucher Usage Over Time",
+    "usageByVoucher": "Usage by Voucher",
+    "yAxisLabel": "Usage Count",
+    "centerMetricLabel": "Vouchers"
+  },
+  "stats": {
+    "totalVouchers": "Total Vouchers",
+    "activeVouchers": "Active Vouchers",
+    "inactiveVouchers": "Inactive Vouchers",
+    "totalUsage": "Total Usage"
+  },
+  "table": {
+    "columns": {
+      "id": "ID",
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "discount": "Discount",
+      "maxDiscount": "Max Discount",
+      "usage": "Usage",
+      "validFrom": "Valid From",
+      "validTo": "Valid To",
+      "lastUsed": "Last Used",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "types": {
+      "percentage": "Percentage",
+      "fixed": "Fixed Amount"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "noLimit": "No limit",
+    "immediate": "Immediate",
+    "noExpiry": "No expiry",
+    "never": "Never"
+  },
+  "actions": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": {
+      "title": "Delete Voucher?",
+      "text": "Are you sure you want to delete \"{voucherName}\"? This action cannot be undone.",
+      "confirm": "Yes, delete",
+      "cancel": "Cancel"
+    }
+  },
+  "messages": {
+    "deleteSuccess": "Voucher deleted successfully",
+    "loadAnalyticsError": "Failed to load analytics data"
+  }
+}

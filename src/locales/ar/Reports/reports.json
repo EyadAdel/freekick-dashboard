@@ -1,0 +1,8 @@
+{
+  "title": "التقارير",
+  "charts": {
+    "revenueOverview": "نظرة عامة على الإيرادات",
+    "bookingPerVenues": "الحجوزات لكل منشأة",
+    "teamActivity": "نشاط الفريق"
+  }
+}

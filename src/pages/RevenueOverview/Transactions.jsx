@@ -1,6 +1,7 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import MainTable from "../../components/MainTable.jsx";
-import {FaFilePdf} from "react-icons/fa";
+import { FaFilePdf } from "react-icons/fa";
 import analyticsService from "../../services/analyticsService.js";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -13,6 +14,7 @@ function Transactions(props) {
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [generatingPDFId, setGeneratingPDFId] = useState(null);
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+    const [pdfError, setPdfError] = useState(null);
     const printRef = useRef();
 
     // Pagination state
@@ -29,6 +31,9 @@ function Transactions(props) {
     // Active filters
     const [activeFilters, setActiveFilters] = useState({});
     const [searchTerm, setSearchTerm] = useState('');
+
+    const { t,i18n } = useTranslation(['transactions', 'common']);
+
     const fetchTransactions = async () => {
         try {
             setTableLoading(true);
@@ -59,6 +64,7 @@ function Transactions(props) {
             setTableLoading(false);
         }
     };
+
     useEffect(() => {
         fetchTransactions();
     }, [currentPage, sortConfig, activeFilters, searchTerm]);
@@ -69,7 +75,9 @@ function Transactions(props) {
             generatePDF();
         }
     }, [selectedTransaction]);
+
     const handleDownloadReceipt = (transaction) => {
+        setPdfError(null);
         setGeneratingPDFId(transaction.id);
         setSelectedTransaction(transaction);
     };
@@ -112,47 +120,57 @@ function Transactions(props) {
         });
     };
 
-    // Calculate percentage change (example - you might want to get this from API)
-    const calculatePercentChange = (current, previous) => {
-        if (previous === 0) return current > 0 ? 100 : 0;
-        return ((current - previous) / Math.abs(previous) * 100).toFixed(1);
+    // Format amount
+    const formatAmount = (amount) => {
+        if (!amount && amount !== 0) return 'N/A';
+        return `${Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    };
+
+    // Get currency symbol based on language
+    const getCurrencySymbol = () => {
+        const lang = i18n.language;
+        return lang === 'ar' ? 'د.إ' : 'AED';
     };
 
     // Table columns configuration
     const columns = [
+        // {
+        //     header: t('transactions:table.columns.id'),
+        //     accessor: 'id',
+        //     align: 'left',
+        //     sortable: true,
+        //     sortKey: 'id',
+        //     render: (row) => (
+        //         <span className="font-semibold">
+        //             #{row.id}
+        //         </span>
+        //     )
+        // },
         {
-            header: 'Transaction ID',
-            accessor: 'id',
-            align: 'left',
-            sortable: true,
-            sortKey: 'id',
-            render: (row) => (
-                <span className="font-semibold">
-                    #{row.id}
-                </span>
-            )
-        },
-        {
-            header: 'Description',
+            header: t('transactions:table.columns.description'),
             accessor: 'description',
             align: 'left'
         },
         {
-            header: 'Amount',
+            header: t('transactions:table.columns.amount'),
             accessor: 'amount',
             align: 'right',
             sortable: true,
             sortKey: 'amount',
-            render: (row) => (
-                <span className={`font-semibold ${
-                    row.kind === 'add' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                    {row.kind === 'add' ? '+' : '-'} AED {formatAmount(row.amount)}
-                </span>
-            )
+            render: (row) => {
+                const formattedAmount = formatAmount(row.amount);
+                const currencySymbol = getCurrencySymbol();
+                return (
+                    <span className={`font-semibold ${
+                        row.kind === 'add' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                        {row.kind === 'add' ? '+' : '-'} {currencySymbol} {formattedAmount}
+                    </span>
+                );
+            }
         },
         {
-            header: 'Type',
+            header: t('transactions:table.columns.type'),
             accessor: 'kind',
             align: 'center',
             sortable: true,
@@ -163,18 +181,18 @@ function Transactions(props) {
                         ? 'bg-green-100 text-green-700'
                         : 'bg-red-100 text-red-700'
                 }`}>
-                    {row.kind === 'add' ? 'Credit' : 'Debit'}
+                    {row.kind === 'add' ? t('transactions:types.credit') : t('transactions:types.debit')}
                 </span>
             )
         },
         {
-            header: 'Booking Action',
+            header: t('transactions:table.columns.bookingAction'),
             accessor: 'booking_action',
             align: 'center',
             render: (row) => row.booking_action || 'N/A'
         },
         {
-            header: 'Date',
+            header: t('transactions:table.columns.date'),
             accessor: 'created_at',
             align: 'left',
             sortable: true,
@@ -182,7 +200,7 @@ function Transactions(props) {
             render: (row) => formatDate(row.created_at)
         },
         {
-            header: 'Receipt',
+            header: t('transactions:table.columns.receipt'),
             align: 'center',
             sortable: false,
             render: (row) => (
@@ -195,7 +213,11 @@ function Transactions(props) {
                             : 'bg-primary-500 bg-opacity-80'
                     }`}
                 >
-                    <FaFilePdf size={'12'} /> {isGeneratingPDF && generatingPDFId === row.id ? 'Generating...' : 'Print PDF'}
+                    <FaFilePdf size={'12'} />
+                    {isGeneratingPDF && generatingPDFId === row.id
+                        ? t('transactions:table.actions.generatingPDF')
+                        : t('transactions:table.actions.printPDF')
+                    }
                 </button>
             )
         },
@@ -206,28 +228,29 @@ function Transactions(props) {
         {
             type: 'select',
             key: 'kind',
-            label: 'Transaction Type',
+            label: t('transactions:filters.transactionType'),
             options: [
-                { value: 'add', label: 'Credit' },
-                { value: 'deduct', label: 'Debit' }
+                { value: 'add', label: t('transactions:types.credit') },
+                { value: 'deduct', label: t('transactions:types.debit') }
             ]
         },
         {
             type: 'number',
             key: 'amount',
-            label: 'Exact Amount',
+            label: t('transactions:filters.exactAmount'),
         },
         {
             type: 'number',
             key: 'amount__gte',
-            label: 'Min Amount',
+            label: t('transactions:filters.minAmount'),
         },
         {
             type: 'number',
             key: 'amount__lte',
-            label: 'Max Amount',
+            label: t('transactions:filters.maxAmount'),
         },
     ];
+
     const generatePDF = async () => {
         try {
             setIsGeneratingPDF(true);
@@ -274,20 +297,22 @@ function Transactions(props) {
 
         } catch (error) {
             console.error('Error generating PDF:', error);
-            alert('Failed to generate PDF. Please try again.');
+            setPdfError(t('transactions:messages.pdfFailed'));
         } finally {
             setIsGeneratingPDF(false);
             setGeneratingPDFId(null);
             setSelectedTransaction(null);
         }
     };
-// Format amount
-    const formatAmount = (amount) => {
-        if (!amount && amount !== 0) return 'N/A';
-        return `${Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    };
+
     return (
         <div>
+            {pdfError && (
+                <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+                    <p className="font-semibold">{pdfError}</p>
+                </div>
+            )}
+
             {selectedTransaction && (
                 <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
                     <TransactionReceipt
@@ -300,13 +325,15 @@ function Transactions(props) {
 
             <div className="mt-8 bg-white p-5 rounded-lg lg:mt-10">
                 <div className="mb-4">
-                    <h2 className="text-xl font-bold text-gray-800">Transactions </h2>
+                    <h2 className="text-xl font-bold text-gray-800">
+                        {t('transactions:title')}
+                    </h2>
                 </div>
 
                 <MainTable
                     columns={columns}
                     data={transactions}
-                    searchPlaceholder="Search transactions..."
+                    searchPlaceholder={t('transactions:searchPlaceholder')}
                     filters={filterConfigs}
                     currentPage={currentPage}
                     itemsPerPage={itemsPerPage}
@@ -316,6 +343,16 @@ function Transactions(props) {
                     onPageChange={handlePageChange}
                     sortConfig={sortConfig}
                     onSort={handleSort}
+                    loading={tableLoading}
+                    noDataMessage={t('transactions:noData')}
+                    paginationTexts={{
+                        showing: t('transactions:pagination.showing'),
+                        to: t('transactions:pagination.to'),
+                        of: t('transactions:pagination.of'),
+                        results: t('transactions:pagination.results'),
+                        previous: t('transactions:pagination.previous'),
+                        next: t('transactions:pagination.next')
+                    }}
                 />
             </div>
         </div>

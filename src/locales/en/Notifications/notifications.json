@@ -1,0 +1,63 @@
+{
+  "pageTitle": "Apps Notification",
+  "header": {
+    "title": "Send Notification",
+    "subtitle": "Notify your users instantly"
+  },
+  "recipients": {
+    "label": "Select Recipients",
+    "allUsers": {
+      "title": "All Users",
+      "description": "Send to everyone"
+    },
+    "pitchUsers": {
+      "title": "Pitch Users",
+      "description": "Pitch users only"
+    },
+    "specificUsers": {
+      "title": "Specific Users",
+      "description": "Choose manually"
+    }
+  },
+  "userSelection": {
+    "label": "Select Users",
+    "selected": "{{count}} selected",
+    "placeholder": "Click to select users",
+    "loading": "Loading users...",
+    "noUsers": "No users available",
+    "usersSelected": "{{count}} user(s) selected"
+  },
+  "form": {
+    "title": {
+      "label": "Notification Title",
+      "placeholder": "Enter notification title",
+      "required": "*"
+    },
+    "message": {
+      "label": "Notification Message",
+      "placeholder": "Write your notification message...",
+      "required": "*"
+    },
+    "channels": {
+      "label": "Delivery Channels",
+      "app": "📱 App Notification",
+      "sms": "💬 SMS",
+      "whatsapp": "📞 WhatsApp"
+    },
+    "activeStatus": "Activate notification immediately"
+  },
+  "buttons": {
+    "send": "Send Notification",
+    "sending": "Sending..."
+  },
+  "errors": {
+    "titleRequired": "Please enter a notification title",
+    "messageRequired": "Please enter a notification message",
+    "usersRequired": "Please select at least one user",
+    "fetchUsers": "Failed to fetch users. Please try again.",
+    "sendFailed": "Failed to send notification. Please try again."
+  },
+  "success": {
+    "sent": "Notification sent successfully!"
+  }
+}

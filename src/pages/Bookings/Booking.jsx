@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next'; // Add this import
 import { useBookings } from '../../hooks/useBookings';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import {
@@ -11,9 +12,11 @@ import MainTable from '../../components/MainTable';
 import BookingDetailView from "./BookingDetailView.jsx";
 import StatCard from '../../components/Charts/StatCards.jsx';
 import { useNavigate } from "react-router-dom";
-import { getImageUrl } from '../../utils/imageUtils.js'; // Import image utility
+import { getImageUrl } from '../../utils/imageUtils.js';
+
 const Bookings = () => {
     const dispatch = useDispatch();
+    const { t, i18n } = useTranslation('booking'); // Add this
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [viewMode, setViewMode] = useState('list');
@@ -36,8 +39,8 @@ const Bookings = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        dispatch(setPageTitle('Bookings'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pageTitle')));
+    }, [dispatch, t]);
 
     function getOrderingParam(key, order) {
         const orderingMap = {
@@ -67,7 +70,7 @@ const Bookings = () => {
         return (
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
                 <Icon size={14} />
-                {status}
+                {t(`status.${status?.toLowerCase()}`) || status}
             </span>
         );
     };
@@ -75,7 +78,7 @@ const Bookings = () => {
     const formatDateTime = (dateTime) => {
         if (!dateTime) return 'N/A';
         const date = new Date(dateTime);
-        return date.toLocaleDateString('en-US', {
+        return date.toLocaleDateString(i18n.language, {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -85,7 +88,6 @@ const Bookings = () => {
     };
 
     const handleViewBooking = (booking) => {
-        // Navigate with booking data in state
         navigate('/bookings/book-details', {
             state: {
                 booking,
@@ -99,20 +101,15 @@ const Bookings = () => {
         setSelectedBooking(null);
     };
 
-    // Server-side sorting - just update sort config, API will handle it
     const handleSort = (key) => {
-        console.log('🔄 Sort clicked:', key);
         let order = 'asc';
-
         if (sortConfig.key === key && sortConfig.order === 'asc') {
             order = 'desc';
         }
-
         setSortConfig({ key, order });
-        setCurrentPage(1); // Reset to first page when sorting
+        setCurrentPage(1);
     };
 
-    // Helper function to handle image loading errors
     const handleImageError = (e, fallbackContent) => {
         e.target.style.display = 'none';
         if (fallbackContent) {
@@ -122,7 +119,7 @@ const Bookings = () => {
 
     const columns = [
         {
-            header: 'Pitch Name',
+            header: t('table.pitchName'),
             accessor: 'pitch',
             sortable: true,
             sortKey: 'name',
@@ -136,13 +133,13 @@ const Bookings = () => {
                         {imageUrl ? (
                             <img
                                 src={imageUrl}
-                                alt={row.pitch?.translations?.name || 'Pitch'}
+                                alt={row.pitch?.translations?.name || t('table.pitch')}
                                 className="w-10 h-10 rounded-full object-cover"
                                 onError={(e) => handleImageError(
                                     e,
-                                    '<div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">' +
-                                    '<MapPin size="18" class="text-teal-600" />' +
-                                    '</div>'
+                                    `<div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
+                                        <MapPin size="18" class="text-teal-600" />
+                                    </div>`
                                 )}
                             />
                         ) : (
@@ -151,14 +148,14 @@ const Bookings = () => {
                             </div>
                         )}
                         <span className="font-medium text-gray-900">
-                            {row.pitch?.translations?.name || 'Pitch ' + row.id}
+                            {row.pitch?.translations?.name || t('table.pitch') + ' ' + row.id}
                         </span>
                     </div>
                 );
             }
         },
         {
-            header: 'ID',
+            header: t('table.id'),
             accessor: 'id',
             sortable: true,
             sortKey: 'id',
@@ -169,7 +166,7 @@ const Bookings = () => {
             )
         },
         {
-            header: 'Customer',
+            header: t('table.customer'),
             accessor: 'user_info',
             sortable: true,
             sortKey: 'customer',
@@ -180,7 +177,7 @@ const Bookings = () => {
                         {userImageUrl ? (
                             <img
                                 src={userImageUrl}
-                                alt={row.user_info?.name || 'Customer'}
+                                alt={row.user_info?.name || t('table.customer')}
                                 className="w-8 h-8 rounded-full object-cover"
                                 onError={(e) => {
                                     e.target.style.display = 'none';
@@ -199,21 +196,23 @@ const Bookings = () => {
                                 </span>
                             </div>
                         )}
-                        <span className="text-gray-900">{row.user_info?.name || 'Unknown'}</span>
+                        <span className="text-gray-900">{row.user_info?.name || t('table.unknown')}</span>
                     </div>
                 );
             }
         },
         {
-            header: 'Payment type',
+            header: t('table.paymentType'),
             accessor: 'split_payment',
             sortable: false,
             render: (row) => (
-                <span className="text-gray-600">{row.split_payment ? 'Split' : 'Solo'}</span>
+                <span className="text-gray-600">
+                    {row.split_payment ? t('paymentTypes.split') : t('paymentTypes.solo')}
+                </span>
             )
         },
         {
-            header: 'Date added',
+            header: t('table.dateAdded'),
             accessor: 'created_at',
             sortable: true,
             sortKey: 'created_at',
@@ -222,7 +221,7 @@ const Bookings = () => {
             )
         },
         {
-            header: 'Amount',
+            header: t('table.amount'),
             accessor: 'total_price',
             sortable: true,
             sortKey: 'amount',
@@ -233,14 +232,14 @@ const Bookings = () => {
             )
         },
         {
-            header: 'STATUS',
+            header: t('table.status'),
             accessor: 'status',
             sortable: true,
             sortKey: 'status',
             render: (row) => getStatusBadge(row.status)
         },
         {
-            header: '',
+            header: t('table.actions'),
             accessor: 'actions',
             align: 'center',
             sortable: false,
@@ -248,7 +247,7 @@ const Bookings = () => {
                 <button
                     onClick={() => handleViewBooking(row)}
                     className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                    aria-label="View booking details"
+                    aria-label={t('details.view')}
                 >
                     <ArrowLeft size={18} className="rotate-180" />
                 </button>
@@ -257,61 +256,54 @@ const Bookings = () => {
     ];
 
     const handleSearch = (searchTerm) => {
-        console.log('🔎 Search term:', searchTerm);
         setFilters(prev => ({ ...prev, search: searchTerm }));
         setCurrentPage(1);
     };
 
     const handleFilterChange = (newFilters) => {
-        console.log('🎯 Filter changed:', newFilters);
         setFilters(prev => ({ ...prev, ...newFilters }));
         setCurrentPage(1);
     };
 
     const handlePageChange = (page) => {
-        console.log('📄 Page changed to:', page);
         setCurrentPage(page);
     };
 
     const handleRefresh = () => {
-        console.log('🔄 Refreshing data...');
         refetch();
     };
 
-    // Server returns paginated data directly - no client-side sorting needed
     const bookingData = bookings?.results || [];
-
     const confirmedCount = bookings?.confirmed || 0;
     const cancelledCount = bookings?.cancelled || 0;
-
     const totalItems = bookings?.count || 0;
     const pendingCount = bookings?.pending || 0;
 
     // Prepare stats for StatCard components
     const bookingStats = [
         {
-            title: 'Confirmed',
+            title: t('stats.confirmed'),
             value: confirmedCount,
             percentChange: 12,
             icon: CheckCircle,
             iconColor: 'text-green-600'
         },
         {
-            title: 'Pending',
+            title: t('stats.pending'),
             value: pendingCount,
             percentChange: -5,
             icon: Clock,
             iconColor: 'text-yellow-600'
         },
         {
-            title: 'Cancelled',
+            title: t('stats.cancelled'),
             value: cancelledCount,
             percentChange: 8,
             icon: XCircle,
             iconColor: 'text-red-600'
         },
         {
-            title: 'Total ',
+            title: t('stats.total'),
             value: totalItems,
             percentChange: 18,
             icon: DollarSign,
@@ -319,17 +311,34 @@ const Bookings = () => {
         }
     ];
 
+    // Filter configuration
+    const filterConfig = [
+        {
+            key: 'status',
+            label: t('filters.label'),
+            type: 'select',
+            options: [
+                { label: t('filters.all'), value: 'all' },
+                { label: t('filters.pending'), value: 'pending' },
+                { label: t('filters.confirmed'), value: 'confirmed' },
+                { label: t('filters.completed'), value: 'completed' },
+                { label: t('filters.cancelled'), value: 'cancelled' }
+            ],
+            value: filters.status || 'all'
+        }
+    ];
+
     if (error) {
         return (
             <div className="p-6">
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                    <p className="font-medium">Error loading bookings</p>
+                    <p className="font-medium">{t('errors.loading')}</p>
                     <p className="text-sm">{error}</p>
                     <button
                         onClick={handleRefresh}
                         className="mt-2 text-sm underline hover:no-underline"
                     >
-                        Try again
+                        {t('errors.tryAgain')}
                     </button>
                 </div>
             </div>
@@ -364,17 +373,18 @@ const Bookings = () => {
 
             <div className={'py-5'}>
                 <h1 className="px-8 text-primary-700 lg:-mb-10 lg:text-xl lg:mt-8 font-bold">
-                    Bookings list
+                    {t('listTitle')}
                 </h1>
 
                 <MainTable
                     columns={columns}
                     data={bookingData}
-                    searchPlaceholder="Search player, ID, venue, etc"
+                    searchPlaceholder={t('searchPlaceholder')}
                     currentPage={currentPage}
                     itemsPerPage={itemsPerPage}
                     totalItems={totalItems}
                     onSearch={handleSearch}
+                    filters={filterConfig}
                     onFilterChange={handleFilterChange}
                     onPageChange={handlePageChange}
                     sortConfig={sortConfig}

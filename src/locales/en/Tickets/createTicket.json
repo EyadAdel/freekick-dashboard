@@ -1,0 +1,95 @@
+{
+  "header": {
+    "back": "Back to Tickets",
+    "createTitle": "Create New Ticket",
+    "createSubtitle": "Fill in the details to create a new event",
+    "editTitle": "Edit Ticket",
+    "editSubtitle": "Update ticket information"
+  },
+  "form": {
+    "eventName": {
+      "label": "Event Name",
+      "placeholder": "Enter event name",
+      "required": "Event name is required",
+      "minLength": "Name must be at least 3 characters"
+    },
+    "date": {
+      "label": "Event Date",
+      "required": "Event date is required"
+    },
+    "city": {
+      "label": "City",
+      "placeholder": "Enter city",
+      "required": "City is required",
+      "options": {
+        "Abu_Dhabi": "Abu Dhabi",
+        "Dubai": "Dubai",
+        "Sharjah": "Sharjah",
+        "Ajman": "Ajman",
+        "Umm_Al_Quwain": "Umm Al Quwain",
+        "Ras_Al_Khaimah": "Ras Al Khaimah",
+        "Fujairah": "Fujairah"
+      }
+    },
+    "place": {
+      "label": "Venue/Place",
+      "placeholder": "Enter venue name",
+      "required": "Place is required"
+    },
+    "price": {
+      "label": "Price",
+      "placeholder": "0.00",
+      "required": "Price is required",
+      "min": "Price must be positive"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Enter event description"
+    },
+    "url": {
+      "label": "Ticket URL",
+      "placeholder": "https://example.com/tickets",
+      "pattern": "Please enter a valid URL starting with http:// or https://",
+      "helperText": "Link where users can purchase tickets"
+    },
+    "activeStatus": {
+      "label": "Active Ticket",
+      "helperText": ""
+    },
+    "image": {
+      "label": "Event Image",
+      "dragDrop": "Drag & drop an image or click to select",
+      "supported": "PNG, JPG, JPEG up to 5MB",
+      "choose": "Choose Image",
+      "change": "Change Image",
+      "uploading": "Uploading...",
+      "uploaded": "Image uploaded",
+      "currentImage": "Current Image",
+      "existingImage": "Existing Image",
+      "uploadStatus": "Image will be uploaded automatically when selected. Supported formats: PNG, JPG, JPEG. Max size: 5MB",
+      "errors": {
+        "invalidType": "Please select a valid image file",
+        "sizeLimit": "Image size must be less than 5MB",
+        "uploadFailed": "Failed to upload image",
+        "waitForUpload": "Please wait for image upload to complete"
+      }
+    }
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "create": "Create Ticket",
+    "update": "Update Ticket",
+    "removeImage": "Remove Image"
+  },
+  "messages": {
+    "success": {
+      "uploaded": "Image uploaded successfully",
+      "created": "Ticket created successfully",
+      "updated": "Ticket updated successfully"
+    },
+    "error": {
+      "formErrors": "Please fix form errors before submitting",
+      "operationFailed": "Operation failed"
+    }
+  }
+}

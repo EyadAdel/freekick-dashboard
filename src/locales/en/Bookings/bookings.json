@@ -1,0 +1,57 @@
+{
+  "pageTitle": "Bookings",
+  "listTitle": "Bookings list",
+  "searchPlaceholder": "Search player, ID, venue, etc",
+  "stats": {
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "cancelled": "Cancelled",
+    "total": "Total Bookings"
+  },
+  "table": {
+    "pitchName": "Pitch Name",
+    "id": "ID",
+    "customer": "Customer",
+    "paymentType": "Payment type",
+    "dateAdded": "Date added",
+    "amount": "Amount",
+    "status": "STATUS",
+    "actions": "",
+    "unknown": "Unknown",
+    "pitch": "Pitch",
+    "customer": "Customer"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "paymentTypes": {
+    "split": "Split",
+    "solo": "Solo"
+  },
+  "filters": {
+    "label": "Filter by Status",
+    "all": "All Statuses",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "confirm": {
+    "refresh": {
+      "title": "Refresh Data",
+      "text": "Are you sure you want to refresh the bookings data?",
+      "btn": "Refresh"
+    }
+  },
+  "errors": {
+    "loading": "Error loading bookings",
+    "tryAgain": "Try again"
+  },
+  "details": {
+    "view": "View booking details",
+    "back": "Back to list"
+  }
+}

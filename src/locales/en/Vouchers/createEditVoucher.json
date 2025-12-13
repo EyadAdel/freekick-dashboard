@@ -1,0 +1,64 @@
+{
+  "title": {
+    "create": "Create New Voucher",
+    "edit": "Edit Voucher"
+  },
+  "backButton": "Back to Vouchers",
+  "form": {
+    "labels": {
+      "code": "Voucher Code",
+      "name": "Voucher Name",
+      "description": "Description (Optional)",
+      "discountType": "Discount Type",
+      "discountAmount": "Discount {type}",
+      "maxDiscountAmount": "Maximum Discount Amount (Optional)",
+      "validFrom": "Valid From (Optional)",
+      "validTo": "Valid Until (Optional)",
+      "usageLimit": "Maximum Usage Limit (Optional)",
+      "activeStatus": "Active Voucher"
+    },
+    "placeholders": {
+      "code": "Enter voucher code",
+      "name": "Enter voucher name",
+      "description": "Enter voucher description",
+      "percentage": "0",
+      "fixed": "0.00",
+      "usageLimit": "Leave empty for unlimited"
+    },
+    "helperText": {
+      "description": "Optional description for the voucher",
+      "maxDiscount": "Maximum discount amount when using percentage (leave empty for no limit)",
+      "validFrom": "Leave empty for immediate validity",
+      "validTo": "Leave empty for no expiry",
+      "usageLimit": "Maximum number of times this voucher can be used",
+      "activeStatus": "Inactive vouchers cannot be used"
+    },
+    "options": {
+      "discountTypes": [
+        { "value": "percentage", "label": "Percentage (%)" },
+        { "value": "fixed", "label": "Fixed Amount ($)" }
+      ]
+    },
+    "buttons": {
+      "regenerate": "Regenerate Code",
+      "cancel": "Cancel",
+      "submit": {
+        "create": "Create Voucher",
+        "edit": "Update Voucher"
+      }
+    },
+    "messages": {
+      "success": {
+        "create": "Voucher created successfully",
+        "edit": "Voucher updated successfully"
+      },
+      "errors": {
+        "required": "{field} is required",
+        "minLength": "{field} must be at least {min} characters",
+        "positive": "Amount must be positive",
+        "percentageExceed": "Percentage cannot exceed 100%",
+        "minUsage": "Must be at least 1"
+      }
+    }
+  }
+}

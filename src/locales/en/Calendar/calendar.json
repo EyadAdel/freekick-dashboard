@@ -1,0 +1,63 @@
+{
+  "calendar": {
+    "pageTitle": "Calendar",
+    "header": {
+      "totalBookings": "Total Bookings",
+      "today": "Today",
+      "selectVenue": "Select Venue",
+      "allVenues": "All Venues"
+    },
+    "datePicker": {
+      "yesterday": "أمس",
+      "tomorrow": "غداً",
+      "close": "✕",
+      "previousDay": "اليوم السابق",
+      "nextDay": "اليوم التالي"
+    },
+    "loading": {
+      "loadingBookings": "Loading bookings..."
+    },
+    "emptyState": {
+      "title": "No bookings found",
+      "description": "There are no bookings for the selected date."
+    },
+    "errorState": {
+      "errorLoading": "Error loading bookings: {{error}}",
+      "retry": "Retry"
+    },
+    "grid": {
+      "time": "Time",
+      "unknownPitch": "Unknown Pitch",
+      "venueFormat": "Venue {{id}}"
+    },
+    "bookingCard": {
+      "unknownHost": "Unknown Host",
+      "players": "👥 {{count}} players",
+      "playKind": "⚽ {{kind}}"
+    },
+    "status": {
+      "active": "Active",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    },
+    "dateFormats": {
+      "weekday": "short",
+      "day": "numeric",
+      "month": "short",
+      "year": "numeric",
+      "timeFormat": {
+        "hour": "numeric",
+        "minute": "2-digit",
+        "hour12": true
+      }
+    },
+    "timeSlots": {
+      "am": "AM",
+      "pm": "PM"
+    },
+    "pitchImage": {
+      "alt": "Pitch"
+    }
+  }
+}

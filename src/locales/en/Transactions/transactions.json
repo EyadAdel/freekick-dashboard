@@ -1,0 +1,69 @@
+{
+  "title": "Transactions",
+  "searchPlaceholder": "Search transactions...",
+  "loading": "Loading...",
+  "noData": "No transactions found",
+  "table": {
+    "columns": {
+      "id": "Transaction ID",
+      "description": "Description",
+      "amount": "Amount",
+      "type": "Type",
+      "bookingAction": "Booking Action",
+      "date": "Date",
+      "receipt": "Receipt"
+    },
+    "actions": {
+      "printPDF": "Print PDF",
+      "generatingPDF": "Generating...",
+      "downloadReceipt": "Download Receipt"
+    }
+  },
+  "filters": {
+    "transactionType": "Transaction Type",
+    "exactAmount": "Exact Amount",
+    "minAmount": "Min Amount",
+    "maxAmount": "Max Amount",
+    "dateRange": "Date Range",
+    "allTypes": "All Types",
+    "from": "From",
+    "to": "To"
+  },
+  "types": {
+    "credit": "Credit",
+    "debit": "Debit",
+    "add": "Credit",
+    "deduct": "Debit"
+  },
+  "receipt": {
+    "title": "Transaction Receipt",
+    "generating": "Generating receipt...",
+    "failed": "Failed to generate receipt",
+    "transactionId": "Transaction ID",
+    "date": "Date",
+    "description": "Description",
+    "amount": "Amount",
+    "type": "Type",
+    "bookingAction": "Booking Action",
+    "total": "Total",
+    "thankYou": "Thank you for your transaction!"
+  },
+  "messages": {
+    "pdfGenerated": "PDF generated successfully",
+    "pdfFailed": "Failed to generate PDF. Please try again.",
+    "receiptDownloaded": "Receipt downloaded"
+  },
+  "pagination": {
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "results": "results",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "format": {
+    "amount": "AED {amount}",
+    "date": "MMM dd, yyyy hh:mm a",
+    "id": "#{id}"
+  }
+}

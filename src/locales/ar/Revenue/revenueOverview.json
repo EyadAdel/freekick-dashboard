@@ -1,0 +1,28 @@
+
+{
+  "title": "نظرة عامة على الإيرادات",
+  "loading": "جاري تحميل البيانات...",
+  "error": {
+    "title": "خطأ في تحميل البيانات",
+    "message": "فشل تحميل بيانات الرسوم البيانية",
+    "retry": "إعادة المحاولة"
+  },
+  "stats": {
+    "totalIncome": "إجمالي الدخل",
+    "totalExpense": "إجمالي المصروفات",
+    "netBalance": "صافي الرصيد"
+  },
+  "charts": {
+    "monthlyRevenue": "الإيرادات الشهرية",
+    "monthlyTransfers": "التحويلات الشهرية"
+  },
+  "transactions": "المعاملات",
+  "income": "الدخل",
+  "expense": "المصاريف",
+  "noData": "لا توجد بيانات للإيرادات",
+  "legend": {
+    "lowRevenue": "إيرادات منخفضة",
+    "mediumRevenue": "إيرادات متوسطة",
+    "highRevenue": "إيرادات عالية"
+  }
+}

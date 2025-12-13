@@ -1,0 +1,95 @@
+{
+  "header": {
+    "back": "العودة إلى التذاكر",
+    "createTitle": "إنشاء تذكرة جديدة",
+    "createSubtitle": "املأ التفاصيل لإنشاء فعالية جديدة",
+    "editTitle": "تعديل التذكرة",
+    "editSubtitle": "تحديث معلومات التذكرة"
+  },
+  "form": {
+    "eventName": {
+      "label": "اسم الفعالية",
+      "placeholder": "أدخل اسم الفعالية",
+      "required": "اسم الفعالية مطلوب",
+      "minLength": "يجب أن يكون الاسم 3 أحرف على الأقل"
+    },
+    "date": {
+      "label": "تاريخ الفعالية",
+      "required": "تاريخ الفعالية مطلوب"
+    },
+    "city": {
+      "label": "المدينة",
+      "placeholder": "أدخل المدينة",
+      "required": "المدينة مطلوبة",
+      "options": {
+        "Abu_Dhabi": "أبو ظبي",
+        "Dubai": "دبي",
+        "Sharjah": "الشارقة",
+        "Ajman": "عجمان",
+        "Umm_Al_Quwain": "أم القيوين",
+        "Ras_Al_Khaimah": "رأس الخيمة",
+        "Fujairah": "الفجيرة"
+      }
+    },
+    "place": {
+      "label": "الموقع/المكان",
+      "placeholder": "أدخل اسم المكان",
+      "required": "المكان مطلوب"
+    },
+    "price": {
+      "label": "السعر",
+      "placeholder": "0.00",
+      "required": "السعر مطلوب",
+      "min": "يجب أن يكون السعر رقمًا موجبًا"
+    },
+    "description": {
+      "label": "الوصف",
+      "placeholder": "أدخل وصف الفعالية"
+    },
+    "url": {
+      "label": "رابط التذكرة",
+      "placeholder": "https://example.com/tickets",
+      "pattern": "الرجاء إدخال رابط صحيح يبدأ بـ http:// أو https://",
+      "helperText": "الرابط الذي يمكن للمستخدمين شراء التذاكر منه"
+    },
+    "activeStatus": {
+      "label": "تذكرة نشطة",
+      "helperText": ""
+    },
+    "image": {
+      "label": "صورة الفعالية",
+      "dragDrop": "اسحب وأفلت صورة أو انقر للاختيار",
+      "supported": "PNG, JPG, JPEG حتى 5 ميجابايت",
+      "choose": "اختر صورة",
+      "change": "تغيير الصورة",
+      "uploading": "جاري الرفع...",
+      "uploaded": "تم رفع الصورة",
+      "currentImage": "الصورة الحالية",
+      "existingImage": "صورة موجودة",
+      "uploadStatus": "سيتم رفع الصورة تلقائيًا عند الاختيار. الصيغ المدعومة: PNG, JPG, JPEG. الحد الأقصى: 5 ميجابايت",
+      "errors": {
+        "invalidType": "الرجاء اختيار ملف صورة صالح",
+        "sizeLimit": "يجب أن يكون حجم الصورة أقل من 5 ميجابايت",
+        "uploadFailed": "فشل في رفع الصورة",
+        "waitForUpload": "الرجاء الانتظار حتى اكتمال رفع الصورة"
+      }
+    }
+  },
+  "buttons": {
+    "cancel": "إلغاء",
+    "create": "إنشاء تذكرة",
+    "update": "تحديث التذكرة",
+    "removeImage": "إزالة الصورة"
+  },
+  "messages": {
+    "success": {
+      "uploaded": "تم رفع الصورة بنجاح",
+      "created": "تم إنشاء التذكرة بنجاح",
+      "updated": "تم تحديث التذكرة بنجاح"
+    },
+    "error": {
+      "formErrors": "الرجاء تصحيح أخطاء النموذج قبل الإرسال",
+      "operationFailed": "فشلت العملية"
+    }
+  }
+}
