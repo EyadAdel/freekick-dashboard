@@ -38,6 +38,11 @@ import enTournamentPage from '../locales/en/Tournaments/tournamentPage.json';
 import arTournamentPage from '../locales/ar/Tournaments/tournamentPage.json';
 import entournamentDetails from '../locales/en/Tournaments/tournamentDetails.json';
 import artournamentDetails from '../locales/ar/Tournaments/tournamentDetails.json';
+import enAddOnsForm from '../locales/en/AddOns/addOnsForm.json';
+import arAddOnsForm from '../locales/ar/AddOns/addOnsForm.json';
+import enAddOnsPage from '../locales/en/AddOns/addOnsPage.json';
+import arAddOnsPage from '../locales/ar/AddOns/addOnsPage.json';
+
 import enBookingsPage from '../locales/en/Bookings/bookings.json';
 import arBookingsPage from '../locales/ar/Bookings/bookings.json';
 import enBookingDetails from '../locales/en/Bookings/bookingDetails.json';
@@ -70,6 +75,7 @@ import enPieChart from '../locales/en/Charts/pieChart.json';
 import arPieChart from '../locales/ar/Charts/pieChart.json';
 import enPlayers from '../locales/en/Players/players.json';
 import arPlayers from '../locales/ar/Players/players.json';
+
 // Translation resources
 const resources = {
     en: {
@@ -90,10 +96,13 @@ const resources = {
         tournamentForm: enTournamentForm,
         tournamentPage: enTournamentPage,
         tournamentDetails: entournamentDetails,
+        addOnsForm: enAddOnsForm,
+        addOnsPage: enAddOnsPage,
+
         booking: enBookingsPage,
         bookingDetails: enBookingDetails,
-        notifications: enNotifications, // Add this
-        bannersPage: enBannersPage, // Add this
+        notifications: enNotifications,
+        bannersPage: enBannersPage,
         ticketsPage: enTicketsPage,
         createTicket: enCreateTicket,
         calendar: enCalendar,
@@ -106,7 +115,6 @@ const resources = {
         createEditVoucher: enCreateEditVoucher,
         pieChart: enPieChart,
         players: enPlayers,
-
     },
     ar: {
         common: arCommon,
@@ -126,10 +134,13 @@ const resources = {
         tournamentForm: arTournamentForm,
         tournamentPage: arTournamentPage,
         tournamentDetails: artournamentDetails,
+        addOnsForm: arAddOnsForm,
+        addOnsPage: arAddOnsPage,
+
         booking: arBookingsPage,
         bookingDetails: arBookingDetails,
-        notifications: arNotifications, // Add this
-        bannersPage: arBannersPage, // Add this
+        notifications: arNotifications,
+        bannersPage: arBannersPage,
         ticketsPage: arTicketsPage,
         createTicket: arCreateTicket,
         calendar: arCalendar,
@@ -142,8 +153,6 @@ const resources = {
         createEditVoucher: arCreateEditVoucher,
         pieChart: arPieChart,
         players: arPlayers,
-
-
     },
 };
 
@@ -180,7 +189,9 @@ i18n
             'tournamentForm',
             'tournamentPage',
             'tournamentDetails',
-            ' booking',
+            'addOnsForm',
+            'addOnsPage',
+            'booking',
             'bookingDetails',
             'notifications',
             'bannersPage',
@@ -196,7 +207,6 @@ i18n
             'createEditVoucher',
             'pieChart',
             'players',
-
         ],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {

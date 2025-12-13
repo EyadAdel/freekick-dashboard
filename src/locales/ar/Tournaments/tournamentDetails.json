@@ -4,24 +4,29 @@
     "update": "تحديث البطولة"
   },
   "status": {
-    "active": "نشطة",
-    "inactive": "غير نشطة",
-    "private": "خاصة"
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "private": "خاص"
   },
   "card": {
     "start_date": "تاريخ البدء",
     "end_date": "تاريخ الانتهاء",
     "daily": "يومياً",
-    "entry_fee": "رسوم الاشتراك",
-    "currency": "د.إ",
+    "entry_fee": "رسوم الدخول",
+    "currency": "درهم",
     "free": "مجاني",
-    "registered_teams": "الفرق المسجلة",
-    "code": "الكود",
+    "registered_teams": "المسجلين",
+    "code": "الرمز",
     "share": "مشاركة البطولة",
-    "venue_id": "رقم المنشأة: {{id}}"
+    "venue_id": "رقم الملعب: {{id}}"
   },
   "gallery": {
     "title": "معرض الصور"
+  },
+  "participants": {
+    "title": "المشاركين",
+    "teams": "الفرق",
+    "players": "اللاعبين"
   },
   "info": {
     "title": "عن البطولة",
@@ -30,7 +35,7 @@
     "sport": "الرياضة",
     "deadline": "الموعد النهائي",
     "format": "التنسيق",
-    "teams_max": "أقصى عدد {{count}} فرق",
+    "teams_max": "الحد الأقصى {{count}} فرق",
     "standard_system": "قياسي",
     "sport_id": "رقم الرياضة: {{id}}",
     "unknown_sport": "غير معروف"

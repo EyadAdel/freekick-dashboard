@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
+
+// Changed import to use the helper function instead of just the constant
+import { getImageUrl } from '../../utils/imageUtils.js'; // Import image utility
 
 import {
     MapPin, CheckCircle2, XCircle,
@@ -10,7 +12,7 @@ import {
     Mail, Phone, Clock, Globe,
     TrendingUp, TrendingDown,
     Wallet, Plus, FileText,
-    ArrowLeft, Percent
+    Percent, Edit2, Save, X
 } from 'lucide-react';
 
 // --- Services ---
@@ -23,7 +25,7 @@ import AddActionModal from "../../components/pitchOwners/AddActionModal.jsx";
 // --- Hooks ---
 import { useContact } from "../../hooks/useContact.js";
 import ArrowIcon from "../common/ArrowIcon.jsx";
-import {t} from "i18next";
+import { toast } from "react-toastify";
 
 // ============================================================================
 // HELPERS
@@ -63,11 +65,10 @@ const getStatusBadge = (status) => {
 // SUB-COMPONENTS
 // ============================================================================
 
-
 // --- Header Component ---
 const Header = ({ onBack }) => (
-    <div className="bg-white shadow-sm   top-0">
-        <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+    <div className="bg-white shadow-sm top-0">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <button
                 onClick={onBack}
                 className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors group"
@@ -77,68 +78,85 @@ const Header = ({ onBack }) => (
                 </div>
                 <span className="font-medium text-sm sm:text-base">Back to Pitch Owners</span>
             </button>
-
         </div>
     </div>
 );
 
 // --- OwnerProfileCard Component ---
-const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookingsCount, onEmail, onWhatsapp, isAdmin }) => {
-    // FIX: Changed from via.placeholder.com to placehold.co
+const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookingsCount, onEmail, onWhatsapp, isAdmin, onUpdateCommission }) => {
     const placeholderImg = 'https://placehold.co/400x300?text=No+Image';
-    const mainImage = ownerData.profile_image || placeholderImg;
+
+    // Logic: Use cover_image for background, profile_image for logo
+    // Updated to use getImageUrl helper
+    const coverImage = getImageUrl(ownerData.cover_image) || getImageUrl(ownerData.profile_image) || placeholderImg;
+    const logoImage = getImageUrl(ownerData.profile_image) || placeholderImg;
+
+    // Editable Commission State
+    const [isEditing, setIsEditing] = useState(false);
+    const [tempCommission, setTempCommission] = useState(ownerData.commission_rate ?? 0);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        await onUpdateCommission(tempCommission);
+        setIsSaving(false);
+        setIsEditing(false);
+    };
+
+    const handleCancel = () => {
+        setTempCommission(ownerData.commission_rate ?? 0);
+        setIsEditing(false);
+    };
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group h-full flex flex-col">
             {/* Image & Overlay */}
-            <div className="relative h-56 sm:h-64 lg:h-72 w-full shrink-0">
+            <div className="relative h-48 sm:h-56 w-full shrink-0">
+                {/* Background Cover */}
                 <img
-                    src={mainImage}
-                    alt="Owner Profile"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = placeholderImg;
-                    }}
+                    src={coverImage}
+                    alt="Cover"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.onerror = null; e.target.src = placeholderImg; }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
 
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 z-10">
                     <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm ${
-                        ownerData.is_active
-                            ? 'bg-green-500/90 text-white'
-                            : 'bg-red-500/90 text-white'
+                        ownerData.is_active ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
                     }`}>
                         {ownerData.is_active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                         {ownerData.is_active ? 'Active' : 'Inactive'}
                     </span>
                 </div>
 
-                {/* City Badge */}
-                <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4 z-10">
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm bg-blue-500/90 text-white">
-                        <Globe size={12} />
-                        {ownerData.city || 'UAE'}
-                    </span>
-                </div>
-
-                {/* Title & Contact Name */}
-                <div className="absolute bottom-4 left-4 right-4 text-white rtl:text-right">
-                    <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-1 drop-shadow-md line-clamp-2">
-                        {ownerData.pitch_name}
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs sm:text-sm opacity-90 rtl:justify-end">
-                        <div className="flex items-center gap-1">
-                            <Users size={14} />
-                            <span className="font-semibold">{ownerData.contact_name || 'N/A'}</span>
-                        </div>
+                {/* Logo Overlay - Centered or absolute bottom left */}
+                <div className="absolute -bottom-8 left-4 rtl:left-auto rtl:right-4 z-20">
+                    <div className="w-20 h-20 rounded-full border-4 border-white shadow-md overflow-hidden bg-white">
+                        <img
+                            src={logoImage}
+                            alt="Logo"
+                            className="w-full h-full object-cover"
+                            onError={(e) => { e.target.onerror = null; e.target.src = placeholderImg; }}
+                        />
                     </div>
                 </div>
             </div>
 
+            {/* Title Section (Pushed down slightly due to logo) */}
+            <div className="pt-10 px-4 sm:px-6 pb-2">
+                <h2 className="text-xl sm:text-2xl font-bold leading-tight text-gray-900 mb-1">
+                    {ownerData.pitch_name}
+                </h2>
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <Globe size={14} />
+                    <span className="font-semibold">{ownerData.city || 'UAE'}</span>
+                </div>
+            </div>
+
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 border-b border-gray-100 divide-x divide-gray-100 rtl:divide-x-reverse">
+            <div className="grid grid-cols-2 border-y border-gray-100 divide-x divide-gray-100 rtl:divide-x-reverse mt-2">
                 <div className="p-3 sm:p-4 flex flex-col items-center justify-center text-center">
                     <span className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">Bookings</span>
                     <span className="text-base sm:text-lg font-bold text-gray-900">{totalBookingsCount}</span>
@@ -160,41 +178,76 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                         </div>
                     </div>
 
-                    {/* Commission Rate (Admin Only) */}
+                    {/* Commission Rate (Admin Only & Editable) */}
                     {isAdmin && (
-                        <div className="flex items-center justify-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm mx-auto w-fit">
-                            <Percent className="w-4 h-4 text-gray-400" />
-                            <span className="text-xs text-gray-500 font-semibold uppercase">Commission:</span>
-                            <span className="text-sm font-bold text-gray-900">{ownerData.commission_rate ?? 0}%</span>
+                        <div className="flex flex-col items-center justify-center gap-2">
+                            {!isEditing ? (
+                                <div className="flex items-center justify-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm mx-auto w-fit group/edit">
+                                    <Percent className="w-4 h-4 text-gray-400" />
+                                    <span className="text-xs text-gray-500 font-semibold uppercase">Commission:</span>
+                                    <span className="text-sm font-bold text-gray-900">{ownerData.commission_rate ?? 0}%</span>
+
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="ml-2 p-1 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-full transition-all"
+                                        title="Edit Commission"
+                                    >
+                                        <Edit2 size={14} />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-center gap-2 bg-white px-2 py-1.5 rounded-lg border border-primary-300 shadow-sm mx-auto w-fit ring-2 ring-primary-100">
+                                    <span className="text-xs text-gray-500 font-semibold uppercase">Rate %:</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={tempCommission}
+                                        onChange={(e) => setTempCommission(e.target.value)}
+                                        className="w-16 px-1 py-0.5 text-center font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-primary-500 text-sm"
+                                        autoFocus
+                                    />
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={isSaving}
+                                        className="p-1 text-green-600 hover:bg-green-50 rounded-full disabled:opacity-50"
+                                    >
+                                        <Save size={16} />
+                                    </button>
+                                    <button
+                                        onClick={handleCancel}
+                                        disabled={isSaving}
+                                        className="p-1 text-red-600 hover:bg-red-50 rounded-full disabled:opacity-50"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
             </div>
-            {/* --- Info Row / Actions --- */}
-            <div className="px-4 pt-4 pb-2 sm:px-6   bg-white flex-grow">
-                {/* Contact Info */}
 
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contact Person</h4>
-                <div className="flex items-center gap-3   p-2 rounded-lg">
-                    <div
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 ">
+            {/* --- Info Row / Actions --- */}
+            <div className="px-4 pt-4 pb-2 sm:px-6 bg-white flex-grow">
+                {/* Contact Person */}
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contact Details</h4>
+                <div className="flex items-center gap-3 p-2 rounded-lg">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
                         <User className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"/>
                     </div>
-
-                    <div className="flex-1 min-w-0"><p
-                        className="text-sm font-semibold text-gray-900 truncate">{ownerData.contact_name || 'N/A'}</p>
-                        <p className="text-xs text-gray-500 truncate">{ownerData.email}</p></div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{ownerData.contact_name || 'N/A'}</p>
+                        <p className="text-xs text-gray-500 truncate">Contact Person</p>
+                    </div>
                 </div>
 
-
-
                 {/* Email Action */}
-                <div className="flex items-center gap-3  p-2 rounded-lg ">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0 ">
+                <div className="flex items-center gap-3 p-2 rounded-lg">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                         <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-500">Email Address</p>
                         <p className="text-sm font-medium truncate text-primary-600">
                             {ownerData.email || 'No email provided'}
                         </p>
@@ -202,43 +255,42 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                 </div>
 
                 {/* Phone Action */}
-                <div className="flex items-center gap-3  p-2 rounded-lg ">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0 ">
+                <div className="flex items-center gap-3 p-2 rounded-lg">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
                         <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-500">WhatsApp / Phone</p>
                         <p className="text-sm font-medium truncate text-gray-900">
                             {ownerData.contact_phone || 'No phone provided'}
                         </p>
                     </div>
                 </div>
-
-
             </div>
 
             {/* --- Buttons & Details --- */}
             <div className="px-4 sm:px-6 sm:pb-6 space-y-4 bg-white flex-grow">
-                {/* Contact Buttons (Restored Old Style) */}
-                <div className="space-y-2">
-                    {ownerData.email && (
-                        <button
-                            onClick={onEmail}
-                            className="w-full px-3 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors border border-gray-200"
-                        >
-                            <Mail className="w-4 h-4" />
-                            Send Email
-                        </button>
-                    )}
-                    {ownerData.contact_phone && (
-                        <button
-                            onClick={onWhatsapp}
-                            className="w-full px-3 py-2.5 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors border border-primary-100"
-                        >
-                            <Phone className="w-4 h-4" />
-                            WhatsApp
-                        </button>
-                    )}
+                {/* Contact Buttons */}
+                <div className="space-y-2 pt-2 border-t border-gray-100">
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                        {ownerData.email && (
+                            <button
+                                onClick={onEmail}
+                                className="px-3 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2 transition-colors border border-gray-200"
+                            >
+                                <Mail className="w-4 h-4" />
+                                Email
+                            </button>
+                        )}
+                        {ownerData.contact_phone && (
+                            <button
+                                onClick={onWhatsapp}
+                                className="px-3 py-2.5 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2 transition-colors border border-primary-100"
+                            >
+                                <Phone className="w-4 h-4" />
+                                WhatsApp
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="w-full h-px bg-gray-100"></div>
@@ -250,8 +302,7 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-xs text-gray-500">Location</p>
-                        <p className="text-sm font-medium truncate">{`${ownerData.pitch_address}, ${ownerData.city}` || 'Address not available'}
-                        </p>
+                        <p className="text-sm font-medium truncate">{`${ownerData.pitch_address}, ${ownerData.city}` || 'Address not available'}</p>
                     </div>
                 </div>
 
@@ -281,8 +332,8 @@ const PitchOwnerDetails = () => {
     const { user } = useSelector((state) => state.auth);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
 
-    // 1. Retrieve Data
-    const ownerData = location.state?.ownerData?.data || {};
+    // 1. Retrieve Data & Local State Management
+    const [currentOwnerData, setCurrentOwnerData] = useState(location.state?.ownerData?.data || {});
 
     // State
     const [bookingStatus, setBookingStatus] = useState('all');
@@ -303,26 +354,26 @@ const PitchOwnerDetails = () => {
 
     // 2. Filter Bookings Logic
     const filteredBookings = useMemo(() => {
-        if (!ownerData.booking) return [];
-        return ownerData.booking.filter(b => {
+        if (!currentOwnerData.booking) return [];
+        return currentOwnerData.booking.filter(b => {
             return bookingStatus === 'all' || b.status === bookingStatus;
         });
-    }, [ownerData.booking, bookingStatus]);
+    }, [currentOwnerData.booking, bookingStatus]);
 
     // 3. Pagination for Pitches
     const paginatedPitches = useMemo(() => {
         const startIndex = (currentPitchPage - 1) * pitchesPerPage;
-        return (ownerData.my_pitches || []).slice(startIndex, startIndex + pitchesPerPage);
-    }, [ownerData.my_pitches, currentPitchPage]);
+        return (currentOwnerData.my_pitches || []).slice(startIndex, startIndex + pitchesPerPage);
+    }, [currentOwnerData.my_pitches, currentPitchPage]);
 
     // 4. Fetch Actions Effect
     useEffect(() => {
-        if (!ownerData.id) return;
+        if (!currentOwnerData.id) return;
         const fetchActions = async () => {
             setLoadingActions(true);
             try {
                 const response = await pitchOwnersService.getAllStaffActions(
-                    ownerData.id,
+                    currentOwnerData.id,
                     currentActionPage,
                     actionsLimit
                 );
@@ -338,26 +389,47 @@ const PitchOwnerDetails = () => {
             }
         };
         fetchActions();
-    }, [ownerData.id, currentActionPage, actionsLimit, refreshTrigger]);
+    }, [currentOwnerData.id, currentActionPage, actionsLimit, refreshTrigger]);
 
     // Handlers
-    const handleContactEmail = () => { if(ownerData.email) handleEmailClick(ownerData.email, `Inquiry regarding ${ownerData.pitch_name}`, "Hello,"); };
-    const handleContactPhone = () => { if(ownerData.contact_phone) handleWhatsAppClick(ownerData.contact_phone, "Hello, I have a question regarding your venue."); };
+    const handleContactEmail = () => { if(currentOwnerData.email) handleEmailClick(currentOwnerData.email, `Inquiry regarding ${currentOwnerData.pitch_name}`, "Hello,"); };
+    const handleContactPhone = () => { if(currentOwnerData.contact_phone) handleWhatsAppClick(currentOwnerData.contact_phone, "Hello, I have a question regarding your venue."); };
     const handleAddAction = () => setIsActionModalOpen(true);
     const handleActionSuccess = () => { setRefreshTrigger(prev => prev + 1); setCurrentActionPage(1); };
 
+    // --- NEW: Update Commission Handler ---
+    const handleUpdateCommission = async (newRate) => {
+        try {
+            // Call the service update function
+            const response = await pitchOwnersService.updateStaff(currentOwnerData.id, {
+                commission_rate: newRate
+            });
+
+            // Check success and update local state
+            if(response) {
+                setCurrentOwnerData(prev => ({
+                    ...prev,
+                    commission_rate: newRate
+                }));
+            }
+        } catch (error) {
+            console.error("Failed to update commission", error);
+        }
+    };
+
     // Derived Stats
-    const totalRevenue = (ownerData.booking || []).reduce((acc, curr) => acc + parseFloat(curr.total_price || 0), 0);
-    const totalPitches = ownerData.my_pitches?.length || 0;
-    const totalBookingsCount = ownerData.booking?.length || 0;
+    const totalRevenue = (currentOwnerData.booking || []).reduce((acc, curr) => acc + parseFloat(curr.total_price || 0), 0);
+    const totalPitches = currentOwnerData.my_pitches?.length || 0;
+    const totalBookingsCount = currentOwnerData.booking?.length || 0;
 
     // Table Column Definitions
     const pitchColumns = [
         { header: 'Pitch Code', accessor: 'id', align: 'left', render: (pitch) => <span className="text-sm font-semibold text-primary-600">{`P${pitch.id}`}</span> },
         { header: 'Pitch Name', accessor: 'translations.name', render: (pitch) => (
                 <div className="flex items-center gap-3">
+                    {/* Updated to use getImageUrl helper */}
                     {pitch.image ? (
-                        <img src={`${IMAGE_BASE_URL}${pitch.image}`} alt={pitch.translations.name} className="w-10 h-10 rounded-lg object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/40"; }} />
+                        <img src={getImageUrl(pitch.image)} alt={pitch.translations.name} className="w-10 h-10 rounded-lg object-cover" onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/40"; }} />
                     ) : ( <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center"><LayoutGrid className="w-5 h-5 text-primary-600" /></div> )}
                     <div><p className="text-sm font-semibold text-gray-900">{pitch.translations?.name || 'Unknown'}</p><p className="text-xs text-gray-500">Size: {pitch.size}</p></div>
                 </div>
@@ -389,7 +461,7 @@ const PitchOwnerDetails = () => {
     ];
 
     // Validation
-    if (!ownerData || !ownerData.id) {
+    if (!currentOwnerData || !currentOwnerData.id) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
                 <p className="text-gray-500 mb-4">Pitch Owner data not found</p>
@@ -412,21 +484,21 @@ const PitchOwnerDetails = () => {
                     <div className="col-span-1">
                         <div className="lg:sticky lg:top-24 h-fit space-y-6">
                             <OwnerProfileCard
-                                ownerData={ownerData}
+                                ownerData={currentOwnerData}
                                 totalRevenue={totalRevenue}
                                 totalPitches={totalPitches}
                                 totalBookingsCount={totalBookingsCount}
                                 onEmail={handleContactEmail}
                                 onWhatsapp={handleContactPhone}
                                 isAdmin={user.role.is_admin}
+                                onUpdateCommission={handleUpdateCommission}
                             />
                         </div>
                     </div>
 
                     {/* --- Right Column: Details & Tables --- */}
                     <div className="lg:col-span-2 space-y-6">
-
-                        {/* 1. Bookings Section */}
+                        {/* Bookings Section */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                             <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                                 <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -487,7 +559,7 @@ const PitchOwnerDetails = () => {
                             </div>
                         </div>
 
-                        {/* 2. Pitches Table Section */}
+                        {/* Pitches Table Section */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                             <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50">
                                 <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -495,13 +567,13 @@ const PitchOwnerDetails = () => {
                                 </h3>
                             </div>
                             <div className="p-4">
-                                {(ownerData.my_pitches && ownerData.my_pitches.length > 0) ? (
+                                {(currentOwnerData.my_pitches && currentOwnerData.my_pitches.length > 0) ? (
                                     <MainTable
                                         columns={pitchColumns}
                                         data={paginatedPitches}
                                         currentPage={currentPitchPage}
                                         itemsPerPage={pitchesPerPage}
-                                        totalItems={ownerData.my_pitches.length}
+                                        totalItems={currentOwnerData.my_pitches.length}
                                         onPageChange={setCurrentPitchPage}
                                         showSearch={false}
                                     />
@@ -513,12 +585,10 @@ const PitchOwnerDetails = () => {
                     </div>
                 </div>
 
-                {/* 3. Staff Actions Section (Admin Only) - MOVED OUTSIDE GRID */}
+                {/* 3. Staff Actions Section (Admin Only) */}
                 {user.role.is_admin && (
                     <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full">
                         <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex flex-wrap justify-between items-center gap-3">
-
-                            {/* Left Side: Title & Balance */}
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
                                     <FileText className="w-5 h-5 text-gray-700" />
@@ -530,8 +600,6 @@ const PitchOwnerDetails = () => {
                                     <span className="text-sm font-bold text-primary-800">{formatAmount(actionsTotalBalance)}</span>
                                 </div>
                             </div>
-
-                            {/* Right Side: Rows & Add Button */}
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-2">
                                     <select
@@ -549,7 +617,6 @@ const PitchOwnerDetails = () => {
                                         <option value={200}>200 / page</option>
                                     </select>
                                 </div>
-
                                 <button
                                     onClick={handleAddAction}
                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
@@ -581,7 +648,7 @@ const PitchOwnerDetails = () => {
                 isOpen={isActionModalOpen}
                 onClose={() => setIsActionModalOpen(false)}
                 onSuccess={handleActionSuccess}
-                staffId={ownerData.id}
+                staffId={currentOwnerData.id}
             />
         </div>
     );

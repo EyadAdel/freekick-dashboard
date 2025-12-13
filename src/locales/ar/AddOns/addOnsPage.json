@@ -1,0 +1,27 @@
+{
+  "pageTitle": "الإضافات",
+  "actions": {
+    "create": "إضافة جديدة +",
+    "editTooltip": "تعديل الإضافة",
+    "deleteTooltip": "حذف الإضافة"
+  },
+  "table": {
+    "headers": {
+      "srNo": "م.",
+      "icon": "الأيقونة",
+      "nameEn": "الاسم (EN)",
+      "nameAr": "الاسم (AR)",
+      "actions": "إجراءات سريعة"
+    },
+    "searchPlaceholder": "البحث بالاسم..."
+  },
+  "messages": {
+    "fetchError": "فشل تحميل بيانات الإضافات.",
+    "deleteConfirm": {
+      "title": "حذف \"{{name}}\"؟",
+      "text": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف الإضافة بشكل دائم.",
+      "confirmButton": "نعم، احذفها",
+      "fallbackItemName": "هذا العنصر"
+    }
+  }
+}

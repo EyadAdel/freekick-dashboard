@@ -1,0 +1,34 @@
+{
+  "titles": {
+    "create": "إنشاء إضافة جديدة",
+    "edit": "تعديل الإضافة",
+    "createSubtitle": "املأ التفاصيل للإضافة الجديدة.",
+    "editSubtitle": "تحديث تفاصيل هذه الإضافة."
+  },
+  "sections": {
+    "basicInfo": "المعلومات الأساسية",
+    "addonIcon": "أيقونة الإضافة"
+  },
+  "labels": {
+    "nameEn": "الاسم (بالإنجليزية)",
+    "nameAr": "الاسم (بالعربية)",
+    "clickToUpload": "اضغط لرفع الأيقونة",
+    "dragAndDrop": "أو قم بالسحب والإفلات",
+    "translating": "جارٍ الترجمة...",
+    "auto": "تلقائي"
+  },
+  "buttons": {
+    "cancel": "إلغاء",
+    "save": "حفظ الإضافة",
+    "update": "تحديث الإضافة"
+  },
+  "messages": {
+    "uploadValidImage": "يرجى تحميل ملف صورة صالح",
+    "iconUploadedSuccess": "تم تحميل الأيقونة بنجاح",
+    "iconUploadFailed": "فشل تحميل الأيقونة.",
+    "waitUpload": "يرجى انتظار انتهاء تحميل الأيقونة.",
+    "submissionError": "حدث خطأ ما أثناء الإرسال.",
+    "requiredNameEn": "الاسم (بالإنجليزية) مطلوب",
+    "requiredNameAr": "الاسم (بالعربية) مطلوب"
+  }
+}

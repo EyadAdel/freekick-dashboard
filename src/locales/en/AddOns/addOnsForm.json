@@ -1,0 +1,34 @@
+{
+  "titles": {
+    "create": "Create New Addon",
+    "edit": "Edit Addon",
+    "createSubtitle": "Fill in the details for the new addon.",
+    "editSubtitle": "Update the details for this addon."
+  },
+  "sections": {
+    "basicInfo": "Basic Information",
+    "addonIcon": "Addon Icon"
+  },
+  "labels": {
+    "nameEn": "Name (English)",
+    "nameAr": "Name (Arabic)",
+    "clickToUpload": "Click to upload icon",
+    "dragAndDrop": "or drag and drop",
+    "translating": "Translating...",
+    "auto": "Auto"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "save": "Save Addon",
+    "update": "Update Addon"
+  },
+  "messages": {
+    "uploadValidImage": "Please upload a valid image file",
+    "iconUploadedSuccess": "Icon uploaded successfully",
+    "iconUploadFailed": "Icon upload failed.",
+    "waitUpload": "Please wait for the icon to finish uploading.",
+    "submissionError": "Something went wrong during submission.",
+    "requiredNameEn": "Name (EN) is required",
+    "requiredNameAr": "Name (AR) is required"
+  }
+}
