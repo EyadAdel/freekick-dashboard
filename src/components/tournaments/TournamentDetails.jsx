@@ -6,7 +6,7 @@ import {
     Share2, Award, BookOpen, LayoutGrid,
     CheckCircle, Edit, Shield, CheckCircle2,
     XCircle, Image as ImageIcon, Users, Activity,
-    User, UserCircle
+    User, UserCircle, Phone, Mail // <--- Added Phone and Mail icons
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
@@ -18,8 +18,10 @@ import { venueSportsService } from '../../services/venueSports/venueSportsServic
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 
 // --- Utils ---
-// UPDATED: Imported getImageUrl instead of IMAGE_BASE_URL
 import { getImageUrl } from '../../utils/imageUtils';
+
+// --- Hooks ---
+import { useContact } from '../../hooks/useContact'; // <--- Added Hook
 
 // --- Components ---
 import ArrowIcon from '../../components/common/ArrowIcon';
@@ -51,7 +53,8 @@ const Header = ({ onBack, onUpdate, isEditing, t }) => (
     </div>
 );
 
-const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
+// --- UPDATED CARD COMPONENT ---
+const TournamentProfileCard = ({ tournament, venueName, t, currentLang, onWhatsApp }) => {
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         return new Date(dateString).toLocaleDateString(currentLang, {
@@ -64,10 +67,8 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
         return timeString.substring(0, 5);
     };
 
-    // Calculate total participants (Teams + Individuals)
+    // Calculate total participants
     const teamsCount = tournament.joined_data?.filter(i => i.kind === 'team').length || 0;
-
-    // Combine joined_data(users) and joined_user_data, then dedup by ID to get accurate count
     const soloFromMixed = tournament.joined_data?.filter(item => item.kind === 'user') || [];
     const directUsers = tournament.joined_user_data || [];
     const allPlayers = [...soloFromMixed, ...directUsers];
@@ -77,8 +78,12 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
     const max = tournament.max_teams || 0;
     const percentage = max > 0 ? (totalRegistered / max) * 100 : 0;
 
+    // Organizer Data
+    const organizer = tournament.user || {};
+
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group">
+            {/* Image Section */}
             <div className="relative h-64 w-full">
                 {tournament.cover_image ? (
                     <img
@@ -108,14 +113,6 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
                     </span>
                 </div>
 
-                {tournament.private && (
-                    <div className="absolute top-4 left-4">
-                        <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm bg-amber-500/90 text-white">
-                            {t('status.private')}
-                        </span>
-                    </div>
-                )}
-
                 <div className="absolute bottom-4 left-4 right-4 text-white">
                     <h2 className="text-2xl font-bold leading-tight mb-1 drop-shadow-md">
                         {tournament.name}
@@ -132,6 +129,7 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
                 </div>
             </div>
 
+            {/* Dates */}
             <div className="bg-gray-50 border-b border-gray-100 p-4 flex justify-between items-center text-sm">
                 <div className="flex flex-col">
                     <span className="text-xs text-gray-500 uppercase font-bold mb-0.5">{t('card.start_date')}</span>
@@ -148,6 +146,7 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
                 </div>
             </div>
 
+            {/* Time */}
             <div className="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-center text-sm">
                 <Clock size={14} className="text-gray-400 mr-2"/>
                 <span className="text-gray-600 font-medium">
@@ -155,6 +154,7 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
                 </span>
             </div>
 
+            {/* Fee */}
             <div className="p-6 text-center border-b border-gray-100">
                 <p className="text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">{t('card.entry_fee')}</p>
                 <div className="text-3xl font-extrabold text-primary-600 flex items-center justify-center gap-1">
@@ -169,6 +169,7 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
                 </div>
             </div>
 
+            {/* Progress */}
             <div className="p-5 border-b border-gray-100">
                 <div className="flex justify-between items-end mb-2">
                     <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
@@ -184,16 +185,85 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang }) => {
                         style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
                 </div>
-                <div className="mt-3 flex justify-between text-xs text-gray-500">
-                    <span>{t('card.code')}: <span className="font-mono bg-gray-100 px-1 rounded text-gray-700">{tournament.code || 'N/A'}</span></span>
-                </div>
             </div>
 
-            <div className="p-5">
-                <button className="w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-colors flex items-center justify-center gap-2 text-sm">
-                    <Share2 size={16} /> {t('card.share')}
-                </button>
-            </div>
+            {/* --- NEW SECTION: Contact Details (Like Pitch Owner) --- */}
+            {organizer && (
+                <div className="px-5 py-5 bg-white border-b border-gray-100 flex-grow">
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                        {t('card.contact_details') || "Organizer Contact"}
+                    </h4>
+
+                    {/* Organizer Info */}
+                    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100">
+                            {organizer.image ? (
+                                <img
+                                    src={getImageUrl(organizer.image)}
+                                    alt={organizer.name}
+                                    className="w-full h-full object-cover rounded-lg"
+                                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                                />
+                            ) : null}
+                            <div className="w-full h-full flex items-center justify-center" style={{ display: organizer.image ? 'none' : 'flex' }}>
+                                <User className="w-5 h-5 text-blue-600" />
+                            </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                                {organizer.name || "Organizer"}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                                {t('card.role_organizer') || "Tournament Organizer"}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Phone Display */}
+                    {organizer.phone && (
+                        <div className="flex items-center gap-3 p-2 rounded-lg mt-1 hover:bg-gray-50 transition-colors">
+                            <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0 border border-green-100">
+                                <Phone className="w-5 h-5 text-green-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                    {organizer.phone}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Contact Buttons */}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                        {organizer.phone && (
+                            <button
+                                onClick={onWhatsApp}
+                                className="w-full py-2.5 bg-green-50 hover:bg-green-100 text-green-700 font-medium rounded-lg border border-green-200 transition-colors flex items-center justify-center gap-2 text-sm"
+                            >
+                                <Phone size={16} />
+                                {t('card.whatsapp') || "WhatsApp"}
+                            </button>
+                        )}
+                        {/* Example Email Button if data existed in API */}
+                        {organizer.email && (
+                            <button className="mt-2 w-full py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-2 text-sm">
+                                <Mail size={16} />
+                                {t('card.email') || "Email"}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Share Button */}
+            {/*<div className="p-5">*/}
+            {/*    <div className="flex justify-between text-xs text-gray-500 mb-4">*/}
+            {/*        <span>{t('card.code')}: <span className="font-mono bg-gray-100 px-1 rounded text-gray-700">{tournament.code || 'N/A'}</span></span>*/}
+            {/*    </div>*/}
+            {/*    <button className="w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-colors flex items-center justify-center gap-2 text-sm">*/}
+            {/*        <Share2 size={16} /> {t('card.share')}*/}
+            {/*    </button>*/}
+            {/*</div>*/}
         </div>
     );
 };
@@ -252,17 +322,10 @@ const TournamentGallery = ({ images, t }) => {
 };
 
 const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
-    // 1. Extract Teams (from joined_data where kind is team)
     const teams = joinedData?.filter(item => item.kind === 'team') || [];
-
-    // 2. Extract Users (Merge joined_data users and joined_user_data, prevent duplicates)
     const soloFromMixed = joinedData?.filter(item => item.kind === 'user') || [];
     const directUsers = joinedUserData || [];
-
-    // Combine arrays
     const allPlayers = [...soloFromMixed, ...directUsers];
-
-    // Remove duplicates based on ID
     const uniquePlayers = Array.from(new Map(allPlayers.map(item => [item.id, item])).values());
 
     if (teams.length === 0 && uniquePlayers.length === 0) return null;
@@ -276,7 +339,6 @@ const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
             </div>
 
             <div className="p-6 space-y-8">
-                {/* Teams List */}
                 {teams.length > 0 && (
                     <div>
                         <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -303,7 +365,6 @@ const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
 
                 {teams.length > 0 && uniquePlayers.length > 0 && <div className="h-px bg-gray-100 w-full"></div>}
 
-                {/* Players List */}
                 {uniquePlayers.length > 0 && (
                     <div>
                         <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -363,7 +424,6 @@ const TournamentInfoSection = ({ tournament, sportName, t, currentLang }) => {
                         </div>
                     </div>
 
-                    {/* SPORT NAME DISPLAY */}
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
                         <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-700">
                             <Activity size={16} />
@@ -439,20 +499,20 @@ const TournamentRulesSection = ({ tournament, t }) => {
 // --- MAIN PAGE COMPONENT ---
 
 const TournamentDetails = () => {
-    const { t, i18n } = useTranslation('tournamentDetails'); // Initialize hook
+    const { t, i18n } = useTranslation('tournamentDetails');
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Use Contact Hook
+    const { handleWhatsAppClick } = useContact(); // <--- Initialize hook
+
     const tournamentId = location.state?.id || location.state?.tournamentData?.id;
 
-    // --- State ---
     const [tournament, setTournament] = useState(null);
     const [venueName, setVenueName] = useState('');
     const [venuesList, setVenuesList] = useState([]);
-    // Sports List State
     const [sportsList, setSportsList] = useState([]);
-
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
@@ -468,13 +528,11 @@ const TournamentDetails = () => {
 
             setLoading(true);
             try {
-                // 1. Fetch Tournament
                 const response = await tournamentsService.getById(tournamentId);
                 const data = response.data || response;
                 setTournament(data);
                 dispatch(setPageTitle(`${data.name}`));
 
-                // 2. Fetch Sports
                 try {
                     const sportsRes = await venueSportsService.getAll();
                     setSportsList(sportsRes.results || []);
@@ -482,7 +540,6 @@ const TournamentDetails = () => {
                     console.warn("Could not fetch sports list", sportErr);
                 }
 
-                // 3. Fetch Venues
                 try {
                     const venuesRes = await venuesService.getAllVenues({ page_limit: 1000 });
                     const allVenues = venuesRes.results || venuesRes || [];
@@ -491,7 +548,6 @@ const TournamentDetails = () => {
                     if (data.venue) {
                         const foundVenue = allVenues.find(v => v.id === data.venue);
                         if (foundVenue) {
-                            // Use translation logic for venue name if available or fallback
                             setVenueName(foundVenue.translations?.[i18n.language]?.name || foundVenue.translations?.name || foundVenue.name);
                         } else {
                             setVenueName(t('card.venue_id', { id: data.venue }));
@@ -513,7 +569,6 @@ const TournamentDetails = () => {
         fetchTournamentDetails();
     }, [tournamentId, refreshKey, dispatch, navigate, i18n.language, t]);
 
-    // --- Helper: Find Sport Name by ID ---
     const getSportName = (sportId) => {
         if (!sportId) return 'N/A';
         const sport = sportsList.find(s => s.id === sportId);
@@ -528,6 +583,15 @@ const TournamentDetails = () => {
         setRefreshKey(prev => prev + 1);
     };
 
+    // Handler for Contact
+    const handleContactOrganizer = () => {
+        if (tournament?.user?.phone) {
+            handleWhatsAppClick(tournament.user.phone, `Hello ${tournament.user.name}, I have a question regarding the tournament ${tournament.name}.`);
+        } else {
+            toast.error("No phone number available for this organizer.");
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -538,7 +602,6 @@ const TournamentDetails = () => {
 
     if (!tournament) return null;
 
-    // --- RENDER: EDIT MODE ---
     if (isEditing) {
         const formattedVenues = venuesList.map(v => ({
             label: v.translations?.[i18n.language]?.name || v.translations?.name || v.name,
@@ -565,7 +628,6 @@ const TournamentDetails = () => {
         );
     }
 
-    // --- RENDER: VIEW MODE ---
     const allImages = tournament.images && Array.isArray(tournament.images) ? tournament.images : [];
 
     return (
@@ -588,6 +650,7 @@ const TournamentDetails = () => {
                                 venueName={venueName}
                                 t={t}
                                 currentLang={i18n.language}
+                                onWhatsApp={handleContactOrganizer} // <--- Pass handler
                             />
                         </div>
                     </div>
@@ -596,7 +659,6 @@ const TournamentDetails = () => {
                     <div className="lg:col-span-2 space-y-6">
                         <TournamentGallery images={allImages} t={t} />
 
-                        {/* Participants Section */}
                         <TournamentParticipantsSection
                             joinedData={tournament.joined_data}
                             joinedUserData={tournament.joined_user_data}

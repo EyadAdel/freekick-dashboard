@@ -488,6 +488,7 @@ const Tournaments = () => {
                             statusType="approved"
                             emptyMessage={t('status_section.empty_active')}
                             onReject={(item) => handleStatusUpdate(item, false)} // Action: Deactivate
+                            onItemClick={handleViewDetails} // <--- Added Click Handler
                             rejectLabel={t('status_section.reject_btn')}
                             renderIcon={renderTournamentIcon}
                             renderHeader={renderTournamentHeader}
@@ -501,6 +502,7 @@ const Tournaments = () => {
                             statusType="pending"
                             emptyMessage={t('status_section.empty_inactive')}
                             onApprove={(item) => handleStatusUpdate(item, true)} // Action: Activate
+                            onItemClick={handleViewDetails} // <--- Added Click Handler
                             approveLabel={t('status_section.approve_btn')}
                             renderIcon={renderTournamentIcon}
                             renderHeader={renderTournamentHeader}
