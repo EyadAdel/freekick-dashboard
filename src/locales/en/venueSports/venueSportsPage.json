@@ -1,0 +1,22 @@
+{
+  "pageTitle": "Venues Sports",
+  "createButton": "+ Create Venues Type",
+  "searchPlaceholder": "Search by name...",
+  "table": {
+    "srNo": "Sr.No",
+    "icon": "Icon",
+    "nameEn": "Name (EN)",
+    "nameAr": "Name (AR)",
+    "quickActions": "Quick Actions"
+  },
+  "actions": {
+    "editTooltip": "Edit Venue Type",
+    "deleteTooltip": "Delete Venue Type"
+  },
+  "deleteModal": {
+    "title": "Delete \"{{name}}\"?",
+    "text": "This action cannot be undone. The venue type will be permanently removed.",
+    "confirmButton": "Yes, Delete it",
+    "fallbackItem": "this item"
+  }
+}
