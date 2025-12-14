@@ -1,0 +1,36 @@
+{
+  "header": {
+    "create_title": "إضافة رياضة جديدة",
+    "edit_title": "تعديل رياضة الملعب",
+    "create_desc": "املأ التفاصيل للرياضة الجديدة.",
+    "edit_desc": "تحديث تفاصيل هذه الرياضة."
+  },
+  "basic_info": {
+    "title": "المعلومات الأساسية",
+    "name_en_label": "الاسم (إنجليزي)",
+    "name_ar_label": "الاسم (عربي)",
+    "badge_en": "إنجليزي",
+    "badge_ar": "عربي",
+    "translating": "جاري الترجمة...",
+    "auto_btn": "تلقائي"
+  },
+  "images": {
+    "title": "أيقونة الرياضة",
+    "upload_label": "رفع الأيقونة",
+    "click_to_select": "اضغط للاختيار",
+    "valid_image_error": "يرجى رفع ملف صورة صالح",
+    "upload_success": "تم رفع الأيقونة بنجاح",
+    "upload_fail": "فشل رفع الأيقونة",
+    "wait_upload": "يرجى الانتظار حتى انتهاء رفع الأيقونة"
+  },
+  "buttons": {
+    "cancel": "إلغاء",
+    "save": "حفظ الرياضة",
+    "update": "تحديث الرياضة"
+  },
+  "validation": {
+    "name_en_required": "الاسم (إنجليزي) مطلوب",
+    "name_ar_required": "الاسم (عربي) مطلوب",
+    "generic_error": "حدث خطأ ما أثناء الإرسال"
+  }
+}

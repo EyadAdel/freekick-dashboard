@@ -1,38 +1,96 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MainInput from './../MainInput.jsx';
-import useTranslation from '../../hooks/useTranslation.js';
+// Rename custom hook to avoid conflict with i18next
+import useCustomTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from 'react-i18next';
+
 import { uploadService } from '../../services/upload/uploadService.js';
-import { venueSportsService } from '../../services/venueSports/venueSportsService.js'; // Ensure path is correct
+import { venueSportsService } from '../../services/venueSports/venueSportsService.js';
 import { generateUniqueFileName } from '../../utils/fileUtils';
+import { getImageUrl } from '../../utils/imageUtils';
 
 import {
     Type, Save, X, Globe,
-    UploadCloud, Trash2, Loader2, Edit, Activity, Image as ImageIcon
+    UploadCloud, Trash2, Loader2, Edit, Activity, Image as ImageIcon, Check, RefreshCw
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
+// --- REUSABLE TRANSLATION INPUT COMPONENT ---
+const TranslationInput = ({
+                              label,
+                              value,
+                              onChange,
+                              loading,
+                              isManual,
+                              onReset,
+                              error,
+                              placeholder,
+                              forcedDir = null,
+                              t // Pass translation function or strings
+                          }) => {
+    // Determine direction
+    const inputDir = forcedDir || 'ltr';
+    const isRtl = inputDir === 'rtl';
+
+    return (
+        <div className="relative w-full">
+            <MainInput
+                label={label}
+                value={value}
+                onChange={onChange}
+                error={error}
+                dir={inputDir}
+                placeholder={placeholder}
+            />
+
+            {/* Loading Indicator */}
+            {loading && !isManual && (
+                <span className={`absolute top-0 ${isRtl ? 'left-0 ml-1' : 'right-0 mr-1'} text-xs text-blue-500 mt-2 animate-pulse`}>
+                    {t('basic_info.translating')}
+                </span>
+            )}
+
+            {/* Manual Edit Reset Button */}
+            {isManual && (
+                <button
+                    type="button"
+                    onClick={onReset}
+                    className={`absolute top-0 ${isRtl ? 'left-0 ml-1' : 'right-0 mr-1'} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
+                    title="Reset to auto-translation"
+                >
+                    <RefreshCw size={10} /> {t('basic_info.auto_btn')}
+                </button>
+            )}
+        </div>
+    );
+};
+
 const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
+    const { t, i18n } = useTranslation('venueSportsForm');
+    const isRTL = i18n.language === 'ar';
 
     // --- STATE ---
     const [formData, setFormData] = useState({
-        name: '',
-        name_ar: '',
+        name: '',     // English
+        name_ar: '',  // Arabic
     });
 
-    // Image States
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
-    const [finalIconName, setFinalIconName] = useState(''); // Stores the filename string
-    const [isImageUploading, setIsImageUploading] = useState(false);
+    // Image State: { id, file, preview, serverUrl, uniqueName, uploading }
+    const [imageState, setImageState] = useState(null);
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Translation Logic
+    // --- TRANSLATION STATE ---
     const [activeField, setActiveField] = useState(null);
+    const [manualEdits, setManualEdits] = useState({
+        name: false,
+        name_ar: false
+    });
+
     const fileInputRef = useRef(null);
 
-    // --- POPULATE FORM IF EDITING (initialData) ---
+    // --- POPULATE FORM IF EDITING ---
     useEffect(() => {
         if (initialData) {
             setFormData({
@@ -40,97 +98,116 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
                 name_ar: initialData.translations?.ar?.name || '',
             });
 
-            // Handle existing icon
+            // Mark as manually edited to prevent auto-translate from overwriting existing data on load
+            setManualEdits({ name: true, name_ar: true });
+
             if (initialData.icon) {
-                setImagePreview(initialData.icon);
-                setFinalIconName(initialData.icon);
+                setImageState({
+                    id: 'initial_img',
+                    preview: getImageUrl(initialData.icon),
+                    serverUrl: initialData.icon,
+                    uniqueName: initialData.icon,
+                    uploading: false
+                });
             }
         }
     }, [initialData]);
 
-    // --- TRANSLATION HOOKS ---
-    const { translatedText: arabicTranslation, loading: loadingAr } =
-        useTranslation(activeField === 'en' ? formData.name : "", 'ar');
+    // --- CUSTOM HOOKS FOR AUTO TRANSLATION ---
+    // 1. Get Arabic translation when English changes
+    const { translatedText: arName, loading: loadArName } = useCustomTranslation(
+        activeField === 'en' ? formData.name : "",
+        'ar'
+    );
 
-    const { translatedText: englishTranslation, loading: loadingEn } =
-        useTranslation(activeField === 'ar' ? formData.name_ar : "", 'en');
+    // 2. Get English translation when Arabic changes
+    const { translatedText: enName, loading: loadEnName } = useCustomTranslation(
+        activeField === 'ar' ? formData.name_ar : "",
+        'en'
+    );
+
+    // --- SYNC EFFECTS ---
+    useEffect(() => {
+        if (activeField === 'en' && arName && !manualEdits.name_ar) {
+            setFormData(prev => ({ ...prev, name_ar: arName }));
+        }
+    }, [arName, activeField, manualEdits.name_ar]);
 
     useEffect(() => {
-        if (activeField === 'en' && arabicTranslation) {
-            setFormData(prev => ({ ...prev, name_ar: arabicTranslation }));
+        if (activeField === 'ar' && enName && !manualEdits.name) {
+            setFormData(prev => ({ ...prev, name: enName }));
         }
-    }, [arabicTranslation, activeField]);
+    }, [enName, activeField, manualEdits.name]);
 
-    useEffect(() => {
-        if (activeField === 'ar' && englishTranslation) {
-            setFormData(prev => ({ ...prev, name: englishTranslation }));
-        }
-    }, [englishTranslation, activeField]);
+    // --- HANDLERS ---
+    const handleTranslationChange = (lang, value) => {
+        const field = lang === 'en' ? 'name' : 'name_ar';
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        if (name === 'name') setActiveField('en');
-        if (name === 'name_ar') setActiveField('ar');
+        setActiveField(lang);
+        setManualEdits(prev => ({ ...prev, [field]: true }));
+        setFormData(prev => ({ ...prev, [field]: value }));
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-        if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+        if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
+    };
+
+    const resetManualEdit = (lang) => {
+        const field = lang === 'en' ? 'name' : 'name_ar';
+        const otherLang = lang === 'en' ? 'ar' : 'en';
+
+        setManualEdits(prev => ({ ...prev, [field]: false }));
+        // Trigger re-translation by setting active field to the source language
+        setActiveField(otherLang);
     };
 
     // --- UPLOAD LOGIC ---
-    const handleImageSelect = async (file) => {
-        if (!file) return;
+    const handleImageSelect = (e) => {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+
+        const file = files[0];
         if (!file.type.startsWith('image/')) {
-            toast.error("Please upload a valid image file");
+            toast.error(t('images.valid_image_error'));
             return;
         }
 
-        const previewUrl = URL.createObjectURL(file);
-        setSelectedImage(file);
-        setImagePreview(previewUrl);
+        const newImage = {
+            id: Date.now() + Math.random(),
+            file,
+            preview: URL.createObjectURL(file),
+            uploading: true,
+            serverUrl: null,
+            uniqueName: null
+        };
+
+        setImageState(newImage);
         setErrors(prev => ({ ...prev, icon: '' }));
 
-        setIsImageUploading(true);
-        try {
-            const generatedName = generateUniqueFileName(file.name);
-            const result = await uploadService.processFullUpload(file, generatedName);
-            // Assuming result returns { key: "filename.png", ... } or similar
-            const uploadedName = result.key || result.fileName || generatedName;
+        const uploadImage = async () => {
+            try {
+                const uniqueName = generateUniqueFileName(file.name);
+                const result = await uploadService.processFullUpload(file, uniqueName);
 
-            setFinalIconName(uploadedName);
-            toast.success("Icon uploaded successfully");
-        } catch (error) {
-            console.error("Icon upload failed", error);
-            setSelectedImage(null);
-            setImagePreview(null);
-            setFinalIconName('');
-            if(fileInputRef.current) fileInputRef.current.value = '';
-            toast.error("Icon upload failed.");
-        } finally {
-            setIsImageUploading(false);
-        }
+                setImageState(prev => ({
+                    ...prev,
+                    serverUrl: result.url || uniqueName,
+                    uniqueName: uniqueName,
+                    uploading: false
+                }));
+                toast.success(t('images.upload_success'));
+            } catch (error) {
+                console.error("Icon upload failed", error);
+                toast.error(t('images.upload_fail'));
+                setImageState(null);
+            }
+        };
+
+        uploadImage();
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
-
-    const onFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) handleImageSelect(file);
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const file = e.dataTransfer.files[0];
-        if (file) handleImageSelect(file);
-    };
-
-    const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); };
 
     const removeImage = (e) => {
-        e.stopPropagation();
-        setSelectedImage(null);
-        setImagePreview(null);
-        setFinalIconName('');
+        if(e) e.stopPropagation();
+        setImageState(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -139,11 +216,11 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
         e.preventDefault();
 
         const newErrors = {};
-        if (!formData.name) newErrors.name = "Name (EN) is required";
-        if (!formData.name_ar) newErrors.name_ar = "Name (AR) is required";
+        if (!formData.name) newErrors.name = t('validation.name_en_required');
+        if (!formData.name_ar) newErrors.name_ar = t('validation.name_ar_required');
 
-        if (isImageUploading) {
-            toast.warning("Please wait for the icon to finish uploading.");
+        if (imageState?.uploading) {
+            toast.warning(t('images.wait_upload'));
             return;
         }
 
@@ -153,9 +230,13 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
         setIsSubmitting(true);
 
         try {
-            // Construct payload exactly as requested
+            let finalIconName = null;
+            if (imageState) {
+                finalIconName = imageState.uniqueName || imageState.serverUrl;
+            }
+
             const payload = {
-                icon: finalIconName || null, // Optional: send null if empty
+                icon: finalIconName,
                 translations: {
                     en: { name: formData.name },
                     ar: { name: formData.name_ar }
@@ -163,34 +244,42 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
             };
 
             if (initialData) {
-                // --- UPDATE ---
                 await venueSportsService.update(initialData.id, payload);
             } else {
-                // --- CREATE ---
                 await venueSportsService.create(payload);
             }
 
             if (onSuccess) onSuccess();
+            // Optional: Success toast handled by parent or here
+            // toast.success(initialData ? "Updated" : "Created");
 
         } catch (error) {
             console.error("Submission failed", error);
-            if(!error.response) toast.error("Something went wrong during submission.");
+            if (!error.response) toast.error(t('validation.generic_error'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    const SectionHeader = ({ title, icon: Icon }) => (
+        <h3 className="text-base md:text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
+            {Icon && <Icon size={20} />} {title}
+        </h3>
+    );
+
     return (
-        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+
+            {/* Header */}
             <div className="bg-gradient-to-r from-primary-500 to-primary-700 px-8 py-6">
                 <div className="flex justify-between items-center">
                     <div>
                         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                             {initialData ? <Edit className="text-primary-100" /> : <Activity className="text-primary-100" />}
-                            {initialData ? "Edit Venues Sport" : "Create New Venues Sport"}
+                            {initialData ? t('header.edit_title') : t('header.create_title')}
                         </h2>
                         <p className="text-primary-100 text-sm mt-1">
-                            {initialData ? "Update the details for this sport." : "Fill in the details for the new sport."}
+                            {initialData ? t('header.edit_desc') : t('header.create_desc')}
                         </p>
                     </div>
                     <button onClick={onCancel} className="text-white hover:bg-primary-600 p-2 rounded-lg">
@@ -201,83 +290,122 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
 
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
 
-                {/* Names */}
+                {/* 1. Translations Section */}
                 <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2">Basic Information</h3>
+                    <SectionHeader title={t('basic_info.title')} icon={Globe} />
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="relative">
-                            <MainInput
-                                label="Name (English)"
-                                name="name"
+
+                        {/* English */}
+                        <div className="space-y-4">
+                            <span className="badge bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">
+                                {t('basic_info.badge_en')}
+                            </span>
+                            <TranslationInput
+                                label={t('basic_info.name_en_label')}
                                 value={formData.name}
-                                onChange={handleChange}
+                                onChange={(e) => handleTranslationChange('en', e.target.value)}
+                                loading={loadEnName}
+                                isManual={manualEdits.name}
+                                onReset={() => resetManualEdit('en')}
                                 error={errors.name}
-                                icon={Type}
-                                required
+                                forcedDir="ltr"
+                                t={t}
                             />
-                            {activeField === 'ar' && loadingEn && (
-                                <span className="absolute top-0 right-0 text-xs text-blue-500 mt-2 mr-2 animate-pulse">Translating...</span>
-                            )}
                         </div>
-                        <div className="relative">
-                            <MainInput
-                                label="Name (Arabic)"
-                                name="name_ar"
+
+                        {/* Arabic */}
+                        <div className="space-y-4" dir="rtl">
+                            <span className="badge bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">
+                                {t('basic_info.badge_ar')}
+                            </span>
+                            <TranslationInput
+                                label={t('basic_info.name_ar_label')}
                                 value={formData.name_ar}
-                                onChange={handleChange}
+                                onChange={(e) => handleTranslationChange('ar', e.target.value)}
+                                loading={loadArName}
+                                isManual={manualEdits.name_ar}
+                                onReset={() => resetManualEdit('ar')}
                                 error={errors.name_ar}
-                                icon={Globe}
-                                required
-                                style={{ direction: 'rtl' }}
+                                forcedDir="rtl"
+                                t={t}
                             />
-                            {activeField === 'en' && loadingAr && (
-                                <span className="absolute top-0 left-0 text-xs text-blue-500 mt-2 ml-2 animate-pulse">Translating...</span>
-                            )}
                         </div>
+
                     </div>
                 </div>
 
-                {/* Icon Upload (Optional) */}
+                {/* 2. Full Width Image Upload Section */}
                 <div className="space-y-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Sport Icon <span className="text-gray-400 font-normal">(Optional)</span>
-                    </label>
-                    <div
-                        onClick={() => !isImageUploading && fileInputRef.current.click()}
-                        onDragOver={handleDragOver}
-                        onDrop={handleDrop}
-                        className={`relative w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors 
-                        ${errors.icon ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-primary-500'}
-                        ${isImageUploading ? 'cursor-wait bg-gray-50' : 'cursor-pointer'}`}
-                    >
-                        <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={onFileChange} disabled={isImageUploading} />
+                    <SectionHeader title={t('images.title')} icon={ImageIcon} />
 
-                        {isImageUploading ? (
-                            <div className="flex flex-col items-center justify-center">
-                                <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
-                                <p className="text-sm font-medium text-gray-600">Uploading...</p>
-                            </div>
-                        ) : imagePreview ? (
-                            <div className="relative w-full h-full p-2 group">
-                                <img src={imagePreview} alt="Preview" className="w-full h-full object-contain rounded-md" />
-                                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
-                                    <button type="button" onClick={removeImage} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"><Trash2 size={20} /></button>
+                    <div className="w-full">
+                        {imageState ? (
+                            // Image Preview Container
+                            <div className="relative group w-full h-64 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm">
+                                <img
+                                    src={imageState.preview}
+                                    alt="Sport Icon"
+                                    className={`w-full h-full object-contain p-2 transition-opacity ${imageState.uploading ? 'opacity-50' : 'opacity-100'}`}
+                                />
+
+                                {/* Loading Spinner */}
+                                {imageState.uploading && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                        <Loader2 className="animate-spin text-white w-8 h-8" />
+                                    </div>
+                                )}
+
+                                {/* Success Checkmark */}
+                                {!imageState.uploading && (imageState.serverUrl || imageState.uniqueName) && (
+                                    <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} bg-green-500 text-white rounded-full p-1 shadow-sm`}>
+                                        <Check size={14} />
+                                    </div>
+                                )}
+
+                                {/* Delete Button (Hover) */}
+                                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+                                    <button
+                                        type="button"
+                                        onClick={removeImage}
+                                        className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-transform"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-center p-4">
-                                <div className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3"><UploadCloud size={24} /></div>
-                                <p className="text-sm font-medium text-gray-700">Click to upload icon</p>
-                            </div>
+                            // Upload Placeholder
+                            <label className={`w-full h-48 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 
+                                ${errors.icon ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-primary-500 hover:bg-primary-50'} 
+                                cursor-pointer bg-white hover:shadow-sm`}>
+                                <input
+                                    type="file"
+                                    hidden
+                                    ref={fileInputRef}
+                                    accept="image/*"
+                                    onChange={handleImageSelect}
+                                />
+                                <div className="p-3 bg-primary-100 rounded-full mb-3 text-primary-600">
+                                    <UploadCloud className="w-8 h-8" />
+                                </div>
+                                <span className="text-sm text-gray-600 font-semibold">{t('images.upload_label')}</span>
+                                <span className="text-xs text-gray-500 mt-1">{t('images.click_to_select')}</span>
+                            </label>
                         )}
                     </div>
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-4 pt-4">
-                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">Cancel</button>
-                    <button type="submit" disabled={isSubmitting || isImageUploading} className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg">
-                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? "Update Sport" : "Save Sport"}</>}
+                <div className="flex gap-4 pt-4 border-t">
+                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors">
+                        {t('buttons.cancel')}
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting || imageState?.uploading}
+                        className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg shadow-sm transition-colors"
+                    >
+                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? t('buttons.update') : t('buttons.save')}</>}
                     </button>
                 </div>
             </form>

@@ -1,0 +1,36 @@
+{
+  "header": {
+    "create_title": "Create New Venues Sport",
+    "edit_title": "Edit Venues Sport",
+    "create_desc": "Fill in the details for the new sport.",
+    "edit_desc": "Update the details for this sport."
+  },
+  "basic_info": {
+    "title": "Basic Information",
+    "name_en_label": "Name (English)",
+    "name_ar_label": "Name (Arabic)",
+    "badge_en": "English",
+    "badge_ar": "Arabic",
+    "translating": "Translating...",
+    "auto_btn": "Auto"
+  },
+  "images": {
+    "title": "Sport Icon",
+    "upload_label": "Upload Icon",
+    "click_to_select": "Click to select",
+    "valid_image_error": "Please upload a valid image file",
+    "upload_success": "Icon uploaded successfully",
+    "upload_fail": "Icon upload failed",
+    "wait_upload": "Please wait for the icon to finish uploading"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "save": "Save Sport",
+    "update": "Update Sport"
+  },
+  "validation": {
+    "name_en_required": "Name (EN) is required",
+    "name_ar_required": "Name (AR) is required",
+    "generic_error": "Something went wrong during submission"
+  }
+}

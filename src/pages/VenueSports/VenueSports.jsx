@@ -1,19 +1,23 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next'; // Import translation hook
 import MainTable from './../../components/MainTable';
-import { Pencil, Trash2, Activity, Plus } from 'lucide-react'; // Changed Puzzle to Activity for Sports
+import { Pencil, Trash2, Activity, Plus } from 'lucide-react';
 import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
-import VenueSportsForm from './../../components/venueSports/VenueSportsForm.jsx'; // Assumed Form Component
-import { venueSportsService } from '../../services/venueSports/venueSportsService.js'; // Adjust path if needed
+import VenueSportsForm from './../../components/venueSports/VenueSportsForm.jsx';
+import { venueSportsService } from '../../services/venueSports/venueSportsService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
-import { toast } from 'react-toastify';
+import { getImageUrl } from '../../utils/imageUtils';
 
 // --- Safe Image Component ---
 const VenueTypeImage = ({ src }) => {
     const [hasError, setHasError] = useState(false);
 
+    // Use the utility to get the full URL
+    const fullSrc = getImageUrl(src);
+
     // If no source or if an error occurred, show the fallback icon
-    if (!src || hasError) {
+    if (!fullSrc || hasError) {
         return (
             <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-400">
                 <Activity size={20} />
@@ -24,7 +28,7 @@ const VenueTypeImage = ({ src }) => {
     return (
         <div className="w-10 h-10 bg-gray-50 rounded-lg p-1 border border-gray-200">
             <img
-                src={src}
+                src={fullSrc}
                 alt="icon"
                 className="w-full h-full object-contain"
                 onError={() => setHasError(true)}
@@ -36,10 +40,11 @@ const VenueTypeImage = ({ src }) => {
 const VenueSports = () => {
     const rowsPerPage = 10;
     const dispatch = useDispatch();
+    const { t } = useTranslation('venueSportsPage'); // Initialize translation
 
     useEffect(() => {
-        dispatch(setPageTitle('Venues Sports'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pageTitle')));
+    }, [dispatch, t]);
 
     // --- STATE ---
     const [venueData, setVenueData] = useState([]);
@@ -71,7 +76,6 @@ const VenueSports = () => {
             }
         } catch (error) {
             console.error("Failed to fetch venue types:", error);
-            // Error toast is already handled in service, but we can add UI fallback here if needed
         } finally {
             setIsLoading(false);
         }
@@ -95,9 +99,9 @@ const VenueSports = () => {
 
     const handleDelete = async (id, name) => {
         const isConfirmed = await showConfirm({
-            title: `Delete "${name}"?`,
-            text: "This action cannot be undone. The venue type will be permanently removed.",
-            confirmButtonText: 'Yes, Delete it'
+            title: t('deleteModal.title', { name: name }),
+            text: t('deleteModal.text'),
+            confirmButtonText: t('deleteModal.confirmButton')
         });
 
         if (!isConfirmed) return;
@@ -149,15 +153,15 @@ const VenueSports = () => {
         <div className="flex justify-end items-center gap-1 sm:gap-2">
             <button
                 className="text-gray-500 hover:text-blue-600 p-1 rounded transition-colors hover:bg-gray-50"
-                title="Edit Venue Type"
+                title={t('actions.editTooltip')}
                 onClick={() => handleEdit(item)}
             >
                 <Pencil size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button
                 className="text-gray-500 hover:text-red-600 p-1 rounded transition-colors hover:bg-gray-50"
-                onClick={() => handleDelete(item.id, item.translations?.en?.name || "this item")}
-                title="Delete Venue Type"
+                onClick={() => handleDelete(item.id, item.translations?.en?.name || t('deleteModal.fallbackItem'))}
+                title={t('actions.deleteTooltip')}
             >
                 <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
@@ -166,7 +170,7 @@ const VenueSports = () => {
 
     const columns = [
         {
-            header: 'Sr.No',
+            header: t('table.srNo'),
             accessor: 'id',
             align: 'left',
             width: '80px',
@@ -177,7 +181,7 @@ const VenueSports = () => {
             )
         },
         {
-            header: 'Icon',
+            header: t('table.icon'),
             accessor: 'icon',
             align: 'center',
             width: '100px',
@@ -188,7 +192,7 @@ const VenueSports = () => {
             )
         },
         {
-            header: 'Name (EN)',
+            header: t('table.nameEn'),
             accessor: 'name_en',
             align: 'center',
             render: (row) => (
@@ -198,7 +202,7 @@ const VenueSports = () => {
             )
         },
         {
-            header: 'Name (AR)',
+            header: t('table.nameAr'),
             accessor: 'name_ar',
             align: 'center',
             render: (row) => (
@@ -208,7 +212,7 @@ const VenueSports = () => {
             )
         },
         {
-            header: 'Quick Actions',
+            header: t('table.quickActions'),
             align: 'right',
             render: (row) => <ActionButtons item={row} />
         }
@@ -216,7 +220,7 @@ const VenueSports = () => {
 
     const topActions = [
         {
-            label: '+ Create Venues Type',
+            label: t('createButton'),
             onClick: handleCreate,
             type: 'primary',
             icon: <Plus size={18} />
@@ -225,8 +229,8 @@ const VenueSports = () => {
 
     return (
         <div className="w-full p-4">
-            {/* Form Section */}
-            {showForm && (
+            {showForm ? (
+                // --- SHOW ONLY FORM IF ACTIVE ---
                 <div className='mb-6 sm:mb-8'>
                     <VenueSportsForm
                         initialData={selectedItem}
@@ -234,22 +238,22 @@ const VenueSports = () => {
                         onSuccess={handleFormSuccess}
                     />
                 </div>
+            ) : (
+                // --- SHOW ONLY TABLE IF FORM IS INACTIVE ---
+                <MainTable
+                    data={filteredData}
+                    columns={columns}
+                    filters={[]}
+                    searchPlaceholder={t('searchPlaceholder')}
+                    topActions={topActions}
+                    currentPage={currentPage}
+                    totalItems={totalCount}
+                    itemsPerPage={rowsPerPage}
+                    onSearch={handleSearch}
+                    onPageChange={handlePageChange}
+                    isLoading={isLoading}
+                />
             )}
-
-            {/* Main Table Section */}
-            <MainTable
-                data={filteredData}
-                columns={columns}
-                filters={[]}
-                searchPlaceholder="Search by name..."
-                topActions={topActions}
-                currentPage={currentPage}
-                totalItems={totalCount}
-                itemsPerPage={rowsPerPage}
-                onSearch={handleSearch}
-                onPageChange={handlePageChange}
-                isLoading={isLoading}
-            />
         </div>
     );
 };

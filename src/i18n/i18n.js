@@ -75,7 +75,10 @@ import enPieChart from '../locales/en/Charts/pieChart.json';
 import arPieChart from '../locales/ar/Charts/pieChart.json';
 import enPlayers from '../locales/en/Players/players.json';
 import arPlayers from '../locales/ar/Players/players.json';
-
+import enVenueSportsPage from '../locales/en/venueSports/venueSportsPage.json';
+import arVenueSportsPage from '../locales/ar/venueSports/venueSportsPage.json';
+import enVenueSportsForm from '../locales/en/venueSports/venueSportsForm.json';
+import arVenueSportsForm from '../locales/ar/venueSports/venueSportsForm.json';
 // Translation resources
 const resources = {
     en: {
@@ -115,6 +118,8 @@ const resources = {
         createEditVoucher: enCreateEditVoucher,
         pieChart: enPieChart,
         players: enPlayers,
+        venueSportsPage: enVenueSportsPage,
+        venueSportsForm: enVenueSportsForm,
     },
     ar: {
         common: arCommon,
@@ -136,7 +141,6 @@ const resources = {
         tournamentDetails: artournamentDetails,
         addOnsForm: arAddOnsForm,
         addOnsPage: arAddOnsPage,
-
         booking: arBookingsPage,
         bookingDetails: arBookingDetails,
         notifications: arNotifications,
@@ -153,6 +157,10 @@ const resources = {
         createEditVoucher: arCreateEditVoucher,
         pieChart: arPieChart,
         players: arPlayers,
+        venueSportsPage: arVenueSportsPage,
+        venueSportsForm: arVenueSportsForm, // Added
+
+
     },
 };
 
@@ -207,6 +215,7 @@ i18n
             'createEditVoucher',
             'pieChart',
             'players',
+            'venueSportsForm',
         ],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {
