@@ -84,9 +84,11 @@ const PlayerDetailView = () => {
     const tournamentColumns = getTournamentColumns(t);
     const dispatch = useDispatch();
 
+
     useEffect(() => {
-        dispatch(setPageTitle('Player'));
-    }, [dispatch]);
+        const title = player?.name ? `${player.name} ` : 'Player';
+        dispatch(setPageTitle(title));
+    }, [dispatch, player?.name]);
     const handleStatusToggle = async (newStatus) => {
         try {
             const confirmed = await showConfirm({
@@ -302,7 +304,7 @@ const BookingsSection = ({
                 ) : bookings.length > 0 ? (
                     <div className="space-y-3">
                         {bookings.map((booking, index) => (
-                            <BookingCard key={booking.id || `booking-${index}`} booking={booking} />
+                            <BookingCard  key={booking.id || `booking-${index}`} booking={booking} />
                         ))}
                     </div>
                 ) : (

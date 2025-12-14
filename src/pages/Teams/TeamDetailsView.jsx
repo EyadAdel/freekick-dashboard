@@ -88,11 +88,10 @@ const TeamDetailView = () => {
     const handleBack = () => {
         navigate('/teams');
     };
-
     useEffect(() => {
-        dispatch(setPageTitle('Team'));
-    }, [dispatch]);
-
+        const title = team?.name ? `${team.name} ` : 'Team';
+        dispatch(setPageTitle(title));
+    }, [dispatch, team?.name]);
     // Tournament columns configuration for MainTable
 // Update the tournament columns configuration
     const tournamentColumns = [
@@ -344,7 +343,13 @@ const TeamDetailView = () => {
     // Filtered bookings - handled by API
 
     // Paginated tournaments
-
+    const handleViewPlayer = (player) => {
+        navigate('/players/player-profile', {
+            state: {
+                player,
+                from: '/bookings'            }
+        });
+    };
 
 
     const formatDate = (dateTime) => {
@@ -588,7 +593,9 @@ const TeamDetailView = () => {
                                 </h4>
                                 {team.team_leader && (
                                     <>
-                                        <div className="flex items-center gap-3 mb-4">
+                                        <div
+                                            onClick={() => handleViewPlayer(team.team_leader)}
+                                            className="flex cursor-pointer items-center gap-3 mb-4">
                                             {team.team_leader.image ? (
                                                 <img
                                                     src={getImageUrl( team.team_leader.image)} // Use utility function here
@@ -743,7 +750,9 @@ const TeamDetailView = () => {
                                 {team.members && team.members.length > 0 ? (
                                     <div className="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 gap-4">
                                         {team.members.map((member, idx) => (
-                                            <div key={idx} className="relative flex  flex-col flex-wrap items-center text-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 border border-gray-100">
+                                            <div key={idx}
+                                                 onClick={() => handleViewPlayer(member.user_info)}
+                                                 className="relative cursor-pointer flex  flex-col flex-wrap items-center text-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200 border border-gray-100">
                                                 {/* Index number in top-left corner */}
                                                 <span className="absolute -top-4 -right-2 bg-primary-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
                             {idx + 1}

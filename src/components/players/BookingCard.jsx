@@ -11,9 +11,11 @@ import {
     Lock
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import {useNavigate} from "react-router-dom";
 
 const BookingCard = ({ booking }) => {
     const { t, i18n } = useTranslation(['players', 'common']);
+    const navigate = useNavigate();
 
     const getStatusBadge = (status, acceptedByPitchOwner) => {
         const displayStatus = acceptedByPitchOwner && status !== 'cancelled' ? 'confirmed' : (status?.toLowerCase() || 'pending');
@@ -78,9 +80,18 @@ const BookingCard = ({ booking }) => {
 
         return new Intl.DateTimeFormat(locale, options).format(date);
     };
-
+    const handleViewBooking = (booking) => {
+        navigate('/bookings/book-details', {
+            state: {
+                booking,
+                from: '/bookings'
+            }
+        });
+    };
     return (
-        <div className="bg-white rounded-xl border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200 overflow-hidden">
+        <div
+            onClick={() => handleViewBooking(booking)}
+            className="bg-white cursor-pointer rounded-xl border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all duration-200 overflow-hidden">
             <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                 <span className="text-sm font-semibold text-gray-700">
                     {t('booking.bookingId', 'Booking ID')}:

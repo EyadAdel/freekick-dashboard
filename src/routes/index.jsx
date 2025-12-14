@@ -43,7 +43,6 @@ import PlayerDetailView from "../pages/players/playerDetailView.jsx";
 import TeamDetailsView from "../pages/Teams/TeamDetailsView.jsx";
 import AccessDenied from "../pages/AccessDenied.jsx";
 import NotFound from "../pages/NotFound.jsx";
-import EncryptionTest from "../pages/EncryptionTest.jsx";
 
 
 const router = createBrowserRouter([
