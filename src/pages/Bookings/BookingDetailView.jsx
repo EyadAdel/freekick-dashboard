@@ -18,6 +18,8 @@ import { showConfirm } from "../../components/showConfirm.jsx";
 import {toast} from "react-toastify";
 import {useLocation, useNavigate} from "react-router-dom";
 import { getImageUrl } from '../../utils/imageUtils.js';
+import {daysOfWeekService} from "../../services/daysOfWeek/daysOfWeekService.js";
+import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 
 const BookingDetailView = () => {
     const location = useLocation();
@@ -43,6 +45,23 @@ const BookingDetailView = () => {
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [imageErrors, setImageErrors] = useState({});
     const { cancelStatus, cancelError } = useSelector(state => state.bookings);
+    const [daysList, setDaysList] = useState([]);
+    const fetchFilterOptions = async () => {
+        try {
+            const daysRes = await daysOfWeekService.getAll({ all_languages: true });
+            if (daysRes && daysRes.results) {
+                setDaysList(daysRes.results);
+            }
+        } catch (error) {
+            console.error("Failed to fetch filter options:", error);
+        }
+    };
+    useEffect(() => {
+        fetchFilterOptions()
+    }, []);
+    useEffect(() => {
+        dispatch(setPageTitle('Book'));
+    }, [dispatch]);
 
     useEffect(() => {
         if (cancelStatus === 'succeeded') {
@@ -468,7 +487,12 @@ const BookingDetailView = () => {
                                 </div>
                             </div>
                             <div className={'grid bg-primary-50 p-4 m-4 gap-5 rounded-xl sm:grid-cols-2'}>
-                                <div className="relative rounded-lg h-48 md:h-64">
+                                <div  onClick={()=>navigate('/venues/venue-details', {
+                                    state: {
+                                        venueId: booking.venue_info.id,
+                                        daysList: daysList
+                                    }})}
+                                      className="relative cursor-pointer rounded-lg h-48 md:h-64">
                                     {booking.pitch?.image || booking.venue_info?.images?.[0]?.image ? (
                                         <img
                                             src={getImageUrl(booking.pitch?.image || booking.venue_info?.images?.[0]?.image)}

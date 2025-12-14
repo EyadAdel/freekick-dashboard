@@ -272,8 +272,18 @@ const Sidebar = ({ onToggle }) => {
         })
     })).filter(section => section.items.length > 0); // Remove empty sections
 
-    const isActive = (path) => location.pathname === path;
+    // const isActive = (path) => location.pathname === path;
+    const isActive = (path) => {
+        const currentPath = location.pathname;
 
+        // Exact match for root/dashboard
+        if (path === '/') {
+            return currentPath === '/';
+        }
+
+
+        return currentPath === path || currentPath.startsWith(path + '/');
+    };
     const handleMouseEnter = (e, label) => {
         if (!isCollapsed) return;
         const rect = e.currentTarget.getBoundingClientRect();

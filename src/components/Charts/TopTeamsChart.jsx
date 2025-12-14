@@ -67,33 +67,8 @@ const TopTeamsChart = ({
             <div className="flex items-start justify-between mb-6">
                 <div>
                     <h2 className="xl:text-xl font-bold text-gray-900 mb-1">{title}</h2>
-                    {/*<p className="text-sm text-gray-500">{subtitle}</p>*/}
                 </div>
 
-                {/*{showPeriodSelector && (*/}
-                {/*    <div className="relative">*/}
-                {/*        <select*/}
-                {/*            value={period}*/}
-                {/*            onChange={handlePeriodChange}*/}
-                {/*            className="appearance-none text-secondary-600 bg-gradient-to-br from-[#84FAA4] cursor  via-primary-500 to-[#2ACEF2] py-2 px-2 border border-gray-300 rounded-lg px-4 pl-8 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"*/}
-                {/*        >*/}
-                {/*            {periodOptions.map(option => (*/}
-                {/*                <option key={option.value} value={option.value}>*/}
-                {/*                    {option.label}*/}
-                {/*                </option>*/}
-                {/*            ))}*/}
-                {/*        </select>*/}
-                {/*        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-secondary-600" />*/}
-                {/*        <svg*/}
-                {/*            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-secondary-600"*/}
-                {/*            fill="none"*/}
-                {/*            stroke="currentColor"*/}
-                {/*            viewBox="0 0 24 24"*/}
-                {/*        >*/}
-                {/*            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />*/}
-                {/*        </svg>*/}
-                {/*    </div>*/}
-                {/*)}*/}
             </div>
 
             {/* Table Header */}
@@ -122,13 +97,14 @@ const TopTeamsChart = ({
                         >
                             {/* Team Name */}
                             <div className="col-span-4 flex items-center">
-                                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 mr-3 flex-shrink-0">
+                                <div
+                                    onClick={()=>navigate('/teams/team-profile',{state:{team:team}})}
+                                    className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full bg-gray-100 mr-3 flex-shrink-0">
                                     {team.logo ? (
                                         <img
-                                            onClick={()=>navigate('/teams/team-profile',{state:{team:team}})}
                                             src={getImageUrl(team.logo)}
                                             alt={team.name}
-                                            className="w-8 h-8 rounded-full object-cover"
+                                            className="w-8  h-8 rounded-full object-cover"
                                             onError={(e) => {
                                                 e.target.style.display = 'none';
                                                 e.target.parentElement.innerHTML =

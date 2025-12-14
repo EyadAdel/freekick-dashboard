@@ -1,16 +1,30 @@
 // src/services/api.js
 import axios from 'axios';
+import { getEncryptedApiKey } from '../utils/encryption';
 
 // Create axios instance with default config
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api.freekickapp.com',
-    timeout: 30000, // Increased timeout
-    // ⚠️ DON'T set Content-Type here - it breaks FormData uploads
+    timeout: 30000,
 });
 
 // Request interceptor
 api.interceptors.request.use(
     (config) => {
+        // Add encrypted API key header
+        try {
+            const encryptedKey = getEncryptedApiKey();
+            if (encryptedKey) {
+                config.headers['X-API-KEY'] = encryptedKey;
+            }
+        } catch (error) {
+            console.error('Failed to encrypt API key:', error);
+        }
+
+        // Add API version header
+        config.headers['x-api-version'] = 'v2';
+
+        // Add authorization token if available
         const token = localStorage.getItem('authToken');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -46,14 +60,12 @@ api.interceptors.response.use(
         });
 
         if (error.response) {
-            const { status, data } = error.response;
+            const { status } = error.response;
             switch (status) {
                 case 401:
                     console.error('🔐 Unauthorized - clearing tokens');
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('refreshToken');
-                    // Optionally redirect to login
-                    // window.location.href = '/login';
                     break;
                 case 403:
                     console.error('🚫 Forbidden - insufficient permissions');

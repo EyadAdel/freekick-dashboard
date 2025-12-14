@@ -35,6 +35,8 @@ import BookingCard from "../../components/players/BookingCard.jsx";
 import {useLocation, useNavigate} from "react-router-dom";
 import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
 import {getImageUrl} from "../../utils/imageUtils.js";
+import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
+import {useDispatch} from "react-redux";
 
 
 
@@ -81,9 +83,16 @@ const TeamDetailView = () => {
     const [tournamentFilters, setTournamentFilters] = useState({});
     const [tournamentSort, setTournamentSort] = useState({ key: 'start_date', direction: 'desc' });
     const [isUpdating, setIsUpdating] = useState(false);
+    const dispatch = useDispatch();
+
     const handleBack = () => {
         navigate('/teams');
     };
+
+    useEffect(() => {
+        dispatch(setPageTitle('Team'));
+    }, [dispatch]);
+
     // Tournament columns configuration for MainTable
 // Update the tournament columns configuration
     const tournamentColumns = [

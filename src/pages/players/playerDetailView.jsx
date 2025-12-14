@@ -1,6 +1,7 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import { Calendar, Trophy, RefreshCw } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 import BookingCard from '../../components/players/BookingCard.jsx';
 import PlayerProfileCard from '../../components/players/PlayerProfileCard.jsx';
@@ -16,6 +17,8 @@ import { showConfirm } from '../../components/showConfirm';
 import { formatDate, calculateAge, formatAmount } from '../../hooks/players/formatters.js';
 import { getTournamentColumns } from '../../hooks/players/tournamentColumns.jsx';
 import {useLocation, useNavigate} from "react-router-dom";
+import {useDispatch} from "react-redux";
+import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 
 const TOURNAMENT_FILTERS = [
     {
@@ -46,6 +49,7 @@ const TOURNAMENT_FILTERS = [
 ];
 
 const PlayerDetailView = () => {
+    const { t, i18n } = useTranslation(['players', 'common', 'tournament']);
     const location = useLocation();
     const navigate = useNavigate();
     const playerFromState = location.state?.player;
@@ -77,26 +81,38 @@ const PlayerDetailView = () => {
 
     const currentPlayer = player || playerFromState || getDefaultPlayer();
     const filteredBookings = useMemo(() => bookings?.results || [], [bookings]);
-    const tournamentColumns = getTournamentColumns();
+    const tournamentColumns = getTournamentColumns(t);
+    const dispatch = useDispatch();
 
+    useEffect(() => {
+        dispatch(setPageTitle('Player'));
+    }, [dispatch]);
     const handleStatusToggle = async (newStatus) => {
         try {
             const confirmed = await showConfirm({
-                title: 'Are you sure?',
-                text: `Do you want to ${currentPlayer.is_active ? 'Suspend' : 'activate'} this player?`,
-                confirmButtonText: `Yes, ${currentPlayer.is_active ? 'Suspend' : 'Activate'}`,
-                cancelButtonText: 'Cancel',
+                title: t('players:playersDetail.confirm.title'),
+                text: currentPlayer.is_active
+                    ? t('players:playersDetail.confirm.suspend')
+                    : t('players:playersDetail.confirm.activate'),
+                confirmButtonText: currentPlayer.is_active
+                    ? t('players:playersDetail.buttons.suspend')
+                    : t('players:playersDetail.buttons.activate'),
+                cancelButtonText: t('common:buttons.cancel'),
                 icon: currentPlayer.is_active ? 'warning' : 'info'
             });
 
             if (confirmed) {
                 await playerService.updatePlayerStatus(playerId, newStatus);
-                toast.success(`Player ${newStatus ? 'activated' : 'suspended'} successfully`);
+                toast.success(
+                    newStatus
+                        ? t('players:playersDetail.status.activated')
+                        : t('players:playersDetail.status.suspended')
+                );
                 refetchPlayer();
             }
         } catch (error) {
             console.error('Status update error:', error);
-            toast.error(`Failed to update player status: ${error.message || 'Unknown error'}`);
+            toast.error(t('players:playersDetail.status.updateError'));
         }
     };
 
@@ -158,7 +174,7 @@ const PlayerDetailView = () => {
                             tournaments={tournaments}
                             isLoading={tournamentsLoading}
                             columns={tournamentColumns}
-                            filters={TOURNAMENT_FILTERS}
+                            filters={getTranslatedFilters()}
                             sortConfig={tournamentSort}
                             currentPage={currentTournamentPage}
                             itemsPerPage={tournamentsPerPage}
@@ -174,30 +190,68 @@ const PlayerDetailView = () => {
             </div>
         </div>
     );
+
+    function getTranslatedFilters() {
+        return [
+            {
+                key: 'status',
+                label: t('players:playersDetail.filters.status.label'),
+                type: 'select',
+                options: [
+                    { value: 'upcoming', label: t('players:playersDetail.filters.status.options.upcoming') },
+                    { value: 'ongoing', label: t('players:playersDetail.filters.status.options.ongoing') },
+                    { value: 'completed', label: t('players:playersDetail.filters.status.options.completed') },
+                    { value: 'cancelled', label: t('players:playersDetail.filters.status.options.cancelled') },
+                    { value: 'won', label: t('players:playersDetail.filters.status.options.won') },
+                    { value: 'qualify', label: t('players:playersDetail.filters.status.options.qualify') },
+                    { value: 'lost', label: t('players:playersDetail.filters.status.options.lost') }
+                ]
+            },
+            {
+                key: 'scoring_system',
+                label: t('players:playersDetail.filters.format.label'),
+                type: 'select',
+                options: [
+                    { value: 'round_robin', label: t('players:playersDetail.filters.format.options.roundRobin') },
+                    { value: 'knockout', label: t('players:playersDetail.filters.format.options.knockout') },
+                    { value: 'double_elimination', label: t('players:playersDetail.filters.format.options.doubleElimination') },
+                    { value: 'single_elimination', label: t('players:playersDetail.filters.format.options.singleElimination') }
+                ]
+            }
+        ];
+    }
 };
 
-const Header = ({ onBack }) => (
-    <div className="bg-white shadow-sm">
-        <div className="mx-auto px-4 sm:px-6 py-4">
-            <button
-                onClick={onBack}
-                className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors"
-            >
-                <ArrowIcon size="lg" />
-                <span className="font-medium">Back to Players</span>
-            </button>
-        </div>
-    </div>
-);
+const Header = ({ onBack }) => {
+    const { t } = useTranslation(['players', 'common']);
 
-const LoadingSpinner = () => (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading player details...</p>
+    return (
+        <div className="bg-white shadow-sm">
+            <div className="mx-auto px-4 sm:px-6 py-4">
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors"
+                >
+                    <ArrowIcon size="lg" />
+                    <span className="font-medium">{t('players:playersDetail.buttons.backToPlayers')}</span>
+                </button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
+
+const LoadingSpinner = () => {
+    const { t } = useTranslation('players');
+
+    return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+                <p className="text-gray-600">{t('playersDetail.loading')}</p>
+            </div>
+        </div>
+    );
+};
 
 const BookingsSection = ({
                              bookings,
@@ -208,16 +262,18 @@ const BookingsSection = ({
                              onStatusChange,
                              onRefresh
                          }) => {
+    const { t } = useTranslation(['players', 'common']);
+
     return (
         <div className="bg-white px-2 rounded-lg shadow-sm border border-gray-100">
             <div className="p-3 lg:px-5 flex flex-wrap justify-between items-center border-b border-gray-100">
                 <div className="flex items-center gap-4">
-                    <h3 className="text-lg font-bold text-gray-900">Bookings</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{t('players:playersDetail.sections.bookings')}</h3>
                     <button
                         onClick={onRefresh}
                         disabled={isLoading}
                         className="p-1 text-primary-600 hover:text-primary-700 disabled:opacity-50 transition-colors"
-                        title="Refresh bookings"
+                        title={t('players:playersDetail.buttons.refresh')}
                     >
                         <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                     </button>
@@ -241,7 +297,7 @@ const BookingsSection = ({
                 {isLoading ? (
                     <div className="flex justify-center py-12">
                         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500"></div>
-                        <span className="sr-only">Loading bookings...</span>
+                        <span className="sr-only">{t('players:playersDetail.loadingBookings')}</span>
                     </div>
                 ) : bookings.length > 0 ? (
                     <div className="space-y-3">
@@ -257,36 +313,46 @@ const BookingsSection = ({
     );
 };
 
-const BookingStatusSelect = ({ value, onChange, disabled }) => (
-    <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        className="lg:px-4 px-2 py-1 lg:py-2 lg:pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-        style={{
-            backgroundImage: disabled
-                ? 'none'
-                : `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-            backgroundPosition: 'right 0.4rem center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '1.5em 1.5em',
-            paddingRight: '1.5rem'
-        }}
-    >
-        <option value="all">All Status</option>
-        <option value="confirmed">Confirmed</option>
-        <option value="pending">Pending</option>
-        <option value="cancelled">Cancelled</option>
-    </select>
-);
+const BookingStatusSelect = ({ value, onChange, disabled }) => {
+    const { t } = useTranslation('players');
 
-const NoBookingsMessage = ({ date }) => (
-    <div className="text-center py-12">
-        <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-        <p className="text-gray-500">No bookings found for {formatDate(date)}</p>
-        <p className="text-sm text-gray-400 mt-1">Try selecting a different date or status</p>
-    </div>
-);
+    return (
+        <select
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
+            className="lg:px-4 px-2 py-1 lg:py-2 lg:pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+            style={{
+                backgroundImage: disabled
+                    ? 'none'
+                    : `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.4rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '1.5rem'
+            }}
+        >
+            <option value="all">{t('playersDetail.bookingStatus.all')}</option>
+            <option value="confirmed">{t('playersDetail.bookingStatus.confirmed')}</option>
+            <option value="pending">{t('playersDetail.bookingStatus.pending')}</option>
+            <option value="cancelled">{t('playersDetail.bookingStatus.cancelled')}</option>
+        </select>
+    );
+};
+
+const NoBookingsMessage = ({ date }) => {
+    const { t } = useTranslation('players');
+
+    return (
+        <div className="text-center py-12">
+            <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500">
+                {t('playersDetail.noBookings', { date: formatDate(date) })}
+            </p>
+            <p className="text-sm text-gray-400 mt-1">{t('playersDetail.noBookingsHint')}</p>
+        </div>
+    );
+};
 
 const TournamentsSection = ({
                                 tournaments,
@@ -301,15 +367,21 @@ const TournamentsSection = ({
                                 onSort,
                                 onPageChange
                             }) => {
+    const { t } = useTranslation('players');
     const tournamentData = tournaments?.results || [];
+
+    // Get the count - check multiple possible sources
+    const tournamentCount = tournaments?.count || tournaments?.total || tournamentData.length || 0;
 
     return (
         <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-100">
             <div className="lg:p-6 p-2 mb-2">
                 <div className="flex items-center justify-between gap-4">
-                    <h3 className="lg:text-lg font-bold text-gray-900">Tournaments</h3>
+                    <h3 className="lg:text-lg font-bold text-gray-900">
+                        {t('playersDetail.sections.tournaments')}
+                    </h3>
                     <p className="text-sm text-gray-500 mt-1">
-                        Total: {tournamentData.length} tournaments
+                        {t('playersDetail.tournaments.total', { count: tournamentCount })}
                     </p>
                 </div>
             </div>
@@ -330,7 +402,7 @@ const TournamentsSection = ({
                     onFilterChange={onFilterChange}
                     onSort={onSort}
                     sortConfig={sortConfig}
-                    searchPlaceholder="Search tournaments..."
+                    searchPlaceholder={t('playersDetail.searchTournaments')}
                     showSearch={true}
                     showFilters={true}
                     filters={filters}
@@ -342,15 +414,17 @@ const TournamentsSection = ({
     );
 };
 
-const NoTournamentsMessage = () => (
-    <div className="text-center py-12">
-        <Trophy className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-        <p className="text-gray-500">No tournaments found</p>
-        <p className="text-sm text-gray-400 mt-1">
-            This player hasn't participated in any tournaments yet
-        </p>
-    </div>
-);
+const NoTournamentsMessage = () => {
+    const { t } = useTranslation('players');
+
+    return (
+        <div className="text-center py-12">
+            <Trophy className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500">{t('playersDetail.noTournaments')}</p>
+            <p className="text-sm text-gray-400 mt-1">{t('playersDetail.noTournamentsHint')}</p>
+        </div>
+    );
+};
 
 const getDefaultPlayer = () => ({
     id: 1,
