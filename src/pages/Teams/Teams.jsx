@@ -110,7 +110,13 @@ function Teams() {
         setSortConfig({ key, order });
         setCurrentPage(1); // Reset to first page when sorting
     };
-
+    const handleViewLeader = (player) => {
+        navigate('/players/player-profile', {
+            state: {
+                player,
+                from: '/bookings'            }
+        });
+    };
     const columns = [
         {
             header: 'Team Name',
@@ -144,7 +150,9 @@ function Teams() {
             sortable: true,
             sortKey: 'creator',
             render: (row) => (
-                <div className="flex items-center gap-2">
+                <div
+                    onClick={() => handleViewLeader(row.team_leader)}
+                    className="flex cursor-pointer items-center gap-2">
                     {row.team_leader?.image ? (
                         <img
                             src={getImageUrl(row.team_leader.image)} // Use utility function here

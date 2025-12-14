@@ -1,8 +1,9 @@
 import React from 'react';
 import { Phone, Calendar, Wallet, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useContact } from '../../hooks/useContact';
-import {IMAGE_BASE_URL} from '../../utils/ImageBaseURL.js'
-import {getImageUrl} from "../../utils/imageUtils.js";
+import { getImageUrl } from "../../utils/imageUtils.js";
+
 const PlayerProfileCard = ({
                                player,
                                onStatusToggle,
@@ -11,6 +12,7 @@ const PlayerProfileCard = ({
                                calculateAge,
                                formatAmount
                            }) => {
+    const { t } = useTranslation(['players', 'common']);
     const { handleWhatsAppClick } = useContact();
 
     return (
@@ -21,8 +23,7 @@ const PlayerProfileCard = ({
                         {player.image ? (
                             <img
                                 className="w-full h-full rounded-full object-cover"
-                                src={getImageUrl(player.image)} // Use utility function here
-
+                                src={getImageUrl(player.image)}
                                 alt={player.name}
                             />
                         ) : (
@@ -35,7 +36,10 @@ const PlayerProfileCard = ({
                         <span className={`px-4 py-1.5 rounded-full text-xs font-semibold ${
                             player.is_active ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'
                         }`}>
-                            {player.is_active ? 'Active' : 'Suspended'}
+                            {player.is_active
+                                ? t('status.active')
+                                : t('status.inactive')
+                            }
                         </span>
                     </div>
                 </div>
@@ -44,15 +48,15 @@ const PlayerProfileCard = ({
             <div className="grid grid-cols-3 gap-4 p-6 bg-gray-50 border-b">
                 <div className="text-center">
                     <div className="text-2xl font-bold text-primary-600">{player.num_of_points || 0}</div>
-                    <div className="text-xs text-gray-500 mt-1">Points</div>
+                    <div className="text-xs text-gray-500 mt-1">{t('playersPage.points')}</div>
                 </div>
                 <div className="text-center border-x border-gray-200">
                     <div className="text-2xl font-bold text-primary-600">{player.num_of_booking || 0}</div>
-                    <div className="text-xs text-gray-500 mt-1">Bookings</div>
+                    <div className="text-xs text-gray-500 mt-1">{t('playersPage.bookings')}</div>
                 </div>
                 <div className="text-center">
                     <div className="text-2xl font-bold text-primary-600">{player.num_of_tournaments || 0}</div>
-                    <div className="text-xs text-gray-500 mt-1">Tournaments</div>
+                    <div className="text-xs text-gray-500 mt-1">{t('playersPage.tournaments')}</div>
                 </div>
             </div>
 
@@ -62,8 +66,8 @@ const PlayerProfileCard = ({
                         <Phone className="w-5 h-5 text-primary-600" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-xs text-gray-500">Phone</p>
-                        <p className="text-sm font-medium">{player.phone || 'N/A'}</p>
+                        <p className="text-xs text-gray-500">{t('playersPage.phone')}</p>
+                        <p className="text-sm font-medium">{player.phone || t('playersPage.noPhone')}</p>
                     </div>
                 </div>
 
@@ -72,9 +76,11 @@ const PlayerProfileCard = ({
                         <Calendar className="w-5 h-5 text-primary-600" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-xs text-gray-500">Birth Date</p>
+                        <p className="text-xs text-gray-500">{t('playersDetail.birthDate', 'Birth Date')}</p>
                         <p className="text-sm font-medium">{formatDate(player.date_of_birth)}</p>
-                        <p className="text-xs text-gray-400">Age: {calculateAge(player.date_of_birth)}</p>
+                        <p className="text-xs text-gray-400">
+                            {t('playersDetail.age', 'Age')}: {calculateAge(player.date_of_birth)}
+                        </p>
                     </div>
                 </div>
 
@@ -83,7 +89,7 @@ const PlayerProfileCard = ({
                         <Wallet className="w-5 h-5 text-primary-600" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-xs text-gray-500">Wallet Balance</p>
+                        <p className="text-xs text-gray-500">{t('playersPage.walletBalance')}</p>
                         <p className="text-lg font-bold text-primary-600">{formatAmount(player.wallet_balance)}</p>
                     </div>
                 </div>
@@ -105,7 +111,10 @@ const PlayerProfileCard = ({
                         onClick={() => onStatusToggle(false)}
                         className="w-full px-4 py-2.5 bg-red-100 text-red-500 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isUpdatingStatus ? 'Updating...' : 'Suspend Player'}
+                        {isUpdatingStatus
+                            ? t('common:buttons.updating', 'Updating...')
+                            : t('playersDetail.buttons.suspend')
+                        }
                     </button>
                 ) : (
                     <button
@@ -113,7 +122,10 @@ const PlayerProfileCard = ({
                         onClick={() => onStatusToggle(true)}
                         className="w-full px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isUpdatingStatus ? 'Updating...' : 'Reactivate Player'}
+                        {isUpdatingStatus
+                            ? t('common:buttons.updating', 'Updating...')
+                            : t('playersDetail.buttons.activate')
+                        }
                     </button>
                 )}
             </div>

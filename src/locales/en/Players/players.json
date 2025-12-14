@@ -34,6 +34,81 @@
       "desc": "Descending"
     }
   },
+  "playersDetail": {
+    "title": "Player Details",
+    "loading": "Loading player details...",
+    "loadingBookings": "Loading bookings...",
+    "sections": {
+      "bookings": "Bookings",
+      "tournaments": "Tournaments"
+    },
+    "buttons": {
+      "backToPlayers": "Back to Players",
+      "refresh": "Refresh bookings",
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "bookingStatus": {
+      "all": "All Status",
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    },
+    "confirm": {
+      "title": "Are you sure?",
+      "suspend": "Do you want to suspend this player?",
+      "activate": "Do you want to activate this player?"
+    },
+    "status": {
+      "suspended": "Player suspended successfully",
+      "activated": "Player activated successfully",
+      "updateError": "Failed to update player status"
+    },
+    "noBookings": "No bookings found for {date}",
+    "noBookingsHint": "Try selecting a different date or status",
+    "noTournaments": "No tournaments found",
+    "noTournamentsHint": "This player hasn't participated in any tournaments yet",
+    "searchTournaments": "Search tournaments...",
+    "tournament": "Tournament",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "participants": "Participants",
+    "entryFee": "Entry Fee",
+    "noDescription": "No description",
+    "tournaments": {
+      "total": "Total: {{count}} tournaments"
+    },
+    "filters": {
+      "status": {
+        "label": "Status",
+        "options": {
+          "tournament": "Tournament",
+          "upcoming": "Upcoming",
+          "ongoing": "Ongoing",
+          "completed": "Completed",
+          "cancelled": "Cancelled",
+          "won": "Won",
+          "qualify": "Qualified",
+          "lost": "Lost"
+        }
+      },
+      "format": {
+        "label": "Format",
+        "options": {
+          "roundRobin": "Round Robin",
+          "knockout": "Knockout",
+          "doubleElimination": "Double Elimination",
+          "singleElimination": "Single Elimination"
+        }
+      }
+    },
+    "defaultPlayer": {
+      "name": "Ali Raheem"
+    }
+  },
   "playerPoints": {
     "title": "Points",
     "createPointButton": "Create New Point",
@@ -129,73 +204,5 @@
     "confirm": "Confirm",
     "close": "Close",
     "back": "Back"
-  },
-  "playersDetail": {
-    "title": "Player Details",
-    "loading": "Loading player details...",
-    "loadingBookings": "Loading bookings...",
-    "sections": {
-      "bookings": "Bookings",
-      "tournaments": "Tournaments"
-    },
-    "buttons": {
-      "backToPlayers": "Back to Players",
-      "refresh": "Refresh bookings",
-      "suspend": "Suspend",
-      "activate": "Activate",
-      "edit": "Edit",
-      "save": "Save",
-      "cancel": "Cancel"
-    },
-    "bookingStatus": {
-      "all": "All Status",
-      "confirmed": "Confirmed",
-      "pending": "Pending",
-      "cancelled": "Cancelled"
-    },
-    "confirm": {
-      "title": "Are you sure?",
-      "suspend": "Do you want to suspend this player?",
-      "activate": "Do you want to activate this player?"
-    },
-    "status": {
-      "suspended": "Player suspended successfully",
-      "activated": "Player activated successfully",
-      "updateError": "Failed to update player status"
-    },
-    "noBookings": "No bookings found for {date}",
-    "noBookingsHint": "Try selecting a different date or status",
-    "noTournaments": "No tournaments found",
-    "noTournamentsHint": "This player hasn't participated in any tournaments yet",
-    "searchTournaments": "Search tournaments...",
-    "tournaments": {
-      "total": "Total: {count} tournaments"
-    },
-    "filters": {
-      "status": {
-        "label": "Status",
-        "options": {
-          "upcoming": "Upcoming",
-          "ongoing": "Ongoing",
-          "completed": "Completed",
-          "cancelled": "Cancelled",
-          "won": "Won",
-          "qualify": "Qualified",
-          "lost": "Lost"
-        }
-      },
-      "format": {
-        "label": "Format",
-        "options": {
-          "roundRobin": "Round Robin",
-          "knockout": "Knockout",
-          "doubleElimination": "Double Elimination",
-          "singleElimination": "Single Elimination"
-        }
-      }
-    },
-    "defaultPlayer": {
-      "name": "Ali Raheem"
-    }
   }
 }

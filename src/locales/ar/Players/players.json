@@ -34,6 +34,81 @@
       "desc": "تنازلي"
     }
   },
+  "playersDetail": {
+    "title": "تفاصيل اللاعب",
+    "loading": "جاري تحميل تفاصيل اللاعب...",
+    "loadingBookings": "جاري تحميل الحجوزات...",
+    "sections": {
+      "bookings": "الحجوزات",
+      "tournaments": "البطولات"
+    },
+    "buttons": {
+      "backToPlayers": "العودة إلى اللاعبين",
+      "refresh": "تحديث الحجوزات",
+      "suspend": "تعليق",
+      "activate": "تفعيل",
+      "edit": "تعديل",
+      "save": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "bookingStatus": {
+      "all": "جميع الحالات",
+      "confirmed": "مؤكد",
+      "pending": "قيد الانتظار",
+      "cancelled": "ملغى"
+    },
+    "confirm": {
+      "title": "هل أنت متأكد؟",
+      "suspend": "هل تريد تعليق هذا اللاعب؟",
+      "activate": "هل تريد تفعيل هذا اللاعب؟"
+    },
+    "status": {
+      "suspended": "تم تعليق اللاعب بنجاح",
+      "activated": "تم تفعيل اللاعب بنجاح",
+      "updateError": "فشل في تحديث حالة اللاعب"
+    },
+    "noBookings": "لم يتم العثور على حجوزات بتاريخ {date}",
+    "noBookingsHint": "حاول اختيار تاريخ أو حالة مختلفة",
+    "noTournaments": "لم يتم العثور على بطولات",
+    "noTournamentsHint": "لم يشارك هذا اللاعب في أي بطولات بعد",
+    "searchTournaments": "البحث في البطولات...",
+    "tournament": "البطولة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "participants": "المشاركون",
+    "entryFee": "رسوم الدخول",
+    "noDescription": "لا يوجد وصف",
+    "tournaments": {
+      "total": "الإجمالي: {{count}} بطولة"
+    },
+    "filters": {
+      "status": {
+        "label": "الحالة",
+        "options": {
+          "tournament": "البطولة",
+          "upcoming": "قادمة",
+          "ongoing": "جارية",
+          "completed": "مكتملة",
+          "cancelled": "ملغاة",
+          "won": "فاز",
+          "qualify": "مؤهل",
+          "lost": "خسر"
+        }
+      },
+      "format": {
+        "label": "الصيغة",
+        "options": {
+          "roundRobin": "دوري",
+          "knockout": "خروج المغلوب",
+          "doubleElimination": "إقصاء مزدوج",
+          "singleElimination": "إقصاء فردي"
+        }
+      }
+    },
+    "defaultPlayer": {
+      "name": "علي رحيم"
+    }
+  },
   "playerPoints": {
     "title": "النقاط",
     "createPointButton": "إنشاء نقطة جديدة",
@@ -93,7 +168,12 @@
     "phone": "+١ XXX XXX XXXX",
     "currency": "$٠,٠.٠٠",
     "wallet": "${amount}",
-    "id": "PL{id}"
+    "id": "PL{id}",
+    "relative": {
+      "today": "اليوم",
+      "yesterday": "أمس",
+      "tomorrow": "غداً"
+    }
   },
   "status": {
     "active": "نشط",
@@ -130,72 +210,14 @@
     "close": "إغلاق",
     "back": "رجوع"
   },
-  "playersDetail": {
-    "title": "تفاصيل اللاعب",
-    "loading": "جاري تحميل تفاصيل اللاعب...",
-    "loadingBookings": "جاري تحميل الحجوزات...",
-    "sections": {
-      "bookings": "الحجوزات",
-      "tournaments": "البطولات"
-    },
+  "common": {
     "buttons": {
-      "backToPlayers": "العودة إلى اللاعبين",
-      "refresh": "تحديث الحجوزات",
-      "suspend": "تعليق",
-      "activate": "تفعيل",
-      "edit": "تعديل",
+      "cancel": "إلغاء",
+      "confirm": "تأكيد",
       "save": "حفظ",
-      "cancel": "إلغاء"
+      "back": "رجوع"
     },
-    "bookingStatus": {
-      "all": "جميع الحالات",
-      "confirmed": "مؤكد",
-      "pending": "قيد الانتظار",
-      "cancelled": "ملغى"
-    },
-    "confirm": {
-      "title": "هل أنت متأكد؟",
-      "suspend": "هل تريد تعليق هذا اللاعب؟",
-      "activate": "هل تريد تفعيل هذا اللاعب؟"
-    },
-    "status": {
-      "suspended": "تم تعليق اللاعب بنجاح",
-      "activated": "تم تفعيل اللاعب بنجاح",
-      "updateError": "فشل في تحديث حالة اللاعب"
-    },
-    "noBookings": "لم يتم العثور على حجوزات بتاريخ {date}",
-    "noBookingsHint": "حاول اختيار تاريخ أو حالة مختلفة",
-    "noTournaments": "لم يتم العثور على بطولات",
-    "noTournamentsHint": "لم يشارك هذا اللاعب في أي بطولات بعد",
-    "searchTournaments": "البحث في البطولات...",
-    "tournaments": {
-      "total": "الإجمالي: {count} بطولة"
-    },
-    "filters": {
-      "status": {
-        "label": "الحالة",
-        "options": {
-          "upcoming": "قادمة",
-          "ongoing": "جارية",
-          "completed": "مكتملة",
-          "cancelled": "ملغاة",
-          "won": "فاز",
-          "qualify": "مؤهل",
-          "lost": "خسر"
-        }
-      },
-      "format": {
-        "label": "التنسيق",
-        "options": {
-          "roundRobin": "دور روبن",
-          "knockout": "إقصائي",
-          "doubleElimination": "إقصاء مزدوج",
-          "singleElimination": "إقصاء فردي"
-        }
-      }
-    },
-    "defaultPlayer": {
-      "name": "علي رحيم"
-    }
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ"
   }
 }

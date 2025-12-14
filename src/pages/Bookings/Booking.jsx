@@ -95,6 +95,13 @@ const Bookings = () => {
             }
         });
     };
+    const handleViewCustomer = (player) => {
+        navigate('/players/player-profile', {
+            state: {
+                player,
+                from: '/bookings'            }
+        });
+    };
 
     const handleBackToList = () => {
         setViewMode('list');
@@ -173,7 +180,7 @@ const Bookings = () => {
             render: (row) => {
                 const userImageUrl = getImageUrl(row.user_info?.image);
                 return (
-                    <div className="flex items-center gap-2">
+                    <div                        onClick={() => handleViewCustomer(row.user_info)} className="flex cursor-pointer items-center gap-2">
                         {userImageUrl ? (
                             <img
                                 src={userImageUrl}

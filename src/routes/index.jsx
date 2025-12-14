@@ -309,6 +309,7 @@ const router = createBrowserRouter([
                 path: '/access-denied',
                 element: <AccessDenied />,
             },
+
         ],
     },
     {
