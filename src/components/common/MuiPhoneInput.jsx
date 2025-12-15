@@ -29,7 +29,7 @@ const MuiPhoneInput = ({
     };
 
     const appLanguage = getAppLanguage();
-    const isRTL = appLanguage === 'ar';
+    const isRTL = appLanguage === 'en';
 
     // 2. Dynamic Height
     const getInputHeight = () => {
