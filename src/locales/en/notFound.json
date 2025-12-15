@@ -1,0 +1,11 @@
+{
+  "title": "Goal Missed!",
+  "message": "The page you're looking for has been <highlight>sent off the field</highlight>.",
+  "subMessage": "It seems like this URL doesn't exist or has been moved. Let's get you back in the game!",
+  "quickLinks": "Quick Links",
+  "dashboard": "Dashboard",
+  "bookings": "Bookings",
+  "returnHome": "Return to Home",
+  "goBack": "Go Back",
+  "slogan": "- Play, Book, Compete"
+}

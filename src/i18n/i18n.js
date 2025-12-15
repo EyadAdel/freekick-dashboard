@@ -81,6 +81,16 @@ import enVenueSportsForm from '../locales/en/venueSports/venueSportsForm.json';
 import arVenueSportsForm from '../locales/ar/venueSports/venueSportsForm.json';
 import enProfileSettings from '../locales/en/Profile/profileSettings.json';
 import arProfileSettings from '../locales/ar/Profile/profileSettings.json';
+import enPitchOwnerPage from '../locales/en/pitchOwner/pitchOwnerPage.json';
+import arPitchOwnerPage from '../locales/ar/pitchOwner/pitchOwnerPage.json';
+import enPitchOwnerForm from '../locales/en/pitchOwner/pitchOwnerForm.json';
+import arPitchOwnerForm from '../locales/ar/pitchOwner/pitchOwnerForm.json';
+import enPitchOwnerDetails from '../locales/en/pitchOwner/PitchOwnerDetails.json';
+import arPitchOwnerDetails from '../locales/ar/pitchOwner/PitchOwnerDetails.json';
+import enHeader from '../locales/en/Header/Header.json';
+import arHeader from '../locales/ar/Header/Header.json';
+import enNotFound from '../locales/en/notFound.json';
+import arNotFound from '../locales/ar/notFound.json';
 // Translation resources
 const resources = {
     en: {
@@ -123,6 +133,13 @@ const resources = {
         venueSportsPage: enVenueSportsPage,
         venueSportsForm: enVenueSportsForm,
         profileSettings: enProfileSettings,
+        pitchOwnerPage: enPitchOwnerPage,
+        pitchOwnerForm: enPitchOwnerForm,
+        pitchOwnerDetails: enPitchOwnerDetails,
+        header: enHeader,
+        notFound: enNotFound,
+
+
     },
     ar: {
         common: arCommon,
@@ -163,6 +180,12 @@ const resources = {
         venueSportsPage: arVenueSportsPage,
         venueSportsForm: arVenueSportsForm,
         profileSettings: arProfileSettings,
+        pitchOwnerPage: arPitchOwnerPage,
+        pitchOwnerForm: arPitchOwnerForm,
+        pitchOwnerDetails: arPitchOwnerDetails,
+        header: arHeader,
+        notFound: arNotFound,
+
 
 
     },
@@ -220,7 +243,12 @@ i18n
             'pieChart',
             'players',
             'venueSportsForm',
-            'profileSettings'
+            'profileSettings',
+            'pitchOwnerPage',
+            'pitchOwnerForm',
+            'pitchOwnerDetails',
+            'header',
+            'notFound'
         ],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {

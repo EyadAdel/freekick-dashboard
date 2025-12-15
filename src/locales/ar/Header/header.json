@@ -1,0 +1,14 @@
+{
+  "welcome": "مرحباً، {{name}}",
+  "defaultTitle": "لوحة التحكم",
+  "profile": "الملف الشخصي",
+  "logout": "تسجيل الخروج",
+  "roles": {
+    "admin": "مسؤول",
+    "subAdmin": "مسؤول فرعي",
+    "pitchOwner": "مالك الملعب",
+    "subPitchOwner": "مالك ملعب فرعي",
+    "staff": "موظف",
+    "user": "مستخدم"
+  }
+}

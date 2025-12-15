@@ -1,0 +1,95 @@
+{
+  "header": {
+    "backButton": "العودة إلى ملاك الملاعب"
+  },
+  "profile": {
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "stats": {
+      "bookings": "الحجوزات",
+      "pitches": "الملاعب",
+      "estRevenue": "الإيرادات المقدرة",
+      "commission": "العمولة",
+      "rate": "النسبة %"
+    },
+    "contact": {
+      "title": "تفاصيل الاتصال",
+      "contactPerson": "الشخص المسؤول",
+      "noEmail": "لا يوجد بريد إلكتروني",
+      "noPhone": "لا يوجد رقم هاتف",
+      "emailBtn": "بريد إلكتروني",
+      "whatsappBtn": "واتساب",
+      "location": "الموقع",
+      "addressNA": "العنوان غير متوفر",
+      "joinedDate": "تاريخ الانضمام"
+    }
+  },
+  "bookings": {
+    "title": "الحجوزات",
+    "filters": {
+      "all": "كل الحالات",
+      "completed": "مكتمل",
+      "pending": "قيد الانتظار",
+      "cancelled": "ملغي"
+    },
+    "user": "المستخدم",
+    "unknown": "غير معروف",
+    "noBookings": "لا توجد حجوزات لهذا التصنيف.",
+    "statusLabels": {
+      "completed": "مكتمل",
+      "pending": "قيد الانتظار",
+      "cancelled": "ملغي"
+    }
+  },
+  "pitches": {
+    "title": "الملاعب المسجلة",
+    "noPitches": "لا توجد ملاعب مسجلة حتى الآن.",
+    "table": {
+      "code": "كود الملعب",
+      "name": "اسم الملعب",
+      "size": "الحجم",
+      "pricePerHour": "سعر / ساعة",
+      "bookings": "الحجوزات",
+      "status": "الحالة"
+    }
+  },
+  "staffActions": {
+    "title": "إجراءات الموظفين",
+    "totalBalance": "إجمالي الرصيد",
+    "addActionBtn": "إضافة إجراء",
+    "perPage": "{{count}} / صفحة",
+    "table": {
+      "srNo": "ت",
+      "description": "الوصف",
+      "type": "النوع",
+      "amount": "المبلغ",
+      "balance": "الرصيد",
+      "date": "التاريخ"
+    }
+  },
+  "actionModal": {
+    "title": "إضافة إجراء موظف",
+    "labels": {
+      "actionType": "نوع الإجراء",
+      "amount": "المبلغ",
+      "description": "الوصف",
+      "descPlaceholder": "أدخل تفاصيل حول هذا الإجراء..."
+    },
+    "validation": {
+      "kindRequired": "نوع الإجراء مطلوب",
+      "amountRequired": "مبلغ صالح مطلوب",
+      "descRequired": "الوصف مطلوب"
+    },
+    "buttons": {
+      "cancel": "إلغاء",
+      "saving": "جاري الحفظ...",
+      "submit": "إرسال الإجراء"
+    }
+  },
+  "errors": {
+    "notFound": "بيانات مالك الملعب غير موجودة",
+    "goBack": "رجوع"
+  }
+}

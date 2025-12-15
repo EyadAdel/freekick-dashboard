@@ -4,8 +4,9 @@ import { uploadService } from '../../services/upload/uploadService.js';
 import { authService } from '../../services/authService.js';
 import { pitchOwnersService } from '../../services/pitchOwners/pitchOwnersService.js';
 import { generateUniqueFileName } from '../../utils/fileUtils';
-import { getImageUrl, extractFilename } from '../../utils/imageUtils'; // Imported new utils
+import { getImageUrl, extractFilename } from '../../utils/imageUtils';
 import { citiesList } from '../../services/citiesList/citiesListService.js';
+import { useTranslation } from 'react-i18next';
 
 import {
     Save, X, UploadCloud, Trash2, Loader2,
@@ -15,6 +16,7 @@ import {
 import { toast } from 'react-toastify';
 
 const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
+    const { t } = useTranslation();
 
     // --- STATE ---
     const [formData, setFormData] = useState({
@@ -35,7 +37,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
 
-    // --- PROFILE IMAGE STATES ---
+    // --- PROFILE IMAGE STATES (LOGO) ---
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [finalImageName, setFinalImageName] = useState('');
@@ -64,13 +66,13 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 setUsers(userList);
             } catch (error) {
                 console.error("Failed to fetch users", error);
-                toast.error("Could not load users list.");
+                toast.error(t('pitchOwnerForm:messages.usersLoadError'));
             } finally {
                 setLoadingUsers(false);
             }
         };
         fetchUsers();
-    }, []);
+    }, [t]);
 
     // --- POPULATE FORM WITH API DATA ---
     useEffect(() => {
@@ -95,15 +97,15 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
             // Handle Profile Image using Utils
             const img = data.profile_image || data.image;
             if (img) {
-                setImagePreview(getImageUrl(img)); // Resolve full URL for display
-                setFinalImageName(extractFilename(img)); // Ensure we store just the filename for updates
+                setImagePreview(getImageUrl(img));
+                setFinalImageName(extractFilename(img));
             }
 
             // Handle Cover Image using Utils
             const cover = data.cover_image;
             if (cover) {
-                setCoverImagePreview(getImageUrl(cover)); // Resolve full URL for display
-                setFinalCoverImageName(extractFilename(cover)); // Ensure we store just the filename for updates
+                setCoverImagePreview(getImageUrl(cover));
+                setFinalCoverImageName(extractFilename(cover));
             }
         }
     }, [initialData]);
@@ -122,14 +124,14 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     const handleImageSelect = async (file) => {
         if (!file) return;
         if (!file.type.startsWith('image/')) {
-            toast.error("Please upload a valid image file");
+            toast.error(t('pitchOwnerForm:validation.invalidImage'));
             return;
         }
 
         const previewUrl = URL.createObjectURL(file);
         setSelectedImage(file);
         setImagePreview(previewUrl);
-        setErrors(prev => ({ ...prev, image: '' }));
+        setErrors(prev => ({ ...prev, image: '' })); // Clear error on select
 
         setIsImageUploading(true);
         try {
@@ -137,14 +139,14 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
             const result = await uploadService.processFullUpload(file, generatedName);
             const uploadedName = result.key || result.fileName || generatedName;
             setFinalImageName(uploadedName);
-            toast.success("Profile image uploaded successfully");
+            toast.success(t('pitchOwnerForm:messages.profileUploadSuccess'));
         } catch (error) {
             console.error("Image upload failed", error);
             setSelectedImage(null);
             setImagePreview(null);
             setFinalImageName('');
             if (fileInputRef.current) fileInputRef.current.value = '';
-            toast.error("Profile image upload failed.");
+            toast.error(t('pitchOwnerForm:messages.profileUploadError'));
         } finally {
             setIsImageUploading(false);
         }
@@ -167,7 +169,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     const handleCoverSelect = async (file) => {
         if (!file) return;
         if (!file.type.startsWith('image/')) {
-            toast.error("Please upload a valid image file");
+            toast.error(t('pitchOwnerForm:validation.invalidImage'));
             return;
         }
 
@@ -181,14 +183,14 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
             const result = await uploadService.processFullUpload(file, generatedName);
             const uploadedName = result.key || result.fileName || generatedName;
             setFinalCoverImageName(uploadedName);
-            toast.success("Cover image uploaded successfully");
+            toast.success(t('pitchOwnerForm:messages.coverUploadSuccess'));
         } catch (error) {
             console.error("Cover upload failed", error);
             setSelectedCoverImage(null);
             setCoverImagePreview(null);
             setFinalCoverImageName('');
             if (coverInputRef.current) coverInputRef.current.value = '';
-            toast.error("Cover image upload failed.");
+            toast.error(t('pitchOwnerForm:messages.coverUploadError'));
         } finally {
             setIsCoverImageUploading(false);
         }
@@ -225,14 +227,19 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         e.preventDefault();
 
         const newErrors = {};
-        if (!formData.user_id) newErrors.user_id = "User selection is required";
-        if (!formData.name) newErrors.name = "Pitch Name is required";
-        if (!formData.email) newErrors.email = "Email is required";
-        if (!formData.contact_phone) newErrors.contact_phone = "Contact Phone is required";
-        if (!formData.commission_rate) newErrors.commission_rate = "Commission Rate is required";
+        if (!formData.user_id) newErrors.user_id = t('pitchOwnerForm:validation.userRequired');
+        if (!formData.name) newErrors.name = t('pitchOwnerForm:validation.nameRequired');
+        if (!formData.email) newErrors.email = t('pitchOwnerForm:validation.emailRequired');
+        if (!formData.contact_phone) newErrors.contact_phone = t('pitchOwnerForm:validation.phoneRequired');
+        if (!formData.commission_rate) newErrors.commission_rate = t('pitchOwnerForm:validation.commissionRequired');
+
+        // VALIDATE IMAGE REQUIREMENT
+        if (!finalImageName) {
+            newErrors.image = t('pitchOwnerForm:validation.imageRequired');
+        }
 
         if (isImageUploading || isCoverImageUploading) {
-            toast.warning("Please wait for images to finish uploading.");
+            toast.warning(t('pitchOwnerForm:validation.waitUpload'));
             return;
         }
 
@@ -279,10 +286,10 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                     <div>
                         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                             {initialData ? <Edit className="text-primary-100" /> : <Building className="text-primary-100" />}
-                            {initialData ? "Edit Pitch Owner" : "New Pitch Owner"}
+                            {initialData ? t('pitchOwnerForm:header.editTitle') : t('pitchOwnerForm:header.createTitle')}
                         </h2>
                         <p className="text-primary-100 text-sm mt-1">
-                            {initialData ? "Update the details for this pitch owner." : "Manage pitch owner details."}
+                            {initialData ? t('pitchOwnerForm:header.editSubtitle') : t('pitchOwnerForm:header.createSubtitle')}
                         </p>
                     </div>
                     <button onClick={onCancel} className="text-white hover:bg-primary-600 p-2 rounded-lg">
@@ -296,12 +303,14 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 {/* Section 1: User Association */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
-                        <User size={20} /> User Account
+                        <User size={20} /> {t('pitchOwnerForm:sections.user.title')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* User Dropdown */}
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm font-medium text-gray-700">Select User <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-medium text-gray-700">
+                                {t('pitchOwnerForm:sections.user.selectLabel')} <span className="text-red-500">*</span>
+                            </label>
                             <div className="relative">
                                 <select
                                     name="user_id"
@@ -309,9 +318,9 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                     onChange={handleChange}
                                     className={`w-full p-3 bg-gray-50 border rounded-lg appearance-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all ${errors.user_id ? 'border-red-500' : 'border-gray-200'}`}
                                 >
-                                    <option value="">-- Choose a User --</option>
+                                    <option value="">{t('pitchOwnerForm:sections.user.defaultOption')}</option>
                                     {loadingUsers ? (
-                                        <option disabled>Loading users...</option>
+                                        <option disabled>{t('pitchOwnerForm:sections.user.loading')}</option>
                                     ) : (
                                         users.map(user => (
                                             <option key={user.id} value={user.id}>
@@ -328,12 +337,12 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                         </div>
 
                         <MainInput
-                            label="User Info / Notes"
+                            label={t('pitchOwnerForm:sections.user.infoLabel')}
                             name="user_info"
                             value={formData.user_info}
                             onChange={handleChange}
                             icon={FileText}
-                            placeholder="Additional user details..."
+                            placeholder={t('pitchOwnerForm:sections.user.infoPlaceholder')}
                         />
                     </div>
                 </div>
@@ -341,11 +350,11 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 {/* Section 2: Pitch Details */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
-                        <MapPin size={20} /> Pitch Details
+                        <MapPin size={20} /> {t('pitchOwnerForm:sections.pitch.title')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <MainInput
-                            label="Pitch Name"
+                            label={t('pitchOwnerForm:sections.pitch.nameLabel')}
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
@@ -355,16 +364,16 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                         />
 
                         <MainInput
-                            label="Pitch Address"
+                            label={t('pitchOwnerForm:sections.pitch.addressLabel')}
                             name="address"
                             value={formData.address}
                             onChange={handleChange}
                             icon={MapPin}
-                            placeholder="Full street address"
+                            placeholder={t('pitchOwnerForm:sections.pitch.addressPlaceholder')}
                         />
 
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm font-medium text-gray-700">City</label>
+                            <label className="text-sm font-medium text-gray-700">{t('pitchOwnerForm:sections.pitch.cityLabel')}</label>
                             <div className="relative">
                                 <select
                                     name="city"
@@ -372,7 +381,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                     onChange={handleChange}
                                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg appearance-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                                 >
-                                    <option value="">-- Select City --</option>
+                                    <option value="">{t('pitchOwnerForm:sections.pitch.cityDefault')}</option>
                                     {citiesList.map(city => (
                                         <option key={city.value} value={city.value}>{city.label}</option>
                                     ))}
@@ -382,7 +391,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                         </div>
 
                         <MainInput
-                            label="State / Province"
+                            label={t('pitchOwnerForm:sections.pitch.stateLabel')}
                             name="state"
                             value={formData.state}
                             onChange={handleChange}
@@ -394,11 +403,11 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 {/* Section 3: Contact & Financials */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
-                        <CreditCard size={20}/> Contact & Financials
+                        <CreditCard size={20}/> {t('pitchOwnerForm:sections.contact.title')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <MainInput
-                            label="Email Address"
+                            label={t('pitchOwnerForm:sections.contact.emailLabel')}
                             name="email"
                             type="email"
                             value={formData.email}
@@ -408,14 +417,14 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                             required
                         />
                         <MainInput
-                            label="Contact Person Name"
+                            label={t('pitchOwnerForm:sections.contact.personLabel')}
                             name="contact_name"
                             value={formData.contact_name}
                             onChange={handleChange}
                             icon={User}
                         />
                         <MainInput
-                            label="Contact Phone"
+                            label={t('pitchOwnerForm:sections.contact.phoneLabel')}
                             name="contact_phone"
                             value={formData.contact_phone}
                             onChange={handleChange}
@@ -424,28 +433,34 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                             required
                         />
                         <MainInput
-                            label="EID (Entity ID)"
+                            label={t('pitchOwnerForm:sections.contact.eidLabel')}
                             name="eid"
                             value={formData.eid}
                             onChange={handleChange}
                             icon={FileText}
                         />
                         <MainInput
-                            label="Commission Rate (%)"
+                            label={t('pitchOwnerForm:sections.contact.commissionLabel')}
                             name="commission_rate"
                             type="number"
                             value={formData.commission_rate}
                             onChange={handleChange}
                             error={errors.commission_rate}
                             icon={Percent}
-                            placeholder="e.g. 10"
+                            placeholder={t('pitchOwnerForm:sections.contact.commissionPlaceholder')}
                             required
                         />
                     </div>
                     {/* Status */}
                     <div className="bg-primary-50 p-6 rounded-lg space-y-4 border border-primary-100">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <MainInput type="checkbox" label="Is Active ?" name="is_active" value={formData.is_active} onChange={handleChange} />
+                            <MainInput
+                                type="checkbox"
+                                label={t('pitchOwnerForm:sections.contact.isActive')}
+                                name="is_active"
+                                value={formData.is_active}
+                                onChange={handleChange}
+                            />
                         </div>
                     </div>
                 </div>
@@ -453,14 +468,14 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 {/* Section 4: Images (Profile & Cover) */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
-                        <ImageIcon size={20} /> Media
+                        <ImageIcon size={20} /> {t('pitchOwnerForm:sections.media.title')}
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* 1. Profile/Pitch Image */}
+                        {/* 1. Profile/Pitch Image (REQUIRED) */}
                         <div className="space-y-4">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                 Logo  <span className="text-gray-400 font-normal">(Optional)</span>
+                                {t('pitchOwnerForm:sections.media.logoLabel')} <span className="text-red-500">*</span>
                             </label>
                             <div
                                 onClick={() => !isImageUploading && fileInputRef.current.click()}
@@ -476,7 +491,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 {isImageUploading ? (
                                     <div className="flex flex-col items-center justify-center">
                                         <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
-                                        <p className="text-sm font-medium text-gray-600">Uploading...</p>
+                                        <p className="text-sm font-medium text-gray-600">{t('pitchOwnerForm:sections.media.uploading')}</p>
                                     </div>
                                 ) : imagePreview ? (
                                     <div className="relative w-full h-full p-2 group">
@@ -488,16 +503,17 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 ) : (
                                     <div className="text-center p-4">
                                         <div className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3"><UploadCloud size={24} /></div>
-                                        <p className="text-sm font-medium text-gray-700">Upload Logo</p>
+                                        <p className="text-sm font-medium text-gray-700">{t('pitchOwnerForm:sections.media.uploadLogo')}</p>
                                     </div>
                                 )}
                             </div>
+                            {errors.image && <p className="text-xs text-red-500 mt-1">{errors.image}</p>}
                         </div>
 
-                        {/* 2. Cover Image */}
+                        {/* 2. Cover Image (OPTIONAL) */}
                         <div className="space-y-4">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Profile Image <span className="text-gray-400 font-normal">(Optional)</span>
+                                {t('pitchOwnerForm:sections.media.profileLabel')} <span className="text-gray-400 font-normal">{t('pitchOwnerForm:sections.media.optional')}</span>
                             </label>
                             <div
                                 onClick={() => !isCoverImageUploading && coverInputRef.current.click()}
@@ -512,7 +528,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 {isCoverImageUploading ? (
                                     <div className="flex flex-col items-center justify-center">
                                         <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
-                                        <p className="text-sm font-medium text-gray-600">Uploading...</p>
+                                        <p className="text-sm font-medium text-gray-600">{t('pitchOwnerForm:sections.media.uploading')}</p>
                                     </div>
                                 ) : coverImagePreview ? (
                                     <div className="relative w-full h-full p-2 group">
@@ -524,7 +540,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 ) : (
                                     <div className="text-center p-4">
                                         <div className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3"><UploadCloud size={24} /></div>
-                                        <p className="text-sm font-medium text-gray-700">Upload Cover</p>
+                                        <p className="text-sm font-medium text-gray-700">{t('pitchOwnerForm:sections.media.uploadCover')}</p>
                                     </div>
                                 )}
                             </div>
@@ -534,9 +550,9 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                 {/* Buttons */}
                 <div className="flex gap-4 pt-4">
-                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">Cancel</button>
+                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">{t('pitchOwnerForm:buttons.cancel')}</button>
                     <button type="submit" disabled={isSubmitting || isImageUploading || isCoverImageUploading} className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg">
-                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? "Update Pitch Owner" : "Save Pitch Owner"}</>}
+                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? t('pitchOwnerForm:buttons.update') : t('pitchOwnerForm:buttons.save')}</>}
                     </button>
                 </div>
             </form>

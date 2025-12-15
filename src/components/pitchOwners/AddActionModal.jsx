@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2, Save } from 'lucide-react';
 import { TextField, MenuItem, InputAdornment } from '@mui/material';
+import { useTranslation } from 'react-i18next'; // Import Hook
 
 // Import your service and constants
-// Adjust these paths based on your project structure
 import { pitchOwnersService } from '../../services/pitchOwners/pitchOwnersService';
-import { stuffActionListService } from '../../services/stuffActionListService.js'; // Or wherever you saved the list
+import { stuffActionListService } from '../../services/stuffActionListService.js';
 
 const AddActionModal = ({ isOpen, onClose, onSuccess, staffId }) => {
+    const { t } = useTranslation('pitchOwnerDetails'); // Use same namespace
+
     // Initial State
     const initialFormState = {
         kind: '',
@@ -44,9 +46,9 @@ const AddActionModal = ({ isOpen, onClose, onSuccess, staffId }) => {
     // Validation
     const validate = () => {
         const newErrors = {};
-        if (!formData.kind) newErrors.kind = "Action type is required";
-        if (!formData.amount || formData.amount <= 0) newErrors.amount = "Valid amount is required";
-        if (!formData.description) newErrors.description = "Description is required";
+        if (!formData.kind) newErrors.kind = t('actionModal.validation.kindRequired');
+        if (!formData.amount || formData.amount <= 0) newErrors.amount = t('actionModal.validation.amountRequired');
+        if (!formData.description) newErrors.description = t('actionModal.validation.descRequired');
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -104,7 +106,7 @@ const AddActionModal = ({ isOpen, onClose, onSuccess, staffId }) => {
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
-                    <h3 className="text-lg font-bold text-gray-900">Add Staff Action</h3>
+                    <h3 className="text-lg font-bold text-gray-900">{t('actionModal.title')}</h3>
                     <button
                         onClick={onClose}
                         className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors"
@@ -120,7 +122,7 @@ const AddActionModal = ({ isOpen, onClose, onSuccess, staffId }) => {
                     <TextField
                         select
                         fullWidth
-                        label="Action Type"
+                        label={t('actionModal.labels.actionType')}
                         variant="outlined"
                         size="small"
                         value={formData.kind}
@@ -140,7 +142,7 @@ const AddActionModal = ({ isOpen, onClose, onSuccess, staffId }) => {
                     <TextField
                         fullWidth
                         type="number"
-                        label="Amount"
+                        label={t('actionModal.labels.amount')}
                         variant="outlined"
                         size="small"
                         value={formData.amount}
@@ -159,9 +161,9 @@ const AddActionModal = ({ isOpen, onClose, onSuccess, staffId }) => {
                         fullWidth
                         multiline
                         rows={4}
-                        label="Description"
+                        label={t('actionModal.labels.description')}
                         variant="outlined"
-                        placeholder="Enter details about this action..."
+                        placeholder={t('actionModal.labels.descPlaceholder')}
                         value={formData.description}
                         onChange={(e) => handleChange('description', e.target.value)}
                         error={!!errors.description}
@@ -177,7 +179,7 @@ const AddActionModal = ({ isOpen, onClose, onSuccess, staffId }) => {
                             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
                             disabled={loading}
                         >
-                            Cancel
+                            {t('actionModal.buttons.cancel')}
                         </button>
 
                         <button
@@ -188,12 +190,12 @@ const AddActionModal = ({ isOpen, onClose, onSuccess, staffId }) => {
                             {loading ? (
                                 <>
                                     <Loader2 size={16} className="animate-spin" />
-                                    Saving...
+                                    {t('actionModal.buttons.saving')}
                                 </>
                             ) : (
                                 <>
                                     <Save size={16} />
-                                    Submit Action
+                                    {t('actionModal.buttons.submit')}
                                 </>
                             )}
                         </button>

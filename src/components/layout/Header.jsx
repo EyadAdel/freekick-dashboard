@@ -1,21 +1,25 @@
-import { Bell, Settings, User } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LanguageSwitcher from '../LanguageSwitcher.jsx';
-import { selectPageTitle } from '../../features/pageTitle/pageTitleSlice';
-import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { MdLogout } from "react-icons/md";
-import { Menu } from 'lucide-react';
+
+// Components & Hooks
+import LanguageSwitcher from '../LanguageSwitcher.jsx';
 import NotificationDropdown from "../NotificationDropdown.jsx";
+import { selectPageTitle } from '../../features/pageTitle/pageTitleSlice';
+import { useAuth } from '../../hooks/useAuth';
 import { useNotifications } from "../../hooks/useNotifications.js";
 import { getImageUrl } from "../../utils/imageUtils.js";
 
 const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
     const { direction } = useSelector((state) => state.language);
     const pageTitle = useSelector(selectPageTitle);
-    const { t } = useTranslation('common');
+
+    // Updated to use 'header' namespace
+    const { t } = useTranslation('header');
+
     const { user, isLoading } = useSelector((state) => state.auth);
     const { logout } = useAuth();
     const navigate = useNavigate();
@@ -48,22 +52,23 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
 
+    // Translate User Roles
     const getUserRole = () => {
-        if (!user?.role) return 'User';
+        if (!user?.role) return t('roles.user');
 
         const role = user.role;
 
-        if (role.is_admin) return 'Admin';
-        if (role.is_sub_admin) return 'Sub Admin';
-        if (role.is_pitch_owner) return 'Pitch Owner';
-        if (role.is_sub_pitch_owner) return 'Sub Pitch Owner';
-        if (role.is_staff) return 'Staff';
+        if (role.is_admin) return t('roles.admin');
+        if (role.is_sub_admin) return t('roles.subAdmin');
+        if (role.is_pitch_owner) return t('roles.pitchOwner');
+        if (role.is_sub_pitch_owner) return t('roles.subPitchOwner');
+        if (role.is_staff) return t('roles.staff');
 
-        return 'User';
+        return t('roles.user');
     };
 
     const getDisplayName = () => {
-        return user?.name || 'User';
+        return user?.name || t('roles.user');
     };
 
     // Function to get initials from name
@@ -80,15 +85,13 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
         return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
     };
 
-    // Function to generate a color based on user's name (for consistent avatar colors)
+    // Function to generate a color based on user's name
     const getAvatarColor = () => {
         const name = user?.name || 'User';
         const colors = [
-
             'from-primary-500 to-primary-600',
         ];
 
-        // Simple hash function for consistent color selection
         let hash = 0;
         for (let i = 0; i < name.length; i++) {
             hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -180,10 +183,10 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
                     {/* Welcome message */}
                     <div className="flex-1 lg:flex-none">
                         <h1 className="text-lg lg:text-xl font-bold text-gray-800">
-                            {pageTitle || 'Dashboard'}
+                            {pageTitle || t('defaultTitle')}
                         </h1>
                         <p className="text-xs text-gray-500 hidden lg:block">
-                            Welcome, {getDisplayName()}
+                            {t('welcome', { name: getDisplayName() })}
                         </p>
                     </div>
 
@@ -194,7 +197,7 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
                             <LanguageSwitcher />
                         </div>
 
-                        {/* Notifications - UPDATED */}
+                        {/* Notifications */}
                         <div className="relative">
                             <button
                                 onClick={() => {
@@ -272,16 +275,16 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
                                             onClick={handleProfileClick}
                                             className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg text-start"
                                         >
-                                            Profile
+                                            {t('profile')}
                                         </button>
 
                                         <hr className="my-2" />
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full flex gap-4 items-center text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                                            className="w-full flex gap-4 items-center text-start px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
                                         >
                                             <MdLogout />
-                                            Logout
+                                            {t('logout')}
                                         </button>
                                     </div>
                                 </div>
