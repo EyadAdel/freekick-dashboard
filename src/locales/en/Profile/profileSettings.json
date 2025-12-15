@@ -1,0 +1,94 @@
+{
+  "pageTitle": "Profile",
+  "tabs": {
+    "editProfile": "Edit Profile",
+    "preferences": "Preferences",
+    "security": "Security"
+  },
+  "profile": {
+    "contactName": "Name",
+    "pitchName": "Pitch Name",
+    "email": "Email",
+    "phoneNumber": "Phone Number",
+    "state": "State",
+    "city": "City",
+    "pitchAddress": "Pitch Address",
+    "autoAcceptBookings": "Auto Accept Bookings",
+    "reset": "Reset",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "placeholders": {
+      "contactName": "Omar",
+      "pitchName": "Enter pitch name",
+      "state": "Enter state",
+      "city": "Dubai",
+      "pitchAddress": "Enter pitch address"
+    }
+  },
+  "preferences": {
+    "savePreferences": "Save Preferences",
+    "groups": {
+      "app": "App Notifications",
+      "sms": "SMS Notifications",
+      "whatsapp": "WhatsApp Notifications"
+    },
+    "labels": {
+      "app_updates": "App Updates",
+      "app_news": "App News",
+      "app_booking": "App Booking Notifications",
+      "app_promotions": "App Promotions",
+      "sms_booking": "SMS Booking Notifications",
+      "sms_promotions": "SMS Promotions",
+      "whatsapp_booking": "WhatsApp Booking Notifications",
+      "whatsapp_promotions": "WhatsApp Promotions",
+      "whatsapp_news": "WhatsApp News"
+    }
+  },
+  "security": {
+    "twoFactorHeading": "Two-factor Authentication",
+    "twoFactorDesc": "Enable or disable two factor authentication",
+    "changePasswordHeading": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "clear": "Clear",
+    "changePasswordBtn": "Change Password",
+    "placeholders": {
+      "currentPassword": "Enter current password",
+      "newPassword": "Enter new password",
+      "confirmPassword": "Confirm new password"
+    }
+  },
+  "validation": {
+    "contactNameRequired": "Contact name is required",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email address",
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Invalid phone number",
+    "validImage": "Please select a valid image file",
+    "imageSize": "Image size must be less than 5MB",
+    "currentPasswordRequired": "Current password is required",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "newPasswordRequired": "New password is required",
+    "passwordComplexity": "Password must contain uppercase, lowercase, and number",
+    "confirmPasswordRequired": "Please confirm your password",
+    "passwordsDoNotMatch": "Passwords do not match"
+  },
+  "messages": {
+    "loadProfileError": "Failed to load profile",
+    "imageSelected": "Image selected successfully",
+    "profileUpdated": "Profile updated successfully",
+    "profileUpdateError": "Failed to update profile",
+    "errorOccurred": "An error occurred",
+    "preferencesUpdated": "Preferences updated successfully",
+    "preferencesUpdateError": "Failed to update preferences",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeError": "Failed to change password",
+    "twoFactorUpdated": "Two-factor authentication {{status}}",
+    "twoFactorError": "Failed to update two-factor authentication"
+  },
+  "common": {
+    "enabled": "enabled",
+    "disabled": "disabled"
+  }
+}

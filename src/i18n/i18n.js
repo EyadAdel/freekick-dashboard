@@ -79,6 +79,8 @@ import enVenueSportsPage from '../locales/en/venueSports/venueSportsPage.json';
 import arVenueSportsPage from '../locales/ar/venueSports/venueSportsPage.json';
 import enVenueSportsForm from '../locales/en/venueSports/venueSportsForm.json';
 import arVenueSportsForm from '../locales/ar/venueSports/venueSportsForm.json';
+import enProfileSettings from '../locales/en/Profile/profileSettings.json';
+import arProfileSettings from '../locales/ar/Profile/profileSettings.json';
 // Translation resources
 const resources = {
     en: {
@@ -120,6 +122,7 @@ const resources = {
         players: enPlayers,
         venueSportsPage: enVenueSportsPage,
         venueSportsForm: enVenueSportsForm,
+        profileSettings: enProfileSettings,
     },
     ar: {
         common: arCommon,
@@ -158,7 +161,8 @@ const resources = {
         pieChart: arPieChart,
         players: arPlayers,
         venueSportsPage: arVenueSportsPage,
-        venueSportsForm: arVenueSportsForm, // Added
+        venueSportsForm: arVenueSportsForm,
+        profileSettings: arProfileSettings,
 
 
     },
@@ -216,6 +220,7 @@ i18n
             'pieChart',
             'players',
             'venueSportsForm',
+            'profileSettings'
         ],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {
