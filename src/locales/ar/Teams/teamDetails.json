@@ -1,0 +1,88 @@
+{
+  "header": {
+    "backToTeams": "العودة للفرق"
+  },
+  "sidebar": {
+    "teamId": "معرف الفريق: {{id}}",
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "private": "خاص",
+      "public": "عام",
+      "suspendTeam": "تعليق الفريق",
+      "activateTeam": "تفعيل الفريق",
+      "updating": "جاري التحديث..."
+    },
+    "stats": {
+      "points": "النقاط",
+      "members": "الأعضاء",
+      "tournaments": "البطولات",
+      "matchesPlayed": "المباريات الملعوبة",
+      "totalTournaments": "إجمالي البطولات",
+      "teamMembers": "أعضاء الفريق"
+    },
+    "teamLeader": {
+      "title": "قائد الفريق",
+      "whatsapp": "واتساب"
+    },
+    "created": "تم الإنشاء {{date}}"
+  },
+  "bookings": {
+    "title": "الحجوزات",
+    "allStatus": "كل الحالات",
+    "confirmed": "مؤكد",
+    "pending": "قيد الانتظار",
+    "cancelled": "ملغي",
+    "noBookings": "لا توجد حجوزات ليوم {{date}}",
+    "tryDifferent": "حاول اختيار تاريخ أو حالة مختلفة"
+  },
+  "tournaments": {
+    "title": "البطولات",
+    "total": "الإجمالي : {{count}} بطولة",
+    "noTournaments": "لا توجد بطولات",
+    "noParticipation": "لم يشارك هذا الفريق في أي بطولات بعد",
+    "table": {
+      "tournament": "البطولة",
+      "status": "الحالة",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "format": "النظام",
+      "participants": "المشاركين",
+      "entryFee": "رسوم الدخول",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "noDescription": "لا يوجد وصف"
+    }
+  },
+  "members": {
+    "title": "أعضاء الفريق",
+    "total": "الإجمالي : {{count}} لاعب",
+    "noMembers": "لا يوجد أعضاء في الفريق بعد",
+    "inviteHint": "يمكن لقائد الفريق دعوة لاعبين للانضمام"
+  },
+  "loading": {
+    "details": "جاري تحميل تفاصيل الفريق...",
+    "noData": "لا توجد بيانات للفريق",
+    "goBack": "رجوع"
+  },
+  "confirm": {
+    "title": "هل أنت متأكد؟",
+    "suspendText": "هل تريد تعليق هذا الفريق؟",
+    "activateText": "هل تريد تفعيل هذا الفريق؟",
+    "yesSuspend": "نعم، تعليق",
+    "yesActivate": "نعم، تفعيل",
+    "cancel": "إلغاء",
+    "successActivated": "تم تفعيل الفريق بنجاح",
+    "successDeactivated": "تم تعليق الفريق بنجاح"
+  },
+  "email": {
+    "subject": "فريق {{name}} - المعرف: {{id}}",
+    "body": "عزيزي {{name}}،\n\nبخصوص فريقك \"{{teamName}}\".\n\n"
+  },
+  "whatsapp": {
+    "message": "مرحباً {{name}}! بخصوص فريقك \"{{teamName}}\"."
+  },
+  "errors": {
+    "updateFailed": "فشل تحديث الفريق: {{error}}"
+  }
+}

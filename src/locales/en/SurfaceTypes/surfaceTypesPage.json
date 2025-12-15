@@ -1,0 +1,17 @@
+{
+  "title": "Surface Types",
+  "actions": {
+    "add": "Add Surface Type",
+    "searchPlaceholder": "Search surface types..."
+  },
+  "table": {
+    "hash": "#",
+    "nameEn": "Surface Name (EN)",
+    "nameAr": "Surface Name (AR)",
+    "actions": "Actions"
+  },
+  "delete": {
+    "title": "Delete Surface Type?",
+    "text": "Are you sure you want to delete this surface type? This action cannot be undone."
+  }
+}

@@ -91,6 +91,21 @@ import enHeader from '../locales/en/Header/Header.json';
 import arHeader from '../locales/ar/Header/Header.json';
 import enNotFound from '../locales/en/notFound.json';
 import arNotFound from '../locales/ar/notFound.json';
+import enTeamsPage from '../locales/en/Teams/teamsPage.json';
+import arTeamsPage from '../locales/ar/Teams/teamsPage.json';
+import enTeamDetails from '../locales/en/Teams/teamDetails.json';
+import arTeamDetails from '../locales/ar/Teams/teamDetails.json';
+import enDashboard from '../locales/en/Dashboard/dashboard.json';
+import arDashboard from '../locales/ar/Dashboard/dashboard.json';
+import enNotificationsPanel from '../locales/en/Dashboard/notificationsPanel.json';
+import arNotificationsPanel from '../locales/ar/Dashboard/notificationsPanel.json';
+import enSurfaceTypesPage from '../locales/en/SurfaceTypes/surfaceTypesPage.json';
+import arSurfaceTypePages from '../locales/ar/SurfaceTypes/surfaceTypesPage.json';
+import enSurfaceTypeForm from '../locales/en/SurfaceTypes/surfaceTypeForm.json';
+import arSurfaceTypeForm from '../locales/ar/SurfaceTypes/surfaceTypeForm.json';
+import enLogin from '../locales/en/login.json';
+import arLogin from '../locales/ar/login.json';
+
 // Translation resources
 const resources = {
     en: {
@@ -138,6 +153,13 @@ const resources = {
         pitchOwnerDetails: enPitchOwnerDetails,
         header: enHeader,
         notFound: enNotFound,
+        teamsPage: enTeamsPage,
+        teamDetails: enTeamDetails,
+        dashboard: enDashboard,
+        notificationsPanel: enNotificationsPanel,
+        surfaceTypesPage: enSurfaceTypesPage,
+        surfaceTypeForm: enSurfaceTypeForm,
+        login: enLogin,
 
 
     },
@@ -185,6 +207,19 @@ const resources = {
         pitchOwnerDetails: arPitchOwnerDetails,
         header: arHeader,
         notFound: arNotFound,
+        teamsPage: arTeamsPage,
+        teamDetails: arTeamDetails,
+        dashboard: arDashboard,
+        notificationsPanel: arNotificationsPanel,
+        surfaceTypesPage: arSurfaceTypePages,
+        surfaceTypeForm: arSurfaceTypeForm,
+        login: arLogin,
+
+
+
+
+
+
 
 
 
@@ -248,7 +283,14 @@ i18n
             'pitchOwnerForm',
             'pitchOwnerDetails',
             'header',
-            'notFound'
+            'notFound',
+            'notificationsPanel',
+            'dashboard',
+            'teamsPage',
+            'teamDetails',
+            'surfaceTypesPage',
+            'surfaceTypeForm',
+            'login'
         ],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {

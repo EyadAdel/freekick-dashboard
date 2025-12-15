@@ -1,0 +1,37 @@
+{
+  "title": {
+    "add": "Add Surface Type",
+    "edit": "Edit Surface Type"
+  },
+  "subtitle": {
+    "add": "Define a new surface type for pitches.",
+    "edit": "Update the details for this surface type."
+  },
+  "section": {
+    "basicInfo": "Basic Information"
+  },
+  "fields": {
+    "nameEn": {
+      "label": "Surface Name (English)",
+      "placeholder": "e.g. Natural Grass"
+    },
+    "nameAr": {
+      "label": "Surface Name (Arabic)",
+      "placeholder": "e.g. Natural Grass"
+    }
+  },
+  "validation": {
+    "requiredEn": "English Name is required",
+    "requiredAr": "Arabic Name is required"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "save": "Save Surface",
+    "update": "Update Surface",
+    "auto": "Auto",
+    "translating": "Translating..."
+  },
+  "errors": {
+    "submission": "Something went wrong during submission."
+  }
+}

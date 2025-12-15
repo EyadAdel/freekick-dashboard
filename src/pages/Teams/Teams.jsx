@@ -1,16 +1,17 @@
 // pages/Teams/Teams.jsx
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from "react-redux";
-import { useTeams, useTeamAnalytics } from "../../hooks/useTeams.js";
+import { useTeams } from "../../hooks/useTeams.js";
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
-import { ArrowLeft, Trophy, Users, Target, Award } from "lucide-react";
+import { ArrowLeft, Users } from "lucide-react";
 import MainTable from "../../components/MainTable.jsx";
-import {useNavigate} from "react-router-dom";
-import {IMAGE_BASE_URL} from "../../utils/ImageBaseURL.js";
-import {getImageUrl} from "../../utils/imageUtils.js";
+import { useNavigate } from "react-router-dom";
+import { getImageUrl } from "../../utils/imageUtils.js";
+import { useTranslation } from 'react-i18next'; // Import Translation Hook
 
 function Teams() {
     const dispatch = useDispatch();
+    const { t, i18n } = useTranslation('teamsPage'); // Initialize translation
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [viewMode, setViewMode] = useState('list');
@@ -21,7 +22,7 @@ function Teams() {
     const [filters, setFilters] = useState({});
 
     const itemsPerPage = 10;
-    const  navigate = useNavigate()
+    const navigate = useNavigate();
 
     // Build API filters with pagination and sorting
     const apiFilters = {
@@ -41,10 +42,9 @@ function Teams() {
     // Fetch teams with filters
     const { teams, isLoading, error, refetch } = useTeams(apiFilters);
 
-
     useEffect(() => {
-        dispatch(setPageTitle('Teams'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('title')));
+    }, [dispatch, t]);
 
     // Convert sort keys to API ordering field names
     function getOrderingParam(key, order) {
@@ -66,21 +66,22 @@ function Teams() {
         if (isActive) {
             return (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Active
+                    {t('status.active')}
                 </span>
             );
         }
         return (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                Inactive
+                {t('status.inactive')}
             </span>
         );
     };
 
     const formatDate = (dateTime) => {
-        if (!dateTime) return 'N/A';
+        if (!dateTime) return t('data.na');
         const date = new Date(dateTime);
-        return date.toLocaleDateString('en-US', {
+        const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
+        return date.toLocaleDateString(locale, {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
@@ -89,7 +90,7 @@ function Teams() {
 
     const handleViewTeam = (team) => {
         navigate(`/teams/team-profile`, {
-            state: {team:team}
+            state: { team: team }
         });
     };
 
@@ -110,16 +111,19 @@ function Teams() {
         setSortConfig({ key, order });
         setCurrentPage(1); // Reset to first page when sorting
     };
+
     const handleViewLeader = (player) => {
         navigate('/players/player-profile', {
             state: {
                 player,
-                from: '/bookings'            }
+                from: '/bookings'
+            }
         });
     };
+
     const columns = [
         {
-            header: 'Team Name',
+            header: t('table.teamName'),
             accessor: 'name',
             sortable: true,
             sortKey: 'name',
@@ -129,7 +133,7 @@ function Teams() {
                     className="flex cursor-pointer items-center gap-3">
                     {row.logo ? (
                         <img
-                            src={getImageUrl( row.logo)} // Use utility function here
+                            src={getImageUrl(row.logo)} // Use utility function here
                             alt="Team Logo"
                             className="w-10 h-10 rounded-full object-cover"
                         />
@@ -139,13 +143,13 @@ function Teams() {
                         </div>
                     )}
                     <span className="font-medium text-gray-900">
-                        {row.name || 'Team ' + row.id}
+                        {row.name || `${t('data.teamPrefix')} ${row.id}`}
                     </span>
                 </div>
             )
         },
         {
-            header: 'Team Leader',
+            header: t('table.teamLeader'),
             accessor: 'team_leader',
             sortable: true,
             sortKey: 'creator',
@@ -167,13 +171,13 @@ function Teams() {
                         </div>
                     )}
                     <span className="text-gray-900">
-                        {row.team_leader?.name || 'Unknown'}
+                        {row.team_leader?.name || t('data.unknown')}
                     </span>
                 </div>
             )
         },
         {
-            header: 'Members',
+            header: t('table.members'),
             accessor: 'number_of_members',
             sortable: true,
             sortKey: 'members',
@@ -184,7 +188,7 @@ function Teams() {
             )
         },
         {
-            header: 'Points',
+            header: t('table.points'),
             accessor: 'num_of_points',
             sortable: true,
             sortKey: 'num_of_points',
@@ -193,7 +197,7 @@ function Teams() {
             )
         },
         {
-            header: 'Bookings',
+            header: t('table.bookings'),
             accessor: 'number_of_booking',
             sortable: true,
             sortKey: 'number_of_booking',
@@ -202,7 +206,7 @@ function Teams() {
             )
         },
         {
-            header: 'Last Activity',
+            header: t('table.lastActivity'),
             accessor: 'updated_at',
             sortable: true,
             sortKey: 'updated_at',
@@ -211,7 +215,7 @@ function Teams() {
             )
         },
         {
-            header: 'STATUS',
+            header: t('table.status'),
             accessor: 'is_active',
             sortable: true,
             sortKey: 'status',
@@ -226,9 +230,9 @@ function Teams() {
                 <button
                     onClick={() => handleViewTeam(row)}
                     className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                    aria-label="View team details"
+                    aria-label={t('actions.viewDetails')}
                 >
-                    <ArrowLeft size={18} className="rotate-180" />
+                    <ArrowLeft size={18} className="rotate-180 rtl:rotate-0" />
                 </button>
             )
         }
@@ -270,7 +274,6 @@ function Teams() {
         }
     }, [teams]);
 
-
     // Total items for pagination
     const totalItems = teams?.count || 0;
 
@@ -278,42 +281,29 @@ function Teams() {
         return (
             <div className="p-6">
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                    <p className="font-medium">Error loading teams</p>
+                    <p className="font-medium">{t('errors.loading')}</p>
                     <p className="text-sm">{error}</p>
                     <button
                         onClick={handleRefresh}
                         className="mt-2 text-sm underline hover:no-underline"
                     >
-                        Try again
+                        {t('actions.tryAgain')}
                     </button>
                 </div>
             </div>
         );
     }
 
-    // // Show detail view if a team is selected
-    // if (viewMode === 'detail' && selectedTeam) {
-    //     return (
-    //         <TeamDetailView
-    //             team={selectedTeam}
-    //             onBack={handleBackToList}
-    //             onRefresh={handleRefresh}
-    //         />
-    //     );
-    // }
-
     // Show list view
     return (
-        <div className=" bg-white rounded-xl p-5">
-
-
-            <h1 className="px-8 text-primary-700 lg:-mb-8 lg:text-xl xl:text-2xl lg:mt-8  font-bold">
-                Teams List
+        <div className="bg-white rounded-xl p-5">
+            <h1 className="px-8 text-primary-700 lg:-mb-8 lg:text-xl xl:text-2xl lg:mt-8 font-bold">
+                {t('heading')}
             </h1>
             <MainTable
                 columns={columns}
                 data={teamData}
-                searchPlaceholder="Search team name, ID, creator..."
+                searchPlaceholder={t('searchPlaceholder')}
                 currentPage={currentPage}
                 itemsPerPage={itemsPerPage}
                 totalItems={totalItems}

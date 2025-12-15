@@ -1,0 +1,16 @@
+{
+  "title": "Notifications",
+  "loading": "Loading...",
+  "empty": "No notifications yet",
+  "defaultTitle": "Notification",
+  "defaultBody": "No message content",
+  "new": "New",
+  "viewAll": "View all {{count}} notifications",
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "yesterday": "Yesterday",
+    "daysAgo": "{{count}}d ago"
+  }
+}

@@ -1,6 +1,7 @@
 // src/pages/venue-data/SurfaceTypes.jsx
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from "react-redux";
+import { useTranslation } from 'react-i18next'; // Import hook
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 import MainTable from '../../components/MainTable.jsx';
 import SurfaceTypesForm from '../../components/SurfaceTypes/SurfaceTypesForm.jsx';
@@ -11,6 +12,7 @@ import { IconButton } from '@mui/material';
 
 const SurfaceTypes = () => {
     const dispatch = useDispatch();
+    const { t } = useTranslation('surfaceTypesPage'); // Initialize translation
 
     // -- State Management --
     const [data, setData] = useState([]);
@@ -27,9 +29,9 @@ const SurfaceTypes = () => {
 
     // -- Effects --
     useEffect(() => {
-        dispatch(setPageTitle('Surface Types'));
+        dispatch(setPageTitle(t('title')));
         fetchData();
-    }, [dispatch]);
+    }, [dispatch, t]);
 
     // -- API Actions --
     const fetchData = async () => {
@@ -48,8 +50,8 @@ const SurfaceTypes = () => {
     const handleDelete = async (id) => {
         // Trigger the SweetAlert Confirm Dialog
         const isConfirmed = await showConfirm({
-            title: "Delete Surface Type?",
-            text: "Are you sure you want to delete this surface type? This action cannot be undone."
+            title: t('delete.title'),
+            text: t('delete.text')
         });
 
         if (isConfirmed) {
@@ -102,12 +104,12 @@ const SurfaceTypes = () => {
 
     const columns = [
         {
-            header: "#",
+            header: t('table.hash'),
             align: 'left',
             render: (_, __, serialNumber) => <span className="text-gray-500 font-medium">{serialNumber}</span>
         },
         {
-            header: "Surface Name (EN)",
+            header: t('table.nameEn'),
             align: 'center',
             render: (row) => {
                 const name = row.translations?.en?.name || '-';
@@ -115,7 +117,7 @@ const SurfaceTypes = () => {
             }
         },
         {
-            header: "Surface Name (AR)",
+            header: t('table.nameAr'),
             align: 'center',
             render: (row) => {
                 const name = row.translations?.ar?.name || '-';
@@ -123,7 +125,7 @@ const SurfaceTypes = () => {
             }
         },
         {
-            header: "Actions",
+            header: t('table.actions'),
             align: 'right',
             render: (row) => (
                 <div className="flex items-center justify-end gap-2">
@@ -151,7 +153,7 @@ const SurfaceTypes = () => {
             label: (
                 <div className="flex items-center gap-2">
                     <Plus size={18} />
-                    <span>Add Surface Type</span>
+                    <span>{t('actions.add')}</span>
                 </div>
             ),
             type: 'primary',
@@ -170,19 +172,18 @@ const SurfaceTypes = () => {
                     onSuccess={handleFormSuccess}
                 />
             )}
-                <MainTable
-                    columns={columns}
-                    data={filteredData}
-                    totalItems={filteredData.length}
-                    searchPlaceholder="Search surface types..."
-                    currentPage={currentPage}
-                    itemsPerPage={itemsPerPage}
-                    onPageChange={setCurrentPage}
-                    onSearch={setSearchTerm}
-                    topActions={topActions}
-                    filters={[]}
-                />
-
+            <MainTable
+                columns={columns}
+                data={filteredData}
+                totalItems={filteredData.length}
+                searchPlaceholder={t('actions.searchPlaceholder')}
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+                onSearch={setSearchTerm}
+                topActions={topActions}
+                filters={[]}
+            />
         </div>
     );
 };

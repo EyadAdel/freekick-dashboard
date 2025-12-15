@@ -1,0 +1,26 @@
+{
+  "title": "Popular Venues",
+  "cities": {
+    "Abu Dhabi": "Abu Dhabi",
+    "Dubai": "Dubai",
+    "Sharjah": "Sharjah",
+    "Ajman": "Ajman",
+    "Ras Al Khaimah": "Ras Al Khaimah",
+    "Fujairah": "Fujairah",
+    "Umm Al Quwain": "Umm Al Quwain"
+  },
+  "loading": "Loading...",
+  "noData": "No venues found in {{city}}",
+  "chart": {
+    "bookings": "{{count}} Bookings",
+    "inCity": "in {{city}}"
+  },
+  "venue": {
+    "unknown": "Unknown Venues",
+    "indoor": "🏠 Indoor",
+    "outdoor": "🌳 Outdoor",
+    "bookingCount": "{{count}} booking",
+    "bookingCount_plural": "{{count}} bookings",
+    "ofTotal": "of total"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "title": "الفرق",
+  "heading": "قائمة الفرق",
+  "searchPlaceholder": "البحث باسم الفريق، المعرف، القائد...",
+  "table": {
+    "teamName": "اسم الفريق",
+    "teamLeader": "قائد الفريق",
+    "members": "الأعضاء",
+    "points": "النقاط",
+    "bookings": "الحجوزات",
+    "lastActivity": "آخر نشاط",
+    "status": "الحالة"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "data": {
+    "unknown": "غير معروف",
+    "teamPrefix": "فريق",
+    "na": "غير متوفر"
+  },
+  "actions": {
+    "viewDetails": "عرض تفاصيل الفريق",
+    "tryAgain": "حاول مرة أخرى"
+  },
+  "errors": {
+    "loading": "خطأ في تحميل الفرق"
+  }
+}
