@@ -1,0 +1,16 @@
+{
+  "title": "الإشعارات",
+  "loading": "جاري التحميل...",
+  "empty": "لا توجد إشعارات حتى الآن",
+  "defaultTitle": "إشعار",
+  "defaultBody": "لا يوجد محتوى للرسالة",
+  "new": "جديد",
+  "viewAll": "عرض جميع {{count}} الإشعارات",
+  "time": {
+    "justNow": "الآن",
+    "minutesAgo": "منذ {{count}} دقيقة",
+    "hoursAgo": "منذ {{count}} ساعة",
+    "yesterday": "أمس",
+    "daysAgo": "منذ {{count}} يوم"
+  }
+}

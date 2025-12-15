@@ -3,14 +3,15 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next'; // Import Translation Hook
 import { Eye, EyeOff } from 'lucide-react';
-import { MdPhoneInTalk } from "react-icons/md";
 import { TbLockPassword } from "react-icons/tb";
 import LogoText from "../components/common/LogoText.jsx";
 import LogoLoader from "../components/common/LogoLoader.jsx";
 import MuiPhoneInput from "../components/common/MuiPhoneInput.jsx";
 
 const Login = () => {
+    const { t, i18n } = useTranslation('login'); // Initialize translation
     const [formData, setFormData] = useState({
         phone: '',
         password: ''
@@ -29,37 +30,35 @@ const Login = () => {
     useEffect(() => {
         if (isAuthenticated) {
             setIsSubmitting(true);
-            toast.success('Login successful! Redirecting...', {
+            toast.success(t('messages.success'), {
                 position: "top-right",
                 autoClose: 2000,
             });
             navigate(from, { replace: true });
         }
-    }, [isAuthenticated, navigate, from]);
+    }, [isAuthenticated, navigate, from, t]);
 
     // Handle authentication errors
     useEffect(() => {
         if (error && !isLoading) {
             setIsSubmitting(false);
-            toast.error(error.message || 'Login failed. Please check your credentials.', {
+            toast.error(error.message || t('messages.error'), {
                 position: "top-right",
                 autoClose: 4000,
             });
             resetError();
         }
-    }, [error, isLoading, resetError]);
+    }, [error, isLoading, resetError, t]);
 
     const handlePhoneChange = (value, country) => {
         setFormData(prev => ({ ...prev, phone: value }));
 
-        // Clear error when user starts typing
         if (phoneError) {
             setPhoneError('');
         }
 
-        // Basic validation
         if (value && value.length < 8) {
-            setPhoneError('Please enter a valid phone number');
+            setPhoneError(t('validation.phoneInvalid'));
         }
     };
 
@@ -70,18 +69,16 @@ const Login = () => {
     const validateForm = () => {
         let isValid = true;
 
-        // Phone validation
         if (!formData.phone) {
-            setPhoneError('Phone number is required');
+            setPhoneError(t('validation.phoneRequired'));
             isValid = false;
         } else if (formData.phone.length < 8) {
-            setPhoneError('Please enter a valid phone number');
+            setPhoneError(t('validation.phoneInvalid'));
             isValid = false;
         }
 
-        // Password validation
         if (!formData.password) {
-            toast.warning('Please enter your password', {
+            toast.warning(t('validation.passwordRequired'), {
                 position: "top-right",
                 autoClose: 3000,
             });
@@ -106,8 +103,10 @@ const Login = () => {
         setShowPassword(prev => !prev);
     };
 
+    const isRtl = i18n.dir() === 'rtl';
+
     return (
-        <div className="min-h-screen bg-gradient-to-t from-primary-300 via-primary-500 to-primary-600 flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-t from-primary-300 via-primary-500 to-primary-600 flex items-center justify-center p-4 relative overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
             {/* Logo Loader Overlay */}
             {isSubmitting && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
@@ -138,19 +137,16 @@ const Login = () => {
                 {/* Login Form Card */}
                 <div className="bg-white bg-opacity-50 backdrop-blur-sm rounded-3xl shadow-2xl p-8">
                     <h1 className="text-2xl font-bold text-slate-700 mb-8 text-center">
-                        Welcome to Admin Panel
+                        {t('title')}
                     </h1>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Phone Number Field with MUI Phone Input */}
                         <div>
                             <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
-                                Phone Number
+                                {t('fields.phone.label')}
                             </label>
-                            <div className="relative">
-                                {/*<div className="absolute inset-y-0 left-0 -pl-4  flex items-center pointer-events-none z-10">*/}
-                                {/*    <MdPhoneInTalk className="h-5 w-5 text-slate-400" />*/}
-                                {/*</div>*/}
+                            <div className="relative" dir="ltr">
                                 <MuiPhoneInput
                                     value={formData.phone}
                                     onChange={handlePhoneChange}
@@ -166,10 +162,10 @@ const Login = () => {
                         {/* Password Field */}
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
-                                Password
+                                {t('fields.password.label')}
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <div className={`absolute inset-y-0 ${isRtl ? 'right-0 pr-4' : 'left-0 pl-4'} flex items-center pointer-events-none`}>
                                     <TbLockPassword className="h-5 w-5 text-slate-400" />
                                 </div>
                                 <input
@@ -179,16 +175,16 @@ const Login = () => {
                                     required
                                     value={formData.password}
                                     onChange={(e) => handleInputChange('password', e.target.value)}
-                                    placeholder="Your password"
-                                    className="block w-full pl-12 pr-12 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    placeholder={t('fields.password.placeholder')}
+                                    className={`block w-full py-3.5 bg-white border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${isRtl ? 'pr-12 pl-12' : 'pl-12 pr-12'}`}
                                     disabled={isSubmitting}
                                 />
                                 <button
                                     type="button"
-                                    className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                                    className={`absolute inset-y-0 ${isRtl ? 'left-0 pl-4' : 'right-0 pr-4'} flex items-center`}
                                     onClick={togglePasswordVisibility}
                                     disabled={isSubmitting}
-                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                    aria-label={showPassword ? t('fields.password.hide') : t('fields.password.show')}
                                 >
                                     {showPassword ? (
                                         <EyeOff className="h-5 w-5 text-slate-400 hover:text-slate-600" />
@@ -205,19 +201,19 @@ const Login = () => {
                             disabled={isSubmitting}
                             className="w-full bg-secondary-600 text-lg text-white py-3.5 px-4 rounded-xl font-semibold hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isSubmitting ? 'Logging in...' : 'Login'}
+                            {isSubmitting ? t('messages.submitting') : t('buttons.login')}
                         </button>
 
                         {/* Links Below Button */}
                         <div className="flex items-center justify-between text-sm pt-2">
-                            <span className="text-slate-600">Don't have an account?</span>
+                            <span className="text-slate-600">{t('footer.noAccount')}</span>
                             <button
                                 type="button"
                                 className="text-primary-600 hover:text-primary-700 font-medium"
                                 disabled={isSubmitting}
                                 onClick={() => navigate('/forgot-password')}
                             >
-                                Reset Password
+                                {t('buttons.resetPassword')}
                             </button>
                         </div>
                     </form>
@@ -225,13 +221,13 @@ const Login = () => {
                     {/* Footer Info Box */}
                     <div className="mt-6 bg-white rounded-2xl p-5 flex items-center justify-between">
                         <div className="text-xs text-slate-600 leading-relaxed">
-                            <p>This platform is for</p>
-                            <p>administrators only. If you're</p>
-                            <p>looking for the user</p>
-                            <p>application, please visit our</p>
-                            <p className="text-primary-600 font-medium">User App.</p>
+                            <p>{t('footer.adminOnly.line1')}</p>
+                            <p>{t('footer.adminOnly.line2')}</p>
+                            <p>{t('footer.adminOnly.line3')}</p>
+                            <p>{t('footer.adminOnly.line4')}</p>
+                            <p className="text-primary-600 font-medium">{t('footer.adminOnly.link')}</p>
                         </div>
-                        <div className="flex -space-x-1">
+                        <div className="flex -space-x-1 rtl:space-x-reverse">
                             <div className="w-5 h-5 rounded-full bg-primary-300 border-2 border-white animate-avatar-float-slow"></div>
                             <div className="w-5 h-5 rounded-full bg-primary-700 border-2 border-white animate-avatar-float-slowest"></div>
                             <div className="w-5 h-5 rounded-full bg-secondary-600 border-2 border-white animate-avatar-float-slower"></div>
@@ -242,12 +238,12 @@ const Login = () => {
                 {/* Bottom Contact Link */}
                 <div className="text-center">
                     <p className="text-white text-sm">
-                        Can't access your account?{' '}
+                        {t('footer.cantAccess')}{' '}
                         <button
                             className="font-semibold underline hover:text-primary-100 transition-colors"
                             disabled={isSubmitting}
                         >
-                            Contact us
+                            {t('buttons.contactUs')}
                         </button>
                     </p>
                 </div>

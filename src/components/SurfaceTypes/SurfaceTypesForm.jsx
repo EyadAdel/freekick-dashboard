@@ -1,9 +1,10 @@
 // src/components/venue-data/SurfaceTypesForm.jsx
 import React, { useState, useEffect } from 'react';
 import MainInput from './../MainInput.jsx';
-import useTranslation from '../../hooks/useTranslation.js';
+import useAutoTranslation from '../../hooks/useTranslation.js';
 import { surfaceTypesService } from '../../services/surfaceTypes/surfaceTypesService.js';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next'; // Import hook
 import {
     Type,
     Save,
@@ -11,15 +12,70 @@ import {
     Globe,
     Loader2,
     Edit,
-    Grid
+    Grid,
+    RefreshCw
 } from 'lucide-react';
 
+// --- REUSABLE TRANSLATION COMPONENT ---
+const TranslationInput = ({
+                              label,
+                              value,
+                              onChange,
+                              loading,
+                              isManual,
+                              onReset,
+                              error,
+                              placeholder,
+                              icon: Icon,
+                              direction = 'ltr',
+                              t // Pass translation function
+                          }) => {
+
+    return (
+        <div className="relative w-full">
+            <MainInput
+                label={label}
+                name="name"
+                value={value}
+                onChange={onChange}
+                error={error}
+                icon={Icon}
+                required
+                placeholder={placeholder}
+                style={{ direction: direction }}
+            />
+
+            {/* Loading Indicator */}
+            {loading && !isManual && (
+                <span className={`absolute top-0 ${direction === 'rtl' ? 'left-0 ml-2' : 'right-0 mr-2'} text-xs text-blue-500 mt-2 animate-pulse`}>
+                    {t('buttons.translating')}
+                </span>
+            )}
+
+            {/* Manual Edit / Reset Button */}
+            {isManual && (
+                <button
+                    type="button"
+                    onClick={onReset}
+                    className={`absolute top-0 ${direction === 'rtl' ? 'left-0 ml-1' : 'right-0 mr-1'} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
+                    title="Reset auto-translation"
+                >
+                    <RefreshCw size={10} /> {t('buttons.auto')}
+                </button>
+            )}
+        </div>
+    );
+};
+
 const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
+    const { t } = useTranslation('surfaceTypeForm'); // Initialize translation
 
     // --- STATE ---
     const [formData, setFormData] = useState({
-        name: '',
-        name_ar: '',
+        translations: {
+            en: { name: '' },
+            ar: { name: '' }
+        }
     });
 
     const [errors, setErrors] = useState({});
@@ -27,56 +83,84 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
 
     // Translation Logic State
     const [activeField, setActiveField] = useState(null);
+    const [manualEdits, setManualEdits] = useState({
+        en: { name: false },
+        ar: { name: false }
+    });
 
     // --- POPULATE FORM IF EDITING ---
     useEffect(() => {
         if (initialData) {
-            // Handle cases where data might come flat or nested in translations object
             const enName = initialData.translations?.en?.name || initialData.name || '';
             const arName = initialData.translations?.ar?.name || initialData.name_ar || '';
 
             setFormData({
-                name: enName,
-                name_ar: arName,
+                translations: {
+                    en: { name: enName },
+                    ar: { name: arName }
+                }
+            });
+
+            setManualEdits({
+                en: { name: true },
+                ar: { name: true }
             });
         }
     }, [initialData]);
 
     // --- TRANSLATION HOOKS ---
-    const { translatedText: arabicTranslation, loading: loadingAr } =
-        useTranslation(activeField === 'en' ? formData.name : "", 'ar');
+    const { translatedText: arName, loading: loadArName } =
+        useAutoTranslation(activeField === 'en' ? formData.translations.en.name : "", 'ar');
 
-    const { translatedText: englishTranslation, loading: loadingEn } =
-        useTranslation(activeField === 'ar' ? formData.name_ar : "", 'en');
+    const { translatedText: enName, loading: loadEnName } =
+        useAutoTranslation(activeField === 'ar' ? formData.translations.ar.name : "", 'en');
 
-    // Auto-update Arabic when typing English
-    useEffect(() => {
-        if (activeField === 'en' && arabicTranslation) {
-            setFormData(prev => ({ ...prev, name_ar: arabicTranslation }));
-        }
-    }, [arabicTranslation, activeField]);
+    // --- SYNC LOGIC ---
+    const useSyncTranslation = (targetLang, field, text) => {
+        useEffect(() => {
+            if (activeField === (targetLang === 'en' ? 'ar' : 'en') && text && !manualEdits[targetLang][field]) {
+                setFormData(prev => ({
+                    ...prev,
+                    translations: {
+                        ...prev.translations,
+                        [targetLang]: { ...prev.translations[targetLang], [field]: text }
+                    }
+                }));
+            }
+        }, [text, activeField, manualEdits, targetLang, field]);
+    };
 
-    // Auto-update English when typing Arabic
-    useEffect(() => {
-        if (activeField === 'ar' && englishTranslation) {
-            setFormData(prev => ({ ...prev, name: englishTranslation }));
-        }
-    }, [englishTranslation, activeField]);
+    useSyncTranslation('ar', 'name', arName);
+    useSyncTranslation('en', 'name', enName);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
+    // --- HANDLERS ---
+    const handleTranslationChange = (lang, field, value) => {
+        setActiveField(lang);
 
-        // Track which field is active to prevent circular translation loops
-        if (name === 'name') setActiveField('en');
-        if (name === 'name_ar') setActiveField('ar');
-
-        setFormData((prev) => ({
+        setManualEdits(prev => ({
             ...prev,
-            [name]: value,
+            [lang]: { ...prev[lang], [field]: true }
         }));
 
-        // Clear error when user types
-        if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+        setFormData(prev => ({
+            ...prev,
+            translations: {
+                ...prev.translations,
+                [lang]: { ...prev.translations[lang], [field]: value }
+            }
+        }));
+
+        const errorKey = lang === 'en' ? 'name' : 'name_ar';
+        if (errors[errorKey]) setErrors(prev => ({ ...prev, [errorKey]: '' }));
+    };
+
+    const resetManualEdit = (lang, field) => {
+        setManualEdits(prev => ({
+            ...prev,
+            [lang]: { ...prev[lang], [field]: false }
+        }));
+        const otherLang = lang === 'en' ? 'ar' : 'en';
+        setActiveField(otherLang);
     };
 
     // --- SUBMIT ---
@@ -85,8 +169,8 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
 
         // Validation
         const newErrors = {};
-        if (!formData.name.trim()) newErrors.name = "English Name is required";
-        if (!formData.name_ar.trim()) newErrors.name_ar = "Arabic Name is required";
+        if (!formData.translations.en.name.trim()) newErrors.name = t('validation.requiredEn');
+        if (!formData.translations.ar.name.trim()) newErrors.name_ar = t('validation.requiredAr');
 
         setErrors(newErrors);
         if (Object.keys(newErrors).length > 0) return;
@@ -94,24 +178,16 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
         setIsSubmitting(true);
 
         try {
-            // Construct payload exactly as requested
             const payload = {
                 translations: {
-                    en: {
-                        name: formData.name
-                    },
-                    ar: {
-                        name: formData.name_ar
-                    }
+                    en: { name: formData.translations.en.name },
+                    ar: { name: formData.translations.ar.name }
                 },
-
             };
 
             if (initialData) {
-                // --- UPDATE ---
                 await surfaceTypesService.updateSurfaceType(initialData.id, payload);
             } else {
-                // --- CREATE ---
                 await surfaceTypesService.createSurfaceType(payload);
             }
 
@@ -119,7 +195,7 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
 
         } catch (error) {
             console.error("Submission failed", error);
-            if (!error.response) toast.error("Something went wrong during submission.");
+            if (!error.response) toast.error(t('errors.submission'));
         } finally {
             setIsSubmitting(false);
         }
@@ -133,10 +209,10 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     <div>
                         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                             {initialData ? <Edit className="text-primary-100" /> : <Grid className="text-primary-100" />}
-                            {initialData ? "Edit Surface Type" : "Add Surface Type"}
+                            {initialData ? t('title.edit') : t('title.add')}
                         </h2>
                         <p className="text-primary-100 text-sm mt-1">
-                            {initialData ? "Update the details for this surface type." : "Define a new surface type for pitches."}
+                            {initialData ? t('subtitle.edit') : t('subtitle.add')}
                         </p>
                     </div>
                     <button onClick={onCancel} className="text-white hover:bg-primary-600 p-2 rounded-lg transition-colors">
@@ -149,47 +225,38 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
 
                 <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2">Basic Information</h3>
+                    <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2">{t('section.basicInfo')}</h3>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* English Name Input */}
-                        <div className="relative">
-                            <MainInput
-                                label="Surface Name (English)"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                error={errors.name}
-                                icon={Type}
-                                required
-                                placeholder="e.g. Natural Grass"
-                            />
-                            {activeField === 'ar' && loadingEn && (
-                                <span className="absolute top-0 right-0 text-xs text-blue-500 mt-2 mr-2 animate-pulse">
-                                    Translating...
-                                </span>
-                            )}
-                        </div>
+                        <TranslationInput
+                            label={t('fields.nameEn.label')}
+                            value={formData.translations.en.name}
+                            onChange={(e) => handleTranslationChange('en', 'name', e.target.value)}
+                            loading={loadEnName}
+                            isManual={manualEdits.en.name}
+                            onReset={() => resetManualEdit('en', 'name')}
+                            error={errors.name}
+                            placeholder={t('fields.nameEn.placeholder')}
+                            icon={Type}
+                            direction="ltr"
+                            t={t}
+                        />
 
                         {/* Arabic Name Input */}
-                        <div className="relative">
-                            <MainInput
-                                label="Surface Name (Arabic)"
-                                name="name_ar"
-                                value={formData.name_ar}
-                                onChange={handleChange}
-                                error={errors.name_ar}
-                                icon={Globe}
-                                required
-                                style={{ direction: 'rtl' }}
-                                placeholder="مثال: عشب طبيعي"
-                            />
-                            {activeField === 'en' && loadingAr && (
-                                <span className="absolute top-0 left-0 text-xs text-blue-500 mt-2 ml-2 animate-pulse">
-                                    Translating...
-                                </span>
-                            )}
-                        </div>
+                        <TranslationInput
+                            label={t('fields.nameAr.label')}
+                            value={formData.translations.ar.name}
+                            onChange={(e) => handleTranslationChange('ar', 'name', e.target.value)}
+                            loading={loadArName}
+                            isManual={manualEdits.ar.name}
+                            onReset={() => resetManualEdit('ar', 'name')}
+                            error={errors.name_ar}
+                            placeholder={t('fields.nameAr.placeholder')}
+                            icon={Globe}
+                            direction="rtl"
+                            t={t}
+                        />
                     </div>
                 </div>
 
@@ -200,7 +267,7 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
                         onClick={onCancel}
                         className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-colors"
                     >
-                        Cancel
+                        {t('buttons.cancel')}
                     </button>
                     <button
                         type="submit"
@@ -212,7 +279,7 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
                         ) : (
                             <>
                                 <Save size={20} />
-                                {initialData ? "Update Surface" : "Save Surface"}
+                                {initialData ? t('buttons.update') : t('buttons.save')}
                             </>
                         )}
                     </button>

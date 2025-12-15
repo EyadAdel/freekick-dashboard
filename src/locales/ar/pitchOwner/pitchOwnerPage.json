@@ -1,0 +1,67 @@
+{
+  "pageTitle": "مُلاك الملاعب",
+  "stats": {
+    "total": "إجمالي الملاك",
+    "active": "الملاك النشطين",
+    "inactive": "الملاك غير النشطين"
+  },
+  "partnerRequests": {
+    "title": "طلبات الشراكة الجديدة",
+    "single": "طلب",
+    "group": "طلبات",
+    "empty": "لا توجد طلبات",
+    "approveBtn": "قبول وإنشاء",
+    "rejectBtn": "رفض"
+  },
+  "tabs": {
+    "all": "كل الملاك",
+    "active": "الملاك النشطين",
+    "inactive": "الملاك غير النشطين"
+  },
+  "search": {
+    "placeholder": "ابحث بالاسم، الملعب، المدينة..."
+  },
+  "table": {
+    "headers": {
+      "no": "رقم",
+      "ownerDetails": "تفاصيل المالك",
+      "contactInfo": "معلومات الاتصال",
+      "location": "الموقع",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "content": {
+      "unknownOwner": "مالك غير معروف",
+      "unknown": "غير معروف",
+      "noPitchName": "لا يوجد اسم ملعب",
+      "noPhone": "لا يوجد هاتف",
+      "notSet": "غير محدد",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "loading": "جاري تحميل مُلاك الملاعب..."
+  },
+  "actions": {
+    "create": "إضافة مالك ملعب",
+    "view": "عرض التفاصيل",
+    "edit": "تعديل",
+    "delete": "حذف"
+  },
+  "modals": {
+    "rejectTitle": "رفض الطلب",
+    "rejectText": "سيؤدي هذا إلى حذف الطلب بشكل دائم. هل تريد المتابعة؟",
+    "rejectConfirm": "رفض وحذف",
+    "deleteTitle": "حذف \"{{name}}\"؟",
+    "deleteText": "لا يمكن التراجع عن هذا الإجراء.",
+    "deleteConfirm": "نعم، احذف"
+  },
+  "messages": {
+    "loadError": "فشل تحميل بيانات مُلاك الملاعب",
+    "rejectSuccess": "تم رفض الطلب",
+    "detailsError": "تعذر تحميل تفاصيل المالك",
+    "deleteSuccess": "تم الحذف بنجاح",
+    "deleteError": "فشل الحذف",
+    "partnerProcessSuccess": "تمت معالجة طلب الشراكة بنجاح",
+    "partnerProcessWarning": "تم إنشاء المالك، ولكن فشل حذف الطلب من قائمة الانتظار."
+  }
+}

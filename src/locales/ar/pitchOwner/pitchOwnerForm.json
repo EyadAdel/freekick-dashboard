@@ -1,0 +1,68 @@
+{
+  "header": {
+    "editTitle": "تعديل مالك الملعب",
+    "createTitle": "إضافة مالك ملعب جديد",
+    "editSubtitle": "تحديث تفاصيل مالك هذا الملعب.",
+    "createSubtitle": "إدارة تفاصيل مالك الملعب."
+  },
+  "sections": {
+    "user": {
+      "title": "حساب المستخدم",
+      "selectLabel": "اختر المستخدم",
+      "defaultOption": "-- اختر مستخدم --",
+      "loading": "جاري تحميل المستخدمين...",
+      "infoLabel": "معلومات المستخدم / ملاحظات",
+      "infoPlaceholder": "تفاصيل إضافية للمستخدم..."
+    },
+    "pitch": {
+      "title": "تفاصيل الملعب",
+      "nameLabel": "اسم الملعب",
+      "addressLabel": "عنوان الملعب",
+      "addressPlaceholder": "العنوان بالكامل",
+      "cityLabel": "المدينة",
+      "cityDefault": "-- اختر المدينة --",
+      "stateLabel": "المنطقة / المحافظة"
+    },
+    "contact": {
+      "title": "الاتصال والمالية",
+      "emailLabel": "البريد الإلكتروني",
+      "personLabel": "اسم شخص الاتصال",
+      "phoneLabel": "هاتف الاتصال",
+      "eidLabel": "رقم الهوية (EID)",
+      "commissionLabel": "نسبة العمولة (%)",
+      "commissionPlaceholder": "مثال: 10",
+      "isActive": "نشط ؟"
+    },
+    "media": {
+      "title": "الوسائط",
+      "logoLabel": "الشعار (Logo)",
+      "profileLabel": "صورة الملف الشخصي",
+      "optional": "(اختياري)",
+      "uploadLogo": "رفع الشعار",
+      "uploadCover": "رفع الغلاف",
+      "uploading": "جاري الرفع..."
+    }
+  },
+  "buttons": {
+    "cancel": "إلغاء",
+    "update": "تحديث مالك الملعب",
+    "save": "حفظ مالك الملعب"
+  },
+  "validation": {
+    "userRequired": "اختيار المستخدم مطلوب",
+    "nameRequired": "اسم الملعب مطلوب",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "commissionRequired": "نسبة العمولة مطلوبة",
+    "imageRequired": "صورة الشعار مطلوبة",
+    "waitUpload": "يرجى الانتظار حتى انتهاء رفع الصور.",
+    "invalidImage": "يرجى رفع ملف صورة صالح"
+  },
+  "messages": {
+    "usersLoadError": "تعذر تحميل قائمة المستخدمين.",
+    "profileUploadSuccess": "تم رفع صورة الملف الشخصي بنجاح",
+    "profileUploadError": "فشل رفع صورة الملف الشخصي.",
+    "coverUploadSuccess": "تم رفع صورة الغلاف بنجاح",
+    "coverUploadError": "فشل رفع صورة الغلاف."
+  }
+}

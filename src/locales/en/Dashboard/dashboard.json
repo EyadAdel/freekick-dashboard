@@ -1,0 +1,26 @@
+{
+  "title": "Dashboard",
+  "periods": {
+    "this_week": "This Week",
+    "last_week": "Last Week",
+    "this_month": "This Month",
+    "last_month": "Last Month"
+  },
+  "stats": {
+    "completed": "Completed Bookings",
+    "active": "Active Bookings",
+    "cancelled": "Canceled Bookings",
+    "revenue": "Total Revenue"
+  },
+  "charts": {
+    "totalBookings": "Total Bookings",
+    "revenueTrend": "Revenue Trend",
+    "topEmirates": "Top Emirates",
+    "topTeams": "Top 5 Teams"
+  },
+  "loading": {
+    "data": "Loading data...",
+    "error": "Error loading analytics",
+    "retry": "Retry"
+  }
+}

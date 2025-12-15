@@ -1,0 +1,88 @@
+{
+  "header": {
+    "backToTeams": "Back to Teams"
+  },
+  "sidebar": {
+    "teamId": "Team ID: {{id}}",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "private": "Private",
+      "public": "Public",
+      "suspendTeam": "Suspend Team",
+      "activateTeam": "Activate Team",
+      "updating": "Updating..."
+    },
+    "stats": {
+      "points": "Points",
+      "members": "Members",
+      "tournaments": "Tournaments",
+      "matchesPlayed": "Matches Played",
+      "totalTournaments": "Total Tournaments",
+      "teamMembers": "Team Members"
+    },
+    "teamLeader": {
+      "title": "Team Leader",
+      "whatsapp": "WhatsApp"
+    },
+    "created": "Created {{date}}"
+  },
+  "bookings": {
+    "title": "Bookings",
+    "allStatus": "All Status",
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "cancelled": "Cancelled",
+    "noBookings": "No bookings found for {{date}}",
+    "tryDifferent": "Try selecting a different date or status"
+  },
+  "tournaments": {
+    "title": "Tournaments",
+    "total": "Total : {{count}} tournaments",
+    "noTournaments": "No tournaments found",
+    "noParticipation": "This team hasn't participated in any tournaments yet",
+    "table": {
+      "tournament": "Tournament",
+      "status": "Status",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "format": "Format",
+      "participants": "Participants",
+      "entryFee": "Entry Fee",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noDescription": "No description"
+    }
+  },
+  "members": {
+    "title": "Team Members",
+    "total": "Total : {{count}} players",
+    "noMembers": "No team members yet",
+    "inviteHint": "Team leader can invite players to join"
+  },
+  "loading": {
+    "details": "Loading team details...",
+    "noData": "No team data available",
+    "goBack": "Go Back"
+  },
+  "confirm": {
+    "title": "Are you sure?",
+    "suspendText": "Do you want to Suspend this Team?",
+    "activateText": "Do you want to Activate this Team?",
+    "yesSuspend": "Yes, Suspend",
+    "yesActivate": "Yes, Activate",
+    "cancel": "Cancel",
+    "successActivated": "Team activated successfully",
+    "successDeactivated": "Team deactivated successfully"
+  },
+  "email": {
+    "subject": "Team {{name}} - ID: {{id}}",
+    "body": "Dear {{name}},\n\nRegarding your team \"{{teamName}}\".\n\n"
+  },
+  "whatsapp": {
+    "message": "Hello {{name}}! Regarding your team \"{{teamName}}\"."
+  },
+  "errors": {
+    "updateFailed": "Failed to update team: {{error}}"
+  }
+}

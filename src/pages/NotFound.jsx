@@ -1,10 +1,12 @@
 // src/pages/NotFound/NotFound.jsx
 import { useNavigate } from 'react-router-dom';
 import { Home, Search, Trophy, Target, Dribbble, Zap } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next'; // Import Trans hook
 import logo from '../assets/logo.svg';
 
 const NotFound = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation('notFound');
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-600/5 flex items-center justify-center px-4 relative overflow-hidden">
@@ -25,16 +27,7 @@ const NotFound = () => {
                 <div className="text-center mt-8">
                     {/* Logo with Animation */}
                     <div className="flex justify-center mb-8">
-                    {/*    <div className="relative">*/}
-                    {/*        <div className="absolute inset-0 py-5 mt-5 bg-primary-300/40 rounded-full blur-2xl animate-pulse"></div>*/}
-                    {/*        <div className="relative">*/}
-                    {/*            <img*/}
-                    {/*                src={logo}*/}
-                    {/*                alt="FreeKick Logo"*/}
-                    {/*                className="w-10 h-10 md:w-16 md:h-16 object-contain animate-avatar-float-slower drop-shadow-2xl"*/}
-                    {/*            />*/}
-                    {/*        </div>*/}
-                    {/*    </div>*/}
+                        {/* Intentionally left empty as per original code */}
                     </div>
 
                     {/* 404 Display */}
@@ -52,34 +45,37 @@ const NotFound = () => {
                     {/* Main Content Card */}
                     <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-primary-100 max-w-2xl mx-auto">
                         <div className="mb-8">
-                            <h2 className="text-xl flex justify-center md:text-2xl font-bold text-secondary-600 mb-4">
-                                Goal Missed!
-                                {/*<div className="relative">*/}
-                                {/*<div className="absolute inset-0 py-5 mt-5 bg-primary-300/40 rounded-full blur-2xl animate-pulse"></div>*/}
+                            <h2 className="text-xl flex justify-center items-center gap-2 md:text-2xl font-bold text-secondary-600 mb-4">
+                                {t('title')}
                                 <div className="relative">
                                     <img
                                         src={logo}
                                         alt="FreeKick Logo"
                                         className="w-8 h-8 md:w-10 md:h-10 object-contain animate-avatar-float-slower drop-shadow-2xl"
                                     />
-                            {/*    </div>*/}
-                            </div>
+                                </div>
                             </h2>
                             <div className="w-32 h-1 bg-gradient-to-r from-primary-500 to-primary-300 mx-auto rounded-full mb-6"></div>
 
                             <p className="text-gray-600 text-lg leading-relaxed mb-3">
-                                The page you're looking for has been <span className="font-semibold text-primary-600">sent off the field</span>.
+                                <Trans
+                                    i18nKey="message"
+                                    t={t}
+                                    components={{
+                                        highlight: <span className="font-semibold text-primary-600" />
+                                    }}
+                                />
                             </p>
                             <p className="text-gray-500 text-base">
-                                It seems like this URL doesn't exist or has been moved. Let's get you back in the game!
+                                {t('subMessage')}
                             </p>
                         </div>
 
                         {/* Popular Pages */}
                         <div className="bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-2xl p-6 mb-8">
-                            <h3 className="text-sm font-semibold text-secondary-600 mb-4 flex items-center gap-2">
+                            <h3 className="text-sm font-semibold text-secondary-600 mb-4 flex items-center gap-2 rtl:flex-row-reverse">
                                 <Search className="w-4 h-4" />
-                                Quick Links
+                                {t('quickLinks')}
                             </h3>
                             <div className="grid grid-cols-2 gap-3">
                                 <button
@@ -87,29 +83,15 @@ const NotFound = () => {
                                     className="flex items-center gap-2 px-4 py-3 bg-white rounded-xl hover:bg-primary-50 transition-all duration-200 text-sm font-medium text-gray-700 hover:text-primary-600 border border-primary-100"
                                 >
                                     <Home className="w-4 h-4" />
-                                    Dashboard
+                                    {t('dashboard')}
                                 </button>
                                 <button
                                     onClick={() => navigate('/bookings')}
                                     className="flex items-center gap-2 px-4 py-3 bg-white rounded-xl hover:bg-primary-50 transition-all duration-200 text-sm font-medium text-gray-700 hover:text-primary-600 border border-primary-100"
                                 >
                                     <Target className="w-4 h-4" />
-                                    Bookings
+                                    {t('bookings')}
                                 </button>
-                                {/*<button*/}
-                                {/*    onClick={() => navigate('/venues')}*/}
-                                {/*    className="flex items-center gap-2 px-4 py-3 bg-white rounded-xl hover:bg-primary-50 transition-all duration-200 text-sm font-medium text-gray-700 hover:text-primary-600 border border-primary-100"*/}
-                                {/*>*/}
-                                {/*    <Dribbble className="w-4 h-4" />*/}
-                                {/*    Venues*/}
-                                {/*</button>*/}
-                                {/*<button*/}
-                                {/*    onClick={() => navigate('/tournaments')}*/}
-                                {/*    className="flex items-center gap-2 px-4 py-3 bg-white rounded-xl hover:bg-primary-50 transition-all duration-200 text-sm font-medium text-gray-700 hover:text-primary-600 border border-primary-100"*/}
-                                {/*>*/}
-                                {/*    <Trophy className="w-4 h-4" />*/}
-                                {/*    Tournaments*/}
-                                {/*</button>*/}
                             </div>
                         </div>
 
@@ -120,13 +102,13 @@ const NotFound = () => {
                                 className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] font-semibold"
                             >
                                 <Home className="w-5 h-5" />
-                                Return to Home
+                                {t('returnHome')}
                             </button>
                             <button
                                 onClick={() => navigate(-1)}
                                 className="w-full px-6 py-4 border-2 border-primary-200 text-secondary-600 rounded-xl hover:bg-primary-50 transition-all duration-300 font-medium"
                             >
-                                Go Back
+                                {t('goBack')}
                             </button>
                         </div>
                     </div>
@@ -134,7 +116,6 @@ const NotFound = () => {
                     {/* Footer Branding */}
                     <div className="mt-8 text-center">
                         <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
-                            {/*<span className="text-2xl">⚽</span>*/}
                             <span dir='ltr' className="font-bold text-secondary-600 text-lg flex items-center">
                                 FREE K
                                 <img
@@ -144,7 +125,7 @@ const NotFound = () => {
                                 />
                                 ICK
                             </span>
-                            <span className="text-gray-400">- Play, Book, Compete</span>
+                            <span className="text-gray-400">{t('slogan')}</span>
                         </p>
                     </div>
                 </div>

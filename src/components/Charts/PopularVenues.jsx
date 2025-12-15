@@ -1,19 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next'; // Import translation hook
 import { fetchPopularVenues } from '../../features/dashboard/analyticsSlice';
-import stadiumIcon from '../../assets/stadiumIcon.svg'
-import {useNavigate} from "react-router-dom";
-import {daysOfWeekService} from "../../services/daysOfWeek/daysOfWeekService.js";
-
-const CITIES = [
-    { value: 'Abu Dhabi', label: 'Abu Dhabi' },
-    { value: 'Dubai', label: 'Dubai' },
-    { value: 'Sharjah', label: 'Sharjah' },
-    { value: 'Ajman', label: 'Ajman' },
-    { value: 'Ras Al Khaimah', label: 'Ras Al Khaimah' },
-    { value: 'Fujairah', label: 'Fujairah' },
-    { value: 'Umm Al Quwain', label: 'Umm Al Quwain' }
-];
+import stadiumIcon from '../../assets/stadiumIcon.svg';
+import { daysOfWeekService } from "../../services/daysOfWeek/daysOfWeekService.js";
+import { MapPin, ChevronDown } from 'lucide-react'; // Import icons
 
 const COLORS = [
     '#22D3EE', // cyan
@@ -24,14 +16,27 @@ const COLORS = [
 ];
 
 const PopularVenues = () => {
+    const { t } = useTranslation('popularVenues'); // Initialize translation
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const CITIES = useMemo(() => [
+        { value: 'Abu Dhabi', label: t('cities.Abu Dhabi') },
+        { value: 'Dubai', label: t('cities.Dubai') },
+        { value: 'Sharjah', label: t('cities.Sharjah') },
+        { value: 'Ajman', label: t('cities.Ajman') },
+        { value: 'Ras Al Khaimah', label: t('cities.Ras Al Khaimah') },
+        { value: 'Fujairah', label: t('cities.Fujairah') },
+        { value: 'Umm Al Quwain', label: t('cities.Umm Al Quwain') }
+    ], [t]);
+
     const [selectedCity, setSelectedCity] = useState('Abu Dhabi');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [centerContent, setCenterContent] = useState({
         type: 'image',
         imageUrl: stadiumIcon
     });
-    const navigate= useNavigate()
+
     const [daysList, setDaysList] = useState([]);
 
     const { popularVenues, loading } = useSelector((state) => ({
@@ -55,32 +60,11 @@ const PopularVenues = () => {
         setIsDropdownOpen(false);
     };
 
-    // Function to handle sending chart image
-    const handleSendImage = () => {
-        alert(`Sending popular venues chart for ${selectedCity} to popular venues...`);
-    };
-
-    const handleSetImageCenter = (imageUrl) => {
-        setCenterContent({
-            type: 'image',
-            value: 'Chart',
-            imageUrl: imageUrl
-        });
-    };
-
-    const handleSetTextCenter = () => {
-        setCenterContent({
-            type: 'text',
-            value: `${sortedVenues.length} Venues`,
-            imageUrl: null
-        });
-    };
-
-    // Calculate data for the chart based on actual booking numbers
-    const venuesWithData = popularVenues?.map((venue, index) => {
-        return {
+    // Calculate data for the chart
+    const venuesWithData = useMemo(() => {
+        return popularVenues?.map((venue, index) => ({
             id: venue.id,
-            name: venue.translations?.name || 'Unknown Venues',
+            name: venue.translations?.name || t('venue.unknown'),
             min_price: venue.min_price,
             rate: venue.rate,
             venue_type: venue.venue_type,
@@ -88,15 +72,13 @@ const PopularVenues = () => {
             color: COLORS[index % COLORS.length],
             bookingCount: venue.num_of_booking || 0,
             sports: venue.venue_play_type?.map(sport => sport.translations?.name).join(', ') || ''
-        };
-    }) || [];
+        })) || [];
+    }, [popularVenues, t]);
 
-    // Calculate percentages based on booking counts
+    // Calculate percentages
     const totalBookings = venuesWithData.reduce((sum, venue) => sum + venue.bookingCount, 0);
 
-    // Normalize percentages based on booking counts
     const normalizedVenues = venuesWithData.map(venue => {
-        // If there are no bookings for any venue, distribute equally
         let percentage;
         if (totalBookings === 0) {
             percentage = 100 / venuesWithData.length;
@@ -111,37 +93,30 @@ const PopularVenues = () => {
         };
     });
 
-    // Adjust percentages to ensure they sum to 100%
     const adjustPercentagesTo100 = (venues) => {
         const adjustedVenues = [...venues];
         const total = adjustedVenues.reduce((sum, venue) => sum + venue.percentage, 0);
         const difference = 100 - total;
 
         if (difference !== 0 && adjustedVenues.length > 0) {
-            // Add the difference to the venue with the highest booking count
             const highestBookingVenue = adjustedVenues.reduce((prev, current) =>
                 (prev.bookingCount > current.bookingCount) ? prev : current
             );
             highestBookingVenue.percentage += difference;
             highestBookingVenue.value = highestBookingVenue.percentage;
         }
-
         return adjustedVenues;
     };
 
     const adjustedVenues = adjustPercentagesTo100(normalizedVenues);
-
-    // Sort venues by percentage in descending order (highest to lowest)
     const sortedVenues = [...adjustedVenues].sort((a, b) => b.percentage - a.percentage);
 
-    // Calculate stroke dash array for donut chart
     const calculateStrokeDasharray = (percentage) => {
         const circumference = 2 * Math.PI * 45;
         const dashLength = (percentage / 100) * circumference;
         return `${dashLength} ${circumference}`;
     };
 
-    // Recalculate chart segments based on sorted order
     let cumulativePercentage = 0;
     const chartSegments = sortedVenues.map((venue, index) => {
         const rotation = (cumulativePercentage / 100) * 360 - 90;
@@ -154,8 +129,8 @@ const PopularVenues = () => {
         };
     });
 
-    // Calculate total bookings for display
     const totalVenueBookings = sortedVenues.reduce((sum, venue) => sum + venue.bookingCount, 0);
+
     const fetchFilterOptions = async () => {
         try {
             const daysRes = await daysOfWeekService.getAll({ all_languages: true });
@@ -166,14 +141,22 @@ const PopularVenues = () => {
             console.error("Failed to fetch filter options:", error);
         }
     };
+
     useEffect(() => {
         fetchFilterOptions()
     }, []);
+
+    // Helper to get translated city label
+    const getCityLabel = (cityValue) => {
+        const city = CITIES.find(c => c.value === cityValue);
+        return city ? city.label : cityValue;
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-sm p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-                <h2 className="xl:text-lg font-bold text-gray-800">Popular Venues</h2>
+                <h2 className="xl:text-lg font-bold text-gray-800">{t('title')}</h2>
 
                 {/* Control buttons for center content */}
                 <div className="flex items-center gap-2">
@@ -183,34 +166,9 @@ const PopularVenues = () => {
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             className="flex items-center whitespace-nowrap text-sm gap-2 px-2 py-2 text-secondary-600 focus:cursor bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2] rounded-lg transition-colors"
                         >
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                />
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                            </svg>
-                            <span className="text-sm">{selectedCity}</span>
-                            <svg
-                                className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
+                            <MapPin className="w-4 h-4" />
+                            <span className="text-sm">{getCityLabel(selectedCity)}</span>
+                            <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                         </button>
 
                         {/* Dropdown Menu */}
@@ -220,7 +178,7 @@ const PopularVenues = () => {
                                     <button
                                         key={city.value}
                                         onClick={() => handleCityChange(city.value)}
-                                        className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
+                                        className={`w-full text-start px-4 py-2 hover:bg-gray-50 transition-colors ${
                                             selectedCity === city.value ? 'bg-cyan-50 text-cyan-600' : 'text-gray-700'
                                         }`}
                                     >
@@ -246,7 +204,7 @@ const PopularVenues = () => {
                     <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <p>No venues found in {selectedCity}</p>
+                    <p>{t('noData', { city: getCityLabel(selectedCity) })}</p>
                 </div>
             )}
 
@@ -266,7 +224,7 @@ const PopularVenues = () => {
                                 strokeWidth="10"
                             />
 
-                            {/* Chart segments - already sorted by percentage */}
+                            {/* Chart segments */}
                             {chartSegments.map((segment, index) => (
                                 <circle
                                     key={segment.id || index}
@@ -300,10 +258,10 @@ const PopularVenues = () => {
                                 ) : (
                                     <div className="px-2">
                                         <div className="text-lg font-bold text-gray-800 leading-tight">
-                                            {totalVenueBookings} Bookings
+                                            {t('chart.bookings', { count: totalVenueBookings })}
                                         </div>
                                         <div className="text-xs text-gray-500 mt-1">
-                                            in {selectedCity}
+                                            {t('chart.inCity', { city: getCityLabel(selectedCity) })}
                                         </div>
                                     </div>
                                 )}
@@ -311,52 +269,45 @@ const PopularVenues = () => {
                         </div>
                     </div>
 
-                    {/* Legend with Venues Details - Arranged from top (highest) to bottom (lowest) */}
+                    {/* Legend with Venues Details */}
                     <div className="w-full space-y-4">
                         {sortedVenues.map((venue, index) => (
                             <div key={venue.id || index} className="flex items-start justify-between">
                                 <div
-                                    onClick={()=>navigate('/venues/venue-details', {
+                                    onClick={() => navigate('/venues/venue-details', {
                                         state: {
                                             venueId: venue.id,
                                             daysList: daysList
-                                        }})}
-                                    className=" cursor-pointer flex items-start it gap-2">
-                                    {/* Color indicator and rank number */}
+                                        }
+                                    })}
+                                    className="cursor-pointer flex items-start gap-2"
+                                >
+                                    {/* Color indicator */}
                                     <div className="flex flex-col items-center">
-                                        {/*<div className="text-xs font-semibold text-gray-500 mb-1">*/}
-                                        {/*    #{index + 1}*/}
-                                        {/*</div>*/}
                                         <div
                                             className="w-4 h-4 mt-1 rounded-sm flex-shrink-0"
                                             style={{ backgroundColor: venue.color }}
                                         ></div>
                                     </div>
                                     <div className="flex-1">
-                                        <div className="text-sm   font-medium text-gray-800">
+                                        <div className="text-sm font-medium text-gray-800">
                                             {venue.name}
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <div className="flex text-sm items-center  text-amber-500">
+                                            <div className="flex text-sm items-center text-amber-500">
                                                 {'★'.repeat(Math.floor(venue.rate || 0))}
                                                 {'☆'.repeat(5 - Math.floor(venue.rate || 0))}
                                             </div>
                                             <span className="text-[10px] text-gray-500">
-                                                {venue.venue_type === 'indoor' ? '🏠 Indoor' : '🌳 Outdoor'}
+                                                {venue.venue_type === 'indoor' ? t('venue.indoor') : t('venue.outdoor')}
                                             </span>
                                         </div>
-                                        {/*<div className="text-xs text-gray-500 mt-1">*/}
-                                        {/*    {venue.bookingCount} {venue.bookingCount === 1 ? 'booking' : 'bookings'}*/}
-                                        {/*</div>*/}
                                     </div>
                                 </div>
                                 <div className="text-right">
                                     <div className="text-sm font-semibold" style={{ color: venue.color }}>
                                         {venue.percentage}%
                                     </div>
-                                    {/*<div className="text-xs text-gray-500 mt-1">*/}
-                                    {/*    of total*/}
-                                    {/*</div>*/}
                                 </div>
                             </div>
                         ))}

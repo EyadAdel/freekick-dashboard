@@ -1,0 +1,67 @@
+{
+  "pageTitle": "Pitch Owners",
+  "stats": {
+    "total": "Total Owners",
+    "active": "Active Owners",
+    "inactive": "Inactive Owners"
+  },
+  "partnerRequests": {
+    "title": "New Partner Requests",
+    "single": "Request",
+    "group": "Requests",
+    "empty": "No requests",
+    "approveBtn": "Approve & Create",
+    "rejectBtn": "Reject"
+  },
+  "tabs": {
+    "all": "All Owners",
+    "active": "Active Owners",
+    "inactive": "Inactive Owners"
+  },
+  "search": {
+    "placeholder": "Search name, pitch, city..."
+  },
+  "table": {
+    "headers": {
+      "no": "No.",
+      "ownerDetails": "Owner Details",
+      "contactInfo": "Contact Info",
+      "location": "Location",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "content": {
+      "unknownOwner": "Unknown Owner",
+      "unknown": "Unknown",
+      "noPitchName": "No Pitch Name",
+      "noPhone": "No Phone",
+      "notSet": "Not set",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "loading": "Loading Pitch Owners..."
+  },
+  "actions": {
+    "create": "Create Pitch Owner",
+    "view": "View Details",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "modals": {
+    "rejectTitle": "Reject Request",
+    "rejectText": "This will remove the request permanently. Continue?",
+    "rejectConfirm": "Reject & Delete",
+    "deleteTitle": "Delete \"{{name}}\"?",
+    "deleteText": "This action cannot be undone.",
+    "deleteConfirm": "Yes, Delete"
+  },
+  "messages": {
+    "loadError": "Failed to load pitch owners data",
+    "rejectSuccess": "Request rejected",
+    "detailsError": "Could not load owner details.",
+    "deleteSuccess": "Deleted successfully",
+    "deleteError": "Failed to delete",
+    "partnerProcessSuccess": "Partner request processed successfully.",
+    "partnerProcessWarning": "Owner created, but failed to remove request from queue."
+  }
+}

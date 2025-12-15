@@ -1,0 +1,14 @@
+{
+  "welcome": "Welcome, {{name}}",
+  "defaultTitle": "Dashboard",
+  "profile": "Profile",
+  "logout": "Logout",
+  "roles": {
+    "admin": "Admin",
+    "subAdmin": "Sub Admin",
+    "pitchOwner": "Pitch Owner",
+    "subPitchOwner": "Sub Pitch Owner",
+    "staff": "Staff",
+    "user": "User"
+  }
+}

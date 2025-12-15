@@ -1,0 +1,95 @@
+{
+  "header": {
+    "backButton": "Back to Pitch Owners"
+  },
+  "profile": {
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "stats": {
+      "bookings": "Bookings",
+      "pitches": "Pitches",
+      "estRevenue": "Est. Revenue",
+      "commission": "Commission",
+      "rate": "Rate %"
+    },
+    "contact": {
+      "title": "Contact Details",
+      "contactPerson": "Contact Person",
+      "noEmail": "No email provided",
+      "noPhone": "No phone provided",
+      "emailBtn": "Email",
+      "whatsappBtn": "WhatsApp",
+      "location": "Location",
+      "addressNA": "Address not available",
+      "joinedDate": "Joined Date"
+    }
+  },
+  "bookings": {
+    "title": "Bookings",
+    "filters": {
+      "all": "All Status",
+      "completed": "Completed",
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    },
+    "user": "User",
+    "unknown": "Unknown",
+    "noBookings": "No bookings found for this filter.",
+    "statusLabels": {
+      "completed": "Completed",
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    }
+  },
+  "pitches": {
+    "title": "Registered Pitches",
+    "noPitches": "No pitches registered yet.",
+    "table": {
+      "code": "Pitch Code",
+      "name": "Pitch Name",
+      "size": "Size",
+      "pricePerHour": "Price / Hr",
+      "bookings": "Bookings",
+      "status": "Status"
+    }
+  },
+  "staffActions": {
+    "title": "Staff Actions",
+    "totalBalance": "Total Balance",
+    "addActionBtn": "Add Action",
+    "perPage": "{{count}} / page",
+    "table": {
+      "srNo": "SR.No",
+      "description": "Description",
+      "type": "Type",
+      "amount": "Amount",
+      "balance": "Balance",
+      "date": "Date"
+    }
+  },
+  "actionModal": {
+    "title": "Add Staff Action",
+    "labels": {
+      "actionType": "Action Type",
+      "amount": "Amount",
+      "description": "Description",
+      "descPlaceholder": "Enter details about this action..."
+    },
+    "validation": {
+      "kindRequired": "Action type is required",
+      "amountRequired": "Valid amount is required",
+      "descRequired": "Description is required"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "submit": "Submit Action"
+    }
+  },
+  "errors": {
+    "notFound": "Pitch Owner data not found",
+    "goBack": "Go Back"
+  }
+}

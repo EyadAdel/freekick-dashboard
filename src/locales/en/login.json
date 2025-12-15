@@ -1,0 +1,41 @@
+{
+  "title": "Welcome to Admin Panel",
+  "fields": {
+    "phone": {
+      "label": "Phone Number",
+      "placeholder": "Enter phone number"
+    },
+    "password": {
+      "label": "Password",
+      "placeholder": "Your password",
+      "show": "Show password",
+      "hide": "Hide password"
+    }
+  },
+  "validation": {
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Please enter a valid phone number",
+    "passwordRequired": "Please enter your password"
+  },
+  "messages": {
+    "success": "Login successful! Redirecting...",
+    "error": "Login failed. Please check your credentials.",
+    "submitting": "Logging in..."
+  },
+  "buttons": {
+    "login": "Login",
+    "resetPassword": "Reset Password",
+    "contactUs": "Contact us"
+  },
+  "footer": {
+    "noAccount": "Don't have an account?",
+    "adminOnly": {
+      "line1": "This platform is for",
+      "line2": "administrators only. If you're",
+      "line3": "looking for the user",
+      "line4": "application, please visit our",
+      "link": "User App."
+    },
+    "cantAccess": "Can't access your account?"
+  }
+}

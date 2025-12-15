@@ -22,6 +22,7 @@ const MainInput = ({
 
     const [showPassword, setShowPassword] = useState(false);
     const isError = error.length > 0;
+    const appLang = localStorage.getItem('appLanguage');
 
     // Toggle Password Visibility
     const togglePassword = () => setShowPassword(!showPassword);
@@ -101,7 +102,7 @@ const MainInput = ({
                 {children}
 
                 {/* Right Icon (Error or Password Toggle) */}
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                <div className={`${appLang==="en"?"right-3":"left-3"} absolute  top-1/2 -translate-y-1/2 flex items-center gap-2`}>
                     {type === 'password' && (
                         <button
                             type="button"

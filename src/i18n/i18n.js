@@ -81,6 +81,31 @@ import enVenueSportsForm from '../locales/en/venueSports/venueSportsForm.json';
 import arVenueSportsForm from '../locales/ar/venueSports/venueSportsForm.json';
 import enProfileSettings from '../locales/en/Profile/profileSettings.json';
 import arProfileSettings from '../locales/ar/Profile/profileSettings.json';
+import enPitchOwnerPage from '../locales/en/pitchOwner/pitchOwnerPage.json';
+import arPitchOwnerPage from '../locales/ar/pitchOwner/pitchOwnerPage.json';
+import enPitchOwnerForm from '../locales/en/pitchOwner/pitchOwnerForm.json';
+import arPitchOwnerForm from '../locales/ar/pitchOwner/pitchOwnerForm.json';
+import enPitchOwnerDetails from '../locales/en/pitchOwner/PitchOwnerDetails.json';
+import arPitchOwnerDetails from '../locales/ar/pitchOwner/PitchOwnerDetails.json';
+import enHeader from '../locales/en/Header/Header.json';
+import arHeader from '../locales/ar/Header/Header.json';
+import enNotFound from '../locales/en/notFound.json';
+import arNotFound from '../locales/ar/notFound.json';
+import enTeamsPage from '../locales/en/Teams/teamsPage.json';
+import arTeamsPage from '../locales/ar/Teams/teamsPage.json';
+import enTeamDetails from '../locales/en/Teams/teamDetails.json';
+import arTeamDetails from '../locales/ar/Teams/teamDetails.json';
+import enDashboard from '../locales/en/Dashboard/dashboard.json';
+import arDashboard from '../locales/ar/Dashboard/dashboard.json';
+import enNotificationsPanel from '../locales/en/Dashboard/notificationsPanel.json';
+import arNotificationsPanel from '../locales/ar/Dashboard/notificationsPanel.json';
+import enSurfaceTypesPage from '../locales/en/SurfaceTypes/surfaceTypesPage.json';
+import arSurfaceTypePages from '../locales/ar/SurfaceTypes/surfaceTypesPage.json';
+import enSurfaceTypeForm from '../locales/en/SurfaceTypes/surfaceTypeForm.json';
+import arSurfaceTypeForm from '../locales/ar/SurfaceTypes/surfaceTypeForm.json';
+import enLogin from '../locales/en/login.json';
+import arLogin from '../locales/ar/login.json';
+
 // Translation resources
 const resources = {
     en: {
@@ -123,6 +148,20 @@ const resources = {
         venueSportsPage: enVenueSportsPage,
         venueSportsForm: enVenueSportsForm,
         profileSettings: enProfileSettings,
+        pitchOwnerPage: enPitchOwnerPage,
+        pitchOwnerForm: enPitchOwnerForm,
+        pitchOwnerDetails: enPitchOwnerDetails,
+        header: enHeader,
+        notFound: enNotFound,
+        teamsPage: enTeamsPage,
+        teamDetails: enTeamDetails,
+        dashboard: enDashboard,
+        notificationsPanel: enNotificationsPanel,
+        surfaceTypesPage: enSurfaceTypesPage,
+        surfaceTypeForm: enSurfaceTypeForm,
+        login: enLogin,
+
+
     },
     ar: {
         common: arCommon,
@@ -163,6 +202,25 @@ const resources = {
         venueSportsPage: arVenueSportsPage,
         venueSportsForm: arVenueSportsForm,
         profileSettings: arProfileSettings,
+        pitchOwnerPage: arPitchOwnerPage,
+        pitchOwnerForm: arPitchOwnerForm,
+        pitchOwnerDetails: arPitchOwnerDetails,
+        header: arHeader,
+        notFound: arNotFound,
+        teamsPage: arTeamsPage,
+        teamDetails: arTeamDetails,
+        dashboard: arDashboard,
+        notificationsPanel: arNotificationsPanel,
+        surfaceTypesPage: arSurfaceTypePages,
+        surfaceTypeForm: arSurfaceTypeForm,
+        login: arLogin,
+
+
+
+
+
+
+
 
 
     },
@@ -220,7 +278,19 @@ i18n
             'pieChart',
             'players',
             'venueSportsForm',
-            'profileSettings'
+            'profileSettings',
+            'pitchOwnerPage',
+            'pitchOwnerForm',
+            'pitchOwnerDetails',
+            'header',
+            'notFound',
+            'notificationsPanel',
+            'dashboard',
+            'teamsPage',
+            'teamDetails',
+            'surfaceTypesPage',
+            'surfaceTypeForm',
+            'login'
         ],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {

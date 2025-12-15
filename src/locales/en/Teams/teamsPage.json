@@ -1,0 +1,30 @@
+{
+  "title": "Teams",
+  "heading": "Teams List",
+  "searchPlaceholder": "Search team name, ID, creator...",
+  "table": {
+    "teamName": "Team Name",
+    "teamLeader": "Team Leader",
+    "members": "Members",
+    "points": "Points",
+    "bookings": "Bookings",
+    "lastActivity": "Last Activity",
+    "status": "STATUS"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "data": {
+    "unknown": "Unknown",
+    "teamPrefix": "Team",
+    "na": "N/A"
+  },
+  "actions": {
+    "viewDetails": "View team details",
+    "tryAgain": "Try again"
+  },
+  "errors": {
+    "loading": "Error loading teams"
+  }
+}

@@ -23,7 +23,7 @@ import { pitchOwnersService } from '../../services/pitchOwners/pitchOwnersServic
 import { bePartnerService } from '../../services/bePartner/bePartnerService.js';
 
 // --- Utils ---
-import { getImageUrl } from '../../utils/imageUtils.js'; // Import image utility
+import { getImageUrl } from '../../utils/imageUtils.js';
 
 // --- HELPER COMPONENT: AVATAR ---
 const OwnerAvatar = ({ image, name }) => {
@@ -34,7 +34,6 @@ const OwnerAvatar = ({ image, name }) => {
         return (parts[0][0] + parts[1][0]).toUpperCase();
     };
 
-    // Sanitize input to handle "Null" strings from backend before getting full URL
     const cleanImage = (image && image !== "Null" && image !== "null") ? image : null;
     const imageUrl = getImageUrl(cleanImage);
 
@@ -61,12 +60,15 @@ const OwnerAvatar = ({ image, name }) => {
 
 // --- HELPER COMPONENT: STATUS BADGE ---
 const StatusBadge = ({ isActive }) => {
+    const { t } = useTranslation();
     const style = isActive
         ? 'bg-green-100 text-green-800 border border-green-200'
         : 'bg-red-100 text-red-800 border border-red-200';
     return (
         <span className={`px-3 py-1 rounded-full text-xs font-medium ${style} whitespace-nowrap`}>
-            {isActive ? 'Active' : 'Inactive'}
+            {isActive
+                ? t('pitchOwnerPage:table.content.active')
+                : t('pitchOwnerPage:table.content.inactive')}
         </span>
     );
 };
@@ -80,8 +82,8 @@ const PitchOwners = () => {
     const rowsPerPage = 10;
 
     useEffect(() => {
-        dispatch(setPageTitle('Pitch Owners'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pitchOwnerPage:pageTitle')));
+    }, [dispatch, t]);
 
     // ================= STATE MANAGEMENT =================
 
@@ -113,7 +115,6 @@ const PitchOwners = () => {
 
     // ================= API CALLS =================
 
-    // Prepare API filters exactly like Pitches page
     const apiFilters = useMemo(() => ({
         page: currentPage,
         page_limit: rowsPerPage,
@@ -122,13 +123,11 @@ const PitchOwners = () => {
         is_active: filters.status === 'all' ? undefined : filters.status
     }), [currentPage, rowsPerPage, filters]);
 
-    // Fetch Table Data
     const fetchStaffData = async () => {
         setIsLoading(true);
         try {
             const response = await pitchOwnersService.getAllStaff(apiFilters);
             if (response) {
-                // Handle both pagination format and simple array format just in case
                 if (response.results) {
                     setStaffData(response.results);
                     setTotalItems(response.count || 0);
@@ -139,16 +138,14 @@ const PitchOwners = () => {
             }
         } catch (error) {
             console.error("Failed to load staff:", error);
-            toast.error("Failed to load pitch owners data");
+            toast.error(t('pitchOwnerPage:messages.loadError'));
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Fetch Global Data for Stats (Total, Active, Inactive cards)
     const fetchGlobalData = async () => {
         try {
-            // Fetch a large number to calculate stats client-side or use a specific stats endpoint
             const response = await pitchOwnersService.getAllStaff({
                 kind: 'pitch_owner'
             });
@@ -209,7 +206,6 @@ const PitchOwners = () => {
     const handleApprovePartner = (item) => {
         setConvertingRequestId(item.id);
 
-        // Sanitize before getting URL
         const rawImage = (item.cover_photo && item.cover_photo !== "Null" && item.cover_photo !== "null") ? item.cover_photo : null;
 
         const prefilledData = {
@@ -223,7 +219,6 @@ const PitchOwners = () => {
             eid: item.emirates_id,
             user_id: item.user.id,
             is_active: true,
-            // Use getImageUrl to ensure the form gets a correct URL or null
             profile_image: getImageUrl(rawImage),
         };
         setSelectedOwner(prefilledData);
@@ -232,9 +227,9 @@ const PitchOwners = () => {
 
     const handleRejectPartner = async (item) => {
         const isConfirmed = await showConfirm({
-            title: "Reject Request",
-            text: "This will remove the request permanently. Continue?",
-            confirmButtonText: "Reject & Delete",
+            title: t('pitchOwnerPage:modals.rejectTitle'),
+            text: t('pitchOwnerPage:modals.rejectText'),
+            confirmButtonText: t('pitchOwnerPage:modals.rejectConfirm'),
             icon: 'warning'
         });
 
@@ -242,7 +237,7 @@ const PitchOwners = () => {
 
         try {
             await bePartnerService.delete(item.id);
-            toast.success("Request rejected");
+            toast.success(t('pitchOwnerPage:messages.rejectSuccess'));
             fetchPartnerRequests();
         } catch (error) {
             console.error(error);
@@ -251,7 +246,7 @@ const PitchOwners = () => {
 
     // --- CRUD Handlers ---
 
-    const getOwnerName = (row) => row.user_info?.name || row.contact_name || "Unknown Owner";
+    const getOwnerName = (row) => row.user_info?.name || row.contact_name || t('pitchOwnerPage:table.content.unknownOwner');
 
     const handleCreateStaff = () => {
         setConvertingRequestId(null);
@@ -267,7 +262,7 @@ const PitchOwners = () => {
             setSelectedOwner(fullStaffDetails);
             setShowForm(true);
         } catch (error) {
-            toast.error("Could not load owner details.");
+            toast.error(t('pitchOwnerPage:messages.detailsError'));
         } finally {
             setIsLoading(false);
         }
@@ -279,7 +274,7 @@ const PitchOwners = () => {
             const response = await pitchOwnersService.getStaffById(id);
             navigate('/pitch-owner/pitch-owner-details', { state: { ownerData: response } });
         } catch (error) {
-            toast.error("Failed to load details");
+            toast.error(t('pitchOwnerPage:messages.detailsError'));
         } finally {
             setIsLoading(false);
         }
@@ -287,9 +282,9 @@ const PitchOwners = () => {
 
     const handleDeleteStaff = async (id, name) => {
         const isConfirmed = await showConfirm({
-            title: `Delete "${name}"?`,
-            text: "This action cannot be undone.",
-            confirmButtonText: 'Yes, Delete'
+            title: t('pitchOwnerPage:modals.deleteTitle', { name }),
+            text: t('pitchOwnerPage:modals.deleteText'),
+            confirmButtonText: t('pitchOwnerPage:modals.deleteConfirm')
         });
 
         if (!isConfirmed) return;
@@ -302,9 +297,9 @@ const PitchOwners = () => {
                 fetchStaffData();
             }
             fetchGlobalData(); // Update stats
-            toast.success("Deleted successfully");
+            toast.success(t('pitchOwnerPage:messages.deleteSuccess'));
         } catch (error) {
-            toast.error("Failed to delete");
+            toast.error(t('pitchOwnerPage:messages.deleteError'));
         }
     };
 
@@ -318,10 +313,10 @@ const PitchOwners = () => {
         if (convertingRequestId) {
             try {
                 await bePartnerService.delete(convertingRequestId);
-                toast.success("Partner request processed successfully.");
+                toast.success(t('pitchOwnerPage:messages.partnerProcessSuccess'));
             } catch (error) {
                 console.error("Failed to clean up partner request", error);
-                toast.warning("Owner created, but failed to remove request from queue.");
+                toast.warning(t('pitchOwnerPage:messages.partnerProcessWarning'));
             }
         }
 
@@ -338,12 +333,12 @@ const PitchOwners = () => {
     const filterConfig = [
         {
             key: 'status',
-            label: 'Status',
+            label: t('pitchOwnerPage:table.headers.status'),
             type: 'select',
             options: [
-                { label: 'All Status', value: 'all' },
-                { label: 'Active', value: 'true' },
-                { label: 'Inactive', value: 'false' }
+                { label: t('pitchOwnerPage:tabs.all'), value: 'all' },
+                { label: t('pitchOwnerPage:table.content.active'), value: 'true' },
+                { label: t('pitchOwnerPage:table.content.inactive'), value: 'false' }
             ],
             value: filters.status || 'all'
         }
@@ -351,25 +346,25 @@ const PitchOwners = () => {
 
     const columns = [
         {
-            header: 'No.',
+            header: t('pitchOwnerPage:table.headers.no'),
             accessor: 'id',
             align: 'left',
             width: '50px',
             render: (row, index) => <div className="text-gray-500 font-medium text-sm">{index + 1 + ((currentPage - 1) * rowsPerPage)}</div>
         },
         {
-            header: 'Owner Details',
+            header: t('pitchOwnerPage:table.headers.ownerDetails'),
             accessor: 'user_info',
             align: 'left',
             render: (row) => {
-                const ownerName = row.user_info?.name || row.contact_name || "Unknown";
+                const ownerName = row.user_info?.name || row.contact_name || t('pitchOwnerPage:table.content.unknown');
                 return (
                     <div className="flex items-center gap-3">
                         <OwnerAvatar image={row.profile_image || row.image} name={ownerName} />
                         <div className="flex flex-col">
                             <span className="text-gray-900 font-semibold text-sm">{ownerName}</span>
                             <span className="text-primary-600 text-xs font-medium flex items-center gap-1 mt-0.5">
-                                🏟 {row.pitch_name || row.name || "No Pitch Name"}
+                                🏟 {row.pitch_name || row.name || t('pitchOwnerPage:table.content.noPitchName')}
                             </span>
                         </div>
                     </div>
@@ -377,18 +372,18 @@ const PitchOwners = () => {
             }
         },
         {
-            header: 'Contact Info',
+            header: t('pitchOwnerPage:table.headers.contactInfo'),
             accessor: 'email',
             align: 'left',
             render: (row) => (
                 <div className="flex flex-col">
                     <span className="text-gray-700 text-sm">{row.email}</span>
-                    <span className="text-gray-500 text-xs mt-0.5 font-mono">{row.contact_phone || 'No Phone'}</span>
+                    <span className="text-gray-500 text-xs mt-0.5 font-mono">{row.contact_phone || t('pitchOwnerPage:table.content.noPhone')}</span>
                 </div>
             )
         },
         {
-            header: 'Location',
+            header: t('pitchOwnerPage:table.headers.location'),
             accessor: 'city',
             align: 'left',
             render: (row) => (
@@ -398,25 +393,25 @@ const PitchOwners = () => {
                             <MapPin size={14} className="text-gray-400"/>
                             <span className="capitalize">{row.city} {row.state ? `, ${row.state}` : ''}</span>
                         </>
-                    ) : <span className="text-gray-300 text-xs italic">Not set</span>}
+                    ) : <span className="text-gray-300 text-xs italic">{t('pitchOwnerPage:table.content.notSet')}</span>}
                 </div>
             )
         },
         {
-            header: 'Status',
+            header: t('pitchOwnerPage:table.headers.status'),
             accessor: 'is_active',
             align: 'center',
             render: (row) => <StatusBadge isActive={row.is_active} />
         },
         {
-            header: 'Actions',
+            header: t('pitchOwnerPage:table.headers.actions'),
             align: 'right',
             render: (row) => (
                 <div className="flex justify-end items-center gap-2">
                     <button
                         onClick={() => handleViewOwner(row.id)}
                         className="text-gray-500 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition-colors"
-                        title="View Details"
+                        title={t('pitchOwnerPage:actions.view')}
                     >
                         <Eye size={18} />
                     </button>
@@ -425,14 +420,14 @@ const PitchOwners = () => {
                             <button
                                 onClick={() => handleEditStaff(row)}
                                 className="text-gray-500 hover:text-primary-600 p-1.5 rounded-lg hover:bg-primary-50 transition-colors"
-                                title="Edit"
+                                title={t('pitchOwnerPage:actions.edit')}
                             >
                                 <Pencil size={18}/>
                             </button>
                             <button
                                 onClick={() => handleDeleteStaff(row.id, getOwnerName(row))}
                                 className="text-gray-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                                title="Delete"
+                                title={t('pitchOwnerPage:actions.delete')}
                             >
                                 <Trash2 size={18}/>
                             </button>
@@ -445,7 +440,7 @@ const PitchOwners = () => {
 
     const topActions = [
         {
-            label: 'Create Pitch Owner',
+            label: t('pitchOwnerPage:actions.create'),
             onClick: handleCreateStaff,
             type: 'primary'
         }
@@ -470,19 +465,19 @@ const PitchOwners = () => {
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 my-6">
                 <StatCard
-                    title="Total Owners"
+                    title={t('pitchOwnerPage:stats.total')}
                     value={allStaff.length}
                     icon={Users}
                     iconColor="text-blue-600"
                 />
                 <StatCard
-                    title="Active Owners"
+                    title={t('pitchOwnerPage:stats.active')}
                     value={allStaff.filter(s => s.is_active).length}
                     icon={CheckCircle}
                     iconColor="text-green-600"
                 />
                 <StatCard
-                    title="Inactive Owners"
+                    title={t('pitchOwnerPage:stats.inactive')}
                     value={allStaff.filter(s => !s.is_active).length}
                     icon={XCircle}
                     iconColor="text-red-600"
@@ -493,15 +488,18 @@ const PitchOwners = () => {
             {partnerRequests.length > 0 && (
                 <div className="mb-8 animate-fade-in-down">
                     <StatusManagementSection
-                        title="New Partner Requests"
-                        name={{ single: 'Request', group: 'Requests' }}
+                        title={t('pitchOwnerPage:partnerRequests.title')}
+                        name={{
+                            single: t('pitchOwnerPage:partnerRequests.single'),
+                            group: t('pitchOwnerPage:partnerRequests.group')
+                        }}
                         items={partnerRequests}
                         statusType="pending"
-                        emptyMessage="No requests"
+                        emptyMessage={t('pitchOwnerPage:partnerRequests.empty')}
                         onApprove={handleApprovePartner}
                         onReject={handleRejectPartner}
-                        approveLabel="Approve & Create"
-                        rejectLabel="Reject"
+                        approveLabel={t('pitchOwnerPage:partnerRequests.approveBtn')}
+                        rejectLabel={t('pitchOwnerPage:partnerRequests.rejectBtn')}
                         idKey="id"
                         isActiveKey="is_active"
                         renderIcon={(item) => {
@@ -532,9 +530,9 @@ const PitchOwners = () => {
             <div className="bg-gradient-to-br from-white to-primary-50/30 rounded-lg shadow-sm border border-primary-100 p-1.5 mt-5 mb-6">
                 <div className="flex space-x-1">
                     {[
-                        { key: 'all', label: 'All Owners' },
-                        { key: 'active', label: 'Active Owners' },
-                        { key: 'inactive', label: 'Inactive Owners' }
+                        { key: 'all', label: t('pitchOwnerPage:tabs.all') },
+                        { key: 'active', label: t('pitchOwnerPage:tabs.active') },
+                        { key: 'inactive', label: t('pitchOwnerPage:tabs.inactive') }
                     ].map((tab) => (
                         <button
                             key={tab.key}
@@ -554,13 +552,13 @@ const PitchOwners = () => {
             {/* Main Table */}
             <div className='bg-white rounded-lg shadow-sm p-5'>
                 {isLoading && staffData.length === 0 ? (
-                    <div className="p-10 text-center text-gray-500">Loading Pitch Owners...</div>
+                    <div className="p-10 text-center text-gray-500">{t('pitchOwnerPage:table.loading')}</div>
                 ) : (
                     <MainTable
                         data={staffData}
                         columns={columns}
                         filters={filterConfig}
-                        searchPlaceholder="Search name, pitch, city..."
+                        searchPlaceholder={t('pitchOwnerPage:search.placeholder')}
                         topActions={user.role.is_admin ? topActions : []}
                         currentPage={currentPage}
                         totalItems={totalItems}

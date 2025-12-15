@@ -1,0 +1,68 @@
+{
+  "header": {
+    "editTitle": "Edit Pitch Owner",
+    "createTitle": "New Pitch Owner",
+    "editSubtitle": "Update the details for this pitch owner.",
+    "createSubtitle": "Manage pitch owner details."
+  },
+  "sections": {
+    "user": {
+      "title": "User Account",
+      "selectLabel": "Select User",
+      "defaultOption": "-- Choose a User --",
+      "loading": "Loading users...",
+      "infoLabel": "User Info / Notes",
+      "infoPlaceholder": "Additional user details..."
+    },
+    "pitch": {
+      "title": "Pitch Details",
+      "nameLabel": "Pitch Name",
+      "addressLabel": "Pitch Address",
+      "addressPlaceholder": "Full street address",
+      "cityLabel": "City",
+      "cityDefault": "-- Select City --",
+      "stateLabel": "State / Province"
+    },
+    "contact": {
+      "title": "Contact & Financials",
+      "emailLabel": "Email Address",
+      "personLabel": "Contact Person Name",
+      "phoneLabel": "Contact Phone",
+      "eidLabel": "EID (Entity ID)",
+      "commissionLabel": "Commission Rate (%)",
+      "commissionPlaceholder": "e.g. 10",
+      "isActive": "Is Active ?"
+    },
+    "media": {
+      "title": "Media",
+      "logoLabel": "Logo",
+      "profileLabel": "Profile Image",
+      "optional": "(Optional)",
+      "uploadLogo": "Upload Logo",
+      "uploadCover": "Upload Cover",
+      "uploading": "Uploading..."
+    }
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "update": "Update Pitch Owner",
+    "save": "Save Pitch Owner"
+  },
+  "validation": {
+    "userRequired": "User selection is required",
+    "nameRequired": "Pitch Name is required",
+    "emailRequired": "Email is required",
+    "phoneRequired": "Contact Phone is required",
+    "commissionRequired": "Commission Rate is required",
+    "imageRequired": "Logo / Profile image is required",
+    "waitUpload": "Please wait for images to finish uploading.",
+    "invalidImage": "Please upload a valid image file"
+  },
+  "messages": {
+    "usersLoadError": "Could not load users list.",
+    "profileUploadSuccess": "Profile image uploaded successfully",
+    "profileUploadError": "Profile image upload failed.",
+    "coverUploadSuccess": "Cover image uploaded successfully",
+    "coverUploadError": "Cover image upload failed."
+  }
+}

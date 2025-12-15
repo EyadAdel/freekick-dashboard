@@ -230,7 +230,7 @@ const Sidebar = ({ onToggle }) => {
                 },
                 {
                     icon: Users,
-                    label: 'Teams',
+                    label:  t('menu_items.teams'),
                     path: '/teams',
                     permission: 'can_view_teams'
                 },

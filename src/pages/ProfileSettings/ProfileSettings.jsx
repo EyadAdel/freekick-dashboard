@@ -531,19 +531,19 @@ const ProfileSettings = () => {
                         {/* Security Tab */}
                         {activeTab === 'security' && (
                             <div className="space-y-8">
-                                <div>
-                                    <h3 className="lg:text-lg text-sm font-semibold text-gray-900 mb-4">{t('security.twoFactorHeading')}</h3>
-                                    <div className="flex items-center justify-between py-4">
-                                        <span className="text-gray-700 text-xs lg:text-base">{t('security.twoFactorDesc')}</span>
-                                        <button
-                                            onClick={handleTwoFactorToggle}
-                                            disabled={loading}
-                                            className={`relative w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${twoFactorEnabled ? 'bg-primary-500' : 'bg-gray-300'}`}
-                                        >
-                                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${twoFactorEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
-                                        </button>
-                                    </div>
-                                </div>
+                                {/*<div>*/}
+                                {/*    <h3 className="lg:text-lg text-sm font-semibold text-gray-900 mb-4">{t('security.twoFactorHeading')}</h3>*/}
+                                {/*    <div className="flex items-center justify-between py-4">*/}
+                                {/*        <span className="text-gray-700 text-xs lg:text-base">{t('security.twoFactorDesc')}</span>*/}
+                                {/*        <button*/}
+                                {/*            onClick={handleTwoFactorToggle}*/}
+                                {/*            disabled={loading}*/}
+                                {/*            className={`relative w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${twoFactorEnabled ? 'bg-primary-500' : 'bg-gray-300'}`}*/}
+                                {/*        >*/}
+                                {/*            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${twoFactorEnabled ? 'translate-x-6' : 'translate-x-0'}`} />*/}
+                                {/*        </button>*/}
+                                {/*    </div>*/}
+                                {/*</div>*/}
 
                                 <div>
                                     <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('security.changePasswordHeading')}</h3>
