@@ -1,0 +1,94 @@
+{
+  "pageTitle": "الملف الشخصي",
+  "tabs": {
+    "editProfile": "تعديل الملف الشخصي",
+    "preferences": "التفضيلات",
+    "security": "الأمان"
+  },
+  "profile": {
+    "contactName": "الاسم",
+    "pitchName": "اسم الملعب",
+    "email": "البريد الإلكتروني",
+    "phoneNumber": "رقم الهاتف",
+    "state": "المحافظة/المنطقة",
+    "city": "المدينة",
+    "pitchAddress": "عنوان الملعب",
+    "autoAcceptBookings": "قبول الحجوزات تلقائياً",
+    "reset": "إعادة تعيين",
+    "saveChanges": "حفظ التغييرات",
+    "saving": "جاري الحفظ...",
+    "placeholders": {
+      "contactName": "عمر",
+      "pitchName": "أدخل اسم الملعب",
+      "state": "أدخل المحافظة",
+      "city": "دبي",
+      "pitchAddress": "أدخل عنوان الملعب"
+    }
+  },
+  "preferences": {
+    "savePreferences": "حفظ التفضيلات",
+    "groups": {
+      "app": "إشعارات التطبيق",
+      "sms": "إشعارات الرسائل القصيرة",
+      "whatsapp": "إشعارات واتساب"
+    },
+    "labels": {
+      "app_updates": "تحديثات التطبيق",
+      "app_news": "أخبار التطبيق",
+      "app_booking": "إشعارات الحجوزات (التطبيق)",
+      "app_promotions": "عروض التطبيق",
+      "sms_booking": "إشعارات الحجوزات (SMS)",
+      "sms_promotions": "عروض (SMS)",
+      "whatsapp_booking": "إشعارات الحجوزات (واتساب)",
+      "whatsapp_promotions": "عروض (واتساب)",
+      "whatsapp_news": "أخبار (واتساب)"
+    }
+  },
+  "security": {
+    "twoFactorHeading": "المصادقة الثنائية",
+    "twoFactorDesc": "تفعيل أو تعطيل المصادقة الثنائية",
+    "changePasswordHeading": "تغيير كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد كلمة المرور الجديدة",
+    "clear": "مسح",
+    "changePasswordBtn": "تغيير كلمة المرور",
+    "placeholders": {
+      "currentPassword": "أدخل كلمة المرور الحالية",
+      "newPassword": "أدخل كلمة المرور الجديدة",
+      "confirmPassword": "تأكيد كلمة المرور الجديدة"
+    }
+  },
+  "validation": {
+    "contactNameRequired": "اسم جهة الاتصال مطلوب",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "emailInvalid": "البريد الإلكتروني غير صالح",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "phoneInvalid": "رقم الهاتف غير صالح",
+    "validImage": "يرجى اختيار ملف صورة صالح",
+    "imageSize": "يجب أن يكون حجم الصورة أقل من 5 ميجابايت",
+    "currentPasswordRequired": "كلمة المرور الحالية مطلوبة",
+    "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    "newPasswordRequired": "كلمة المرور الجديدة مطلوبة",
+    "passwordComplexity": "يجب أن تحتوي كلمة المرور على أحرف كبيرة وصغيرة وأرقام",
+    "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
+    "passwordsDoNotMatch": "كلمات المرور غير متطابقة"
+  },
+  "messages": {
+    "loadProfileError": "فشل تحميل الملف الشخصي",
+    "imageSelected": "تم اختيار الصورة بنجاح",
+    "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
+    "profileUpdateError": "فشل تحديث الملف الشخصي",
+    "errorOccurred": "حدث خطأ ما",
+    "preferencesUpdated": "تم تحديث التفضيلات بنجاح",
+    "preferencesUpdateError": "فشل تحديث التفضيلات",
+    "passwordChanged": "تم تغيير كلمة المرور بنجاح",
+    "passwordChangeError": "فشل تغيير كلمة المرور",
+    "twoFactorUpdated": "تم {{status}} المصادقة الثنائية",
+    "twoFactorError": "فشل تحديث المصادقة الثنائية"
+  },
+  "common": {
+    "enabled": "تفعيل",
+    "disabled": "تعطيل"
+  }
+}

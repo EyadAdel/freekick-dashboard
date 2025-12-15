@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Camera, Settings, Bell, User, Phone } from 'lucide-react';
+import { Camera, User } from 'lucide-react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import profileService from '../../services/profileService';
@@ -8,16 +8,21 @@ import MainInput from '../../components/MainInput';
 
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 import { useDispatch } from "react-redux";
+// Import translation hook
+import { useTranslation } from 'react-i18next';
+// Import the image utility
+import { getImageUrl } from '../../utils/imageUtils.js';
 
 const ProfileSettings = () => {
+    const { t } = useTranslation('profileSettings');
     const [activeTab, setActiveTab] = useState('profile');
     const [loading, setLoading] = useState(false);
     const [profileImageUrl, setProfileImageUrl] = useState(null);
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(setPageTitle('Profile'));
-    }, [dispatch]);
+        dispatch(setPageTitle(t('pageTitle')));
+    }, [dispatch, t]);
 
     // React Hook Form setup for profile
     const {
@@ -26,7 +31,6 @@ const ProfileSettings = () => {
         formState: { errors: profileErrors, isDirty: isProfileDirty },
         reset: resetProfileForm,
         setValue: setProfileValue,
-        getValues: getProfileValues
     } = useForm({
         defaultValues: {
             contact_name: '',
@@ -100,20 +104,19 @@ const ProfileSettings = () => {
             resetProfileForm(profileData);
             setSelectedImageFile(null); // Reset selected file
 
-            // Set the profile image URL for display
+            // Set the profile image URL for display using the utility
             if (result.data.profile_image) {
-                setProfileImageUrl(result.data.profile_image);
+                setProfileImageUrl(getImageUrl(result.data.profile_image));
             }
         } else {
-            toast.error(result.error || 'Failed to load profile');
+            toast.error(result.error || t('messages.loadProfileError'));
         }
         setLoading(false);
     };
+
     const fetchPreferences = async () => {
         const result = await profileService.getPreferences();
-        console.log(result,'prefrences')
         if (result.success) {
-            // Map the API response to our state structure
             setPreferences({
                 app_updates: result.data.app_updates ?? true,
                 app_news: result.data.app_news ?? true,
@@ -140,52 +143,44 @@ const ProfileSettings = () => {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        // Validate file type
         if (!file.type.startsWith('image/')) {
-            toast.error('Please select a valid image file');
+            toast.error(t('validation.validImage'));
             return;
         }
 
-        // Validate file size (e.g., max 5MB)
         const maxSize = 5 * 1024 * 1024; // 5MB
         if (file.size > maxSize) {
-            toast.error('Image size must be less than 5MB');
+            toast.error(t('validation.imageSize'));
             return;
         }
 
-        // Clean up previous preview URL if it exists
         if (profileImageUrl && profileImageUrl.startsWith('blob:')) {
             URL.revokeObjectURL(profileImageUrl);
         }
 
-        // Create preview URL for display
         const previewUrl = URL.createObjectURL(file);
         setProfileImageUrl(previewUrl);
 
-        // Store the file in state
         setSelectedImageFile(file);
-
-        // Mark form as dirty
         setProfileValue('profile_image_dirty', true, { shouldDirty: true });
 
-        toast.success('Image selected successfully');
+        toast.success(t('messages.imageSelected'));
     };
-// Clean up on component unmount
+
     useEffect(() => {
         return () => {
-            if (profileImageUrl) {
+            if (profileImageUrl && profileImageUrl.startsWith('blob:')) {
                 URL.revokeObjectURL(profileImageUrl);
             }
         };
     }, [profileImageUrl]);
+
     const onProfileSubmit = async (data) => {
         setLoading(true);
 
         try {
-            // Create FormData to send file as binary
             const formData = new FormData();
 
-            // Append all form fields EXCEPT profile_image
             formData.append('contact_name', data.contact_name);
             formData.append('pitch_name', data.pitch_name);
             formData.append('email', data.email);
@@ -195,7 +190,6 @@ const ProfileSettings = () => {
             formData.append('pitch_address', data.pitch_address);
             formData.append('auto_accept_bookings', data.auto_accept_bookings);
 
-            // Append the file ONLY if a new one was selected
             if (selectedImageFile instanceof File) {
                 formData.append('profile_image', selectedImageFile);
             }
@@ -203,33 +197,30 @@ const ProfileSettings = () => {
             const result = await profileService.updateProfile(formData);
 
             if (result.success) {
-                toast.success(result.message || 'Profile updated successfully');
-
-                // Reset the selected file state
+                toast.success(result.message || t('messages.profileUpdated'));
                 setSelectedImageFile(null);
-
-                // Update the form with new data (without profile_image)
                 resetProfileForm({
                     ...data,
                     profile_image_dirty: undefined
                 });
             } else {
-                toast.error(result.error || 'Failed to update profile');
+                toast.error(result.error || t('messages.profileUpdateError'));
             }
         } catch (error) {
-            toast.error('An error occurred while updating profile');
+            toast.error(t('messages.errorOccurred'));
         }
 
         setLoading(false);
     };
+
     const handlePreferencesSubmit = async () => {
         setLoading(true);
         const result = await profileService.updatePreferences(preferences);
 
         if (result.success) {
-            toast.success(result.message || 'Preferences updated successfully');
+            toast.success(result.message || t('messages.preferencesUpdated'));
         } else {
-            toast.error(result.error || 'Failed to update preferences');
+            toast.error(result.error || t('messages.preferencesUpdateError'));
         }
 
         setLoading(false);
@@ -237,7 +228,7 @@ const ProfileSettings = () => {
 
     const onSecuritySubmit = async (data) => {
         if (data.new_password !== data.confirm_password) {
-            toast.error('New passwords do not match');
+            toast.error(t('validation.passwordsDoNotMatch'));
             return;
         }
 
@@ -250,13 +241,13 @@ const ProfileSettings = () => {
             );
 
             if (result.success) {
-                toast.success(result.message || 'Password changed successfully');
+                toast.success(result.message || t('messages.passwordChanged'));
                 resetSecurityForm();
             } else {
-                toast.error(result.error || 'Failed to change password');
+                toast.error(result.error || t('messages.passwordChangeError'));
             }
         } catch (error) {
-            toast.error('An error occurred while changing password');
+            toast.error(t('messages.errorOccurred'));
         }
 
         setLoading(false);
@@ -271,60 +262,37 @@ const ProfileSettings = () => {
 
             if (result.success) {
                 setTwoFactorEnabled(newStatus);
-                toast.success(result.message || `Two-factor authentication ${newStatus ? 'enabled' : 'disabled'}`);
+                const statusText = newStatus ? t('common.enabled') : t('common.disabled');
+                toast.success(result.message || t('messages.twoFactorUpdated', { status: statusText }));
             } else {
-                toast.error(result.error || 'Failed to update two-factor authentication');
+                toast.error(result.error || t('messages.twoFactorError'));
             }
         } catch (error) {
-            toast.error('An error occurred while updating two-factor authentication');
+            toast.error(t('messages.errorOccurred'));
         }
 
         setLoading(false);
     };
 
-    // Helper function to format preference labels
     const formatPreferenceLabel = (key) => {
-        const labelMap = {
-            app_updates: 'App Updates',
-            app_news: 'App News',
-            app_booking: 'App Booking Notifications',
-            app_promotions: 'App Promotions',
-            sms_booking: 'SMS Booking Notifications',
-            sms_promotions: 'SMS Promotions',
-            whatsapp_booking: 'WhatsApp Booking Notifications',
-            whatsapp_promotions: 'WhatsApp Promotions',
-            whatsapp_news: 'WhatsApp News'
-        };
-        return labelMap[key] || key.replace(/_/g, ' ');
+        return t(`preferences.labels.${key}`);
     };
 
-    // Group preferences by category
     const preferenceGroups = [
         {
-            title: 'App Notifications',
-            preferences: [
-                'app_updates',
-                'app_news',
-                'app_booking',
-                'app_promotions'
-            ]
+            title: t('preferences.groups.app'),
+            preferences: ['app_updates', 'app_news', 'app_booking', 'app_promotions']
         },
         {
-            title: 'SMS Notifications',
-            preferences: [
-                'sms_booking',
-                'sms_promotions'
-            ]
+            title: t('preferences.groups.sms'),
+            preferences: ['sms_booking', 'sms_promotions']
         },
         {
-            title: 'WhatsApp Notifications',
-            preferences: [
-                'whatsapp_booking',
-                'whatsapp_promotions',
-                'whatsapp_news'
-            ]
+            title: t('preferences.groups.whatsapp'),
+            preferences: ['whatsapp_booking', 'whatsapp_promotions', 'whatsapp_news']
         }
     ];
+
     return (
         <div className="min-h-screen">
             <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-2">
@@ -333,9 +301,9 @@ const ProfileSettings = () => {
                     <div className="border-b border-gray-200">
                         <nav className="flex px-6">
                             {[
-                                { id: 'profile', label: 'Edit Profile' },
-                                { id: 'preferences', label: 'Preferences' },
-                                { id: 'security', label: 'Security' }
+                                { id: 'profile', label: t('tabs.editProfile') },
+                                { id: 'preferences', label: t('tabs.preferences') },
+                                { id: 'security', label: t('tabs.security') }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -394,42 +362,38 @@ const ProfileSettings = () => {
 
                                 <aside className={'w-full'}>
                                     <form onSubmit={handleSubmitProfile(onProfileSubmit)}>
-                                        {/* Hidden field for image URL */}
-                                        <input
-                                            type="hidden"
-                                            {...registerProfile('image')}
-                                        />
+                                        <input type="hidden" {...registerProfile('image')} />
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <MainInput
-                                                label=" Name"
+                                                label={t('profile.contactName')}
                                                 name="contact_name"
                                                 type="text"
-                                                {...registerProfile('contact_name', { required: 'Contact name is required' })}
+                                                {...registerProfile('contact_name', { required: t('validation.contactNameRequired') })}
                                                 error={profileErrors.contact_name?.message}
-                                                placeholder="Omar"
+                                                placeholder={t('profile.placeholders.contactName')}
                                                 disabled={loading}
                                             />
 
                                             <MainInput
-                                                label="Pitch Name"
+                                                label={t('profile.pitchName')}
                                                 name="pitch_name"
                                                 type="text"
                                                 {...registerProfile('pitch_name')}
                                                 error={profileErrors.pitch_name?.message}
-                                                placeholder="Enter pitch name"
+                                                placeholder={t('profile.placeholders.pitchName')}
                                                 disabled={loading}
                                             />
 
                                             <MainInput
-                                                label="Email"
+                                                label={t('profile.email')}
                                                 name="email"
                                                 type="email"
                                                 {...registerProfile('email', {
-                                                    required: 'Email is required',
+                                                    required: t('validation.emailRequired'),
                                                     pattern: {
                                                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                                        message: 'Invalid email address'
+                                                        message: t('validation.emailInvalid')
                                                     }
                                                 })}
                                                 error={profileErrors.email?.message}
@@ -438,14 +402,14 @@ const ProfileSettings = () => {
                                             />
 
                                             <MainInput
-                                                label="Phone Number"
+                                                label={t('profile.phoneNumber')}
                                                 name="contact_phone"
                                                 type="tel"
                                                 {...registerProfile('contact_phone', {
-                                                    required: 'Phone number is required',
+                                                    required: t('validation.phoneRequired'),
                                                     pattern: {
                                                         value: /^[\+]?[1-9][\d]?[\-\s\.]?\(?\d{3}\)?[\-\s\.]?\d{3}[\-\s\.]?\d{4,6}$/,
-                                                        message: 'Invalid phone number'
+                                                        message: t('validation.phoneInvalid')
                                                     }
                                                 })}
                                                 error={profileErrors.contact_phone?.message}
@@ -454,33 +418,33 @@ const ProfileSettings = () => {
                                             />
 
                                             <MainInput
-                                                label="State"
+                                                label={t('profile.state')}
                                                 name="state"
                                                 type="text"
                                                 {...registerProfile('state')}
                                                 error={profileErrors.state?.message}
-                                                placeholder="Enter state"
+                                                placeholder={t('profile.placeholders.state')}
                                                 disabled={loading}
                                             />
 
                                             <MainInput
-                                                label="City"
+                                                label={t('profile.city')}
                                                 name="city"
                                                 type="text"
                                                 {...registerProfile('city')}
                                                 error={profileErrors.city?.message}
-                                                placeholder="Dubai"
+                                                placeholder={t('profile.placeholders.city')}
                                                 disabled={loading}
                                             />
 
                                             <div className="md:col-span-2">
                                                 <MainInput
-                                                    label="Pitch Address"
+                                                    label={t('profile.pitchAddress')}
                                                     name="pitch_address"
                                                     type="text"
                                                     {...registerProfile('pitch_address')}
                                                     error={profileErrors.pitch_address?.message}
-                                                    placeholder="Enter pitch address"
+                                                    placeholder={t('profile.placeholders.pitchAddress')}
                                                     disabled={loading}
                                                 />
                                             </div>
@@ -494,7 +458,7 @@ const ProfileSettings = () => {
                                                     disabled={loading}
                                                 />
                                                 <label htmlFor="auto_accept_bookings" className="text-gray-700">
-                                                    Auto Accept Bookings
+                                                    {t('profile.autoAcceptBookings')}
                                                 </label>
                                             </div>
                                         </div>
@@ -505,14 +469,14 @@ const ProfileSettings = () => {
                                                 disabled={!isProfileDirty || loading}
                                                 className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                             >
-                                                Reset
+                                                {t('profile.reset')}
                                             </button>
                                             <button
                                                 type="submit"
                                                 disabled={loading || !isProfileDirty}
                                                 className="lg:px-8 px-2 py-3 text-sm lg:text-base bg-primary-500  text-white  rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed  hover:shadow-xl"
                                             >
-                                                {loading ? 'Saving...' : 'Save Changes'}
+                                                {loading ? t('profile.saving') : t('profile.saveChanges')}
                                             </button>
                                         </div>
                                     </form>
@@ -522,8 +486,6 @@ const ProfileSettings = () => {
 
                         {activeTab === 'preferences' && (
                             <div className="space-y-8">
-                                {/*<h3 className="lg:text-2xl text-lg font-semibold text-gray-900 mb-6">Notifications </h3>*/}
-
                                 {preferenceGroups.map((group) => (
                                     <div key={group.title} className="space-y-4 mb-8">
                                         <h4 className="lg:text-lg font-medium text-gray-800 border-b pb-2">
@@ -537,39 +499,31 @@ const ProfileSettings = () => {
                                                         <span className="text-gray-800 text-sm lg:font-medium">
                                                             {formatPreferenceLabel(prefKey)}
                                                         </span>
-                                                        {/*<p className="text-sm text-gray-500 mt-1">*/}
-                                                        {/*    {prefKey.includes('app') && 'Receive notifications in the app'}*/}
-                                                        {/*    {prefKey.includes('sms') && 'Receive notifications via SMS'}*/}
-                                                        {/*    {prefKey.includes('whatsapp') && 'Receive notifications via WhatsApp'}*/}
-                                                        {/*</p>*/}
                                                     </div>
-                                                    <button
-                                                        onClick={() => setPreferences({ ...preferences, [prefKey]: !preferences[prefKey] })}
-                                                        disabled={loading}
-                                                        className={`relative lg:w-12 lg:h-6 w-10 h-5 rounded-full transition-colors disabled:opacity-50 ${
-                                                            preferences[prefKey] ? 'bg-primary-500' : 'bg-gray-300'
-                                                        }`}
-                                                        aria-label={`Toggle ${formatPreferenceLabel(prefKey)}`}
-                                                    >
-                                                        <span
-                                                            className={`absolute top-0.5 left-0.5 w-4 h-4 lg:w-5 lg:h-5 bg-white rounded-full shadow-md transition-transform ${
-                                                                preferences[prefKey] ? 'translate-x-5 lg:translate-x-6' : 'translate-x-0'
-                                                            }`}
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="sr-only peer"
+                                                            checked={preferences[prefKey]}
+                                                            onChange={() => setPreferences({ ...preferences, [prefKey]: !preferences[prefKey] })}
+                                                            disabled={loading}
                                                         />
-                                                    </button>
+                                                        <div className={`w-10 h-5 lg:w-12 lg:h-6 bg-gray-300 rounded-full peer peer-checked:bg-primary-500 peer-disabled:opacity-50 transition-colors`}></div>
+                                                        <span className={`absolute top-0.5 left-0.5 bg-white w-4 h-4 lg:w-5 lg:h-5 rounded-full shadow-md transition-transform peer-checked:translate-x-5 lg:peer-checked:translate-x-6`}></span>
+                                                        <span className="sr-only">Toggle {formatPreferenceLabel(prefKey)}</span>
+                                                    </label>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 ))}
-
                                 <div className="mt-8 flex justify-end">
                                     <button
                                         onClick={handlePreferencesSubmit}
                                         disabled={loading}
                                         className="px-8 py-3 text-sm lg:text-base bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                                     >
-                                        {loading ? 'Saving...' : 'Save Preferences'}
+                                        {loading ? t('profile.saving') : t('preferences.savePreferences')}
                                     </button>
                                 </div>
                             </div>
@@ -578,84 +532,61 @@ const ProfileSettings = () => {
                         {activeTab === 'security' && (
                             <div className="space-y-8">
                                 <div>
-                                    <h3 className="lg:text-lg text-sm font-semibold text-gray-900 mb-4">Two-factor Authentication</h3>
+                                    <h3 className="lg:text-lg text-sm font-semibold text-gray-900 mb-4">{t('security.twoFactorHeading')}</h3>
                                     <div className="flex items-center justify-between py-4">
-                                        <span className="text-gray-700 text-xs lg:text-base">Enable or disable two factor authentication</span>
+                                        <span className="text-gray-700 text-xs lg:text-base">{t('security.twoFactorDesc')}</span>
                                         <button
                                             onClick={handleTwoFactorToggle}
                                             disabled={loading}
-                                            className={`relative w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${
-                                                twoFactorEnabled ? 'bg-primary-500' : 'bg-gray-300'
-                                            }`}
+                                            className={`relative w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${twoFactorEnabled ? 'bg-primary-500' : 'bg-gray-300'}`}
                                         >
-                    <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
-                            twoFactorEnabled ? 'translate-x-6' : 'translate-x-0'
-                        }`}
-                    />
+                                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${twoFactorEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
                                         </button>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
-
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('security.changePasswordHeading')}</h3>
                                     <form onSubmit={handleSubmitSecurity(onSecuritySubmit)}>
                                         <div className="space-y-4">
-                                            {/* Current Password */}
                                             <MainInput
-                                                label="Current Password"
+                                                label={t('security.currentPassword')}
                                                 name="current_password"
                                                 type="password"
                                                 {...registerSecurity('current_password', {
-                                                    required: 'Current password is required',
-                                                    minLength: {
-                                                        value: 6,
-                                                        message: 'Password must be at least 6 characters'
-                                                    }
+                                                    required: t('validation.currentPasswordRequired'),
+                                                    minLength: { value: 6, message: t('validation.passwordMinLength') }
                                                 })}
                                                 error={securityErrors.current_password?.message}
-                                                placeholder="Enter current password"
+                                                placeholder={t('security.placeholders.currentPassword')}
                                                 disabled={loading}
                                             />
-
-                                            {/* New Password */}
                                             <MainInput
-                                                label="New Password"
+                                                label={t('security.newPassword')}
                                                 name="new_password"
                                                 type="password"
                                                 {...registerSecurity('new_password', {
-                                                    required: 'New password is required',
-                                                    minLength: {
-                                                        value: 6,
-                                                        message: 'Password must be at least 6 characters'
-                                                    },
-                                                    pattern: {
-                                                        value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                                                        message: 'Password must contain uppercase, lowercase, and number'
-                                                    }
+                                                    required: t('validation.newPasswordRequired'),
+                                                    minLength: { value: 6, message: t('validation.passwordMinLength') },
+                                                    pattern: { value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, message: t('validation.passwordComplexity') }
                                                 })}
                                                 error={securityErrors.new_password?.message}
-                                                placeholder="Enter new password"
+                                                placeholder={t('security.placeholders.newPassword')}
                                                 disabled={loading}
                                             />
-
-                                            {/* Confirm Password */}
                                             <MainInput
-                                                label="Confirm New Password"
+                                                label={t('security.confirmPassword')}
                                                 name="confirm_password"
                                                 type="password"
                                                 {...registerSecurity('confirm_password', {
-                                                    required: 'Please confirm your password',
-                                                    validate: (value) =>
-                                                        value === watchSecurity('new_password') || 'Passwords do not match'
+                                                    required: t('validation.confirmPasswordRequired'),
+                                                    validate: (value) => value === watchSecurity('new_password') || t('validation.passwordsDoNotMatch')
                                                 })}
                                                 error={securityErrors.confirm_password?.message}
-                                                placeholder="Confirm new password"
+                                                placeholder={t('security.placeholders.confirmPassword')}
                                                 disabled={loading}
                                             />
                                         </div>
-
                                         <div className="mt-8 flex justify-end gap-4">
                                             <button
                                                 type="button"
@@ -663,14 +594,14 @@ const ProfileSettings = () => {
                                                 disabled={loading}
                                                 className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                                             >
-                                                Clear
+                                                {t('security.clear')}
                                             </button>
                                             <button
                                                 type="submit"
                                                 disabled={loading}
                                                 className="lg:px-8 px-2 py-3 text-sm lg:text-base bg-primary-500 hover:bg-secondary-700 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                                             >
-                                                {loading ? 'Saving...' : 'Change Password'}
+                                                {loading ? t('profile.saving') : t('security.changePasswordBtn')}
                                             </button>
                                         </div>
                                     </form>
