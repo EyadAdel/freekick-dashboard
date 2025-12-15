@@ -37,7 +37,7 @@ const Bookings = () => {
 
     const { bookings, isLoading, error, refetch } = useBookings(apiFilters);
     const navigate = useNavigate();
-
+    // title
     useEffect(() => {
         dispatch(setPageTitle(t('pageTitle')));
     }, [dispatch, t]);
