@@ -4,7 +4,7 @@ import MainInput from './../MainInput.jsx';
 import useAutoTranslation from '../../hooks/useTranslation.js';
 import { surfaceTypesService } from '../../services/surfaceTypes/surfaceTypesService.js';
 import { toast } from 'react-toastify';
-import { useTranslation } from 'react-i18next'; // Import hook
+import { useTranslation } from 'react-i18next';
 import {
     Type,
     Save,
@@ -27,9 +27,28 @@ const TranslationInput = ({
                               error,
                               placeholder,
                               icon: Icon,
-                              direction = 'ltr',
-                              t // Pass translation function
+                              forcedDir = null, // Renamed from direction to forcedDir to match pattern
+                              t, // Pass translation function
+                              i18n // Pass i18n instance
                           }) => {
+
+    const isRTL = i18n.language === 'ar';
+
+    // Determine the text direction for the input field itself
+    const inputDir = forcedDir || (isRTL ? 'rtl' : 'ltr');
+
+    // Helper to position the Manual Reset button
+    // Matches AmenitiesForm logic
+    const getButtonPosition = () => {
+        if (forcedDir === 'rtl' || (isRTL)) return 'left-0 ml-1';
+        return 'right-0 mr-1';
+    };
+
+    // Helper to position the Loading indicator
+    const getLoadingPosition = () => {
+        if (forcedDir === 'rtl' || (isRTL && !forcedDir)) return 'left-0 ml-1';
+        return 'right-0 mr-1';
+    };
 
     return (
         <div className="relative w-full">
@@ -42,12 +61,12 @@ const TranslationInput = ({
                 icon={Icon}
                 required
                 placeholder={placeholder}
-                style={{ direction: direction }}
+                dir={inputDir}
             />
 
             {/* Loading Indicator */}
             {loading && !isManual && (
-                <span className={`absolute top-0 ${direction === 'rtl' ? 'left-0 ml-2' : 'right-0 mr-2'} text-xs text-blue-500 mt-2 animate-pulse`}>
+                <span className={`absolute top-0 ${getLoadingPosition()} text-xs text-blue-500 mt-2 animate-pulse`}>
                     {t('buttons.translating')}
                 </span>
             )}
@@ -57,7 +76,7 @@ const TranslationInput = ({
                 <button
                     type="button"
                     onClick={onReset}
-                    className={`absolute top-0 ${direction === 'rtl' ? 'left-0 ml-1' : 'right-0 mr-1'} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
+                    className={`absolute top-0 ${getButtonPosition()} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
                     title="Reset auto-translation"
                 >
                     <RefreshCw size={10} /> {t('buttons.auto')}
@@ -68,7 +87,8 @@ const TranslationInput = ({
 };
 
 const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
-    const { t } = useTranslation('surfaceTypeForm'); // Initialize translation
+    const { t, i18n } = useTranslation('surfaceTypeForm');
+    const isRTL = i18n.language === 'ar';
 
     // --- STATE ---
     const [formData, setFormData] = useState({
@@ -202,7 +222,7 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
     };
 
     return (
-        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
             {/* Header */}
             <div className="bg-gradient-to-r from-primary-500 to-primary-700 px-8 py-6">
                 <div className="flex justify-between items-center">
@@ -225,38 +245,52 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
 
                 <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2">{t('section.basicInfo')}</h3>
+                    <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
+                        <Type size={20}/> {t('section.basicInfo')}
+                    </h3>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* English Name Input */}
-                        <TranslationInput
-                            label={t('fields.nameEn.label')}
-                            value={formData.translations.en.name}
-                            onChange={(e) => handleTranslationChange('en', 'name', e.target.value)}
-                            loading={loadEnName}
-                            isManual={manualEdits.en.name}
-                            onReset={() => resetManualEdit('en', 'name')}
-                            error={errors.name}
-                            placeholder={t('fields.nameEn.placeholder')}
-                            icon={Type}
-                            direction="ltr"
-                            t={t}
-                        />
+                        <div className="space-y-4">
+                            <span className="badge bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">
+                                English
+                            </span>
+                            <TranslationInput
+                                label={t('fields.nameEn.label')}
+                                value={formData.translations.en.name}
+                                onChange={(e) => handleTranslationChange('en', 'name', e.target.value)}
+                                loading={loadEnName}
+                                isManual={manualEdits.en.name}
+                                onReset={() => resetManualEdit('en', 'name')}
+                                error={errors.name}
+                                placeholder={t('fields.nameEn.placeholder')}
+                                icon={Type}
+                                forcedDir="ltr"
+                                t={t}
+                                i18n={i18n}
+                            />
+                        </div>
 
                         {/* Arabic Name Input */}
-                        <TranslationInput
-                            label={t('fields.nameAr.label')}
-                            value={formData.translations.ar.name}
-                            onChange={(e) => handleTranslationChange('ar', 'name', e.target.value)}
-                            loading={loadArName}
-                            isManual={manualEdits.ar.name}
-                            onReset={() => resetManualEdit('ar', 'name')}
-                            error={errors.name_ar}
-                            placeholder={t('fields.nameAr.placeholder')}
-                            icon={Globe}
-                            direction="rtl"
-                            t={t}
-                        />
+                        <div className="space-y-4" dir="rtl">
+                             <span className="badge bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">
+                                العربية
+                            </span>
+                            <TranslationInput
+                                label={t('fields.nameAr.label')}
+                                value={formData.translations.ar.name}
+                                onChange={(e) => handleTranslationChange('ar', 'name', e.target.value)}
+                                loading={loadArName}
+                                isManual={manualEdits.ar.name}
+                                onReset={() => resetManualEdit('ar', 'name')}
+                                error={errors.name_ar}
+                                placeholder={t('fields.nameAr.placeholder')}
+                                icon={Globe}
+                                forcedDir="rtl"
+                                t={t}
+                                i18n={i18n}
+                            />
+                        </div>
                     </div>
                 </div>
 

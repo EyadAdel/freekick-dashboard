@@ -5,7 +5,7 @@ import { uploadService } from '../../services/upload/uploadService.js';
 import { addonsService } from '../../services/addons/addonsService.js';
 import { generateUniqueFileName } from '../../utils/fileUtils';
 import { getImageUrl } from '../../utils/imageUtils';
-import { useTranslation } from 'react-i18next'; // Import i18n hook
+import { useTranslation } from 'react-i18next';
 
 import {
     Type, Save, X, Globe,
@@ -23,10 +23,27 @@ const TranslationInput = ({
                               isManual,
                               onReset,
                               error,
-                              forcedDir = null
+                              forcedDir = null,
+                              t, // Pass translation function
+                              i18n // Pass i18n instance
                           }) => {
-    const { t } = useTranslation('addOnsForm'); // Use translation hook here
-    const isRTL = forcedDir === 'rtl';
+
+    const isRTL = i18n.language === 'ar';
+
+    // Determine the text direction for the input field itself
+    const inputDir = forcedDir || (isRTL ? 'rtl' : 'ltr');
+
+    // Helper to position the Manual Reset button
+    const getButtonPosition = () => {
+        if (forcedDir === 'rtl' || (isRTL)) return 'left-0 ml-1';
+        return 'right-0 mr-1';
+    };
+
+    // Helper to position the Loading indicator
+    const getLoadingPosition = () => {
+        if (forcedDir === 'rtl' || (isRTL && !forcedDir)) return 'left-0 ml-1';
+        return 'right-0 mr-1';
+    };
 
     return (
         <div className="relative w-full">
@@ -35,21 +52,23 @@ const TranslationInput = ({
                 value={value}
                 onChange={onChange}
                 error={error}
-                style={{ direction: forcedDir || 'ltr' }}
-                icon={isRTL ? Globe : Type}
+                dir={inputDir}
+                icon={forcedDir === 'rtl' ? Globe : Type}
             />
 
+            {/* Loading Indicator */}
             {loading && !isManual && (
-                <span className={`absolute top-0 ${isRTL ? 'left-0 ml-1' : 'right-0 mr-1'} text-xs text-blue-500 mt-2 animate-pulse`}>
+                <span className={`absolute top-0 ${getLoadingPosition()} text-xs text-blue-500 mt-2 animate-pulse`}>
                     {t('labels.translating')}
                 </span>
             )}
 
+            {/* Manual Edit Reset Button */}
             {isManual && (
                 <button
                     type="button"
                     onClick={onReset}
-                    className={`absolute top-0 ${isRTL ? 'left-0 ml-1' : 'right-0 mr-1'} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
+                    className={`absolute top-0 ${getButtonPosition()} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
                     title="Reset to auto-translation"
                 >
                     <RefreshCw size={10} /> {t('labels.auto')}
@@ -60,7 +79,8 @@ const TranslationInput = ({
 };
 
 const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
-    const { t } = useTranslation('addOnsForm'); // Use translation hook
+    const { t, i18n } = useTranslation('addOnsForm');
+    const isRTL = i18n.language === 'ar';
 
     // --- STATE ---
     const [formData, setFormData] = useState({
@@ -107,6 +127,7 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
     const { translatedText: enName, loading: loadEnName } =
         useAutoTranslation(activeField === 'ar' ? formData.name_ar : "", 'en');
 
+    // --- SYNC LOGIC ---
     useEffect(() => {
         if (activeField === 'en' && arName && !manualEdits.name_ar) {
             setFormData(prev => ({ ...prev, name_ar: arName }));
@@ -246,13 +267,15 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
     };
 
     const SectionHeader = ({ title, icon: Icon }) => (
-        <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
+        <h3 className="text-base md:text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
             {Icon && <Icon size={20} />} {title}
         </h3>
     );
 
     return (
-        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6" dir={isRTL ? 'rtl' : 'ltr'}>
+
+            {/* Header */}
             <div className="bg-gradient-to-r from-primary-500 to-primary-700 px-8 py-6">
                 <div className="flex justify-between items-center">
                     <div>
@@ -276,7 +299,12 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
                 <div className="space-y-6">
                     <SectionHeader title={t('sections.basicInfo')} icon={Globe} />
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="relative">
+
+                        {/* English */}
+                        <div className="space-y-4">
+                            <span className="badge bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">
+                                English
+                            </span>
                             <TranslationInput
                                 label={t('labels.nameEn')}
                                 value={formData.name}
@@ -286,9 +314,16 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 onReset={() => resetManualEdit('name')}
                                 error={errors.name}
                                 forcedDir="ltr"
+                                t={t}
+                                i18n={i18n}
                             />
                         </div>
-                        <div className="relative">
+
+                        {/* Arabic */}
+                        <div className="space-y-4" dir="rtl">
+                            <span className="badge bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">
+                                العربية
+                            </span>
                             <TranslationInput
                                 label={t('labels.nameAr')}
                                 value={formData.name_ar}
@@ -298,6 +333,8 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 onReset={() => resetManualEdit('name_ar')}
                                 error={errors.name_ar}
                                 forcedDir="rtl"
+                                t={t}
+                                i18n={i18n}
                             />
                         </div>
                     </div>
@@ -321,8 +358,9 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
                                     </div>
                                 )}
 
+                                {/* Success Checkmark - Direction Aware */}
                                 {!formData.icon.uploading && (
-                                    <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1 z-10 shadow-sm">
+                                    <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} bg-green-500 text-white rounded-full p-1 z-10 shadow-sm`}>
                                         <Check size={14} />
                                     </div>
                                 )}
@@ -357,7 +395,7 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                 {/* Buttons */}
                 <div className="flex gap-4 pt-4 border-t">
-                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors">
+                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors">
                         {t('buttons.cancel')}
                     </button>
                     <button type="submit" disabled={isSubmitting || formData.icon?.uploading} className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm">

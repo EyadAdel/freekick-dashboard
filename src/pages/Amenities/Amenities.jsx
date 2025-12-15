@@ -7,14 +7,18 @@ import { setPageTitle } from '../../features/pageTitle/pageTitleSlice';
 import { amenitiesService } from '../../services/amenities/amenitiesService.js';
 import { showConfirm } from '../../components/showConfirm.jsx';
 import logo from "./../../assets/logo.svg";
-import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
+// Updated import
+import { getImageUrl } from '../../utils/imageUtils.js';
 import { useTranslation } from 'react-i18next'; // Import translation hook
 
 // --- Helper: Image Component for Amenities ---
 const AmenityIcon = ({ iconPath, alt }) => {
     const [hasError, setHasError] = useState(false);
 
-    if (!iconPath || hasError) {
+    // Use the utility function to determine the correct URL
+    const imageUrl = getImageUrl(iconPath);
+
+    if (!imageUrl || hasError) {
         return (
             <div className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                 <img src={logo} alt="Default Logo" className="w-8 h-8 opacity-50" />
@@ -25,7 +29,7 @@ const AmenityIcon = ({ iconPath, alt }) => {
     return (
         <div className="w-12 h-12 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
             <img
-                src={`${IMAGE_BASE_URL}${iconPath}`}
+                src={imageUrl}
                 alt={alt}
                 className="w-full h-full object-cover"
                 onError={() => setHasError(true)}

@@ -26,11 +26,28 @@ const TranslationInput = ({
                               error,
                               placeholder,
                               forcedDir = null,
-                              t // Pass translation function or strings
+                              t, // Pass translation function
+                              i18n // Pass i18n instance for direction checks
                           }) => {
-    // Determine direction
-    const inputDir = forcedDir || 'ltr';
-    const isRtl = inputDir === 'rtl';
+
+    const isRTL = i18n.language === 'ar';
+
+    // Determine the text direction for the input field itself
+    const inputDir = forcedDir || (isRTL ? 'rtl' : 'ltr');
+
+    // Helper to position the Manual Reset button
+    // Matches AmenitiesForm: aligns based on Global direction mostly
+    const getButtonPosition = () => {
+        if (forcedDir === 'rtl' || (isRTL)) return 'left-0 ml-1';
+        return 'right-0 mr-1';
+    };
+
+    // Helper to position the Loading indicator
+    // Matches AmenitiesForm: aligns based on Specific Input direction
+    const getLoadingPosition = () => {
+        if (forcedDir === 'rtl' || (isRTL && !forcedDir)) return 'left-0 ml-1';
+        return 'right-0 mr-1';
+    };
 
     return (
         <div className="relative w-full">
@@ -45,7 +62,7 @@ const TranslationInput = ({
 
             {/* Loading Indicator */}
             {loading && !isManual && (
-                <span className={`absolute top-0 ${isRtl ? 'left-0 ml-1' : 'right-0 mr-1'} text-xs text-blue-500 mt-2 animate-pulse`}>
+                <span className={`absolute top-0 ${getLoadingPosition()} text-xs text-blue-500 mt-2 animate-pulse`}>
                     {t('basic_info.translating')}
                 </span>
             )}
@@ -55,7 +72,7 @@ const TranslationInput = ({
                 <button
                     type="button"
                     onClick={onReset}
-                    className={`absolute top-0 ${isRtl ? 'left-0 ml-1' : 'right-0 mr-1'} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
+                    className={`absolute top-0 ${getButtonPosition()} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
                     title="Reset to auto-translation"
                 >
                     <RefreshCw size={10} /> {t('basic_info.auto_btn')}
@@ -250,8 +267,6 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
             }
 
             if (onSuccess) onSuccess();
-            // Optional: Success toast handled by parent or here
-            // toast.success(initialData ? "Updated" : "Created");
 
         } catch (error) {
             console.error("Submission failed", error);
@@ -310,6 +325,7 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 error={errors.name}
                                 forcedDir="ltr"
                                 t={t}
+                                i18n={i18n}
                             />
                         </div>
 
@@ -328,6 +344,7 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 error={errors.name_ar}
                                 forcedDir="rtl"
                                 t={t}
+                                i18n={i18n}
                             />
                         </div>
 

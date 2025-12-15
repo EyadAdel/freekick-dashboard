@@ -4,7 +4,8 @@ import useAutoTranslation from '../../hooks/useTranslation.js';
 import { uploadService } from '../../services/upload/uploadService.js';
 import { amenitiesService } from '../../services/amenities/amenitiesService.js';
 import { generateUniqueFileName } from '../../utils/fileUtils';
-import { IMAGE_BASE_URL } from '../../utils/ImageBaseURL.js';
+// Updated import based on your instructions
+import { getImageUrl } from '../../utils/imageUtils.js';
 
 import {
     Type, Save, X, Globe,
@@ -32,7 +33,7 @@ const TranslationInput = ({
     const inputDir = forcedDir || (isRTL ? 'rtl' : 'ltr');
 
     const getButtonPosition = () => {
-        if (forcedDir === 'rtl' || (isRTL && !forcedDir)) return 'left-0 ml-1';
+        if (forcedDir === 'rtl' || (isRTL)) return 'left-0 ml-1';
         return 'right-0 mr-1';
     };
 
@@ -97,12 +98,6 @@ const AmenitiesForm = ({ onCancel, onSuccess, initialData = null }) => {
 
     const fileInputRef = useRef(null);
 
-    // --- HELPER: PROCESS SERVER IMAGES ---
-    const processImage = (imagePath) => {
-        if (!imagePath) return null;
-        return imagePath.startsWith('http') ? imagePath : `${IMAGE_BASE_URL}${imagePath}`;
-    };
-
     // --- POPULATE FORM IF EDITING ---
     useEffect(() => {
         if (initialData) {
@@ -115,7 +110,8 @@ const AmenitiesForm = ({ onCancel, onSuccess, initialData = null }) => {
                 },
                 icon: existingImage ? {
                     id: 'initial_img',
-                    preview: processImage(existingImage),
+                    // Use the imported getImageUrl utility here
+                    preview: getImageUrl(existingImage),
                     serverUrl: existingImage,
                     uniqueName: existingImage,
                     uploading: false

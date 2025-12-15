@@ -129,7 +129,7 @@ const Login = () => {
             }`}>
                 {/* Header with Logo */}
                 <div className="text-center">
-                    <div className="flex items-center justify-center mb-8">
+                    <div dir={'ltr'} className="flex items-center justify-center mb-8">
                         <LogoText/>
                     </div>
                 </div>
@@ -146,7 +146,7 @@ const Login = () => {
                             <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
                                 {t('fields.phone.label')}
                             </label>
-                            <div className="relative" dir="ltr">
+                            <div className="relative" >
                                 <MuiPhoneInput
                                     value={formData.phone}
                                     onChange={handlePhoneChange}
