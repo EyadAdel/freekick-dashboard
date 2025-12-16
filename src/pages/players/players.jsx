@@ -184,14 +184,14 @@ function Players() {
         },
         {
             header: t('playersPage.bookings'),
-            accessor: 'num_of_bookings',
+            accessor: 'num_of_booking',
             sortable: true,
             sortKey: 'bookings',
             render: (row) => (
                 <div className="flex items-center gap-2">
                     <Calendar size={14} className="text-gray-400" />
                     <span className="text-gray-600">
-                        {row.num_of_bookings || 0}
+                        {row.num_of_booking || 0}
                     </span>
                 </div>
             )
