@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next';
 import {
     Save, X, UploadCloud, Trash2, Loader2,
     Edit, User, Mail, Phone, MapPin, Percent,
-    FileText, Building, CreditCard, Image as ImageIcon
+    FileText, Building, CreditCard, Image as ImageIcon,
+    Search, ChevronDown, Check // Added icons
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -37,6 +38,11 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
 
+    // --- DROPDOWN SEARCH STATE ---
+    const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+    const [userSearchTerm, setUserSearchTerm] = useState('');
+    const userDropdownRef = useRef(null); // Ref for click outside
+
     // --- PROFILE IMAGE STATES (LOGO) ---
     const [selectedImage, setSelectedImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
@@ -54,13 +60,25 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // --- CLICK OUTSIDE HANDLER ---
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+                setIsUserDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [userDropdownRef]);
 
     // --- FETCH USERS FOR DROPDOWN ---
     useEffect(() => {
         const fetchUsers = async () => {
             setLoadingUsers(true);
             try {
-                const data = await authService.getUsers();
+                const data = await authService.getUsers({page_limit: 1000});
                 const usersArray = data.data.results;
                 const userList = Array.isArray(usersArray) ? usersArray : (data.results || []);
                 setUsers(userList);
@@ -119,6 +137,43 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         }));
         if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
     };
+
+    // --- USER SELECTION HANDLER ---
+    const handleSelectUser = (user) => {
+        setFormData(prev => ({ ...prev, user_id: user.id }));
+        // Optional: Auto-fill other fields if needed
+        // setFormData(prev => ({ ...prev, user_id: user.id, email: user.email }));
+        setIsUserDropdownOpen(false);
+        setUserSearchTerm(''); // Clear search logic so display shows selected name
+        if (errors.user_id) setErrors(prev => ({ ...prev, user_id: '' }));
+    };
+
+    // --- GET DISPLAY NAME ---
+    const getSelectedUserDisplay = () => {
+        if (isUserDropdownOpen) return userSearchTerm;
+
+        if (formData.user_id) {
+            const selected = users.find(u => u.id === formData.user_id);
+            if (selected) return `${selected.name} (${selected.phone})`;
+            // Fallback if user ID exists but list isn't loaded or not found
+            if (initialData && initialData.user_info) return initialData.user_info.name;
+            return formData.user_id;
+        }
+        return '';
+    };
+
+    // --- FILTER USERS ---
+    const filteredUsers = users.filter(user => {
+        if (!userSearchTerm) return true;
+        const searchLower = userSearchTerm.toLowerCase();
+        return (
+            (user.name && user.name.toLowerCase().includes(searchLower)) ||
+            (user.phone && user.phone.includes(searchLower)) ||
+            (user.email && user.email.toLowerCase().includes(searchLower))
+        );
+    });
+
+    // ... (Image upload handlers remain the same: handleImageSelect, onFileChange, removeImage, handleCoverSelect, etc.) ...
 
     // --- PROFILE IMAGE UPLOAD LOGIC ---
     const handleImageSelect = async (file) => {
@@ -306,33 +361,73 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                         <User size={20} /> {t('pitchOwnerForm:sections.user.title')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* User Dropdown */}
-                        <div className="flex flex-col gap-1">
+
+                        {/* --- SEARCHABLE USERS DROPDOWN --- */}
+                        <div className="flex flex-col gap-1 relative" ref={userDropdownRef}>
                             <label className="text-sm font-medium text-gray-700">
                                 {t('pitchOwnerForm:sections.user.selectLabel')} <span className="text-red-500">*</span>
                             </label>
+
                             <div className="relative">
-                                <select
-                                    name="user_id"
-                                    value={formData.user_id}
-                                    onChange={handleChange}
-                                    className={`w-full p-3 bg-gray-50 border rounded-lg appearance-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all ${errors.user_id ? 'border-red-500' : 'border-gray-200'}`}
-                                >
-                                    <option value="">{t('pitchOwnerForm:sections.user.defaultOption')}</option>
-                                    {loadingUsers ? (
-                                        <option disabled>{t('pitchOwnerForm:sections.user.loading')}</option>
-                                    ) : (
-                                        users.map(user => (
-                                            <option key={user.id} value={user.id}>
-                                                {user.name} - ({user.phone})
-                                            </option>
-                                        ))
-                                    )}
-                                </select>
-                                <div className="absolute right-3 top-3.5 pointer-events-none text-gray-500">
-                                    {loadingUsers ? <Loader2 size={16} className="animate-spin" /> : "▼"}
+                                {/* The Input Field acting as trigger and search */}
+                                <input
+                                    type="text"
+                                    value={getSelectedUserDisplay()}
+                                    onChange={(e) => {
+                                        setUserSearchTerm(e.target.value);
+                                        setIsUserDropdownOpen(true);
+                                    }}
+                                    onClick={() => {
+                                        setIsUserDropdownOpen(true);
+                                        // If clicked and field has data, we might want to keep it or select all.
+                                        // Here we ensure it opens.
+                                    }}
+                                    placeholder={loadingUsers ? t('pitchOwnerForm:sections.user.loading') : t('pitchOwnerForm:sections.user.defaultOption')}
+                                    className={`w-full p-3 pr-10 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all ${errors.user_id ? 'border-red-500' : 'border-gray-200'}`}
+                                    disabled={loadingUsers}
+                                    autoComplete="off"
+                                />
+
+                                <div className="absolute right-3 top-3.5 text-gray-500 pointer-events-none">
+                                    {loadingUsers ? <Loader2 size={18} className="animate-spin" /> : <ChevronDown size={18} />}
+                                    {/* Alternative: Show Search icon if typing? <Search size={18} /> */}
                                 </div>
                             </div>
+
+                            {/* The Dropdown List */}
+                            {isUserDropdownOpen && !loadingUsers && (
+                                <div className="absolute z-50 top-[calc(100%+4px)] left-0 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                    {filteredUsers.length > 0 ? (
+                                        <ul className="py-1">
+                                            {filteredUsers.map(user => {
+                                                const isSelected = formData.user_id === user.id;
+                                                return (
+                                                    <li
+                                                        key={user.id}
+                                                        onClick={() => handleSelectUser(user)}
+                                                        className={`px-4 py-3 cursor-pointer hover:bg-primary-50 flex items-center justify-between group ${isSelected ? 'bg-primary-50' : ''}`}
+                                                    >
+                                                        <div className="flex flex-col">
+                                                            <span className={`font-medium ${isSelected ? 'text-primary-700' : 'text-gray-800'}`}>
+                                                                {user.name}
+                                                            </span>
+                                                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                                                                <Phone size={10} /> {user.phone}
+                                                            </span>
+                                                        </div>
+                                                        {isSelected && <Check size={16} className="text-primary-600" />}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    ) : (
+                                        <div className="p-4 text-center text-gray-500 text-sm">
+                                            {t('pitchOwnerForm:messages.noUsersFound', 'No users found')}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {errors.user_id && <p className="text-xs text-red-500 mt-1">{errors.user_id}</p>}
                         </div>
 
