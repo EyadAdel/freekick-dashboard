@@ -6,7 +6,7 @@ import {
     Share2, Award, BookOpen, LayoutGrid,
     CheckCircle, Edit, Shield, CheckCircle2,
     XCircle, Image as ImageIcon, Users, Activity,
-    User, UserCircle, Phone, Mail // <--- Added Phone and Mail icons
+    User, UserCircle, Phone, Mail
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +21,7 @@ import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 import { getImageUrl } from '../../utils/imageUtils';
 
 // --- Hooks ---
-import { useContact } from '../../hooks/useContact'; // <--- Added Hook
+import { useContact } from '../../hooks/useContact';
 
 // --- Components ---
 import ArrowIcon from '../../components/common/ArrowIcon';
@@ -187,7 +187,7 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang, onWhatsA
                 </div>
             </div>
 
-            {/* --- NEW SECTION: Contact Details (Like Pitch Owner) --- */}
+            {/* --- Contact Details --- */}
             {organizer && (
                 <div className="px-5 py-5 bg-white border-b border-gray-100 flex-grow">
                     <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
@@ -244,7 +244,6 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang, onWhatsA
                                 {t('card.whatsapp') || "WhatsApp"}
                             </button>
                         )}
-                        {/* Example Email Button if data existed in API */}
                         {organizer.email && (
                             <button className="mt-2 w-full py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-lg border border-gray-200 transition-colors flex items-center justify-center gap-2 text-sm">
                                 <Mail size={16} />
@@ -254,16 +253,6 @@ const TournamentProfileCard = ({ tournament, venueName, t, currentLang, onWhatsA
                     </div>
                 </div>
             )}
-
-            {/* Share Button */}
-            {/*<div className="p-5">*/}
-            {/*    <div className="flex justify-between text-xs text-gray-500 mb-4">*/}
-            {/*        <span>{t('card.code')}: <span className="font-mono bg-gray-100 px-1 rounded text-gray-700">{tournament.code || 'N/A'}</span></span>*/}
-            {/*    </div>*/}
-            {/*    <button className="w-full py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-colors flex items-center justify-center gap-2 text-sm">*/}
-            {/*        <Share2 size={16} /> {t('card.share')}*/}
-            {/*    </button>*/}
-            {/*</div>*/}
         </div>
     );
 };
@@ -321,7 +310,10 @@ const TournamentGallery = ({ images, t }) => {
     );
 };
 
+// --- UPDATED PARTICIPANTS SECTION (TEAMS AND PLAYERS CLICKABLE) ---
 const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
+    const navigate = useNavigate();
+
     const teams = joinedData?.filter(item => item.kind === 'team') || [];
     const soloFromMixed = joinedData?.filter(item => item.kind === 'user') || [];
     const directUsers = joinedUserData || [];
@@ -329,6 +321,20 @@ const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
     const uniquePlayers = Array.from(new Map(allPlayers.map(item => [item.id, item])).values());
 
     if (teams.length === 0 && uniquePlayers.length === 0) return null;
+
+    // Navigation handler for players
+    const handlePlayerClick = (player) => {
+        navigate('/players/player-profile', {
+            state: { player: player }
+        });
+    };
+
+    // Navigation handler for teams
+    const handleTeamClick = (team) => {
+        navigate('/teams/team-profile', {
+            state: { team: team }
+        });
+    };
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
@@ -346,8 +352,12 @@ const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
                         </h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {teams.map((team) => (
-                                <div key={`team-${team.id}`} className="flex flex-col items-center p-3 rounded-xl border border-gray-100 bg-gray-50 hover:shadow-md transition-all">
-                                    <div className="w-16 h-16 rounded-full overflow-hidden bg-white border border-gray-200 mb-2">
+                                <div
+                                    key={`team-${team.id}`}
+                                    onClick={() => handleTeamClick(team)} // Team Click Handler
+                                    className="flex flex-col items-center p-3 rounded-xl border border-gray-100 bg-gray-50 hover:shadow-md hover:border-blue-200 hover:bg-blue-50 transition-all cursor-pointer group" // Added pointer and hover
+                                >
+                                    <div className="w-16 h-16 rounded-full overflow-hidden bg-white border border-gray-200 group-hover:border-blue-200 mb-2">
                                         {team.image ? (
                                             <img src={getImageUrl(team.image)} alt={team.name} className="w-full h-full object-cover" />
                                         ) : (
@@ -356,7 +366,7 @@ const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
                                             </div>
                                         )}
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-800 text-center line-clamp-1">{team.name}</span>
+                                    <span className="text-sm font-semibold text-gray-800 group-hover:text-blue-700 text-center line-clamp-1">{team.name}</span>
                                 </div>
                             ))}
                         </div>
@@ -372,8 +382,12 @@ const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
                         </h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {uniquePlayers.map((user) => (
-                                <div key={`user-${user.id}`} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white hover:border-primary-200 transition-all">
-                                    <div className="w-10 h-10 flex-shrink-0 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+                                <div
+                                    key={`user-${user.id}`}
+                                    onClick={() => handlePlayerClick(user)}
+                                    className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-white hover:border-primary-300 hover:shadow-md hover:bg-gray-50 transition-all cursor-pointer group"
+                                >
+                                    <div className="w-10 h-10 flex-shrink-0 rounded-full overflow-hidden bg-gray-100 border border-gray-200 group-hover:border-primary-200">
                                         {user.image ? (
                                             <img src={getImageUrl(user.image)} alt={user.name} className="w-full h-full object-cover" />
                                         ) : (
@@ -382,7 +396,7 @@ const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
                                             </div>
                                         )}
                                     </div>
-                                    <span className="text-sm font-medium text-gray-700 line-clamp-1">{user.name}</span>
+                                    <span className="text-sm font-medium text-gray-700 group-hover:text-primary-600 line-clamp-1">{user.name}</span>
                                 </div>
                             ))}
                         </div>
@@ -505,7 +519,7 @@ const TournamentDetails = () => {
     const location = useLocation();
 
     // Use Contact Hook
-    const { handleWhatsAppClick } = useContact(); // <--- Initialize hook
+    const { handleWhatsAppClick } = useContact();
 
     const tournamentId = location.state?.id || location.state?.tournamentData?.id;
 
@@ -650,7 +664,7 @@ const TournamentDetails = () => {
                                 venueName={venueName}
                                 t={t}
                                 currentLang={i18n.language}
-                                onWhatsApp={handleContactOrganizer} // <--- Pass handler
+                                onWhatsApp={handleContactOrganizer}
                             />
                         </div>
                     </div>

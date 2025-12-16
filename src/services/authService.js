@@ -44,7 +44,7 @@ export const authService = {
     },
 
     // NEW: Get Users List
-    getUsers: async (params) => {
+    getUsers: async (params={}) => {
         try {
             const response = await api.get('/auth/users/', { params });
             return response.data;
