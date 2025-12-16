@@ -12,7 +12,7 @@ import {
     Save, X, UploadCloud, Trash2, Loader2,
     Edit, User, Mail, Phone, MapPin, Percent,
     FileText, Building, CreditCard, Image as ImageIcon,
-    Search, ChevronDown, Check // Added icons
+    ChevronDown, Check
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -41,7 +41,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     // --- DROPDOWN SEARCH STATE ---
     const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [userSearchTerm, setUserSearchTerm] = useState('');
-    const userDropdownRef = useRef(null); // Ref for click outside
+    const userDropdownRef = useRef(null);
 
     // --- PROFILE IMAGE STATES (LOGO) ---
     const [selectedImage, setSelectedImage] = useState(null);
@@ -73,24 +73,34 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         };
     }, [userDropdownRef]);
 
-    // --- FETCH USERS FOR DROPDOWN ---
+    // --- FETCH USERS (Server-Side Search & Pagination) ---
     useEffect(() => {
-        const fetchUsers = async () => {
+        // 1. Debounce logic: Only fetch if user stops typing for 500ms
+        const delayDebounceFn = setTimeout(async () => {
             setLoadingUsers(true);
             try {
-                const data = await authService.getUsers({page_limit: 1000});
-                const usersArray = data.data.results;
-                const userList = Array.isArray(usersArray) ? usersArray : (data.results || []);
-                setUsers(userList);
+                // 2. Pass search term and limit to 10
+                const params = {
+                    page_limit: 20,
+                    search: userSearchTerm || '' // Assuming backend uses 'search' param
+                };
+
+                const data = await authService.getUsers(params);
+                const usersArray = data.data?.results || data.results || (Array.isArray(data.data) ? data.data : []);
+
+                setUsers(Array.isArray(usersArray) ? usersArray : []);
             } catch (error) {
                 console.error("Failed to fetch users", error);
-                toast.error(t('pitchOwnerForm:messages.usersLoadError'));
+                // Only show toast if it's not a cancellation/search error to avoid spam
+                // toast.error(t('pitchOwnerForm:messages.usersLoadError'));
             } finally {
                 setLoadingUsers(false);
             }
-        };
-        fetchUsers();
-    }, [t]);
+        }, 500); // 500ms delay
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [userSearchTerm, t]);
+    // Effect runs whenever userSearchTerm changes
 
     // --- POPULATE FORM WITH API DATA ---
     useEffect(() => {
@@ -141,52 +151,54 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     // --- USER SELECTION HANDLER ---
     const handleSelectUser = (user) => {
         setFormData(prev => ({ ...prev, user_id: user.id }));
-        // Optional: Auto-fill other fields if needed
-        // setFormData(prev => ({ ...prev, user_id: user.id, email: user.email }));
         setIsUserDropdownOpen(false);
-        setUserSearchTerm(''); // Clear search logic so display shows selected name
+        // We do NOT clear userSearchTerm here so the display logic knows we selected someone via search,
+        // OR we rely on getSelectedUserDisplay to find the ID.
+        // Usually, it's better to clear search term so logic falls back to ID lookup:
+        setUserSearchTerm('');
+
+        // However, if the user isn't in the initial "top 10" list anymore, ID lookup might fail visually.
+        // For this specific UI pattern, clearing search is usually safer if we store the user object,
+        // but since we only store ID, let's keep it simple.
+
         if (errors.user_id) setErrors(prev => ({ ...prev, user_id: '' }));
     };
 
     // --- GET DISPLAY NAME ---
     const getSelectedUserDisplay = () => {
+        // If the dropdown is open, show exactly what the user is typing
         if (isUserDropdownOpen) return userSearchTerm;
 
+        // If closed, try to find the name based on the ID
         if (formData.user_id) {
+            // Check the currently loaded users list
             const selected = users.find(u => u.id === formData.user_id);
             if (selected) return `${selected.name} (${selected.phone})`;
-            // Fallback if user ID exists but list isn't loaded or not found
-            if (initialData && initialData.user_info) return initialData.user_info.name;
-            return formData.user_id;
+
+            // Check initial data fallback (in case the selected user isn't in the current API page)
+            if (initialData && initialData.user_info && (initialData.user_info.id === formData.user_id || initialData.user || initialData.user_id)) {
+                return initialData.user_info.name || initialData.user_info;
+            }
+
+            // Fallback: If we have an ID but no name loaded, show ID or a placeholder
+            return formData.user_info || formData.user_id; // Added formData.user_info as fallback
         }
         return '';
     };
 
-    // --- FILTER USERS ---
-    const filteredUsers = users.filter(user => {
-        if (!userSearchTerm) return true;
-        const searchLower = userSearchTerm.toLowerCase();
-        return (
-            (user.name && user.name.toLowerCase().includes(searchLower)) ||
-            (user.phone && user.phone.includes(searchLower)) ||
-            (user.email && user.email.toLowerCase().includes(searchLower))
-        );
-    });
+    // NOTE: Removed client-side `filteredUsers`. We now use the `users` state directly.
 
-    // ... (Image upload handlers remain the same: handleImageSelect, onFileChange, removeImage, handleCoverSelect, etc.) ...
-
-    // --- PROFILE IMAGE UPLOAD LOGIC ---
+    // ... (Image upload handlers remain the same) ...
     const handleImageSelect = async (file) => {
         if (!file) return;
         if (!file.type.startsWith('image/')) {
             toast.error(t('pitchOwnerForm:validation.invalidImage'));
             return;
         }
-
         const previewUrl = URL.createObjectURL(file);
         setSelectedImage(file);
         setImagePreview(previewUrl);
-        setErrors(prev => ({ ...prev, image: '' })); // Clear error on select
+        setErrors(prev => ({ ...prev, image: '' }));
 
         setIsImageUploading(true);
         try {
@@ -220,18 +232,15 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    // --- COVER IMAGE UPLOAD LOGIC ---
     const handleCoverSelect = async (file) => {
         if (!file) return;
         if (!file.type.startsWith('image/')) {
             toast.error(t('pitchOwnerForm:validation.invalidImage'));
             return;
         }
-
         const previewUrl = URL.createObjectURL(file);
         setSelectedCoverImage(file);
         setCoverImagePreview(previewUrl);
-
         setIsCoverImageUploading(true);
         try {
             const generatedName = generateUniqueFileName(file.name);
@@ -264,7 +273,6 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (coverInputRef.current) coverInputRef.current.value = "";
     };
 
-    // Drag & Drop Helpers
     const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); };
     const handleDropProfile = (e) => {
         e.preventDefault(); e.stopPropagation();
@@ -288,7 +296,6 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (!formData.contact_phone) newErrors.contact_phone = t('pitchOwnerForm:validation.phoneRequired');
         if (!formData.commission_rate) newErrors.commission_rate = t('pitchOwnerForm:validation.commissionRequired');
 
-        // VALIDATE IMAGE REQUIREMENT
         if (!finalImageName) {
             newErrors.image = t('pitchOwnerForm:validation.imageRequired');
         }
@@ -336,6 +343,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
 
     return (
         <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+            {/* Header */}
             <div className="bg-gradient-to-r from-primary-500 to-primary-700 px-8 py-6">
                 <div className="flex justify-between items-center">
                     <div>
@@ -369,7 +377,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                             </label>
 
                             <div className="relative">
-                                {/* The Input Field acting as trigger and search */}
+                                {/* Trigger/Input */}
                                 <input
                                     type="text"
                                     value={getSelectedUserDisplay()}
@@ -379,27 +387,28 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                     }}
                                     onClick={() => {
                                         setIsUserDropdownOpen(true);
-                                        // If clicked and field has data, we might want to keep it or select all.
-                                        // Here we ensure it opens.
                                     }}
                                     placeholder={loadingUsers ? t('pitchOwnerForm:sections.user.loading') : t('pitchOwnerForm:sections.user.defaultOption')}
                                     className={`w-full p-3 pr-10 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all ${errors.user_id ? 'border-red-500' : 'border-gray-200'}`}
-                                    disabled={loadingUsers}
                                     autoComplete="off"
                                 />
 
                                 <div className="absolute right-3 top-3.5 text-gray-500 pointer-events-none">
                                     {loadingUsers ? <Loader2 size={18} className="animate-spin" /> : <ChevronDown size={18} />}
-                                    {/* Alternative: Show Search icon if typing? <Search size={18} /> */}
                                 </div>
                             </div>
 
-                            {/* The Dropdown List */}
-                            {isUserDropdownOpen && !loadingUsers && (
+                            {/* Dropdown List */}
+                            {isUserDropdownOpen && (
                                 <div className="absolute z-50 top-[calc(100%+4px)] left-0 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
-                                    {filteredUsers.length > 0 ? (
+                                    {/* Show loader only if explicitly loading */}
+                                    {loadingUsers && users.length === 0 ? (
+                                        <div className="p-4 text-center text-gray-500">
+                                            <Loader2 className="w-5 h-5 animate-spin mx-auto"/>
+                                        </div>
+                                    ) : users.length > 0 ? (
                                         <ul className="py-1">
-                                            {filteredUsers.map(user => {
+                                            {users.map(user => {
                                                 const isSelected = formData.user_id === user.id;
                                                 return (
                                                     <li
@@ -427,7 +436,6 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                     )}
                                 </div>
                             )}
-
                             {errors.user_id && <p className="text-xs text-red-500 mt-1">{errors.user_id}</p>}
                         </div>
 
@@ -560,7 +568,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                     </div>
                 </div>
 
-                {/* Section 4: Images (Profile & Cover) */}
+                {/* Section 4: Images */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
                         <ImageIcon size={20} /> {t('pitchOwnerForm:sections.media.title')}

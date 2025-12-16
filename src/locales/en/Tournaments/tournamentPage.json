@@ -19,7 +19,7 @@
     "approve_btn": "Activate"
   },
   "table": {
-    "sr_no": "Sr.No",
+    "sr_no": "ID",
     "info": "Tournament Info",
     "venues": "Venues",
     "timeline": "Timeline",
