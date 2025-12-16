@@ -22,9 +22,10 @@
     "bookingType": "Booking Type",
     "paymentMethod": "Payment Method",
     "split": "Split Payment",
-    "individual": "Individual",
+    "solo": "Solo",
+    "individual": "individual",
     "online": "Online",
-    "card": "Card"
+    "group": "Group"
   },
   "actions": {
     "email": "Email",

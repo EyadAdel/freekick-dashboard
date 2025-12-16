@@ -141,7 +141,7 @@ const Bookings = () => {
                             <img
                                 src={imageUrl}
                                 alt={row.pitch?.translations?.name || t('table.pitch')}
-                                className="w-10 h-10 rounded-full object-cover"
+                                className="w-10 h-10 rounded-full object-cover  "
                                 onError={(e) => handleImageError(
                                     e,
                                     `<div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft, Calendar, CheckCircle, Clock, CreditCard,
     Mail, MapPin, Phone, Printer, Send, Users, MoreVertical,
-    Shield, Globe, Trophy, Bell, Building, Download, Share2
+    Shield, Globe, Trophy, Bell, Building, Download, Share2,RefreshCw,Star
 } from "lucide-react";
 import { bookingService } from "../../services/bookings/bookingService.js";
 import { useBooking } from "../../hooks/useBookings.js";
@@ -333,13 +333,13 @@ const BookingDetailView = () => {
                                     {booking.user_info?.name || 'Unknown Customer'}
                                 </h4>
 
-                                {booking.venue_info?.rate && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 rounded-lg border border-yellow-200">
-                                        <Trophy size={16} className="text-yellow-600" />
-                                        <span className="font-bold text-yellow-700">{booking.venue_info.rate}</span>
-                                        <span className="text-xs text-yellow-600">Rating</span>
-                                    </div>
-                                )}
+                                {/*{booking.venue_info?.rate && (*/}
+                                {/*    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 rounded-lg border border-yellow-200">*/}
+                                {/*        <Trophy size={16} className="text-yellow-600" />*/}
+                                {/*        <span className="font-bold text-yellow-700">{booking.venue_info.rate}</span>*/}
+                                {/*        <span className="text-xs text-yellow-600">Rating</span>*/}
+                                {/*    </div>*/}
+                                {/*)}*/}
                             </div>
 
                             {/* Contact Information */}
@@ -349,16 +349,7 @@ const BookingDetailView = () => {
                                 </h4>
                                 <div className="space-y-3">
                                     <div className="flex items-start gap-3">
-                                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <Mail size={16} className="text-gray-600" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-gray-500 font-medium mb-0.5">{t('contact.email')}</p>
-                                            <p className="text-xs sm:text-sm text-gray-900 truncate">
-                                                {booking.user_info?.email || booking.venue_info?.owner_info?.email || t('contact.notProvided')}
-                                            </p>
-                                        </div>
-                                    </div>
+
                                     <div className="flex items-start gap-3">
                                         <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                             <Phone size={16} className="text-gray-600" />
@@ -370,16 +361,6 @@ const BookingDetailView = () => {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <MapPin size={16} className="text-gray-600" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-xs text-gray-500 font-medium mb-0.5">{t('contact.location')}</p>
-                                            <p className="text-xs sm:text-sm text-gray-900">
-                                                {booking.venue_info?.translations?.address || booking.venue_info?.city || t('contact.notProvided')}
-                                            </p>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -393,7 +374,7 @@ const BookingDetailView = () => {
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs sm:text-sm text-gray-600">{t('bookingInfo.customerType')}</span>
                                         <span className="text-xs sm:text-sm font-semibold text-teal-600">
-                                            {booking.split_payment ? t('bookingInfo.split') : t('bookingInfo.individual')}
+                                            {booking.team_player ? t('bookingInfo.group') : t('bookingInfo.individual')}
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between">
@@ -402,20 +383,16 @@ const BookingDetailView = () => {
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs sm:text-sm text-gray-600">{t('bookingInfo.paymentMethod')}</span>
-                                        <span className="text-xs sm:text-sm font-semibold text-teal-600">{t('bookingInfo.card')}</span>
+                                        <span className="text-xs sm:text-sm font-semibold text-teal-600">
+                                            {booking.split_payment ? t('bookingInfo.split') : t('bookingInfo.solo')}
+                                        </span>
                                     </div>
+
                                 </div>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="grid px-5 pb-5 grid-cols-2 gap-3">
-                                <button
-                                    onClick={handleCustomerEmail}
-                                    className="px-4 py-2.5 text-xs sm:text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2"
-                                >
-                                    <Mail size={16} />
-                                    <span className="hidden sm:inline">{t('actions.email')}</span>
-                                </button>
+                            <div className="grid px-5 pb-5  gap-3">
                                 <button
                                     onClick={handleCustomerWhatsApp}
                                     className="px-4 py-2.5 text-xs sm:text-sm bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium flex items-center justify-center gap-2"
@@ -493,9 +470,9 @@ const BookingDetailView = () => {
                                         daysList: daysList
                                     }})}
                                       className="relative cursor-pointer rounded-lg h-48 md:h-64">
-                                    {booking.pitch?.image || booking.venue_info?.images?.[0]?.image ? (
+                                    { booking.venue_info?.images?.[0]?.image ? (
                                         <img
-                                            src={getImageUrl(booking.pitch?.image || booking.venue_info?.images?.[0]?.image)}
+                                            src={getImageUrl( booking.venue_info?.images?.[0]?.image)}
                                             alt="Venue"
                                             className="w-full lg:h-64 h-48 object-cover rounded-xl"
                                             onError={() => handleImageError('venue-image')}
@@ -573,60 +550,86 @@ const BookingDetailView = () => {
 
                             {/* Table Headers */}
                             <div className="grid grid-cols-12 gap-2 sm:gap-4 pb-3 border-b-2 border-gray-200 mb-3">
-                                <div className="col-span-5 sm:col-span-6">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('orderSummary.description')}</span>
+                                <div className="col-span-3 sm:col-span-3">
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">User</span>
                                 </div>
-                                <div className="col-span-2 text-center">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('orderSummary.quantity')}</span>
+                                <div className="col-span-2 sm:col-span-2 text-center">
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Subscript</span>
                                 </div>
-                                <div className="col-span-2 sm:col-span-2 text-right">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('orderSummary.price')}</span>
+                                <div className="col-span-2 sm:col-span-2 text-center">
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Fees</span>
                                 </div>
-                                <div className="col-span-3 sm:col-span-2 text-right">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('orderSummary.total')}</span>
+                                <div className="col-span-2 sm:col-span-2 text-center">
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Discount</span>
+                                </div>
+                                <div className="col-span-3 sm:col-span-3 text-right">
+                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Amount</span>
                                 </div>
                             </div>
 
                             <div className="space-y-2 mb-4 sm:mb-6">
-                                {/* Pitch Booking Row */}
-                                <div className="grid grid-cols-12 gap-2 sm:gap-4 py-2 border-b border-gray-100">
-                                    <div className="col-span-5 sm:col-span-6">
-                                        <p className="text-sm font-medium text-gray-900 truncate">
-                                            {booking.pitch?.translations?.name || t('orderSummary.pitchBooking')}
-                                        </p>
-                                        <p className="text-xs text-gray-500 truncate">
-                                            {booking.venue_info?.translations?.name || t('orderSummary.venue')}
-                                        </p>
-                                    </div>
-                                    <div className="col-span-2 text-center">
-                                        <p className="text-sm text-gray-700">1</p>
-                                    </div>
-                                    <div className="col-span-2 sm:col-span-2 text-right">
-                                        <p className="text-sm text-gray-700">{pitchTotal.toFixed(0)}</p>
-                                    </div>
-                                    <div className="col-span-3 sm:col-span-2 text-right">
-                                        <p className="text-sm font-semibold text-gray-900">{pitchTotal.toFixed(0)} AED</p>
-                                    </div>
-                                </div>
+                                {booking.booking_action?.map((action, idx) => (
+                                    <div key={idx} className="border-b border-gray-100 pb-3 mb-3">
+                                        {/* User Info Row */}
+                                        <div className="grid grid-cols-12 gap-2 sm:gap-4 py-2">
+                                            <div className="col-span-3 sm:col-span-3">
+                                                <div className="flex items-center gap-2">
+                                                    {action.user?.image && !imageErrors[`action-user-${idx}`] ? (
+                                                        <img
+                                                            src={getImageUrl(action.user.image)}
+                                                            alt={action.user.name}
+                                                            className="w-8 h-8 rounded-full object-cover"
+                                                            onError={() => handleImageError(`action-user-${idx}`)}
+                                                        />
+                                                    ) : (
+                                                        <div className={`w-8 h-8 rounded-full ${getAvatarColor(action.user?.name)} flex items-center justify-center`}>
+                                    <span className="text-white text-xs font-bold">
+                                        {getInitials(action.user?.name)}
+                                    </span>
+                                                        </div>
+                                                    )}
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-medium text-gray-900 truncate">
+                                                            {action.user?.name || 'Player'}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 truncate">
+                                                            {action.user?.phone || ''}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="col-span-2 sm:col-span-2 text-center flex items-center justify-center">
+                                                <p className="text-sm font-semibold text-gray-900">
+                                                    {(parseFloat(action.amount || 0) - parseFloat(action.fees || 0) - parseFloat(action.discounted_amount || 0)).toFixed(2)} AED
 
-                                {/* Addons Rows */}
-                                {booking.booking_addons?.map((addon, idx) => (
-                                    <div key={idx} className="grid grid-cols-12 gap-2 sm:gap-4 py-2 border-b border-gray-100">
-                                        <div className="col-span-5 sm:col-span-6">
-                                            <p className="text-sm font-medium text-gray-900 truncate">
-                                                {addon.addon_info?.addon?.translations?.name || t('orderSummary.addon')}
-                                            </p>
-                                        </div>
-                                        <div className="col-span-2 text-center">
-                                            <p className="text-sm text-gray-700">{addon.quantity}</p>
-                                        </div>
-                                        <div className="col-span-2 sm:col-span-2 text-right">
-                                            <p className="text-sm text-gray-700">{addon.addon_info?.price}</p>
-                                        </div>
-                                        <div className="col-span-3 sm:col-span-2 text-right">
-                                            <p className="text-sm font-semibold text-gray-900">
-                                                {(parseFloat(addon.addon_info?.price || 0) * addon.quantity).toFixed(0)} AED
-                                            </p>
+                                                </p>
+                                            </div>
+                                            <div className="col-span-2 sm:col-span-2 text-center flex items-center justify-center">
+                                                <p className="text-sm font-semibold text-teal-600">
+                                                    +{parseFloat(action.fees || 0).toFixed(2)}
+                                                </p>
+                                            </div>
+                                            <div className="col-span-2 sm:col-span-2 text-center flex items-center justify-center">
+                                                <p className="text-sm font-semibold text-red-600">
+                                                    -{parseFloat(action.discounted_amount || 0).toFixed(2)}
+                                                </p>
+                                            </div>
+                                            <div className="col-span-3 sm:col-span-3 text-right flex items-center justify-end">
+                                                <div>
+                                                    <p className="text-sm font-bold text-gray-900">
+                                                        {parseFloat(action.amount || 0).toFixed(2)}
+                                                    </p>
+                                                    <div className="flex items-center justify-end gap-1 mt-1">
+                                <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
+                                    action.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                        action.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                            'bg-gray-100 text-gray-700'
+                                }`}>
+                                    {action.status}
+                                </span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -729,13 +732,17 @@ const VenueInfoCard = ({ booking }) => {
                     {/* Email */}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Mail size={16} className="text-gray-400 flex-shrink-0" />
-                        <span>{booking.venue_info?.owner_info?.email || t('venueInfo.email')}</span>
+                        <span>{booking.venue_info?.email || t('venueInfo.email')}</span>
                     </div>
 
                     {/* Type */}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Building size={16} className="text-gray-400 flex-shrink-0" />
                         <span>{t('venueInfo.type', { type: venueType })}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Star size={16} className="text-gray-400 flex-shrink-0" />
+                        <span>{booking.venue_info?.rate }</span>
                     </div>
                 </div>
             </div>
