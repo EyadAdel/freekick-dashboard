@@ -315,7 +315,7 @@ const Tournaments = () => {
             accessor: 'id',
             align: 'left',
             width: '60px',
-            render: (row, index) => <div className="text-gray-600 font-medium text-sm">{(currentPage - 1) * rowsPerPage + index + 1}</div>
+            render: (row, index) => <div className="text-gray-600 font-medium text-sm">{row.id}</div>
         },
         {
             header: t('table.info'),

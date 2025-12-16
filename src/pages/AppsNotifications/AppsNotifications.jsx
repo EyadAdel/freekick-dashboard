@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, Users, Bell, User, ChevronDown } from 'lucide-react';
+import { Send, Users, Bell, User, ChevronDown, Search, Loader2 } from 'lucide-react';
 import { notificationService } from "../../services/notificationService.js";
 import { toast } from 'react-toastify';
-import {useDispatch} from "react-redux";
-import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
+import { useDispatch } from "react-redux";
+import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 
 function AppsNotifications() {
     const { t } = useTranslation('notifications');
+    const dispatch = useDispatch();
+    const dropdownRef = useRef(null);
+
+    // --- FORM DATA ---
     const [formData, setFormData] = useState({
         send_kind: 'all_users',
         users: [],
@@ -19,26 +23,54 @@ function AppsNotifications() {
         send_app_notification: true,
     });
 
+    // --- USERS & SEARCH STATE ---
     const [users, setUsers] = useState([]);
-    const [selectedUsers, setSelectedUsers] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [fetchingUsers, setFetchingUsers] = useState(false);
+    const [selectedUsers, setSelectedUsers] = useState([]); // Stores IDs of selected users
+    const [loading, setLoading] = useState(false); // For form submission
+    const [fetchingUsers, setFetchingUsers] = useState(false); // For user list loading
     const [showUserSelect, setShowUserSelect] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(''); // New state for search
 
-    const dropdownRef = useRef(null);
-    const dispatch = useDispatch();
-
+    // --- TITLE ---
     useEffect(() => {
         dispatch(setPageTitle(t('pageTitle')));
     }, [dispatch, t]);
 
+    // --- FETCH USERS WITH DEBOUNCE ---
     useEffect(() => {
-        if (formData.send_kind === 'other') {
-            fetchUsers();
-        }
-    }, [formData.send_kind]);
+        // Only fetch if "Specific Users" is selected
+        if (formData.send_kind !== 'other') return;
 
-    // Close dropdown when clicking outside
+        // Debounce logic: wait 500ms after typing stops
+        const delayDebounceFn = setTimeout(async () => {
+            setFetchingUsers(true);
+            try {
+                // Pass search term and limit
+                const params = {
+                    page_limit: 20,
+                    search: searchTerm || ''
+                };
+
+                const data = await notificationService.fetchUsers(params);
+
+                // Handle various API response structures (array or paginated object)
+                const userList = Array.isArray(data)
+                    ? data
+                    : (data.results || data.data?.results || data.data || []);
+
+                setUsers(userList);
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                // toast.error(t('errors.fetchUsers')); // Optional: minimize toast spam during search
+            } finally {
+                setFetchingUsers(false);
+            }
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [formData.send_kind, searchTerm]); // Runs when mode changes or user types
+
+    // --- CLICK OUTSIDE HANDLER ---
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -55,18 +87,8 @@ function AppsNotifications() {
         };
     }, [showUserSelect]);
 
-    const fetchUsers = async () => {
-        setFetchingUsers(true);
-        try {
-            const data = await notificationService.fetchUsers();
-            setUsers(data || []);
-        } catch (error) {
-            toast.error(t('errors.fetchUsers'));
-        } finally {
-            setFetchingUsers(false);
-        }
-    };
 
+    // --- HANDLERS ---
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({
@@ -82,8 +104,13 @@ function AppsNotifications() {
             send_kind: value,
             users: value === 'all_users' ? [] : prev.users,
         }));
-        setSelectedUsers([]);
-        setShowUserSelect(false);
+
+        // Reset user related states when switching modes
+        if (value !== 'other') {
+            setSelectedUsers([]);
+            setShowUserSelect(false);
+            setSearchTerm('');
+        }
     };
 
     const toggleUserSelection = (userId) => {
@@ -136,6 +163,7 @@ function AppsNotifications() {
             });
             setSelectedUsers([]);
             setShowUserSelect(false);
+            setSearchTerm('');
         } catch (error) {
             toast.error(error.message || t('errors.sendFailed'));
         } finally {
@@ -214,7 +242,7 @@ function AppsNotifications() {
                             </div>
                         </div>
 
-                        {/* User Selection */}
+                        {/* User Selection Dropdown */}
                         {formData.send_kind === 'other' && (
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200" ref={dropdownRef}>
                                 <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -226,6 +254,8 @@ function AppsNotifications() {
                                         </span>
                                     )}
                                 </label>
+
+                                {/* Dropdown Trigger Button */}
                                 <button
                                     type="button"
                                     onClick={() => setShowUserSelect(!showUserSelect)}
@@ -240,43 +270,66 @@ function AppsNotifications() {
                                     <ChevronDown className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${showUserSelect ? 'transform rotate-180' : ''}`} />
                                 </button>
 
+                                {/* Dropdown Content */}
                                 {showUserSelect && (
-                                    <div className="mt-2 bg-white border border-gray-300 rounded-lg max-h-64 overflow-y-auto shadow-sm">
-                                        {fetchingUsers ? (
-                                            <div className="p-6 text-center">
-                                                <div className="inline-block w-6 h-6 border-3 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-                                                <p className="mt-2 text-sm text-gray-500">{t('userSelection.loading')}</p>
+                                    <div className="mt-2 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+
+                                        {/* Search Input Sticky Header */}
+                                        <div className="p-2 border-b border-gray-100 bg-white sticky top-0 z-10">
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <Search className="h-4 w-4 text-gray-400" />
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                    className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-md leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                                    placeholder={t('userSelection.search', 'Search users...')}
+                                                    autoFocus
+                                                />
                                             </div>
-                                        ) : users.length === 0 ? (
-                                            <div className="p-6 text-center text-gray-500">
-                                                <Users className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-                                                <p className="text-sm">{t('userSelection.noUsers')}</p>
-                                            </div>
-                                        ) : (
-                                            <div className="divide-y divide-gray-100">
-                                                {users.map((user) => (
-                                                    <label
-                                                        key={user.id}
-                                                        className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition-colors"
-                                                    >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedUsers.includes(user.id)}
-                                                            onChange={() => toggleUserSelection(user.id)}
-                                                            className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
-                                                        />
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="text-sm font-medium text-gray-900 truncate">
-                                                                {user.name || user.username || `User ${user.id}`}
+                                        </div>
+
+                                        {/* List */}
+                                        <div className="max-h-60 overflow-y-auto">
+                                            {fetchingUsers ? (
+                                                <div className="p-6 text-center">
+                                                    <Loader2 className="w-6 h-6 text-primary-600 animate-spin mx-auto"/>
+                                                    <p className="mt-2 text-sm text-gray-500">{t('userSelection.loading')}</p>
+                                                </div>
+                                            ) : users.length === 0 ? (
+                                                <div className="p-6 text-center text-gray-500">
+                                                    <Users className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                                                    <p className="text-sm">{t('userSelection.noUsers')}</p>
+                                                </div>
+                                            ) : (
+                                                <div className="divide-y divide-gray-100">
+                                                    {users.map((user) => (
+                                                        <label
+                                                            key={user.id}
+                                                            className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedUsers.includes(user.id)}
+                                                                onChange={() => toggleUserSelection(user.id)}
+                                                                className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                                                            />
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="text-sm font-medium text-gray-900 truncate">
+                                                                    {user.name || user.username || `User ${user.id}`}
+                                                                </div>
+                                                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                                    {user.phone && <span>{user.phone}</span>}
+                                                                    {user.email && <span>• {user.email}</span>}
+                                                                </div>
                                                             </div>
-                                                            {user.email && (
-                                                                <div className="text-xs text-gray-500 truncate">{user.email}</div>
-                                                            )}
-                                                        </div>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        )}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>

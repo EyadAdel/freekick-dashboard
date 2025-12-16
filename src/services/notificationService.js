@@ -2,9 +2,9 @@ import api from "./api.js";
 
 export const notificationService = {
     // Fetch users for multi-select
-    async fetchUsers() {
+    async fetchUsers(params={}) {
         try {
-            const response = await  api.get('/auth/users/', );
+            const response = await  api.get('/auth/users/', { params });
 
             return response.data.data.results;
         } catch (error) {
