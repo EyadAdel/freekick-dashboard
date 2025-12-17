@@ -110,11 +110,11 @@ const BookingCard = ({ booking }) => {
                             <h3 className="text-base font-semibold text-gray-900">
                                 {booking.play_kind?.translations?.name || t('booking.match', 'Match')}
                             </h3>
-                            {booking.max_players && (
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                    {booking.team_player || 0} / {booking.max_players} {t('booking.players', 'players')}
-                                </p>
-                            )}
+                            {/*{booking.max_players && (*/}
+                            {/*    <p className="text-xs text-gray-500 mt-0.5">*/}
+                            {/*        {booking.team_player || 0} / {booking.max_players} {t('booking.players', 'players')}*/}
+                            {/*    </p>*/}
+                            {/*)}*/}
                             <div className="flex text-xs items-center gap-4">
                                 {booking.is_private ? (
                                     <span className="flex items-center gap-1 text-gray-400">

@@ -22,9 +22,10 @@
     "bookingType": "نوع الحجز",
     "paymentMethod": "طريقة الدفع",
     "split": "دفع مشترك",
+    "solo": "دفع فردي",
     "individual": "فردي",
     "online": "أونلاين",
-    "card": "بطاقة"
+    "group": "مجموعة"
   },
   "actions": {
     "email": "بريد إلكتروني",
@@ -64,8 +65,8 @@
     "discount": "الخصم",
     "totalAmount": "المبلغ الإجمالي",
     "pitchBooking": "حجز الملعب",
-    "venue": "الملاعب",
-    "addon": "إضافات"
+    "venue": "الملعب",
+    "addon": "إضافة"
   },
   "confirm": {
     "cancel": {
@@ -89,11 +90,11 @@
   "venueInfo": {
     "title": "معلومات الملعب",
     "noInfo": "لا توجد معلومات عن الملعب",
-    "address": "بني ياس، أبو ظبي",
-    "sports": "كرة القدم، كرة السلة",
-    "phone": "+1 234 567 8901",
-    "email": "paris.milton@example.com",
-    "type": "7 ضد 7، {{type}}",
+    "address": "العنوان غير متوفر",
+    "sports": "الرياضات",
+    "phone": "الهاتف غير متوفر",
+    "email": "البريد الإلكتروني غير متوفر",
+    "type": "النوع: {{type}}",
     "indoor": "داخلي",
     "outdoor": "خارجي"
   }

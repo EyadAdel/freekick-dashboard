@@ -187,7 +187,7 @@ function TeamLeaderboardActivity() {
 
                                         {/* Fallback logo/initials */}
                                         <div
-                                            className={`logo-fallback w-10 h-10 rounded-lg flex items-center justify-center border border-gray-200 ${logoUrl ? 'hidden' : 'flex'}`}
+                                            className={`logo-fallback font-bold w-10 h-10 rounded-lg flex items-center justify-center border border-gray-200 ${logoUrl ? 'hidden' : 'flex'}`}
                                             style={{
                                                 backgroundColor: index % 2 === 0 ? '#3B82F6' : '#10B981',
                                             }}
@@ -228,7 +228,7 @@ function TeamLeaderboardActivity() {
                                     <div className="font-semibold text-gray-900 text-sm">
                                         {team.num_of_points || 0} {t('teamActivity:points')}
                                     </div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-xs font-bold text-gray-700">
                                         {team.percentage} {t('teamActivity:percentageOfTotal')}
                                     </div>
                                 </div>
@@ -237,7 +237,7 @@ function TeamLeaderboardActivity() {
                             {/* Progress Bar */}
                             <div className="w-full bg-gray-100 rounded-full h-2">
                                 <div
-                                    className={`h-2 rounded-full ${getColorClass(team.percentage)}`}
+                                    className={`h-2 font-bold rounded-full ${getColorClass(team.percentage)}`}
                                     style={{ width: `${Math.min(team.percentage, 100)}%` }}
                                 ></div>
                             </div>
