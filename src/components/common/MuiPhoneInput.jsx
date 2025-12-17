@@ -90,7 +90,7 @@ const MuiPhoneInput = ({
                     // Note: We keep direction 'ltr' for the input text itself
                     // because phone numbers (+20 123) are always displayed LTR.
                     direction: 'ltr',
-                    textAlign: isRTL ? 'right' : 'left',
+                    textAlign: isRTL ? 'left' : 'left',
                 }}
 
                 buttonStyle={{
@@ -99,8 +99,8 @@ const MuiPhoneInput = ({
                     background: 'transparent',
 
                     // RTL Logic for Button Position
-                    left: isRTL ? 'auto' : '0',
-                    right: isRTL ? '0' : 'auto',
+                    left: isRTL ? 'auto' : 'auto',
+                    // right: isRTL ? '0' : 'auto',
 
                     // Flip Borders
                     borderRight: isRTL ? 'none' : '1px solid #e2e8f0',
@@ -112,7 +112,7 @@ const MuiPhoneInput = ({
 
                 containerStyle={{
                     width: '100%',
-                    direction: isRTL ? 'rtl' : 'ltr', // Ensures the dropdown renders correctly
+                    direction: isRTL ? 'ltr' : 'ltr', // Ensures the dropdown renders correctly
                 }}
 
                 dropdownStyle={{
@@ -130,7 +130,7 @@ const MuiPhoneInput = ({
                 <FormHelperText sx={{
                     mx: 0,
                     mt: 0.5,
-                    textAlign: isRTL ? 'right' : 'left'
+                    textAlign: isRTL ? 'left' : 'left'
                 }}>
                     {helperText}
                 </FormHelperText>
