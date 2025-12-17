@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft, Calendar, CheckCircle, Clock, CreditCard,
     Mail, MapPin, Phone, Printer, Send, Users, MoreVertical,
-    Shield, Globe, Trophy, Bell, Building, Download, Share2,RefreshCw,Star
+    Shield, Globe, Trophy, Bell, Building, Download, Share2,RefreshCw,Star, RefreshCcw
 } from "lucide-react";
 import { bookingService } from "../../services/bookings/bookingService.js";
 import { useBooking } from "../../hooks/useBookings.js";
@@ -199,7 +199,27 @@ const BookingDetailView = () => {
             setIsActionLoading(false);
         }
     };
+    const handleAccept = async (status) => {
+        try {
+            const confirmed = await showConfirm({
+                title: t('confirm.cancel.title'),
+                text: t('confirm.cancel.text'),
+                confirmButtonText: t('confirm.cancel.confirmButton'),
+                cancelButtonText: t('confirm.cancel.cancelButton'),
+                icon: "warning"
+            });
 
+            if (confirmed) {
+                setIsActionLoading(true);
+                await bookingService.partialUpdate(booking.id,{accepted_by_pitch_owner:status});
+                handleRefresh();
+            }
+        } catch (err) {
+            toast.error(t('messages.failedCancel') + err.message);
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
     const handleFullPaid = async () => {
         try {
             const confirmed = await showConfirm({
@@ -226,10 +246,8 @@ const BookingDetailView = () => {
     };
 
     const totalAmount = parseFloat(booking.total_price || 0);
-    const addonsTotal = booking.booking_addons?.reduce((sum, addon) => {
-        return sum + (parseFloat(addon.addon_info?.price || 0) * addon.quantity);
-    }, 0) || 0;
-    const pitchTotal = totalAmount - addonsTotal;
+    const totalCollected = parseFloat(booking.total_collected_amount || 0);
+    const totalPending = parseFloat(booking.total_pending_amount || 0);
 
     const getStatusColor = (status) => {
         const statusStr = String(status || 'pending').toLowerCase();
@@ -243,7 +261,7 @@ const BookingDetailView = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen px-2 lg:px-4 bg-gray-50">
             {/* Hidden PrintableReceipt */}
             <div style={{
                 position: 'fixed',
@@ -255,13 +273,13 @@ const BookingDetailView = () => {
             </div>
 
             {/* Header Section */}
-            <div className="bg-white mx-4 rounded-xl">
-                <div className="mx-auto px-4 sm:px-4 lg:py-3 py-1">
+            <div className="bg-white rounded-xl">
+                <div className="mx-auto px-2 sm:px-4 lg:py-3 py-1">
                     <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-8">
                             <button
                                 onClick={handleBack}
-                                className="flex items-center gap-2 text-primary-700 hover:text-primary-600 transition-colors">
+                                className=" text-xs lg:text-base flex items-center gap-2 text-primary-700 hover:text-primary-600 transition-colors">
                                 <ArrowIcon
                                     direction={isRTL ? 'right' : 'left'}
                                     size="lg"
@@ -271,7 +289,7 @@ const BookingDetailView = () => {
                         </div>
                         {role.is_admin || role.is_sub_admin ? (
                             booking.mark_as_paid ? (
-                                <div className="flex-1 sm:flex-none px-4 py-2 bg-green-100 border border-green-300 text-green-700 rounded-2xl flex items-center justify-center gap-2">
+                                <div className=" px-2 py-2 bg-green-100 border border-green-300 text-green-700 rounded-2xl flex items-center justify-center gap-2">
                                     <CheckCircle className="w-4 h-4" />
                                     <span className="font-medium">{t('actions.fullPaid')}</span>
                                 </div>
@@ -279,7 +297,7 @@ const BookingDetailView = () => {
                                 <button
                                     onClick={handleFullPaid}
                                     disabled={isActionLoading}
-                                    className={`flex-1 sm:flex-none px-4 py-2 bg-teal-500 text-white rounded-2xl transition-colors flex items-center justify-center gap-2 ${
+                                    className={` text-xs lg:text-base px-4 py-2 bg-teal-500 text-white rounded-xl transition-colors flex items-center justify-center gap-2 ${
                                         isActionLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-teal-600'
                                     }`}
                                 >
@@ -302,7 +320,7 @@ const BookingDetailView = () => {
             </div>
 
             {/* Main Content */}
-            <div className="mx-auto px-4 sm:px-4 py-4 sm:py-6">
+            <div className="mx-auto  py-4 sm:py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Left Column - Customer Profile */}
                     <div className="lg:col-span-1 order-1 lg:order-1">
@@ -332,14 +350,6 @@ const BookingDetailView = () => {
                                 <h4 className="font-bold text-gray-900 text-lg sm:text-xl mb-2">
                                     {booking.user_info?.name || 'Unknown Customer'}
                                 </h4>
-
-                                {/*{booking.venue_info?.rate && (*/}
-                                {/*    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 rounded-lg border border-yellow-200">*/}
-                                {/*        <Trophy size={16} className="text-yellow-600" />*/}
-                                {/*        <span className="font-bold text-yellow-700">{booking.venue_info.rate}</span>*/}
-                                {/*        <span className="text-xs text-yellow-600">Rating</span>*/}
-                                {/*    </div>*/}
-                                {/*)}*/}
                             </div>
 
                             {/* Contact Information */}
@@ -348,8 +358,6 @@ const BookingDetailView = () => {
                                     {t('contact.title')}
                                 </h4>
                                 <div className="space-y-3">
-                                    <div className="flex items-start gap-3">
-
                                     <div className="flex items-start gap-3">
                                         <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                             <Phone size={16} className="text-gray-600" />
@@ -360,7 +368,6 @@ const BookingDetailView = () => {
                                                 {booking.user_info?.phone || t('contact.notProvided')}
                                             </p>
                                         </div>
-                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -387,12 +394,38 @@ const BookingDetailView = () => {
                                             {booking.split_payment ? t('bookingInfo.split') : t('bookingInfo.solo')}
                                         </span>
                                     </div>
-
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs sm:text-sm text-gray-600">Status</span>
+                                        <span className={`text-xs sm:text-sm font-semibold px-2 py-1 rounded ${
+                                            booking.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                        }`}>
+                                            {booking.is_active ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                    {booking.is_recurring && (
+                                        <>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs sm:text-sm text-gray-600">Recurring</span>
+                                                <span className="text-xs sm:text-sm font-semibold text-teal-600 flex items-center gap-1">
+                                                    <RefreshCcw size={14} />
+                                                    Yes
+                                                </span>
+                                            </div>
+                                            {booking.recurring_end_date && (
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs sm:text-sm text-gray-600">Ends On</span>
+                                                    <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                                                        {formatDate(booking.recurring_end_date)}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="grid px-5 pb-5  gap-3">
+                            <div className="grid px-5 pb-5 gap-3">
                                 <button
                                     onClick={handleCustomerWhatsApp}
                                     className="px-4 py-2.5 text-xs sm:text-sm bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium flex items-center justify-center gap-2"
@@ -413,8 +446,8 @@ const BookingDetailView = () => {
                                         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
                                             {t('header.bookingId')} <span className="font-semibold text-gray-900">#{String(booking.id).padStart(7, '0')}</span>
                                         </h1>
-                                        <span className={`w-fit px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold border ${getStatusColor(booking.status)}`}>
-                                            {t(`status.${booking.status?.toLowerCase()}`) || t('status.pending')}
+                                        <span className={`w-fit px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold border ${getStatusColor(booking.last_update)}`}>
+                                            {t(`status.${booking.last_update?.toLowerCase()}`) || t('status.pending')}
                                         </span>
                                     </div>
                                     <div className="text-left flex gap-4 text-xs sm:text-sm text-gray-500 w-full sm:w-auto">
@@ -433,7 +466,6 @@ const BookingDetailView = () => {
 
                         {/* Venues Information Card */}
                         <div className="bg-white rounded-xl overflow-hidden">
-                            {/* Venues Image */}
                             <div className="rounded-lg">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-center gap-4 sm:gap-8">
                                     <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -464,15 +496,15 @@ const BookingDetailView = () => {
                                 </div>
                             </div>
                             <div className={'grid bg-primary-50 p-4 m-4 gap-5 rounded-xl sm:grid-cols-2'}>
-                                <div  onClick={()=>navigate('/venues/venue-details', {
+                                <div onClick={()=>navigate('/venues/venue-details', {
                                     state: {
                                         venueId: booking.venue_info.id,
                                         daysList: daysList
                                     }})}
-                                      className="relative cursor-pointer rounded-lg h-48 md:h-64">
-                                    { booking.venue_info?.images?.[0]?.image ? (
+                                     className="relative cursor-pointer rounded-lg h-48 md:h-64">
+                                    {booking.venue_info?.images?.[0]?.image ? (
                                         <img
-                                            src={getImageUrl( booking.venue_info?.images?.[0]?.image)}
+                                            src={getImageUrl(booking.venue_info?.images?.[0]?.image)}
                                             alt="Venue"
                                             className="w-full lg:h-64 h-48 object-cover rounded-xl"
                                             onError={() => handleImageError('venue-image')}
@@ -548,22 +580,24 @@ const BookingDetailView = () => {
                         <div className="bg-white border-t border-gray-100 rounded-xl p-4 sm:p-6">
                             <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-4 sm:mb-6">{t('orderSummary.title')}</h3>
 
+                            {/* Payment Summary Cards */}
+
                             {/* Table Headers */}
-                            <div className="grid grid-cols-12 gap-2 sm:gap-4 pb-3 border-b-2 border-gray-200 mb-3">
-                                <div className="col-span-3 sm:col-span-3">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">User</span>
+                            <div className="grid grid-cols-12 sm:gap-2 pb-3 border-b-2 border-gray-200 mb-3">
+                                <div className="col-span-3 min-w-[80px]">
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">User</span>
                                 </div>
-                                <div className="col-span-2 sm:col-span-2 text-center">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Subscript</span>
+                                <div className="col-span-2 min-w-[70px] text-center">
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">Subscript</span>
                                 </div>
-                                <div className="col-span-2 sm:col-span-2 text-center">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Fees</span>
+                                <div className="col-span-2 min-w-[60px] text-center">
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">Fees</span>
                                 </div>
-                                <div className="col-span-2 sm:col-span-2 text-center">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Discount</span>
+                                <div className="col-span-2 min-w-[70px] text-center">
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">Discount</span>
                                 </div>
-                                <div className="col-span-3 sm:col-span-3 text-right">
-                                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Amount</span>
+                                <div className="col-span-3 min-w-[90px] text-right">
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">Amount</span>
                                 </div>
                             </div>
 
@@ -571,56 +605,64 @@ const BookingDetailView = () => {
                                 {booking.booking_action?.map((action, idx) => (
                                     <div key={idx} className="border-b border-gray-100 pb-3 mb-3">
                                         {/* User Info Row */}
-                                        <div className="grid grid-cols-12 gap-2 sm:gap-4 py-2">
-                                            <div className="col-span-3 sm:col-span-3">
+                                        <div className="grid grid-cols-12 gap-2 sm:gap-4 py-2 items-center">
+                                            {/* User Column - col-span-3 */}
+                                            <div className="col-span-3 min-w-[80px]">
                                                 <div className="flex items-center gap-2">
                                                     {action.user?.image && !imageErrors[`action-user-${idx}`] ? (
                                                         <img
                                                             src={getImageUrl(action.user.image)}
                                                             alt={action.user.name}
-                                                            className="w-8 h-8 rounded-full object-cover"
+                                                            className="lg:w-8 hidden md:block lg:h-8 w-6 h-6 rounded-full object-cover"
                                                             onError={() => handleImageError(`action-user-${idx}`)}
                                                         />
                                                     ) : (
-                                                        <div className={`w-8 h-8 rounded-full ${getAvatarColor(action.user?.name)} flex items-center justify-center`}>
-                                    <span className="text-white text-xs font-bold">
+                                                        <div className={`lg:w-8 hidden md:block lg:h-8 w-6 h-6 rounded-full ${getAvatarColor(action.user?.name)} flex items-center justify-center`}>
+                                    <span className="text-white text-[10px] font-bold">
                                         {getInitials(action.user?.name)}
                                     </span>
                                                         </div>
                                                     )}
-                                                    <div className="min-w-0">
-                                                        <p className="text-sm font-medium text-gray-900 truncate">
-                                                            {action.user?.name || 'Player'}
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-[9px] font-medium text-gray-900 truncate">
+                                                            {action.user?.name ? action.user.name.split(' ').slice(0, 2).join(' ') : 'Player'}
                                                         </p>
-                                                        <p className="text-xs text-gray-500 truncate">
+                                                        <p className="text-[8px] text-gray-500 truncate">
                                                             {action.user?.phone || ''}
                                                         </p>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="col-span-2 sm:col-span-2 text-center flex items-center justify-center">
-                                                <p className="text-sm font-semibold text-gray-900">
-                                                    {(parseFloat(action.amount || 0) - parseFloat(action.fees || 0) - parseFloat(action.discounted_amount || 0)).toFixed(2)} AED
 
+                                            {/* Subscript Column - col-span-2 */}
+                                            <div className="col-span-2 min-w-[70px] text-center">
+                                                <p className="text-[10px] font-semibold text-gray-900">
+                                                    {(parseFloat(action.amount || 0) - parseFloat(action.fees || 0) - parseFloat(action.discounted_amount || 0)).toFixed(2)} AED
                                                 </p>
                                             </div>
-                                            <div className="col-span-2 sm:col-span-2 text-center flex items-center justify-center">
-                                                <p className="text-sm font-semibold text-teal-600">
+
+                                            {/* Fees Column - col-span-2 */}
+                                            <div className="col-span-2 min-w-[60px] text-center">
+                                                <p className="text-[10px] font-semibold text-teal-600">
                                                     +{parseFloat(action.fees || 0).toFixed(2)}
                                                 </p>
                                             </div>
-                                            <div className="col-span-2 sm:col-span-2 text-center flex items-center justify-center">
-                                                <p className="text-sm font-semibold text-red-600">
+
+                                            {/* Discount Column - col-span-2 */}
+                                            <div className="col-span-2 min-w-[70px] text-center">
+                                                <p className="text-[10px] font-semibold text-red-600">
                                                     -{parseFloat(action.discounted_amount || 0).toFixed(2)}
                                                 </p>
                                             </div>
-                                            <div className="col-span-3 sm:col-span-3 text-right flex items-center justify-end">
+
+                                            {/* Amount Column - col-span-3 */}
+                                            <div className="col-span-3 min-w-[90px] text-right">
                                                 <div>
-                                                    <p className="text-sm font-bold text-gray-900">
+                                                    <p className="text-[11px] font-bold text-gray-900">
                                                         {parseFloat(action.amount || 0).toFixed(2)}
                                                     </p>
                                                     <div className="flex items-center justify-end gap-1 mt-1">
-                                <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
+                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${
                                     action.status === 'completed' ? 'bg-green-100 text-green-700' :
                                         action.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                                             'bg-gray-100 text-gray-700'
@@ -635,18 +677,45 @@ const BookingDetailView = () => {
                                 ))}
                             </div>
 
-                            <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2.5 mb-4 sm:mb-6">
-                                <div className="flex justify-between text-xs sm:text-sm">
-                                    <span className="text-gray-600">{t('orderSummary.subtotal')}</span>
-                                    <span className="font-semibold text-gray-900">{totalAmount.toFixed(0)} AED</span>
+                            {/*<div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2.5 mb-4 sm:mb-6">*/}
+                            {/*    <div className="flex justify-between text-xs sm:text-sm">*/}
+                            {/*        <span className="text-gray-600">{t('orderSummary.subtotal')}</span>*/}
+                            {/*        <span className="font-semibold text-gray-900">{totalAmount.toFixed(0)} AED</span>*/}
+                            {/*    </div>*/}
+                            {/*    <div className="flex justify-between text-xs sm:text-sm">*/}
+                            {/*        <span className="text-gray-600">{t('orderSummary.tax')}</span>*/}
+                            {/*        <span className="font-semibold text-gray-900">0 AED</span>*/}
+                            {/*    </div>*/}
+                            {/*    <div className="flex justify-between text-xs sm:text-sm">*/}
+                            {/*        <span className="text-gray-600">{t('orderSummary.discount')}</span>*/}
+                            {/*        <span className="font-semibold text-red-600">-0 AED</span>*/}
+                            {/*    </div>*/}
+                            {/*</div>*/}
+                            <div className="grid lg:grid-cols-2 gap-3 mb-6">
+                                {/*<div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg p-4 border border-teal-200">*/}
+                                {/*    <div className="flex items-center justify-between mb-2">*/}
+                                {/*        <span className="text-xs text-teal-600 font-semibold uppercase tracking-wide">Total Price</span>*/}
+                                {/*        <CreditCard size={16} className="text-teal-600" />*/}
+                                {/*    </div>*/}
+                                {/*    <p className="text-2xl font-bold text-teal-700">{totalAmount.toFixed(2)} AED</p>*/}
+                                {/*</div>*/}
+
+                                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg px-4 py-3 flex items-center justify-between border border-green-200">
+                                    <div className="flex items-center gap-2  ">
+                                        <CheckCircle size={16} className="text-green-600" />
+                                        <span className="text-sm text-green-600 font-semibold uppercase tracking-wide">Collected</span>
+
+                                    </div>
+                                    <p className="text-xl font-bold text-green-700">{totalCollected.toFixed(2)} AED</p>
                                 </div>
-                                <div className="flex justify-between text-xs sm:text-sm">
-                                    <span className="text-gray-600">{t('orderSummary.tax')}</span>
-                                    <span className="font-semibold text-gray-900">0 AED</span>
-                                </div>
-                                <div className="flex justify-between text-xs sm:text-sm">
-                                    <span className="text-gray-600">{t('orderSummary.discount')}</span>
-                                    <span className="font-semibold text-red-600">-0 AED</span>
+
+                                <div className="bg-gradient-to-br from-amber-50 flex items-center justify-between to-yellow-50 rounded-lg px-4 py-3 border border-amber-200">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Clock size={16} className="text-amber-600" />
+
+                                        <span className="text-sm text-amber-600 font-semibold uppercase tracking-wide">Pending</span>
+                                    </div>
+                                    <p className="text-xl font-bold text-amber-700">{totalPending.toFixed(2)} AED</p>
                                 </div>
                             </div>
 
@@ -654,24 +723,33 @@ const BookingDetailView = () => {
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <p className="text-teal-100 text-xs sm:text-sm font-medium mb-1">{t('orderSummary.totalAmount')}</p>
-                                        <p className="text-white text-xl sm:text-3xl font-bold">AED {totalAmount.toFixed(0)}</p>
+                                        <p className="text-white  sm:text-2xl font-bold">AED {totalAmount.toFixed(0)}</p>
                                     </div>
-                                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <div className="w-10 h-10 sm:w-16 sm:h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
                                         <CreditCard size={24} className="text-white sm:w-7 sm:h-7" />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="flex gap-3">
+                                {!booking.accepted_by_pitch_owner &&
+                                    <button
+                                        onClick={()=>{handleAccept(!booking.accepted_by_pitch_owner)}}
+                                        disabled={isActionLoading}
+                                        className="w-full px-4 py-2.5 text-xs sm:text-sm bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium flex items-center justify-center gap-2"
+                                    >
+                                        Accept
+                                    </button>
+                                }
                                 <button
                                     onClick={handleCancel}
                                     disabled={isActionLoading}
-                                    className="px-4 py-2.5 sm:py-3 bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-xs sm:text-sm font-semibold disabled:opacity-50 order-3 sm:order-1"
+                                    className="w-full px-4 py-2.5 sm:py-3 bg-red-50 border border-red-200 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-xs sm:text-sm font-semibold disabled:opacity-50 order-3 sm:order-1"
                                 >
                                     {t('actions.cancel')}
                                 </button>
-                                <button onClick={handlePrint} className="px-4 py-2.5 sm:py-3 border-2 border-primary-500 text-primary-700 rounded-lg hover:bg-teal-50 transition-colors text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 order-1 sm:order-2">
+                                <button onClick={handlePrint} className="px-4 w-full py-2.5 sm:py-3 text-xs sm:text-sm border-2 border-primary-500 text-primary-700 rounded-lg hover:bg-teal-50 transition-colors text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 order-1 sm:order-2">
                                     <Send size={16} />
                                     <span className="hidden sm:inline">{t('actions.sendInvoice')}</span>
                                     <span className="sm:hidden">{t('actions.sendInvoice')}</span>
@@ -742,7 +820,7 @@ const VenueInfoCard = ({ booking }) => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Star size={16} className="text-gray-400 flex-shrink-0" />
-                        <span>{booking.venue_info?.rate }</span>
+                        <span>{booking.venue_info?.rate}</span>
                     </div>
                 </div>
             </div>

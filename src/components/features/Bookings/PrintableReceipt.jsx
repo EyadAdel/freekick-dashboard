@@ -1,5 +1,6 @@
 // components/features/Bookings/PrintableReceipt.jsx
 import React from 'react';
+import {Mail, MapPin, Phone} from "lucide-react";
 
 const PrintableReceipt = React.forwardRef(({ booking, logo }, ref) => {
     if (!booking) {
@@ -11,6 +12,9 @@ const PrintableReceipt = React.forwardRef(({ booking, logo }, ref) => {
         return sum + (parseFloat(addon.addon_info?.price || 0) * addon.quantity);
     }, 0) || 0;
     const pitchTotal = totalAmount - addonsTotal;
+
+    const totalCollected = parseFloat(booking.total_collected_amount || 0);
+    const totalPending = parseFloat(booking.total_pending_amount || 0);
 
     const formatDate = (dateTime) => {
         if (!dateTime) return 'N/A';
@@ -32,86 +36,337 @@ const PrintableReceipt = React.forwardRef(({ booking, logo }, ref) => {
         });
     };
 
+    const containerStyle = {
+        width: '800px',
+        backgroundColor: 'white',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        color: '#1f2937'
+    };
+
+    const headerStyle = {
+        padding: '10px 20px 10px',
+        borderBottom: '4px solid #00bfbf'
+    };
+
+    const headerContentStyle = {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start'
+    };
+
+    const logoContainerStyle = {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px'
+    };
+
+    const logoStyle = {
+        height: '45px',
+        marginTop:'20px',
+        marginLeft:'10px'
+    };
+
+    const brandNameStyle = {
+        fontSize: '40px',
+        fontWeight: '600',
+        color: '#00bfbf',
+        letterSpacing: '-0.5px'
+    };
+
+    const headerRightStyle = {
+        textAlign: 'right'
+    };
+
+    const invoiceTitleStyle = {
+        fontSize: '13px',
+        fontWeight: '600',
+        color: '#6b7280',
+        marginBottom: '8px',
+        letterSpacing: '0.5px'
+    };
+
+    const invoiceNumberStyle = {
+        fontSize: '24px',
+        color: '#111827',
+        marginBottom: '8px',
+        fontWeight: '700'
+    };
+
+    const invoiceDateStyle = {
+        fontSize: '13px',
+        color: '#6b7280'
+    };
+
+    const contentStyle = {
+        padding: '10px 20px'
+    };
+
+    const billingSectionStyle = {
+        marginBottom: '0px'
+    };
+
+    const sectionTitleStyle = {
+        fontSize: '12px',
+        fontWeight: '500',
+        color: '#374151',
+        display:'flex',
+        textTransform: 'uppercase',
+        letterSpacing: '0.5px',
+        marginBottom: '10px'
+    };
+
+    const infoBoxStyle = {
+        padding: '0',
+        wordWrap: 'break-word',
+        overflowWrap: 'break-word',
+        maxWidth: '100%'
+    };
+
+    const venueDetailsStyle = {
+        fontSize: '14px',
+        color: '#6b7280',
+        lineHeight: '1.6',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+        overflowWrap: 'anywhere',
+        padding:'10px',
+        maxWidth: '100%',
+        height:'fit-content'
+    };
+
+    const venueNameStyle = {
+        fontSize: '15px',
+        fontWeight: '600',
+        color: '#111827',
+        marginBottom: '8px'
+    };
+
+    const bookingInfoStyle = {
+        padding: '20px 10px',
+        borderTop: '1px solid #e5e7eb',
+        borderBottom: '1px solid #e5e7eb',
+        marginBottom: '20px',
+        backgroundColor:'#e6f7f7'
+    };
+
+    const gridStyle = {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '20px',
+        alignItems: 'start'
+    };
+
+    const venueWrapperStyle = {
+        minWidth: '0'
+    };
+
+    const bookingGridStyle = {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr 1fr',
+        gap: '24px',
+        fontSize: '14px'
+    };
+
+    const labelStyle = {
+        color: '#6b7280',
+        marginBottom: '6px',
+        fontSize: '12px',
+        fontWeight: '500'
+    };
+
+    const valueStyle = {
+        fontWeight: '600',
+        color: '#111827',
+        fontSize: '14px'
+    };
+
+    const tableStyle = {
+        width: '100%',
+        borderCollapse: 'collapse',
+        fontSize: '13px',
+        marginBottom: '30px'
+    };
+
+    const tableHeaderStyle = {
+        backgroundColor: '#f9fafb',
+        borderBottom: '1px solid #e5e7eb'
+    };
+
+    const tableCellStyle = {
+        padding: '12px 16px',
+        textAlign: 'left',
+        fontWeight: '600',
+        color: '#374151',
+        fontSize: '12px'
+    };
+
+    const tableBodyCellStyle = {
+        padding: '16px',
+        borderBottom: '1px solid #f3f4f6'
+    };
+
+    const statusBadgeStyle = (status) => ({
+        display: 'inline-block',
+        padding: '4px 10px',
+        borderRadius: '4px',
+        fontSize: '11px',
+        fontWeight: '600',
+        backgroundColor: status === 'completed' ? '#ecfdf5' :
+            status === 'pending' ? '#fef3c7' : '#f3f4f6',
+        color: status === 'completed' ? '#065f46' :
+            status === 'pending' ? '#92400e' : '#374151'
+    });
+
+    const paymentGridStyle = {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        gap: '20px',
+        marginBottom: '30px'
+    };
+
+    const paymentCardStyle = (bgColor, borderColor) => ({
+        padding: '20px',
+        backgroundColor: bgColor,
+        borderRadius: '6px',
+        border: `1px solid ${borderColor}`
+    });
+
+    const paymentHeaderStyle = {
+        marginBottom: '8px'
+    };
+
+    const paymentTitleStyle = (color) => ({
+        fontSize: '12px',
+        fontWeight: '500',
+        color: '#6b7280',
+        marginBottom: '4px'
+    });
+
+    const paymentAmountStyle = (color) => ({
+        fontSize: '24px',
+        fontWeight: '700',
+        color: color
+    });
+
+    const footerStyle = {
+        padding: '30px 60px',
+        backgroundColor: '#f9fafb',
+        borderTop: '1px solid #e5e7eb'
+    };
+
+    const footerContentStyle = {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        fontSize: '12px',
+        color: '#6b7280'
+    };
+
+    const iconStyle = {
+        width: '14px',
+        height: '14px',
+        color: '#9ca3af',
+        flexShrink: '0',
+        marginRight: '8px',
+        marginTop: '2px',
+    };
+
+    const venueLineStyle = {
+        display: 'flex',
+        alignItems: 'flex-start',
+        marginBottom: '8px',
+        lineHeight: '1.4'
+    };
+
     return (
-        <div ref={ref} data-booking-id={booking.id} style={{ width: '800px', backgroundColor: 'white', fontFamily: 'Arial, sans-serif' }}>
-            {/* HEADER SECTION - Repeats on each page */}
-            <div data-pdf-section="header" style={{ padding: '10px 20px 10px', borderBottom: '4px solid #14b8a6' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div ref={ref} data-booking-id={booking.id} style={containerStyle}>
+            {/* HEADER SECTION */}
+            <div data-pdf-section="header" style={headerStyle}>
+                <div style={headerContentStyle}>
+                    <div style={logoContainerStyle}>
                         {logo && (
-                            <img src={logo} alt="Logo" style={{ height: '45px',marginTop:'20px' }} />
+                            <img src={logo} alt="Logo" style={logoStyle} />
                         )}
-                        <div style={{ fontSize: '35px', fontWeight: '700', color: '#14b8a6', letterSpacing: '1px' }}>
+                        <div style={brandNameStyle}>
                             FREE KICK
                         </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '32px', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>
-                            INVOICE
+                    <div style={headerRightStyle}>
+                        <div style={invoiceTitleStyle}>
+                            ORDER SUMMARY
                         </div>
-                        <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '5px' }}>
-                            Invoice #: <span style={{ fontWeight: '600', color: '#1e293b' }}>
-                                {String(booking.id).padStart(7, '0')}
-                            </span>
+                        <div style={invoiceNumberStyle}>
+                            #{String(booking.id).padStart(7, '0')}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#64748b' }}>
-                            Date: {formatDate(new Date())}
+                        <div style={invoiceDateStyle}>
+                            {formatDate(booking.created_at)}
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* CONTENT SECTION */}
-            <div data-pdf-section="content" style={{ padding: '40px 50px 0' }}>
+            <div data-pdf-section="content" style={contentStyle}>
                 {/* Billing Information */}
-                <div data-pdf-break="billing" style={{ marginBottom: '35px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
-                        <div>
-                            <div style={{ fontSize: '11px', fontWeight: '600', color: '#14b8a6', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
-                                Invoice From
+                <div data-pdf-break="billing" style={billingSectionStyle}>
+                    <div style={gridStyle}>
+                        {/* Venue Information */}
+                        <div style={venueWrapperStyle}>
+                            <div style={sectionTitleStyle}>
+                                Venue Information
                             </div>
-                            <div style={{ padding: '20px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                                <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '10px' }}>
-                                    {booking.venue_info?.translations?.name || 'Sports Venues'}
+                            <div style={infoBoxStyle}>
+                                <div style={venueNameStyle}>
+                                    {booking.venue_info?.translations?.name || 'No venue information available'}
                                 </div>
-                                <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.8' }}>
-                                    <div>{booking.venue_info?.translations?.address || 'Address not available'}</div>
-                                    <div style={{ marginTop: '5px' }}>
-                                        Phone: {booking.venue_info?.phone_number || 'N/A'}
-                                    </div>
-                                    <div>Email: {booking.venue_info?.owner_info?.email || 'N/A'}</div>
+                                <div style={venueDetailsStyle}>
+                                    {/* Format address with line breaks */}
+                                    {(() => {
+                                        const address = booking.venue_info?.translations?.address || 'Address not available';
+                                        const formattedAddress = address.replace(/,/g, ',\n');
+                                        return formattedAddress.split('\n').map((line, index) => (
+                                            <div key={index} style={venueLineStyle}>
+                                                <MapPin style={iconStyle} />
+                                                <span>{line.trim()}</span>
+                                            </div>
+                                        ));
+                                    })()}
+                                    {booking.venue_info?.phone_number && (
+                                        <div style={venueLineStyle}>
+                                            <Phone style={iconStyle} />
+                                            <span>{booking.venue_info.phone_number}</span>
+                                        </div>
+                                    )}
+                                    {booking.venue_info?.email && (
+                                        <div style={venueLineStyle}>
+                                            <Mail style={iconStyle} />
+                                            <span>{booking.venue_info.email}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
-                        <div>
-                            <div style={{ fontSize: '11px', fontWeight: '600', color: '#14b8a6', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
-                                Invoice To
+                        {/* Customer Information */}
+                        <div style={venueWrapperStyle}>
+                            <div style={sectionTitleStyle}>
+                                Customer
                             </div>
-                            <div style={{ padding: '20px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                                <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '10px' }}>
+                            <div style={infoBoxStyle}>
+                                <div style={venueNameStyle}>
                                     {booking.user_info?.name || 'Customer'}
                                 </div>
-                                <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.8' }}>
-                                    <div>Email: {booking.user_info?.email || 'Not provided'}</div>
-                                    <div>Phone: {booking.user_info?.phone || 'Not provided'}</div>
-                                    <div style={{ marginTop: '10px' }}>
-                                        <span style={{
-                                            display: 'inline-block',
-                                            padding: '4px 12px',
-                                            borderRadius: '4px',
-                                            fontSize: '11px',
-                                            fontWeight: '700',
-                                            backgroundColor: booking.status === 'confirmed' ? '#dcfce7' :
-                                                booking.status === 'pending' ? '#fef3c7' :
-                                                    booking.status === 'cancelled' ? '#fee2e2' : '#dbeafe',
-                                            color: booking.status === 'confirmed' ? '#166534' :
-                                                booking.status === 'pending' ? '#854d0e' :
-                                                    booking.status === 'cancelled' ? '#991b1b' : '#1e40af'
-                                        }}>
-                                            {booking.status?.toUpperCase() || 'PENDING'}
-                                        </span>
+                                <div style={venueDetailsStyle}>
+                                    <div style={venueLineStyle}>
+                                        <Phone style={iconStyle} />
+                                        <span>{booking.user_info?.phone || 'Not provided'}</span>
                                     </div>
+                                    {booking.user_info?.email && (
+                                        <div style={venueLineStyle}>
+                                            <Mail style={iconStyle} />
+                                            <span>{booking.user_info.email}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -119,130 +374,138 @@ const PrintableReceipt = React.forwardRef(({ booking, logo }, ref) => {
                 </div>
 
                 {/* Booking Information */}
-                <div data-pdf-break="booking-info" style={{ marginBottom: '35px' }}>
-                    <div style={{ padding: '25px', backgroundColor: '#f0fdfa', borderRadius: '8px', border: '1px solid #99f6e4' }}>
-                        <div style={{ fontSize: '11px', fontWeight: '600', color: '#14b8a6', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '15px' }}>
-                            Booking Information
+                <div data-pdf-break="booking-info" style={bookingInfoStyle}>
+                    <div style={{...sectionTitleStyle, marginBottom: '8px', justifyContent: 'space-between', alignItems: 'center'}}>
+                        Booking Details
+                        <span style={{
+                            display: 'inline-block',
+                            padding: '1px 1px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            color: booking.last_update === 'confirmed' ? '#065f46' :
+                                booking.last_update === 'pending' ? '#92400e' :
+                                    booking.last_update === 'cancelled' ? '#991b1b' : '#1e40af'
+                        }}>
+                            {(booking.last_update || 'PENDING').toUpperCase()}
+                        </span>
+                    </div>
+                    <div style={bookingGridStyle}>
+                        <div>
+                            <div style={labelStyle}>Date</div>
+                            <div style={valueStyle}>{formatDate(booking.start_time)}</div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', fontSize: '13px' }}>
-                            <div>
-                                <div style={{ color: '#64748b', marginBottom: '5px' }}>Booking Date</div>
-                                <div style={{ fontWeight: '600', color: '#1e293b' }}>{formatDate(booking.start_time)}</div>
+                        <div>
+                            <div style={labelStyle}>Time</div>
+                            <div style={valueStyle}>
+                                {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                             </div>
-                            <div>
-                                <div style={{ color: '#64748b', marginBottom: '5px' }}>Time Slot</div>
-                                <div style={{ fontWeight: '600', color: '#1e293b' }}>
-                                    {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
-                                </div>
-                            </div>
-                            <div>
-                                <div style={{ color: '#64748b', marginBottom: '5px' }}>Venue</div>
-                                <div style={{ fontWeight: '600', color: '#1e293b' }}>
-                                    {booking.venue_info?.translations?.name || 'N/A'}
-                                </div>
-                            </div>
-                            <div>
-                                <div style={{ color: '#64748b', marginBottom: '5px' }}>Pitch</div>
-                                <div style={{ fontWeight: '600', color: '#1e293b' }}>
-                                    {booking.pitch?.translations?.name || 'N/A'}
-                                </div>
+                        </div>
+                        <div>
+                            <div style={labelStyle}>Type</div>
+                            <div style={valueStyle}>Online Booking</div>
+                        </div>
+                        <div>
+                            <div style={labelStyle}>Payment</div>
+                            <div style={valueStyle}>
+                                {booking.split_payment ? 'Split Payment' : 'Full Payment'}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Items Table */}
-                <div data-pdf-break="table" style={{ marginBottom: '35px' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                        <thead>
-                        <tr style={{ backgroundColor: '#14b8a6', color: 'white' }}>
-                            <th style={{ padding: '15px', textAlign: 'left', fontWeight: '600', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                Description
-                            </th>
-                            <th style={{ padding: '15px', textAlign: 'center', fontWeight: '600', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', width: '80px' }}>
-                                Qty
-                            </th>
-                            <th style={{ padding: '15px', textAlign: 'right', fontWeight: '600', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', width: '110px' }}>
-                                Unit Price
-                            </th>
-                            <th style={{ padding: '15px', textAlign: 'right', fontWeight: '600', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', width: '110px' }}>
-                                Amount
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                            <td style={{ padding: '16px 15px' }}>
-                                <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
-                                    {booking.pitch?.translations?.name || 'Pitch Booking'}
-                                </div>
-                                <div style={{ fontSize: '12px', color: '#64748b' }}>
-                                    {booking.venue_info?.translations?.name || 'Venues'}
-                                </div>
-                            </td>
-                            <td style={{ padding: '16px 15px', textAlign: 'center', color: '#475569' }}>1</td>
-                            <td style={{ padding: '16px 15px', textAlign: 'right', color: '#475569' }}>
-                                {pitchTotal.toFixed(2)} AED
-                            </td>
-                            <td style={{ padding: '16px 15px', textAlign: 'right', fontWeight: '600', color: '#1e293b' }}>
-                                {pitchTotal.toFixed(2)} AED
-                            </td>
-                        </tr>
-
-                        {booking.booking_addons?.map((addon, idx) => (
-                            <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                                <td style={{ padding: '16px 15px' }}>
-                                    <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>
-                                        {addon.addon_info?.addon?.translations?.name || 'Add-on'}
-                                    </div>
-                                    <div style={{ fontSize: '12px', color: '#64748b' }}>Additional Service</div>
-                                </td>
-                                <td style={{ padding: '16px 15px', textAlign: 'center', color: '#475569' }}>
-                                    {addon.quantity}
-                                </td>
-                                <td style={{ padding: '16px 15px', textAlign: 'right', color: '#475569' }}>
-                                    {parseFloat(addon.addon_info?.price || 0).toFixed(2)} AED
-                                </td>
-                                <td style={{ padding: '16px 15px', textAlign: 'right', fontWeight: '600', color: '#1e293b' }}>
-                                    {(parseFloat(addon.addon_info?.price || 0) * addon.quantity).toFixed(2)} AED
-                                </td>
+                {/* Payment Summary Table */}
+                {booking.booking_action && booking.booking_action.length > 0 && (
+                    <div data-pdf-break="payment-summary" style={{ marginBottom: '40px' }}>
+                        <div style={sectionTitleStyle}>
+                            Payment Breakdown
+                        </div>
+                        <table style={tableStyle}>
+                            <thead>
+                            <tr style={tableHeaderStyle}>
+                                <th style={{ ...tableCellStyle, textAlign: 'left' }}>Player</th>
+                                <th style={{ ...tableCellStyle, textAlign: 'right', width: '100px' }}>Subscription</th>
+                                <th style={{ ...tableCellStyle, textAlign: 'right', width: '80px' }}>Fees</th>
+                                <th style={{ ...tableCellStyle, textAlign: 'right', width: '90px' }}>Discount</th>
+                                <th style={{ ...tableCellStyle, textAlign: 'right', width: '120px' }}>Total</th>
                             </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                            {booking.booking_action.map((action, idx) => (
+                                <tr key={idx}>
+                                    <td style={{ ...tableBodyCellStyle, textAlign: 'left' }}>
+                                        <div style={{ fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
+                                            {action.user?.name ? action.user.name.split(' ').slice(0, 2).join(' ') : 'Player'}
+                                        </div>
+                                        <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                                            {action.user?.phone || ''}
+                                        </div>
+                                    </td>
+                                    <td style={{ ...tableBodyCellStyle, textAlign: 'right', color: '#6b7280' }}>
+                                        {(parseFloat(action.amount || 0) - parseFloat(action.fees || 0) - parseFloat(action.discounted_amount || 0)).toFixed(2)} AED
+                                    </td>
+                                    <td style={{ ...tableBodyCellStyle, textAlign: 'right', color: '#10b981', fontWeight: '600' }}>
+                                        +{parseFloat(action.fees || 0).toFixed(2)}
+                                    </td>
+                                    <td style={{ ...tableBodyCellStyle, textAlign: 'right', color: '#ef4444', fontWeight: '600' }}>
+                                        -{parseFloat(action.discounted_amount || 0).toFixed(2)}
+                                    </td>
+                                    <td style={{ ...tableBodyCellStyle, textAlign: 'right' }}>
+                                        <div style={{ fontWeight: '700', color: '#111827', marginBottom: '6px' }}>
+                                            {parseFloat(action.amount || 0).toFixed(2)} AED
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                            <span style={statusBadgeStyle(action.status)}>
+                                                {action.status}
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
-                {/* Total Section */}
-                <div data-pdf-break="totals" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
-                    <div style={{ width: '350px' }}>
-                        <div style={{ padding: '12px 20px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', fontSize: '13px' }}>
-                            <span style={{ color: '#64748b' }}>Subtotal</span>
-                            <span style={{ fontWeight: '600', color: '#475569' }}>{totalAmount.toFixed(2)} AED</span>
-                        </div>
-                        <div style={{ padding: '12px 20px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', fontSize: '13px' }}>
-                            <span style={{ color: '#64748b' }}>Tax (0%)</span>
-                            <span style={{ fontWeight: '600', color: '#475569' }}>0.00 AED</span>
-                        </div>
-                        <div style={{ padding: '12px 20px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', fontSize: '13px' }}>
-                            <span style={{ color: '#64748b' }}>Discount</span>
-                            <span style={{ fontWeight: '600', color: '#475569' }}>0.00 AED</span>
-                        </div>
-                        <div style={{ padding: '18px 20px', display: 'flex', justifyContent: 'space-between', backgroundColor: '#14b8a6', borderRadius: '8px', marginTop: '10px' }}>
-                            <span style={{ fontSize: '16px', fontWeight: '700', color: 'white' }}>Total Amount</span>
-                            <span style={{ fontSize: '20px', fontWeight: '700', color: 'white' }}>
+                {/* Payment Status Summary */}
+                <div data-pdf-break="payment-status" style={{ marginBottom: '40px' }}>
+                    <div style={paymentGridStyle}>
+                        <div style={paymentCardStyle('#b3e6e6', '#b3e6e6')}>
+                            <div style={paymentHeaderStyle}>
+                                <div style={paymentTitleStyle('#374151')}>Total price</div>
+                            </div>
+                            <div style={paymentAmountStyle('#111827')}>
                                 {totalAmount.toFixed(2)} AED
-                            </span>
+                            </div>
                         </div>
+                        <div style={paymentCardStyle('#ecfdf5', '#d1fae5')}>
+                            <div style={paymentHeaderStyle}>
+                                <div style={paymentTitleStyle('#065f46')}>Collected</div>
+                            </div>
+                            <div style={paymentAmountStyle('#065f46')}>
+                                {totalCollected.toFixed(2)} AED
+                            </div>
+                        </div>
+
+                        <div style={paymentCardStyle('#fef3c7', 'rgba(253,230,138,0.16)')}>
+                            <div style={paymentHeaderStyle}>
+                                <div style={paymentTitleStyle('#92400e')}>Pending</div>
+                            </div>
+                            <div style={paymentAmountStyle('#92400e')}>
+                                {totalPending.toFixed(2)} AED
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
             </div>
 
-            {/* FOOTER SECTION - Appears only at the end */}
-            <div data-pdf-section="footer" style={{ padding: '30px 50px' }}>
-
-                <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: '#94a3b8' }}>
-                    <div>Invoice generated on {formatDate(new Date())}</div>
-                    <div>{booking.venue_info?.translations?.name || 'FREE KICK'}</div>
+            {/* FOOTER SECTION */}
+            <div data-pdf-section="footer" style={footerStyle}>
+                <div style={footerContentStyle}>
+                    <div>Last updated {formatDate(booking.updated_at)}</div>
+                    <div>Thank you for your business</div>
                 </div>
             </div>
         </div>

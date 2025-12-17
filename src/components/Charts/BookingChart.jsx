@@ -62,6 +62,35 @@ const BookingChart = ({
         getBookingChartAnalytics(newPeriod);
     };
 
+    // Function to get short day name
+    const getShortDayName = (dayString) => {
+        const dayMapping = {
+            'monday': 'Mon',
+            'tuesday': 'Tue',
+            'wednesday': 'Wed',
+            'thursday': 'Thu',
+            'friday': 'Fri',
+            'saturday': 'Sat',
+            'sunday': 'Sun',
+            'mon': 'Mon',
+            'tue': 'Tue',
+            'wed': 'Wed',
+            'thu': 'Thu',
+            'fri': 'Fri',
+            'sat': 'Sat',
+            'sun': 'Sun',
+            'week_1': 'Wk 1',
+            'week_2': 'Wk 2',
+            'week_3': 'Wk 3',
+            'week_4': 'Wk 4',
+            'week_5': 'Wk 5'
+        };
+
+        // Convert to lowercase and remove any whitespace
+        const key = dayString.toLowerCase().trim().replace(/\s+/g, '_');
+        return dayMapping[key] || dayString.substring(0, 3); // Fallback: first 3 chars
+    };
+
     const transformData = () => {
         if (!bookingChartData?.data) {
             console.log('No valid booking chart data found:', bookingChartData);
@@ -72,35 +101,28 @@ const BookingChart = ({
         const data = bookingChartData.data;
 
         if (isMonthly) {
+            // For monthly view - show weeks
             return Object.entries(data).map(([key, value]) => ({
-                period: key.replace('_', ' ').replace('week', 'Week'),
+                period: key,
                 bookings: Number(value) || 0,
-                day: key.replace('_', ' ').replace('week', 'Wk ') // For chart display
+                day: getShortDayName(key), // Use short names for weeks
+                fullDay: key.replace('_', ' ').replace('week', 'Week ') // Full name for tooltip
             }));
         } else {
-            const dayMapping = {
-                mon: { short: 'Mon', full: 'Monday' },
-                tue: { short: 'Tue', full: 'Tuesday' },
-                wed: { short: 'Wed', full: 'Wednesday' },
-                thu: { short: 'Thu', full: 'Thursday' },
-                fri: { short: 'Fri', full: 'Friday' },
-                sat: { short: 'Sat', full: 'Saturday' },
-                sun: { short: 'Sun', full: 'Sunday' }
-            };
-
-            return Object.entries(data).map(([key, value]) => {
-                const dayInfo = dayMapping[key] || { short: key, full: key };
-                return {
-                    day: dayInfo.short,
-                    bookings: Number(value) || 0,
-                    fullDay: dayInfo.full
-                };
-            });
+            // For weekly view - show days
+            return Object.entries(data).map(([key, value]) => ({
+                period: key,
+                bookings: Number(value) || 0,
+                day: getShortDayName(key), // Short day name for X-axis
+                fullDay: key.charAt(0).toUpperCase() + key.slice(1) // Full day name for tooltip
+            }));
         }
     };
 
     const chartData = transformData();
     console.log('Transformed Chart Data:', chartData);
+
+    // Rest of your component remains the same...
 
     const CustomTooltip = ({ active, payload, coordinate }) => {
         if (active && payload && payload.length) {
@@ -110,7 +132,7 @@ const BookingChart = ({
 
             // Calculate tooltip position to start from the dot
             const dotRadius = 6; // Active dot radius
-            const tooltipHeight = 70; // Approximate height of your tooltip (adjust as needed)
+            const tooltipHeight = 70; // Approximate height of your tooltip
             const pointerHeight = 8; // Height of the triangle pointer
 
             return (
@@ -137,10 +159,10 @@ const BookingChart = ({
                         {/* Tooltip content */}
                         <div className="bg-[#06B6D4] text-white text-sm p-3 rounded-lg shadow-lg whitespace-nowrap mb-1">
                             <p className="font-semibold text-xs mb-1">
-                                {data?.fullName || data?.name}
+                                {data?.fullDay || data?.day}
                             </p>
                             <p className="font-bold text-xs">
-                                ${payload[0]?.value?.toLocaleString() || '0'}
+                                {payload[0]?.value?.toLocaleString() || '0'} bookings
                             </p>
                         </div>
                     </div>
@@ -240,28 +262,20 @@ const BookingChart = ({
                 )}
             </div>
 
-            {/* Chart - FIXED */}
+            {/* Chart */}
             <div className="h-64">
                 {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart
-                            data={[
-                                { day: 'Mon', bookings: 158, fullDay: 'Monday' },
-                                { day: 'Tue', bookings: 273, fullDay: 'Tuesday' },
-                                { day: 'Wed', bookings: 412, fullDay: 'Wednesday' },
-                                { day: 'Thu', bookings: 335, fullDay: 'Thursday' },
-                                { day: 'Fri', bookings: 488, fullDay: 'Friday' },
-                                { day: 'Sat', bookings: 542, fullDay: 'Saturday' },
-                                { day: 'Sun', bookings: 392, fullDay: 'Sunday' }
-                            ]} // USE ACTUAL DATA, not hardcoded
+                            data={chartData}
                             margin={{
                                 top: 10,
                                 right: 20,
                                 left: 20,
                                 bottom: 10,
                             }}
-                            barSize={getBarSize()} // Dynamic bar size
-                            barGap={8} // Space between bars
+                            barSize={getBarSize()}
+                            barGap={8}
                         >
                             <CartesianGrid
                                 strokeDasharray="3 3"
@@ -270,7 +284,7 @@ const BookingChart = ({
                             />
 
                             <XAxis
-                                dataKey="day"
+                                dataKey="day"  // Use the 'day' field which contains short names
                                 axisLine={false}
                                 tickLine={false}
                                 tick={{ fill: '#64748b', fontSize: 12, fontWeight: 500 }}
@@ -287,14 +301,14 @@ const BookingChart = ({
                             />
 
                             <Tooltip
-                                content={<CustomTooltip />} // Use the fixed custom tooltip
+                                content={<CustomTooltip />}
                                 cursor={{ fill: 'rgba(203, 213, 225, 0.1)' }}
                             />
 
                             <Bar
                                 dataKey="bookings"
                                 radius={[4, 4, 0, 0]}
-                                barSize={getBarSize()} // Set bar size here too
+                                barSize={getBarSize()}
                             >
                                 {chartData.map((entry, index) => (
                                     <Cell

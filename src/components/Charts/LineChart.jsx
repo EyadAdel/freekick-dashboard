@@ -17,7 +17,7 @@ const CustomTooltipComponent = ({ active, payload, label }) => {
         return (
             <div className="bg-[#00bfbf] text-white text-sm p-3 rounded-lg shadow-lg">
                 <p className="font-semibold text-xs mb-1">Month: {label}</p>
-                <p className="font-bold text-xs">clicks: {payload[0]?.value || 0}</p>
+                <p className="font-bold text-xs"> {payload[0]?.value || 0}</p>
             </div>
         );
     }

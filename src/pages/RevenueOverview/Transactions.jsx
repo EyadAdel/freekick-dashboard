@@ -162,9 +162,9 @@ function Transactions(props) {
                 const currencySymbol = getCurrencySymbol();
                 return (
                     <span className={`font-semibold ${
-                        row.kind === 'addition' ? 'text-green-600' : 'text-red-600'
+                        row.kind === 'addition' ||  row.kind === 'add'  ? 'text-green-600' : 'text-red-600'
                     }`}>
-                        {row.kind === 'addition' ? '+' : '-'} {currencySymbol} {formattedAmount}
+                        {row.kind === 'addition' ||  row.kind === 'add' ? '+' : '-'} {currencySymbol} {formattedAmount}
                         {/*{row.amount}*/}
                     </span>
                 );
@@ -178,11 +178,11 @@ function Transactions(props) {
             sortKey: 'kind',
             render: (row) => (
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    row.kind === 'addition'
-                        ? 'bg-green-100 text-green-700'
+                    row.kind === 'addition' ||  row.kind === 'add'
+                ? 'bg-green-100 text-green-700'
                         : 'bg-red-100 text-red-700'
                 }`}>
-                    {row.kind === 'addition' ? t('transactions:types.credit') : t('transactions:types.debit')}
+                    { row.kind === 'addition' ||  row.kind === 'add'  ? t('transactions:types.credit') : t('transactions:types.debit')}
                 </span>
             )
         },

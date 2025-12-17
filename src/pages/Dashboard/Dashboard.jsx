@@ -47,7 +47,6 @@ const Dashboard = () => {
         sub_admin: role.is_sub_admin,
         sub_pitch_owner: role.is_sub_pitch_owner,
     };
-
     // Use useMemo for periodOptions to ensure translations update dynamically
     const periodOptions = useMemo(() => [
         { value: 'this_week', label: t('periods.this_week') },
@@ -159,7 +158,7 @@ const Dashboard = () => {
                             showPeriodSelector={true}
                         />
                     </div>
-
+                    {permissions.admin || permissions.sub_admin ?
                     <div className="lg:mb-8 mb-4 gap-5 grid lg:grid-cols-2">
                         <EmiratesChart
                             data={topEmirates || {}}
@@ -178,6 +177,9 @@ const Dashboard = () => {
                             limit={5}
                         />
                     </div>
+                        :
+                        ''
+                    }
                 </aside>
 
                 <div className="lg:w-1/4">
