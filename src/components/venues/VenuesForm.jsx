@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import MainInput from './../MainInput.jsx';
 import MuiPhoneInput from '../../components/common/MuiPhoneInput.jsx';
 
@@ -21,10 +21,8 @@ import { daysOfWeekService } from '../../services/daysOfWeek/daysOfWeekService.j
 import { stuffTypeListService } from '../../services/stuff/stuffService.js';
 import { citiesListService } from '../../services/citiesList/citiesListService.js';
 
-// --- LEAFLET IMPORTS ---
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+// --- GOOGLE MAPS IMPORTS ---
+import { GoogleMap, useJsApiLoader, Marker, Autocomplete } from '@react-google-maps/api';
 
 // --- ICONS & UI ---
 import {
@@ -32,48 +30,23 @@ import {
     Layers, Save, X, Globe, UploadCloud, Trash2,
     CheckSquare, DollarSign, Loader2, Edit, Image as ImageIcon,
     Shield, Check, ChevronDown, Crosshair, Calendar, AlertCircle, Map as MapIcon,
-    RefreshCw
+    RefreshCw, Search
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useSelector } from "react-redux";
 
-// --- LEAFLET ICON FIX ---
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+// --- GOOGLE MAPS CONFIG ---
+const GOOGLE_MAPS_API_KEY = "AIzaSyAeWD187O4GPg0j8V-gEOlHLmPqUPp-TeA";
+const LIBRARIES = ['places']; // Required for search/autocomplete
 
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
+const DEFAULT_CENTER = { lat: 24.4539, lng: 54.3773 }; // Abu Dhabi
 
-// --- MAP THEMES ---
-const MAP_THEMES = {
-    standard: { nameKey: "standard", url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" },
-    satellite: { nameKey: "satellite", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" },
-    dark: { nameKey: "dark", url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" },
-    light: { nameKey: "light", url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" }
+const mapContainerStyle = {
+    width: '100%',
+    height: '100%',
+    borderRadius: '0.75rem'
 };
 
-// --- MAP CLICK HELPER ---
-const LocationMarker = ({ setFormData }) => {
-    useMapEvents({
-        click(e) {
-            setFormData(prev => ({
-                ...prev,
-                latitude: e.latlng.lat,
-                longitude: e.latlng.lng
-            }));
-        },
-    });
-    return null;
-};
-
-const DEFAULT_CENTER = [24.4539, 54.3773];
-
-// --- REUSABLE COMPONENT FOR TRANSLATABLE FIELDS ---
 // --- REUSABLE COMPONENT FOR TRANSLATABLE FIELDS ---
 const TranslationInput = ({
                               label,
@@ -87,33 +60,26 @@ const TranslationInput = ({
                               rows = 3,
                               placeholder
                           }) => {
-    // Safely get appLanguage from localStorage with fallback
     const getAppLanguage = () => {
-        if (typeof window === 'undefined') return 'en'; // Server-side fallback
+        if (typeof window === 'undefined') return 'en';
         try {
             return localStorage.getItem('appLanguage') || 'en';
         } catch (error) {
             console.error('Error accessing localStorage:', error);
-            return 'en'; // Fallback to English
+            return 'en';
         }
     };
 
     const appLanguage = getAppLanguage();
-    const isRTL = appLanguage === 'ar'; // Assuming Arabic is RTL
+    const isRTL = appLanguage === 'ar';
 
-    // Determine button position based on language
     const getButtonPosition = () => {
-        if (label.includes('(AR)') || isRTL) {
-            return 'left-0 ml-1';
-        }
+        if (label.includes('(AR)') || isRTL) return 'left-0 ml-1';
         return 'right-0 mr-1';
     };
 
-    // Loading indicator position (same logic)
     const getLoadingPosition = () => {
-        if (label.includes('(AR)') || isRTL) {
-            return 'left-0 ml-1';
-        }
+        if (label.includes('(AR)') || isRTL) return 'left-0 ml-1';
         return 'right-0 mr-1';
     };
 
@@ -145,7 +111,6 @@ const TranslationInput = ({
                 />
             )}
 
-            {/* Loading Indicator */}
             {loading && !isManual && (
                 <span
                     className={`absolute top-0 ${getLoadingPosition()} text-xs text-blue-500 mt-2 animate-pulse`}
@@ -154,7 +119,6 @@ const TranslationInput = ({
                 </span>
             )}
 
-            {/* Manual Override Reset Button */}
             {isManual && (
                 <button
                     type="button"
@@ -172,10 +136,9 @@ const TranslationInput = ({
 const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
     const { user } = useSelector((state) => state.auth);
     const RoleIsAdmin = user?.role?.is_admin;
-    const { t, i18n } = useTranslation('venueForm'); // Namespace 'venues'
+    const { t, i18n } = useTranslation('venueForm');
 
     // --- STATE ---
-    const [mapTheme, setMapTheme] = useState('standard');
     const [formData, setFormData] = useState({
         translations: { en: { name: "", description: "", address: "", rules_and_regulations: "", cancellation_policy: "" }, ar: { name: "", description: "", address: "", rules_and_regulations: "", cancellation_policy: "" } },
         owner: "", city: "", address: "", contact_name: "", phone_number: "", email: "",
@@ -196,6 +159,16 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         en: { name: false, description: false, address: false, rules_and_regulations: false, cancellation_policy: false },
         ar: { name: false, description: false, address: false, rules_and_regulations: false, cancellation_policy: false }
     });
+
+    // --- GOOGLE MAPS STATE ---
+    const { isLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+        libraries: LIBRARIES
+    });
+    const [map, setMap] = useState(null);
+    const [searchResult, setSearchResult] = useState(null);
+    const autocompleteRef = useRef(null);
 
     const fileInputRef = useRef(null);
 
@@ -243,7 +216,7 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                 advance_booking_days: data.advance_booking_days || "", minimum_cancellation_hours: data.minimum_cancellation_hours || "",
                 available_from: data.available_from || "", available_to: data.available_to || "",
                 allow_split_booking: data.allow_split_booking ?? false, allow_recurring_booking: data.allow_recurring_booking ?? false, is_active: data.is_active ?? false,
-                latitude: data.latitude || "", longitude: data.longitude || "",
+                latitude: data.latitude ? parseFloat(data.latitude) : "", longitude: data.longitude ? parseFloat(data.longitude) : "",
                 images: data.images ? data.images.map(processImage).filter(Boolean) : [],
                 venue_play_type: data.venue_play_type?.map(i => (typeof i === 'object' ? i.id : i)) || [],
                 amenities: data.amenities?.map(i => (typeof i === 'object' ? i.id : i)) || [],
@@ -254,7 +227,7 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         }
     }, [initialData]);
 
-    // --- TRANSLATION HOOKS (Auto Translation API) ---
+    // --- TRANSLATION HOOKS ---
     const { translatedText: arName, loading: loadArName } = useAutoTranslation(activeField === 'en' ? formData.translations.en.name : "", 'ar');
     const { translatedText: enName, loading: loadEnName } = useAutoTranslation(activeField === 'ar' ? formData.translations.ar.name : "", 'en');
     const { translatedText: arDesc, loading: loadArDesc } = useAutoTranslation(activeField === 'en' ? formData.translations.en.description : "", 'ar');
@@ -299,6 +272,61 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
     const handleMultiSelectToggle = (field, id) => setFormData(prev => ({ ...prev, [field]: (prev[field] || []).includes(id) ? prev[field].filter(x => x !== id) : [...(prev[field] || []), id] }));
     const handleAddonToggle = (addonId, checked) => setFormData(prev => ({ ...prev, venue_addons: checked ? [...prev.venue_addons, { addon: addonId, price: "", min_number: 0 }] : prev.venue_addons.filter(item => item.addon !== addonId) }));
     const handleAddonDetailChange = (addonId, key, value) => setFormData(prev => ({ ...prev, venue_addons: prev.venue_addons.map(item => item.addon === addonId ? { ...item, [key]: value } : item) }));
+
+    // --- GOOGLE MAP HANDLERS ---
+    const onLoadMap = useCallback(function callback(map) {
+        setMap(map);
+    }, []);
+
+    const onUnmountMap = useCallback(function callback(map) {
+        setMap(null);
+    }, []);
+
+    const handleMapClick = (e) => {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        setFormData(prev => ({
+            ...prev,
+            latitude: lat,
+            longitude: lng
+        }));
+    };
+
+    const onLoadAutocomplete = (autocomplete) => {
+        autocompleteRef.current = autocomplete;
+    };
+
+    const onPlaceChanged = () => {
+        if (autocompleteRef.current !== null) {
+            const place = autocompleteRef.current.getPlace();
+            const location = place.geometry?.location;
+
+            if (location) {
+                const lat = location.lat();
+                const lng = location.lng();
+
+                // Update form data with new location and address
+                setFormData(prev => ({
+                    ...prev,
+                    latitude: lat,
+                    longitude: lng,
+                    address: place.formatted_address || prev.address, // Optional: auto-fill general address
+                    translations: {
+                        ...prev.translations,
+                        en: { ...prev.translations.en, address: place.formatted_address || prev.translations.en.address }
+                    }
+                }));
+
+                // Pan map
+                if (map) {
+                    map.panTo({ lat, lng });
+                    map.setZoom(15);
+                }
+            } else {
+                console.log("Autocomplete: No geometry available");
+            }
+        }
+    };
 
     const handleImageSelect = (e) => {
         const files = Array.from(e.target.files);
@@ -433,7 +461,7 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     {/* 3. Location & Contact */}
                     <div className="space-y-6">
                         <SectionHeader title={t('titles.locationContact')} icon={MapPin} />
-                        {RoleIsAdmin&& (
+                        {RoleIsAdmin && (
                             <div className="flex flex-col">
                                 <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.owner')} <span
                                     className="text-red-500">*</span></label>
@@ -482,24 +510,56 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                             <MainInput label={t('labels.email')} name="email" type="email" value={formData.email} onChange={handleChange} icon={Mail} />
                         </div>
 
-                        {/* Map */}
+                        {/* GOOGLE MAPS SECTION */}
                         <div className="space-y-4 pt-4 border-t">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2"><Globe size={16} /> {t('labels.mapLocation')}</label>
-                                <div className="flex items-center gap-2">
-                                    <MapIcon size={14} className="text-gray-500" />
-                                    <select className="text-xs border rounded p-1 bg-white focus:border-primary-500 outline-none cursor-pointer" value={mapTheme} onChange={(e) => setMapTheme(e.target.value)}>
-                                        {Object.keys(MAP_THEMES).map(key => (<option key={key} value={key}>{t(`mapThemes.${MAP_THEMES[key].nameKey}`)}</option>))}
-                                    </select>
-                                </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                    <Globe size={16} /> {t('labels.mapLocation')}
+                                </label>
+                                {/* SEARCH BOX */}
+                                {isLoaded && (
+                                    <div className="relative z-10 w-full">
+                                        <Autocomplete
+                                            onLoad={onLoadAutocomplete}
+                                            onPlaceChanged={onPlaceChanged}
+                                        >
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    placeholder={t('placeholders.searchLocation') || "Search for a location"}
+                                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                                                />
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                            </div>
+                                        </Autocomplete>
+                                    </div>
+                                )}
                             </div>
-                            <div className="border rounded-xl overflow-hidden shadow-sm h-[300px] md:h-[400px] w-full z-0 relative">
-                                <MapContainer center={formData.latitude ? [formData.latitude, formData.longitude] : DEFAULT_CENTER} zoom={10} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }} attributionControl={false}>
-                                    <TileLayer url={MAP_THEMES[mapTheme].url} />
-                                    <LocationMarker setFormData={setFormData} />
-                                    {formData.latitude && formData.longitude && (<Marker position={[formData.latitude, formData.longitude]} />)}
-                                </MapContainer>
+
+                            <div className="border rounded-xl overflow-hidden shadow-sm h-[300px] md:h-[400px] w-full relative">
+                                {isLoaded ? (
+                                    <GoogleMap
+                                        mapContainerStyle={mapContainerStyle}
+                                        center={formData.latitude && formData.longitude ? { lat: Number(formData.latitude), lng: Number(formData.longitude) } : DEFAULT_CENTER}
+                                        zoom={formData.latitude ? 15 : 10}
+                                        onLoad={onLoadMap}
+                                        onUnmount={onUnmountMap}
+                                        onClick={handleMapClick}
+                                    >
+                                        {formData.latitude && formData.longitude && (
+                                            <Marker
+                                                position={{ lat: Number(formData.latitude), lng: Number(formData.longitude) }}
+                                                animation={2} // DROP animation
+                                            />
+                                        )}
+                                    </GoogleMap>
+                                ) : (
+                                    <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                                        <Loader2 className="animate-spin text-gray-400" />
+                                    </div>
+                                )}
                             </div>
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 bg-gray-50 p-4 rounded-lg">
                                 <MainInput label={t('labels.latitude')} name="latitude" value={formData.latitude} onChange={handleChange} icon={Crosshair} readOnly placeholder={t('placeholders.selectMap')} />
                                 <MainInput label={t('labels.longitude')} name="longitude" value={formData.longitude} onChange={handleChange} icon={Crosshair} readOnly placeholder={t('placeholders.selectMap')} />
