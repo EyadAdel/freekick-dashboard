@@ -106,7 +106,6 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, pitchDetail
         venue: '',
         parent_pitch: '',
         is_active: true,
-        is_primary: false,
         image: null
     });
 
@@ -208,7 +207,6 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, pitchDetail
                 venue: initialData.venue || '',
                 parent_pitch: initialData.parent_pitch || '',
                 is_active: initialData.is_active ?? true,
-                is_primary: initialData.is_primary ?? false,
                 image: initialData.image ? {
                     id: 'initial_img',
                     preview: processImage(initialData.image),
@@ -365,7 +363,6 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, pitchDetail
                 is_active: formData.is_active,
                 price_per_hour: parseFloat(formData.price_per_hour).toFixed(2),
                 size: parseInt(formData.size, 10),
-                is_primary: formData.is_primary,
                 venue: parseInt(formData.venue, 10),
                 parent_pitch: formData.parent_pitch ? parseInt(formData.parent_pitch, 10) : null,
                 image: finalImage
@@ -603,10 +600,7 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, pitchDetail
                             <input type="checkbox" name="is_active" checked={formData.is_active} onChange={handleChange} className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500" />
                             <span className="text-sm font-medium text-gray-700">{t('settings.is_active')}</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" name="is_primary" checked={formData.is_primary} onChange={handleChange} className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500" />
-                            <span className="text-sm font-medium text-gray-700">{t('settings.is_primary')}</span>
-                        </label>
+
                     </div>
                 </div>
 
