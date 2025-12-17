@@ -12,7 +12,7 @@ import {
     Save, X, UploadCloud, Trash2, Loader2,
     Edit, User, Mail, Phone, MapPin, Percent,
     FileText, Building, CreditCard, Image as ImageIcon,
-    ChevronDown, Check
+    ChevronDown, Check,ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -59,7 +59,18 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        pageLimit: 20,
+        totalPages: 1,
+        totalCount: 0,
+        hasNext: false,
+        hasPrevious: false,
+        nextPage: null,
+        previousPage: null
+    });
+    // After line 56 (or after userDropdownRef)
+    const userListRef = useRef(null);
     // --- CLICK OUTSIDE HANDLER ---
     useEffect(() => {
         function handleClickOutside(event) {
@@ -74,34 +85,98 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     }, [userDropdownRef]);
 
     // --- FETCH USERS (Server-Side Search & Pagination) ---
-    useEffect(() => {
-        // 1. Debounce logic: Only fetch if user stops typing for 500ms
-        const delayDebounceFn = setTimeout(async () => {
-            setLoadingUsers(true);
-            try {
-                // 2. Pass search term and limit to 10
-                const params = {
-                    page_limit: 20,
-                    search: userSearchTerm || '' // Assuming backend uses 'search' param
-                };
+    const fetchUsers = async (page, searchTerm) => {
+        setLoadingUsers(true);
+        try {
+            const params = {
+                page: page,
+                page_limit: pagination.pageLimit,
+                search: searchTerm || ''
+            };
 
-                const data = await authService.getUsers(params);
-                const usersArray = data.data?.results || data.results || (Array.isArray(data.data) ? data.data : []);
+            const data = await authService.getUsers(params);
 
-                setUsers(Array.isArray(usersArray) ? usersArray : []);
-            } catch (error) {
-                console.error("Failed to fetch users", error);
-                // Only show toast if it's not a cancellation/search error to avoid spam
-                // toast.error(t('pitchOwnerForm:messages.usersLoadError'));
-            } finally {
-                setLoadingUsers(false);
+            // Handle different API response structures
+            const usersArray = data.data?.results || data.results || (Array.isArray(data.data) ? data.data : []);
+            const userList = Array.isArray(usersArray) ? usersArray : [];
+
+            setUsers(userList);
+
+            // Update pagination info if available
+            if (data.data || data) {
+                const responseData = data.data || data;
+                setPagination(prev => ({
+                    ...prev,
+                    currentPage: page,
+                    totalPages: Math.ceil((responseData.count || 0) / prev.pageLimit),
+                    totalCount: responseData.count || 0,
+                    hasNext: !!responseData.next,
+                    hasPrevious: !!responseData.previous,
+                    nextPage: responseData.next,
+                    previousPage: responseData.previous
+                }));
             }
-        }, 500); // 500ms delay
+
+        } catch (error) {
+            console.error("Failed to fetch users", error);
+            if (error.response?.status !== 404) {
+                toast.error(t('pitchOwnerForm:messages.usersLoadError'));
+            }
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
+
+    // Debounced search effect - only triggers on search term change
+    useEffect(() => {
+        if (!isUserDropdownOpen) return;
+
+        const delayDebounceFn = setTimeout(() => {
+            fetchUsers(1, userSearchTerm); // Always start from page 1 on new search
+        }, 500);
 
         return () => clearTimeout(delayDebounceFn);
-    }, [userSearchTerm, t]);
+    }, [userSearchTerm, isUserDropdownOpen]);
     // Effect runs whenever userSearchTerm changes
+// Reset pagination when search term changes or dropdown opens
+//     useEffect(() => {
+//         if (isUserDropdownOpen) {
+//             setPagination(prev => ({
+//                 ...prev,
+//                 currentPage: 1
+//             }));
+//         }
+//     }, [userSearchTerm]);
+    // --- PAGINATION HANDLERS ---
+    const handleNextPage = () => {
+        if (pagination.hasNext && !loadingUsers) {
+            const nextPage = pagination.currentPage + 1;
+            fetchUsers(nextPage, userSearchTerm); // ← Direct call
+            scrollToTop();
+        }
+    };
 
+    const handlePageClick = (pageNumber) => {
+        if (!loadingUsers && pageNumber !== pagination.currentPage) {
+            fetchUsers(pageNumber, userSearchTerm); // ← Direct call
+            scrollToTop();
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (pagination.hasPrevious && !loadingUsers) {
+            const nextPage = pagination.currentPage - 1;
+            fetchUsers(nextPage, userSearchTerm); // ← Direct call
+            scrollToTop();
+        }
+    };
+
+
+    const scrollToTop = () => {
+        if (userListRef.current) {
+            userListRef.current.scrollTop = 0;
+        }
+    };
     // --- POPULATE FORM WITH API DATA ---
     useEffect(() => {
         if (initialData) {
@@ -149,21 +224,18 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     };
 
     // --- USER SELECTION HANDLER ---
+    // --- USER SELECTION HANDLER ---
     const handleSelectUser = (user) => {
-        setFormData(prev => ({ ...prev, user_id: user.id }));
+        setFormData(prev => ({
+            ...prev,
+            user_id: user.id,
+            user_info: user.name || user.username || `User ${user.id}`
+        }));
         setIsUserDropdownOpen(false);
-        // We do NOT clear userSearchTerm here so the display logic knows we selected someone via search,
-        // OR we rely on getSelectedUserDisplay to find the ID.
-        // Usually, it's better to clear search term so logic falls back to ID lookup:
         setUserSearchTerm('');
-
-        // However, if the user isn't in the initial "top 10" list anymore, ID lookup might fail visually.
-        // For this specific UI pattern, clearing search is usually safer if we store the user object,
-        // but since we only store ID, let's keep it simple.
 
         if (errors.user_id) setErrors(prev => ({ ...prev, user_id: '' }));
     };
-
     // --- GET DISPLAY NAME ---
     const getSelectedUserDisplay = () => {
         // If the dropdown is open, show exactly what the user is typing
@@ -340,7 +412,105 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
             setIsSubmitting(false);
         }
     };
+// --- RENDER PAGINATION CONTROLS ---
+    const renderPagination = () => {
+        const { currentPage, totalPages, totalCount } = pagination;
 
+        if (totalCount === 0 || totalPages <= 1) return null;
+
+        const pageNumbers = [];
+        const maxVisiblePages = 5;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        return (
+            <div className="px-4 py-3 border-t border-gray-100 bg-white">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                    {/* Results count */}
+                    <div className="text-xs text-gray-600">
+                        {totalCount > 0 && `Showing ${totalCount} users`}
+                    </div>
+
+                    {/* Pagination controls */}
+                    <div className="flex items-center gap-1">
+                        {/* Previous button */}
+                        <button
+                            type="button"
+                            onClick={handlePreviousPage}
+                            disabled={!pagination.hasPrevious || loadingUsers}
+                            className="p-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            title="Previous page"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+
+                        {/* Page numbers */}
+                        <div className="flex items-center gap-1">
+                            {pageNumbers.map(page => (
+                                <button
+                                    key={page}
+                                    type="button"
+                                    onClick={() => handlePageClick(page)}
+                                    disabled={loadingUsers}
+                                    className={`min-w-[32px] h-8 px-2 rounded-md text-sm font-medium transition-colors ${
+                                        currentPage === page
+                                            ? 'bg-primary-600 text-white'
+                                            : 'text-gray-700 hover:bg-gray-100 border border-gray-300'
+                                    } ${loadingUsers ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+
+                            {/* Ellipsis for large page counts */}
+                            {endPage < totalPages && (
+                                <span className="px-2 text-gray-500">...</span>
+                            )}
+                        </div>
+
+                        {/* Next button */}
+                        <button
+                            type="button"
+                            onClick={handleNextPage}
+                            disabled={!pagination.hasNext || loadingUsers}
+                            className="p-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            title="Next page"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    {/* Page info */}
+                    <div className="text-xs text-gray-600">
+                        Page {currentPage} of {totalPages}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+// --- INPUT CHANGE HANDLER FOR SEARCH ---
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setUserSearchTerm(value);
+        setIsUserDropdownOpen(true);
+
+        // Reset to page 1 ONLY when search term changes (not when dropdown opens)
+        if (value !== userSearchTerm) {
+            setPagination(prev => ({
+                ...prev,
+                currentPage: 1
+            }));
+        }
+    };
     return (
         <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
             {/* Header */}
@@ -381,10 +551,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 <input
                                     type="text"
                                     value={getSelectedUserDisplay()}
-                                    onChange={(e) => {
-                                        setUserSearchTerm(e.target.value);
-                                        setIsUserDropdownOpen(true);
-                                    }}
+                                    onChange={handleSearchChange}
                                     onClick={() => {
                                         setIsUserDropdownOpen(true);
                                     }}
@@ -400,40 +567,50 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                             {/* Dropdown List */}
                             {isUserDropdownOpen && (
-                                <div className="absolute z-50 top-[calc(100%+4px)] left-0 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-y-auto">
-                                    {/* Show loader only if explicitly loading */}
-                                    {loadingUsers && users.length === 0 ? (
-                                        <div className="p-4 text-center text-gray-500">
-                                            <Loader2 className="w-5 h-5 animate-spin mx-auto"/>
-                                        </div>
-                                    ) : users.length > 0 ? (
-                                        <ul className="py-1">
-                                            {users.map(user => {
-                                                const isSelected = formData.user_id === user.id;
-                                                return (
-                                                    <li
-                                                        key={user.id}
-                                                        onClick={() => handleSelectUser(user)}
-                                                        className={`px-4 py-3 cursor-pointer hover:bg-primary-50 flex items-center justify-between group ${isSelected ? 'bg-primary-50' : ''}`}
-                                                    >
-                                                        <div className="flex flex-col">
-                                                            <span className={`font-medium ${isSelected ? 'text-primary-700' : 'text-gray-800'}`}>
-                                                                {user.name}
-                                                            </span>
-                                                            <span className="text-xs text-gray-500 flex items-center gap-1">
-                                                                <Phone size={10} /> {user.phone}
-                                                            </span>
-                                                        </div>
-                                                        {isSelected && <Check size={16} className="text-primary-600" />}
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    ) : (
-                                        <div className="p-4 text-center text-gray-500 text-sm">
-                                            {t('pitchOwnerForm:messages.noUsersFound', 'No users found')}
-                                        </div>
-                                    )}
+                                <div className="absolute z-50 top-[calc(100%+4px)] left-0 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-96 overflow-hidden">
+                                    {/* User List */}
+                                    <div className="overflow-y-auto max-h-60" ref={userListRef}>
+                                        {/* Show loader only if explicitly loading */}
+                                        {loadingUsers && users.length === 0 ? (
+                                            <div className="p-4 text-center text-gray-500">
+                                                <Loader2 className="w-5 h-5 animate-spin mx-auto"/>
+                                                <p className="mt-2 text-sm">Loading users...</p>
+                                            </div>
+                                        ) : users.length > 0 ? (
+                                            <ul className="py-1">
+                                                {users.map(user => {
+                                                    const isSelected = formData.user_id === user.id;
+                                                    return (
+                                                        <li
+                                                            key={user.id}
+                                                            onClick={() => handleSelectUser(user)}
+                                                            className={`px-4 py-3 cursor-pointer hover:bg-primary-50 flex items-center justify-between group ${isSelected ? 'bg-primary-50' : ''}`}
+                                                        >
+                                                            <div className="flex flex-col">
+                                    <span className={`font-medium ${isSelected ? 'text-primary-700' : 'text-gray-800'}`}>
+                                        {user.name}
+                                    </span>
+                                                                <span className="text-xs text-gray-500 flex items-center gap-1">
+                                        <Phone size={10} /> {user.phone}
+                                    </span>
+                                                            </div>
+                                                            {isSelected && <Check size={16} className="text-primary-600" />}
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
+                                        ) : (
+                                            <div className="p-4 text-center text-gray-500 text-sm">
+                                                {userSearchTerm
+                                                    ? `No users found for "${userSearchTerm}"`
+                                                    : 'No users available'
+                                                }
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Pagination Controls */}
+                                    {renderPagination()}
                                 </div>
                             )}
                             {errors.user_id && <p className="text-xs text-red-500 mt-1">{errors.user_id}</p>}

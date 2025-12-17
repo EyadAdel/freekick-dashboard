@@ -59,5 +59,11 @@
   },
   "success": {
     "sent": "Notification sent successfully!"
+  },
+  "pagination": {
+    "showing": "Showing {{count}} users",
+    "pageOf": "Page {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next"
   }
 }

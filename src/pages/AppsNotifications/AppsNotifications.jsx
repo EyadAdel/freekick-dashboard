@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, Users, Bell, User, ChevronDown, Search, Loader2 } from 'lucide-react';
+import { Send, Users, Bell, User, ChevronDown, Search, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { notificationService } from "../../services/notificationService.js";
 import { toast } from 'react-toastify';
 import { useDispatch } from "react-redux";
@@ -10,6 +10,7 @@ function AppsNotifications() {
     const { t } = useTranslation('notifications');
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
+    const listRef = useRef(null);
 
     // --- FORM DATA ---
     const [formData, setFormData] = useState({
@@ -25,50 +26,109 @@ function AppsNotifications() {
 
     // --- USERS & SEARCH STATE ---
     const [users, setUsers] = useState([]);
-    const [selectedUsers, setSelectedUsers] = useState([]); // Stores IDs of selected users
-    const [loading, setLoading] = useState(false); // For form submission
-    const [fetchingUsers, setFetchingUsers] = useState(false); // For user list loading
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [fetchingUsers, setFetchingUsers] = useState(false);
     const [showUserSelect, setShowUserSelect] = useState(false);
-    const [searchTerm, setSearchTerm] = useState(''); // New state for search
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // --- PAGINATION STATE ---
+    const [pagination, setPagination] = useState({
+        currentPage: 1,
+        pageLimit: 20,
+        totalPages: 1,
+        totalCount: 0,
+        hasNext: false,
+        hasPrevious: false,
+        nextPage: null,
+        previousPage: null
+    });
 
     // --- TITLE ---
     useEffect(() => {
         dispatch(setPageTitle(t('pageTitle')));
     }, [dispatch, t]);
 
-    // --- FETCH USERS WITH DEBOUNCE ---
+    // --- FETCH USERS FUNCTION (SEPARATED FROM useEffect) ---
+    const fetchUsers = async (page, search) => {
+        setFetchingUsers(true);
+        try {
+            const params = {
+                page: page,
+                page_limit: pagination.pageLimit,
+                search: search || ''
+            };
+
+            const data = await notificationService.fetchUsers(params);
+
+            // Handle paginated response
+            const userList = data.results || data.data?.results || data.data || [];
+
+            // Update users list
+            setUsers(userList);
+
+            // Update pagination info - SET PAGE DIRECTLY
+            setPagination(prev => ({
+                ...prev,
+                currentPage: page, // ← Direct assignment
+                totalPages: Math.ceil((data.count || 0) / prev.pageLimit),
+                totalCount: data.count || 0,
+                hasNext: !!data.next,
+                hasPrevious: !!data.previous,
+                nextPage: data.next,
+                previousPage: data.previous
+            }));
+
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        } finally {
+            setFetchingUsers(false);
+        }
+    };
+
+    // --- FETCH USERS WITH DEBOUNCE (ONLY FOR SEARCH) ---
     useEffect(() => {
         // Only fetch if "Specific Users" is selected
         if (formData.send_kind !== 'other') return;
 
         // Debounce logic: wait 500ms after typing stops
-        const delayDebounceFn = setTimeout(async () => {
-            setFetchingUsers(true);
-            try {
-                // Pass search term and limit
-                const params = {
-                    page_limit: 20,
-                    search: searchTerm || ''
-                };
-
-                const data = await notificationService.fetchUsers(params);
-
-                // Handle various API response structures (array or paginated object)
-                const userList = Array.isArray(data)
-                    ? data
-                    : (data.results || data.data?.results || data.data || []);
-
-                setUsers(userList);
-            } catch (error) {
-                console.error("Error fetching users:", error);
-                // toast.error(t('errors.fetchUsers')); // Optional: minimize toast spam during search
-            } finally {
-                setFetchingUsers(false);
-            }
+        const delayDebounceFn = setTimeout(() => {
+            fetchUsers(1, searchTerm); // Always start from page 1 on new search
         }, 500);
 
         return () => clearTimeout(delayDebounceFn);
-    }, [formData.send_kind, searchTerm]); // Runs when mode changes or user types
+    }, [formData.send_kind, searchTerm]);
+    // ← REMOVED pagination.currentPage from dependencies!
+
+    // --- PAGINATION HANDLERS (CALL fetchUsers DIRECTLY) ---
+    const handleNextPage = () => {
+        if (pagination.hasNext && !fetchingUsers) {
+            const nextPage = pagination.currentPage + 1;
+            fetchUsers(nextPage, searchTerm); // ← Direct call
+            scrollToTop();
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (pagination.hasPrevious && !fetchingUsers) {
+            const prevPage = pagination.currentPage - 1;
+            fetchUsers(prevPage, searchTerm); // ← Direct call
+            scrollToTop();
+        }
+    };
+
+    const handlePageClick = (pageNumber) => {
+        if (!fetchingUsers && pageNumber !== pagination.currentPage) {
+            fetchUsers(pageNumber, searchTerm); // ← Direct call
+            scrollToTop();
+        }
+    };
+
+    const scrollToTop = () => {
+        if (listRef.current) {
+            listRef.current.scrollTop = 0;
+        }
+    };
 
     // --- CLICK OUTSIDE HANDLER ---
     useEffect(() => {
@@ -86,7 +146,6 @@ function AppsNotifications() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showUserSelect]);
-
 
     // --- HANDLERS ---
     const handleInputChange = (e) => {
@@ -110,6 +169,17 @@ function AppsNotifications() {
             setSelectedUsers([]);
             setShowUserSelect(false);
             setSearchTerm('');
+            setUsers([]);
+            setPagination({
+                currentPage: 1,
+                pageLimit: 20,
+                totalPages: 1,
+                totalCount: 0,
+                hasNext: false,
+                hasPrevious: false,
+                nextPage: null,
+                previousPage: null
+            });
         }
     };
 
@@ -164,11 +234,103 @@ function AppsNotifications() {
             setSelectedUsers([]);
             setShowUserSelect(false);
             setSearchTerm('');
+            setUsers([]);
+            setPagination({
+                currentPage: 1,
+                pageLimit: 20,
+                totalPages: 1,
+                totalCount: 0,
+                hasNext: false,
+                hasPrevious: false,
+                nextPage: null,
+                previousPage: null
+            });
         } catch (error) {
             toast.error(error.message || t('errors.sendFailed'));
         } finally {
             setLoading(false);
         }
+    };
+
+    // --- RENDER PAGINATION CONTROLS ---
+    const renderPagination = () => {
+        const { currentPage, totalPages, totalCount } = pagination;
+
+        if (totalCount === 0) return null;
+
+        const pageNumbers = [];
+        const maxVisiblePages = 5;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        return (
+            <div className="px-4 py-3 border-t border-gray-100 bg-white">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    {/* Results count */}
+                    <div className="text-xs text-gray-600">
+                        {t('pagination.showing', { count: totalCount })}
+                    </div>
+
+                    {/* Pagination controls */}
+                    <div className="flex items-center gap-1">
+                        {/* Previous button */}
+                        <button
+                            onClick={handlePreviousPage}
+                            disabled={!pagination.hasPrevious || fetchingUsers}
+                            className="p-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+
+                        {/* Page numbers */}
+                        <div className="flex items-center gap-1">
+                            {pageNumbers.map(page => (
+                                <button
+                                    key={page}
+                                    onClick={() => handlePageClick(page)}
+                                    disabled={fetchingUsers}
+                                    className={`min-w-[32px] h-8 px-2 rounded-md text-sm font-medium transition-colors ${
+                                        currentPage === page
+                                            ? 'bg-primary-600 text-white'
+                                            : 'text-gray-700 hover:bg-gray-100 border border-gray-300'
+                                    } ${fetchingUsers ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+
+                            {/* Ellipsis for large page counts */}
+                            {endPage < totalPages && (
+                                <span className="px-2 text-gray-500">...</span>
+                            )}
+                        </div>
+
+                        {/* Next button */}
+                        <button
+                            onClick={handleNextPage}
+                            disabled={!pagination.hasNext || fetchingUsers}
+                            className="p-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    {/* Page info */}
+                    <div className="text-xs text-gray-600">
+                        {t('pagination.pageOf', { current: currentPage, total: totalPages })}
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -273,7 +435,6 @@ function AppsNotifications() {
                                 {/* Dropdown Content */}
                                 {showUserSelect && (
                                     <div className="mt-2 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
-
                                         {/* Search Input Sticky Header */}
                                         <div className="p-2 border-b border-gray-100 bg-white sticky top-0 z-10">
                                             <div className="relative">
@@ -291,8 +452,8 @@ function AppsNotifications() {
                                             </div>
                                         </div>
 
-                                        {/* List */}
-                                        <div className="max-h-60 overflow-y-auto">
+                                        {/* User List with ref for scrolling */}
+                                        <div className="max-h-60 overflow-y-auto" ref={listRef}>
                                             {fetchingUsers ? (
                                                 <div className="p-6 text-center">
                                                     <Loader2 className="w-6 h-6 text-primary-600 animate-spin mx-auto"/>
@@ -330,6 +491,9 @@ function AppsNotifications() {
                                                 </div>
                                             )}
                                         </div>
+
+                                        {/* Pagination Controls */}
+                                        {renderPagination()}
                                     </div>
                                 )}
                             </div>
