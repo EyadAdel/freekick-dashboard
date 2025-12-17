@@ -243,7 +243,7 @@ const Bookings = () => {
             accessor: 'status',
             sortable: true,
             sortKey: 'status',
-            render: (row) => getStatusBadge(row.status)
+            render: (row) => getStatusBadge(row.last_update)
         },
         {
             header: t('table.actions'),

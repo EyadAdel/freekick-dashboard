@@ -22,8 +22,8 @@
     "bookingType": "Booking Type",
     "paymentMethod": "Payment Method",
     "split": "Split Payment",
-    "solo": "Solo",
-    "individual": "individual",
+    "solo": "Solo Payment",
+    "individual": "Individual",
     "online": "Online",
     "group": "Group"
   },
@@ -61,11 +61,11 @@
     "price": "Price",
     "total": "Total",
     "subtotal": "Subtotal",
-    "tax": "TAX",
+    "tax": "Tax",
     "discount": "Discount",
     "totalAmount": "Total Amount",
     "pitchBooking": "Pitch Booking",
-    "venue": "Venues",
+    "venue": "Venue",
     "addon": "Add-on"
   },
   "confirm": {
@@ -90,11 +90,11 @@
   "venueInfo": {
     "title": "Venue Information",
     "noInfo": "No venue information available",
-    "address": "Bani Yas, Abu Dhabi",
-    "sports": "Soccer, Basketball",
-    "phone": "+1 234 567 8901",
-    "email": "paris.milton@example.com",
-    "type": "7v7, {{type}}",
+    "address": "Address not available",
+    "sports": "Sports",
+    "phone": "Phone not available",
+    "email": "Email not available",
+    "type": "Type: {{type}}",
     "indoor": "Indoor",
     "outdoor": "Outdoor"
   }
