@@ -480,9 +480,10 @@ const Pitches = () => {
     }
 
     return (
-        <div className="w-full px-2 sm:px-0">
+        <div className="w-full px-2 sm:px-8">
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 my-4 sm:my-8">
+            {/*xl:grid-cols-4 grid-cols-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2*/}
+            <div className="grid          grid-cols-3 gap-3 sm:gap-6 xl:gap-10 my-4 sm:my-8">
                 <StatCard
                     title={t('stats.total', 'Total Pitches')}
                     value={totalItems}
