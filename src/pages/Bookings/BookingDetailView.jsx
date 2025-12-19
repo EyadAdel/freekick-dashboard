@@ -165,17 +165,23 @@ const BookingDetailView = () => {
         return date.toLocaleDateString(i18n.language, {
             month: 'short',
             day: 'numeric',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'UTC'  // Add this line
         });
     };
-
     const formatTime = (dateTime) => {
         if (!dateTime) return 'N/A';
-        const date = new Date(dateTime);
-        return date.toLocaleTimeString(i18n.language, {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+
+        // Extract the time part directly from the string
+        const timePart = dateTime.split('T')[1]; // "19:00:00Z"
+        const [hours, minutes] = timePart.split(':');
+
+        // Convert to 12-hour format
+        const hour = parseInt(hours);
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+
+        return `${displayHour.toString().padStart(2, '0')}:${minutes} ${period}`;
     };
 
     const handleCancel = async () => {
@@ -191,7 +197,11 @@ const BookingDetailView = () => {
             if (confirmed) {
                 setIsActionLoading(true);
                 await bookingService.cancelBooking(booking.id);
-                handleRefresh();
+
+                // Show success toast
+                toast.success('booking canceld successfully');
+
+                // handleRefresh();
             }
         } catch (err) {
             toast.error(t('messages.failedCancel') + err.message);
@@ -384,6 +394,13 @@ const BookingDetailView = () => {
                                             {booking.team_player ? t('bookingInfo.group') : t('bookingInfo.individual')}
                                         </span>
                                     </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs sm:text-sm text-gray-600">{t('bookingInfo.matchType')}</span>
+                                        <span className="text-xs sm:text-sm font-semibold text-teal-600">
+                                            {booking.play_vs_team ? t('bookingInfo.teamVsTeam') : t('bookingInfo.regular')}
+                                                </span>
+                                    </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs sm:text-sm text-gray-600">{t('bookingInfo.bookingType')}</span>
                                         <span className="text-xs sm:text-sm font-semibold text-teal-600">{t('bookingInfo.online')}</span>
@@ -564,7 +581,140 @@ const BookingDetailView = () => {
                                 </div>
                             </div>
                         )}
+                        {/* Team vs Team Section */}
+                        {booking.team_player && booking.play_vs_team && (
+                            <div className="border-t border-gray-100 pt-4 p-4 sm:pt-6">
+                                <h4 className="font-semibold text-gray-900 mb-6 flex items-center gap-2 text-sm sm:text-base">
+                                    <Trophy size={18} className="text-teal-600" />
+                                    Team Match
+                                </h4>
 
+                                <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-0 border border-teal-200">
+                                    {/* Team Info */}
+
+
+                                    {/* VS Display */}
+                                    <div className="relative -mt-5">
+                                        <div className="absolute inset-0 flex items-center">
+                                            <div className="w-full "></div>
+                                        </div>
+
+                                        <div className="relative flex justify-center">
+                    <span className="px-6 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
+                        <Trophy size={14} />
+                        TEAM VS TEAM
+                    </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Match Info */}
+                                    <div className="grid w-full grid-cols-3 gap-4 my-5">
+                                            <div className="flex items-center justify-start px-8 mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    {booking.teams[0]?.logo && !imageErrors['team1-logo'] ? (
+                                                        <img
+                                                            src={getImageUrl(booking.teams[0].logo)}
+                                                            alt={booking.teams[0].name || "Team 1"}
+                                                            className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                                                            onError={() => handleImageError('team1-logo')}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 flex items-center justify-center">
+                                <span className="text-white text-lg font-bold">
+                                    {getInitials(booking.teams[0]?.name || "Team 1")}
+                                </span>
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <h5 className="font-bold text-lg text-teal-800">
+                                                            {booking.teams[0]?.name || "Team 1"}
+                                                        </h5>
+                                                        {/*<p className="text-sm text-gray-600">*/}
+                                                        {/*    {booking.teams[0]?.players?.length || 0} Players*/}
+                                                        {/*</p>*/}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <div className="text-center flex flex-col  justify-center items-center">
+                                            <div className="px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs font-semibold mb-2">
+                                                {booking.num_of_players_per_team || booking.max_players || 0} vs {booking.num_of_players_per_team || booking.max_players || 0}
+                                            </div>
+                                            <p className="text-lg font-bold text-gray-900">
+                                                {booking.play_kind?.translations?.name || "Football"}
+                                            </p>
+
+                                        </div>
+                                        <div className="flex items-center justify-end px-8 mb-4">
+                                            <div className="flex items-center gap-3">
+                                                {booking.teams[1]?.logo && !imageErrors['team2-logo'] ? (
+                                                    <img
+                                                        src={getImageUrl(booking.teams[1].logo)}
+                                                        alt={booking.teams[1].name || "Team 2"}
+                                                        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                                                        onError={() => handleImageError('team2-logo')}
+                                                    />
+                                                ) : (
+                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+                                    <span className="text-white text-lg font-bold">
+                                        {getInitials(booking.teams[1]?.name || "Team 2")}
+                                    </span>
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <h5 className="font-bold text-lg text-blue-800">
+                                                        {booking.teams[1]?.name || "Team 2"}
+                                                    </h5>
+                                                    {/*<p className="text-sm text-gray-600">*/}
+                                                    {/*    {booking.teams[1]?.players?.length || 0} Players*/}
+                                                    {/*</p>*/}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                {/* Optional: Show which users are in this team */}
+                                {booking.booking_action?.some(action => action.join_team?.id === booking.team_player?.id) && (
+                                    <div className="mt-6">
+                                        <h5 className="font-semibold text-gray-900 mb-3 text-sm">
+                                            Team Members in Booking
+                                        </h5>
+                                        <div className="flex flex-wrap gap-2">
+                                            {booking.booking_action
+                                                .filter(action => action.join_team?.id === booking.team_player?.id)
+                                                .map((action, idx) => (
+                                                    <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                                                        {action.user?.image && !imageErrors[`team-member-${idx}`] ? (
+                                                            <img
+                                                                src={getImageUrl(action.user.image)}
+                                                                alt={action.user.name}
+                                                                className="w-8 h-8 rounded-full object-cover"
+                                                                onError={() => handleImageError(`team-member-${idx}`)}
+                                                            />
+                                                        ) : (
+                                                            <div className={`w-8 h-8 rounded-full ${getAvatarColor(action.user?.name)} flex items-center justify-center`}>
+                                        <span className="text-white text-xs font-bold">
+                                            {getInitials(action.user?.name)}
+                                        </span>
+                                                            </div>
+                                                        )}
+                                                        <div>
+                                                            <p className="text-xs font-medium text-gray-900">
+                                                                {action.user?.name?.split(' ')[0] || 'Player'}
+                                                            </p>
+                                                            <p className="text-[10px] text-gray-500">
+                                                                Paid: {parseFloat(action.amount || 0).toFixed(2)} AED
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         {booking.notes && (
                             <div className="border-t border-gray-100 pt-4 sm:pt-6 mt-4 sm:mt-6">
                                 <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">{t('customerNote.title')}</h4>

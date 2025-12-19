@@ -4,7 +4,9 @@ export const formatDate = (dateTime, options = {}) => {
     const defaultOptions = {
         day: 'numeric',
         month: 'short',
-        year: 'numeric'
+        year: 'numeric',
+        timeZone: 'UTC'  // Add this line
+
     };
 
     return new Date(dateTime).toLocaleDateString('en-US', { ...defaultOptions, ...options });
@@ -17,7 +19,9 @@ export const formatDateTime = (dateTime) => {
         day: 'numeric',
         month: 'short',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        timeZone: 'UTC'  // Add this line
+
     });
 };
 

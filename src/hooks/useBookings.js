@@ -77,8 +77,9 @@ export const useBookings = (filters = {}, options = {}) => {
  * @param {Object} options - Additional options
  * @returns {Object} - { bookings, isLoading, error, refetch }
  */
+// Updated useCalendarBookings hook - correct version
 export const useCalendarBookings = (filters = {}, options = {}) => {
-    const [bookings, setBookings] = useState(null);
+    const [combinedBookings, setCombinedBookings] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -88,11 +89,25 @@ export const useCalendarBookings = (filters = {}, options = {}) => {
         onError
     } = options;
 
-    const fetchCalendarBookings = async () => {
+    // Function to normalize booking data
+    const normalizeBooking = (booking, isWalkIn = false) => {
+        return {
+            ...booking,
+            is_walk_in: isWalkIn,
+            // Ensure consistent field names
+            start_time: booking.start_time || booking.start_time__date || booking.date,
+            end_time: booking.end_time || booking.end_time__date,
+            user: booking.user || booking.customer,
+            unique_id: `${isWalkIn ? 'walkin' : 'booking'}_${booking.id}`
+        };
+    };
+
+    const fetchCombinedBookings = async () => {
         try {
             setIsLoading(true);
             setError(null);
 
+            // Clean filters for both APIs
             const cleanFilters = Object.entries(filters).reduce((acc, [key, value]) => {
                 if (value !== null && value !== undefined && value !== '' && value !== 'all') {
                     acc[key] = value;
@@ -100,24 +115,60 @@ export const useCalendarBookings = (filters = {}, options = {}) => {
                 return acc;
             }, {});
 
-            const response = await bookingService.getCalendarBookings(cleanFilters);
+            console.log('Fetching with filters:', cleanFilters);
 
-            // Extract data from API response wrapper
-            const data = response.data || response;
-            setBookings(data);
+            // Fetch both APIs in parallel with the SAME filters
+            const [calendarResponse, walkInsResponse] = await Promise.all([
+                bookingService.getCalendarBookings(cleanFilters),
+                bookingService.getWalkIns({
+                    ...cleanFilters,
+                    no_pagination: true  // Ensure we get all walk-ins for the date
+                })
+            ]);
+
+            // Extract data from responses
+            const calendarData = calendarResponse.data || calendarResponse || [];
+            const walkInsData = walkInsResponse.data || walkInsResponse || [];
+
+            console.log('Calendar data received:', calendarData);
+            console.log('Walk-ins data received:', walkInsData);
+
+            // Normalize and combine the data
+            const normalizedCalendar = Array.isArray(calendarData)
+                ? calendarData.map(booking => normalizeBooking(booking, false))
+                : (calendarData.results || []).map(booking => normalizeBooking(booking, false));
+
+            const normalizedWalkIns = Array.isArray(walkInsData)
+                ? walkInsData.map(walkIn => normalizeBooking(walkIn, true))
+                : (walkInsData.results || []).map(walkIn => normalizeBooking(walkIn, true));
+
+            console.log('Normalized calendar:', normalizedCalendar.length);
+            console.log('Normalized walk-ins:', normalizedWalkIns.length);
+
+            // Combine all bookings
+            const allBookings = [...normalizedCalendar, ...normalizedWalkIns];
+
+            // Calculate counts
+            const response = {
+                results: allBookings,
+                count: allBookings.length,
+                calendar_count: normalizedCalendar.length,
+                walkins_count: normalizedWalkIns.length
+            };
+
+            setCombinedBookings(response);
 
             if (onSuccess) {
-                onSuccess(data);
+                onSuccess(response);
             }
         } catch (err) {
-            const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch calendar bookings';
+            console.error('Error fetching combined bookings:', err);
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch bookings';
             setError(errorMessage);
 
             if (onError) {
                 onError(errorMessage);
             }
-
-            console.error('Error fetching calendar bookings:', err);
         } finally {
             setIsLoading(false);
         }
@@ -125,18 +176,17 @@ export const useCalendarBookings = (filters = {}, options = {}) => {
 
     useEffect(() => {
         if (autoFetch) {
-            fetchCalendarBookings();
+            fetchCombinedBookings();
         }
     }, [JSON.stringify(filters)]);
 
     return {
-        bookings,
+        bookings: combinedBookings,
         isLoading,
         error,
-        refetch: fetchCalendarBookings
+        refetch: fetchCombinedBookings
     };
 };
-
 /**
  * Hook to fetch a single booking by ID
  */

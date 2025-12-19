@@ -83,10 +83,10 @@ const Bookings = () => {
             month: 'short',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            timeZone: 'UTC'  // Add this line
         });
     };
-
     const handleViewBooking = (booking) => {
         navigate('/bookings/book-details', {
             state: {

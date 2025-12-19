@@ -13,7 +13,13 @@ import { useTranslation } from 'react-i18next';
 
 class DateFormatter {
     static toAPI(date) {
-        return date.toISOString().split('T')[0];
+        // Convert local date to UTC date string
+        const utcDate = new Date(Date.UTC(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        ));
+        return utcDate.toISOString().split('T')[0];
     }
 
     static toDisplay(date, locale = 'en-US') {
@@ -21,14 +27,16 @@ class DateFormatter {
             weekday: 'short',
             day: 'numeric',
             month: 'short',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'UTC'
         });
     }
 
     static toInput(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+        // Get UTC date components
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
 
@@ -37,29 +45,42 @@ class DateFormatter {
         const timeString = date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
-            hour12: true
+            hour12: true,
+            timeZone: 'UTC'
         });
-
-        // Force LTR for time strings
-        return this.#forceLTR(timeString);
+        return this.forceLTR(timeString);
     }
 
-    // Static method to force LTR direction for time strings
-    static #forceLTR(text) {
+    // Change from private to public static method
+    static forceLTR(text) {
         // Unicode directional isolation characters
         return `\u2066${text}\u2069`;
     }
 
-    // Format time range with proper LTR isolation
     static formatTimeRange(startTime, endTime) {
         const start = this.toAMPM(startTime);
         const end = this.toAMPM(endTime);
         return `${start} - ${end}`;
     }
-}
 
+    // Helper to get UTC date at start of day
+    static getUTCDateStart(localDate) {
+        return new Date(Date.UTC(
+            localDate.getFullYear(),
+            localDate.getMonth(),
+            localDate.getDate(),
+            0, 0, 0, 0
+        ));
+    }
+
+    // Helper to parse input date as UTC
+    static parseUTCDate(dateString) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(Date.UTC(year, month - 1, day));
+    }
+}
 class TimeSlotGenerator {
-    static DEFAULT_START = 8;
+    static DEFAULT_START = 1;
     static DEFAULT_END = 24;
 
     static generate(bookings = []) {
@@ -76,11 +97,12 @@ class TimeSlotGenerator {
         let latest = 0;
 
         bookings.forEach(booking => {
-            const startHour = new Date(booking.start_time).getHours();
-            const endHour = new Date(booking.end_time).getHours();
+            const startHour = new Date(booking.start_time).getUTCHours();  // Use getUTCHours
+            const endHour = new Date(booking.end_time).getUTCHours();      // Use getUTCHours
 
             earliest = Math.min(earliest, Math.max(this.DEFAULT_START, startHour));
-            latest = Math.max(latest, Math.min(23, endHour + 1));
+            // Changed: Allow latest to go up to 24 (midnight) instead of capping at 23
+            latest = Math.max(latest, endHour === 0 ? 24 : endHour + 1);
         });
 
         return {
@@ -89,25 +111,26 @@ class TimeSlotGenerator {
         };
     }
 
+
     static #createSlots(start, end) {
         const slots = [];
         for (let hour = start; hour <= end; hour++) {
-            const displayHour = hour % 12 || 12;
-            const period = hour >= 12 ? 'PM' : 'AM';
+            // Handle hour 24 as 12 AM (midnight)
+            const displayHour = hour === 24 ? 12 : (hour % 12 || 12);
+            const period = (hour >= 12 && hour < 24) ? 'PM' : 'AM';
             const timeString = `${displayHour}:00 ${period}`;
 
             slots.push({
                 hour24: hour,
                 hour12: displayHour,
                 period,
-                display: DateFormatter._forceLTR ? DateFormatter._forceLTR(timeString) : `\u2066${timeString}\u2069`,
+                display: DateFormatter.forceLTR(timeString),
                 key: `slot-${hour}`
             });
         }
         return slots;
     }
 }
-
 class BookingGrouper {
     static byPitch(bookings, t) {
         const groups = {};
@@ -139,8 +162,14 @@ class BookingGrouper {
 
 const PitchImage = ({ imageUrl, pitchName }) => {
     const { t } = useTranslation('calendar');
+    const [hasError, setHasError] = useState(false);
 
-    if (!imageUrl) {
+    // Reset error state when imageUrl changes
+    useEffect(() => {
+        setHasError(false);
+    }, [imageUrl]);
+
+    if (hasError || !imageUrl) {
         return (
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
                 <span className="text-sm font-bold text-white">
@@ -156,21 +185,11 @@ const PitchImage = ({ imageUrl, pitchName }) => {
                 src={imageUrl}
                 alt={pitchName || t('calendar.pitchImage.alt', 'Pitch')}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.parentElement.innerHTML = `
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-                            <span class="text-sm font-bold text-white">
-                                ${pitchName?.charAt(0) || 'P'}
-                            </span>
-                        </div>
-                    `;
-                }}
+                onError={() => setHasError(true)}
             />
         </div>
     );
 };
-
 class BookingPositionCalculator {
     constructor(timeSlots) {
         this.timeSlots = timeSlots;
@@ -180,8 +199,8 @@ class BookingPositionCalculator {
 
     getTopPosition(dateTime) {
         const date = new Date(dateTime);
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
+        const hours = date.getUTCHours();  // Use getUTCHours
+        const minutes = date.getUTCMinutes();  // Use getUTCMinutes
 
         const slotIndex = hours - this.firstHour;
         const positionWithinSlot = minutes / 60;
@@ -199,7 +218,6 @@ class BookingPositionCalculator {
         return (durationInSlots / this.totalSlots) * 100;
     }
 }
-
 class StatusColorMapper {
     static get(status, isActive) {
         if (!isActive) return 'bg-red-50 border-red-300 text-red-700';
@@ -219,29 +237,30 @@ class StatusColorMapper {
 // ============================================================================
 
 const useDatePicker = (initialDate) => {
-    const [selectedDate, setSelectedDate] = useState(initialDate);
-    const [tempDate, setTempDate] = useState(initialDate);
+    const [selectedDate, setSelectedDate] = useState(DateFormatter.getUTCDateStart(initialDate));
+    const [tempDate, setTempDate] = useState(DateFormatter.getUTCDateStart(initialDate));
     const [showPicker, setShowPicker] = useState(false);
     const pickerRef = useRef(null);
     const inputRef = useRef(null);
 
     const changeDate = (days) => {
         const newDate = new Date(selectedDate);
-        newDate.setDate(newDate.getDate() + days);
+        newDate.setUTCDate(newDate.getUTCDate() + days);
         setSelectedDate(newDate);
         setTempDate(newDate);
         setShowPicker(false);
     };
 
     const setToday = () => {
-        const today = new Date();
-        setSelectedDate(today);
-        setTempDate(today);
+        const now = new Date();
+        const todayUTC = DateFormatter.getUTCDateStart(now);
+        setSelectedDate(todayUTC);
+        setTempDate(todayUTC);
         setShowPicker(false);
     };
 
     const handleDateChange = (event) => {
-        const newDate = new Date(event.target.value);
+        const newDate = DateFormatter.parseUTCDate(event.target.value);
         setTempDate(newDate);
         setSelectedDate(newDate);
     };
@@ -472,7 +491,9 @@ const CalendarHeader = React.memo(({
                                        bookingCount,
                                        datePicker,
                                        venueFilter,
-                                       isLoading
+                                       isLoading,
+                                       calendarCount = 0,
+                                       walkinsCount = 0
                                    }) => {
     const { t, i18n } = useTranslation('calendar');
 
@@ -488,6 +509,11 @@ const CalendarHeader = React.memo(({
                             <span className="xl:text-4xl text-xl">{bookingCount}</span>
                             {t('calendar.header.totalBookings', 'Total Bookings')}
                         </p>
+                        <div className="text-xs text-gray-500 flex gap-2">
+                            <span>{t('calendar.header.regular', { count: calendarCount }, `Regular: ${calendarCount}`)}</span>
+                            <span>•</span>
+                            <span>{t('calendar.header.walkIns', { count: walkinsCount }, `Walk-ins: ${walkinsCount}`)}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -562,18 +588,37 @@ const BookingItem = React.memo(({ booking, calculator }) => {
 
     const timeRange = DateFormatter.formatTimeRange(startTime, endTime);
 
+    // Determine if it's a walk-in
+    const isWalkIn = booking.is_walk_in || booking.booking_type === 'walk_in';
+
+    // Determine which navigation path to use
+    const navigateToDetails = () => {
+        if (isWalkIn) {
+            navigate('/bookings/walk-in-details', { state: { walkIn: booking } });
+        } else {
+            navigate('/bookings/book-details', { state: { booking: booking } });
+        }
+    };
+
     return (
         <div
-            className={`absolute w-full bg-primary-50 rounded-xl border-[1px] p-2 px-3 ${StatusColorMapper.get(booking.status, booking.is_active)} cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200`}
+            className={`absolute w-full bg-primary-50 rounded-xl border-[1px] p-2 px-3 ${StatusColorMapper.get(booking.status, booking.is_active)} cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-200 ${isWalkIn ? 'border-dashed border-blue-400 bg-blue-50' : ''}`}
             style={{
                 top: `${top}%`,
                 height: `${height}%`,
                 minHeight: '70px'
             }}
-            onClick={() => navigate('/bookings/book-details', { state: { booking: booking } })}
+            onClick={navigateToDetails}
         >
             <div className="text-sm flex justify-between font-bold mb-1.5 truncate">
-                <span>{booking.user?.name || t('calendar.bookingCard.unknownHost', 'Unknown Host')}</span>
+                <span className="flex items-center gap-1">
+                    {booking.user?.name || booking?.customer_name || t('calendar.bookingCard.unknownHost', 'Unknown Host')}
+                    {isWalkIn && (
+                        <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded">
+                            {t('calendar.bookingCard.walkIn', 'Walk-in')}
+                        </span>
+                    )}
+                </span>
                 {booking.max_players && (
                     <div className="text-xs font-medium opacity-80 whitespace-nowrap">
                         {t('calendar.bookingCard.players', { count: booking.max_players }, `👥 ${booking.max_players} players`)}
@@ -599,7 +644,6 @@ const BookingItem = React.memo(({ booking, calculator }) => {
         </div>
     );
 });
-
 const CalendarGrid = React.memo(({ groupedBookings, timeSlots }) => {
     const { t } = useTranslation('calendar');
 
@@ -711,7 +755,7 @@ const CalendarGrid = React.memo(({ groupedBookings, timeSlots }) => {
                                         unicodeBidi: 'isolate'
                                     }}
                                 >
-                                    {time.display}
+             {DateFormatter.forceLTR(time.display)}
                                 </span>
                             </div>
                         ))}
@@ -755,23 +799,24 @@ const BookingCalendar = () => {
 
     const datePicker = useDatePicker(new Date());
 
-    // Update date picker display when language changes (but don't change the actual date)
+    // Update date picker display when language changes
     useEffect(() => {
         if (prevLanguageRef.current !== i18n.language) {
-            // Language changed, trigger a re-render of date display
-            // We don't need to update the date, just force component to re-render
             prevLanguageRef.current = i18n.language;
         }
     }, [i18n.language]);
 
     const apiFilters = useMemo(() => {
+        const utcDate = DateFormatter.getUTCDateStart(datePicker.selectedDate);
+        const dateString = DateFormatter.toAPI(utcDate);
         const filters = {
-            start_time__date: DateFormatter.toAPI(datePicker.selectedDate),
+            start_time__date: dateString,
             no_pagination: true
         };
         return filters;
     }, [datePicker.selectedDate]);
 
+    // Use the updated hook that combines both APIs
     const { bookings, isLoading, error, refetch } = useCalendarBookings(apiFilters);
     const bookingResults = bookings?.results || [];
 
@@ -810,6 +855,8 @@ const BookingCalendar = () => {
                     datePicker={datePicker}
                     venueFilter={venueFilter}
                     isLoading={isLoading}
+                    calendarCount={bookings?.calendar_count || 0}
+                    walkinsCount={bookings?.walkins_count || 0}
                 />
 
                 {!isLoading && filteredBookings.length === 0 && <EmptyState />}
@@ -824,5 +871,4 @@ const BookingCalendar = () => {
         </div>
     );
 };
-
 export default BookingCalendar;

@@ -23,9 +23,14 @@
     "paymentMethod": "Payment Method",
     "split": "Split Payment",
     "solo": "Solo Payment",
-    "individual": "Individual",
     "online": "Online",
-    "group": "Group"
+    "group": "Group",
+    "team": "Team",
+    "individual": "Individual",
+    "teamMatch": "Team Match",
+    "matchType": "Match Type",
+    "teamVsTeam": "Team vs Team",
+    "regular": "Regular"
   },
   "actions": {
     "email": "Email",
