@@ -205,7 +205,24 @@ const BookingChart = ({
 
     // Find max value for YAxis domain
     const maxBookings = Math.max(...chartData.map(item => item.bookings), 1);
-    const yAxisMax = Math.ceil(maxBookings / 1000) * 1000 || 4000;
+
+    // Calculate dynamic Y-axis max that's close to the largest value
+    // Add 20% padding above the max value for better visualization
+    const padding = maxBookings * 0.2;
+    const rawMax = maxBookings + padding;
+
+    // Round to a nice number based on the scale
+    let yAxisMax;
+    if (rawMax <= 10) {
+        yAxisMax = Math.ceil(rawMax);
+    } else if (rawMax <= 100) {
+        yAxisMax = Math.ceil(rawMax / 10) * 10;
+    } else if (rawMax <= 1000) {
+        yAxisMax = Math.ceil(rawMax / 100) * 100;
+    } else {
+        yAxisMax = Math.ceil(rawMax / 1000) * 1000;
+    }
+
     const yAxisTicks = Array.from({ length: 5 }, (_, i) => (yAxisMax / 4) * i);
 
     // Function to get bar color based on value

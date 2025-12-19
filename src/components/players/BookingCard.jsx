@@ -59,7 +59,8 @@ const BookingCard = ({ booking }) => {
         const options = {
             day: '2-digit',
             month: '2-digit',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'UTC'  // Add this line
         };
 
         // You might want to adjust locale based on i18n language
@@ -73,7 +74,8 @@ const BookingCard = ({ booking }) => {
         const options = {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: i18n.language === 'ar' ? false : true // Arabic typically uses 24-hour format
+            hour12: i18n.language === 'ar' ? false : true, // Arabic typically uses 24-hour format
+            timeZone: 'UTC'  // Add this line
         };
 
         const locale = i18n.language === 'ar' ? 'ar-SA' : 'en-US';

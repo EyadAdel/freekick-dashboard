@@ -92,12 +92,42 @@ const TeamDetailView = () => {
     const formatDate = (dateTime) => {
         if (!dateTime) return 'N/A';
         const date = new Date(dateTime);
-        const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
-        return date.toLocaleDateString(locale, {
+        return date.toLocaleDateString(i18n.language, {
             month: 'short',
             day: 'numeric',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'UTC'  // Add this line
         });
+    };
+    const formatTime = (dateTime) => {
+        if (!dateTime) return 'N/A';
+
+        // Ensure it's a string before splitting
+        const timeString = String(dateTime);
+
+        // Check if it contains 'T' (ISO format)
+        if (!timeString.includes('T')) {
+            // If it's already just time like "19:00:00"
+            const [hours, minutes] = timeString.split(':');
+            if (hours && minutes) {
+                const hour = parseInt(hours);
+                const period = hour >= 12 ? 'PM' : 'AM';
+                const displayHour = hour % 12 || 12;
+                return `${displayHour.toString().padStart(2, '0')}:${minutes} ${period}`;
+            }
+            return 'N/A';
+        }
+
+        // Extract the time part from ISO format
+        const timePart = timeString.split('T')[1]; // "19:00:00Z"
+        const [hours, minutes] = timePart.split(':');
+
+        // Convert to 12-hour format
+        const hour = parseInt(hours);
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+
+        return `${displayHour.toString().padStart(2, '0')}:${minutes} ${period}`;
     };
 
     const formatAmount = (amount) => {
@@ -264,10 +294,10 @@ const TeamDetailView = () => {
             render: (tournament) => (
                 <div className="flex flex-col items-center">
                     <span className="text-sm text-gray-600">
-                        {formatDate(tournament.start_date)}
+                        {formatDate(tournament?.start_date)}
                     </span>
                     <span className="text-xs text-gray-400">
-                        {tournament.start_time}
+                        {formatTime(tournament?.start_time)}
                     </span>
                 </div>
             )
@@ -281,10 +311,10 @@ const TeamDetailView = () => {
             render: (tournament) => (
                 <div className="flex flex-col items-center">
                     <span className="text-sm text-gray-600">
-                        {formatDate(tournament.end_date)}
+                        {formatDate(tournament?.end_date)}
                     </span>
                     <span className="text-xs text-gray-400">
-                        {tournament.end_time}
+                        {formatTime(tournament?.end_time)}
                     </span>
                 </div>
             )

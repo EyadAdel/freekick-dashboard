@@ -111,8 +111,10 @@ export const bookingService = {
     },
 
     // Walk-ins
-    getWalkIns: async () => {
-        const response = await api.get('/booking/walk-ins/');
+    getWalkIns: async (filters) => {
+        const response = await api.get('/booking/walk-ins/',{
+            params: filters
+        });
         return response.data;
     },
 

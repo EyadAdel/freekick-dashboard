@@ -84,7 +84,9 @@ function Teams() {
         return date.toLocaleDateString(locale, {
             year: 'numeric',
             month: 'short',
-            day: 'numeric'
+            day: 'numeric',
+            timeZone: 'UTC'  // Add this line
+
         });
     };
 
