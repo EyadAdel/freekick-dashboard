@@ -99,7 +99,7 @@ const BookingCard = ({ booking }) => {
                     {t('booking.bookingId', 'Booking ID')}:
                     <span className="text-gray-900"> {booking.id}</span>
                 </span>
-                {getStatusBadge(booking.status, booking.accepted_by_pitch_owner)}
+                {getStatusBadge(booking.last_update, booking.accepted_by_pitch_owner)}
             </div>
 
             <div className="p-4">
