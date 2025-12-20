@@ -10,11 +10,11 @@
       "allVenues": "All Venues"
     },
     "datePicker": {
-      "yesterday": "أمس",
-      "tomorrow": "غداً",
-      "close": "✕",
-      "previousDay": "اليوم السابق",
-      "nextDay": "اليوم التالي"
+      "yesterday": "Yesterday",
+      "tomorrow": "Tomorrow",
+      "close": "Close",
+      "previousDay": "Previous Day",
+      "nextDay": "Next Day"
     },
     "loading": {
       "loadingBookings": "Loading bookings..."
