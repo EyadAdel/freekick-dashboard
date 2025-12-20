@@ -182,7 +182,7 @@ const Header = ({ isSidebarCollapsed = false, onMenuClick }) => {
                 <div className="flex items-center justify-between w-full px-4 lg:px-8">
                     {/* Welcome message */}
                     <div className="flex-1 lg:flex-none">
-                        <h1 className="text-lg lg:text-xl font-bold text-gray-800">
+                        <h1 className="text-sm lg:text-xl font-bold text-gray-800">
                             {pageTitle || t('defaultTitle')}
                         </h1>
                         <p className="text-xs text-gray-500 hidden lg:block">

@@ -451,7 +451,7 @@ const Tournaments = () => {
                 // SHOW DASHBOARD
                 <>
                     {/* 1. Stat Cards */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 my-4 sm:my-8">
+                    <div className="grid grid-cols-4 gap-3 sm:gap-6 my-4 sm:my-8">
                         <StatCard
                             title={t('stats.total_tournaments')}
                             value={stats.total}

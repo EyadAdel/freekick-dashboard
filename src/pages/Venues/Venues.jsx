@@ -375,7 +375,7 @@ const Venues = () => {
             width: '60px',
             sortable: true,
             sortKey: 'id',
-            render: (row, i) => <div className="text-gray-600 font-medium text-sm">{(i + 1)}</div>
+            render: (row, i) => <div className="text-gray-600 font-medium text-sm">{row.id}</div>
         },
         {
             header: t('table.headers.venue'),
@@ -488,7 +488,7 @@ const Venues = () => {
     return (
         <div className="w-full px-2 sm:px-0">
             {/* Stats Section with 3 Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 my-4 sm:my-8">
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 my-4 sm:my-8">
                 <StatCard
                     title={t('stats.totalFiltered')}
                     value={totalItems} // Comes from Table Pagination

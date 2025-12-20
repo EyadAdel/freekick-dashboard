@@ -463,7 +463,7 @@ const PitchOwners = () => {
     return (
         <div className="w-full px-2 sm:px-0">
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 my-6">
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 my-6">
                 <StatCard
                     title={t('pitchOwnerPage:stats.total')}
                     value={allStaff.length}

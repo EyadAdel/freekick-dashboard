@@ -2,6 +2,8 @@
   "calendar": {
     "pageTitle": "Calendar",
     "header": {
+      "regular": "Regular: {{count}}",
+      "walkIns": "Walk-ins: {{count}}",
       "totalBookings": "Total Bookings",
       "today": "Today",
       "selectVenue": "Select Venue",

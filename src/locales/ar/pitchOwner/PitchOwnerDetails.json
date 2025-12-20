@@ -3,6 +3,9 @@
     "backButton": "العودة إلى ملاك الملاعب"
   },
   "profile": {
+    "accountInfo": {
+      "title": "مالك الحساب"
+    },
     "status": {
       "active": "نشط",
       "inactive": "غير نشط"
@@ -56,6 +59,7 @@
     }
   },
   "staffActions": {
+    "netBalance": "صافي الرصيد",
     "title": "إجراءات الموظفين",
     "totalBalance": "إجمالي الرصيد",
     "addActionBtn": "إضافة إجراء",

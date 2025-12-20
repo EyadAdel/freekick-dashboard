@@ -40,7 +40,7 @@
   },
   "table": {
     "headers": {
-      "srNo": "Sr.No",
+      "srNo": "ID",
       "venue": "Venue",
       "contactInfo": "Contact Info",
       "location": "Location",

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next'; // Import Hook
+import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 // Changed import to use the helper function
 import { getImageUrl } from '../../utils/imageUtils.js';
@@ -13,7 +13,8 @@ import {
     Mail, Phone, Clock, Globe,
     TrendingUp, TrendingDown,
     Wallet, Plus, FileText,
-    Percent, Edit2, Save, X
+    Percent, Edit2, Save, X,
+    ShieldCheck
 } from 'lucide-react';
 
 // --- Services ---
@@ -27,6 +28,7 @@ import AddActionModal from "../../components/pitchOwners/AddActionModal.jsx";
 import { useContact } from "../../hooks/useContact.js";
 import ArrowIcon from "../common/ArrowIcon.jsx";
 import { toast } from "react-toastify";
+import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 
 // ============================================================================
 // CONSTANTS
@@ -88,6 +90,10 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
     const [tempCommission, setTempCommission] = useState(ownerData.commission_rate ?? 0);
     const [isSaving, setIsSaving] = useState(false);
 
+    // Extract User Info safely
+    const userInfo = ownerData.user_info || {};
+    const userImage = getImageUrl(userInfo.image);
+
     const handleSave = async () => {
         setIsSaving(true);
         await onUpdateCommission(tempCommission);
@@ -115,8 +121,7 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
 
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 z-10">
-                    <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm ${
-                        ownerData.is_active ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
+                    <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm ${ownerData.is_active ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
                     }`}>
                         {ownerData.is_active ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                         {ownerData.is_active ? t('profile.status.active') : t('profile.status.inactive')}
@@ -222,11 +227,41 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
 
             {/* --- Info Row / Actions --- */}
             <div className="px-4 pt-4 pb-2 sm:px-6 bg-white flex-grow">
-                {/* Contact Person */}
+
+                {/* 1. Account Owner Info (With Image Preview) */}
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('profile.accountInfo.title') || "Account Owner"}</h4>
+                <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 border border-gray-100 mb-4 hover:border-primary-200 transition-colors">
+                    {/* User Image Preview Section */}
+                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 border border-gray-200 overflow-hidden shadow-sm">
+                        {userImage ? (
+                            <img
+                                src={userImage}
+                                alt={userInfo.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    // Fallback to icon if image fails to load
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                }}
+                            />
+                        ) : null}
+                        {/* Fallback Icon (displayed if no image or error) */}
+                        <div className={`w-full h-full flex items-center justify-center bg-purple-50 ${userImage ? 'hidden' : 'flex'}`}>
+                            <ShieldCheck className="w-5 h-5 text-purple-600" />
+                        </div>
+                    </div>
+
+                    <div className="">
+                        <p className="text-sm font-bold text-gray-900 truncate">{userInfo.name || 'N/A'}</p>
+                        <p className="text-xs text-gray-500 truncate font-mono" dir="ltr">{userInfo.phone || 'N/A'}</p>
+                    </div>
+                </div>
+
+                {/* 2. Contact Person Info */}
                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('profile.contact.title')}</h4>
                 <div className="flex items-center gap-3 p-2 rounded-lg">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"/>
+                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 truncate">{ownerData.contact_name || 'N/A'}</p>
@@ -321,6 +356,7 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
 const PitchOwnerDetails = () => {
     const { t, i18n } = useTranslation('pitchOwnerDetails'); // Load namespace
     const location = useLocation();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
@@ -328,6 +364,8 @@ const PitchOwnerDetails = () => {
 
     // 1. Retrieve Data & Local State Management
     const [currentOwnerData, setCurrentOwnerData] = useState(location.state?.ownerData?.data || {});
+    console.log(currentOwnerData, "fffffffffffffffffffffffff")
+
 
     // State
     const [bookingStatus, setBookingStatus] = useState('all');
@@ -337,7 +375,8 @@ const PitchOwnerDetails = () => {
     // Staff Actions State
     const [actionsData, setActionsData] = useState([]);
     const [totalActions, setTotalActions] = useState(0);
-    const [actionsTotalBalance, setActionsTotalBalance] = useState(0);
+    const [actionsTotalBalance, setActionsTotalBalance] = useState(0); // Gross Total
+    const [staffCurrentBalance, setStaffCurrentBalance] = useState(0); // NEW: Net Total after commission
     const [currentActionPage, setCurrentActionPage] = useState(1);
     const [loadingActions, setLoadingActions] = useState(false);
     const [actionsLimit, setActionsLimit] = useState(10);
@@ -390,6 +429,8 @@ const PitchOwnerDetails = () => {
                     setActionsData(response.results);
                     setTotalActions(response.count);
                     setActionsTotalBalance(response.total);
+                    // Update the staff current balance (net after commission)
+                    setStaffCurrentBalance(response.staff_current_balance || 0);
                 }
             } catch (error) {
                 console.error("Error fetching staff actions:", error);
@@ -401,8 +442,8 @@ const PitchOwnerDetails = () => {
     }, [currentOwnerData.id, currentActionPage, actionsLimit, refreshTrigger]);
 
     // Handlers
-    const handleContactEmail = () => { if(currentOwnerData.email) handleEmailClick(currentOwnerData.email, `Inquiry regarding ${currentOwnerData.pitch_name}`, "Hello,"); };
-    const handleContactPhone = () => { if(currentOwnerData.contact_phone) handleWhatsAppClick(currentOwnerData.contact_phone, "Hello, I have a question regarding your venue."); };
+    const handleContactEmail = () => { if (currentOwnerData.email) handleEmailClick(currentOwnerData.email, `Inquiry regarding ${currentOwnerData.pitch_name}`, "Hello,"); };
+    const handleContactPhone = () => { if (currentOwnerData.contact_phone) handleWhatsAppClick(currentOwnerData.contact_phone, "Hello, I have a question regarding your venue."); };
     const handleAddAction = () => setIsActionModalOpen(true);
     const handleActionSuccess = () => { setRefreshTrigger(prev => prev + 1); setCurrentActionPage(1); };
 
@@ -412,11 +453,15 @@ const PitchOwnerDetails = () => {
             const response = await pitchOwnersService.updateStaff(currentOwnerData.id, {
                 commission_rate: newRate
             });
-            if(response) {
+            if (response) {
                 setCurrentOwnerData(prev => ({ ...prev, commission_rate: newRate }));
+                // Trigger refresh so API is called again and staff_current_balance updates
+                setRefreshTrigger(prev => prev + 1);
+                toast.success(t('profile.stats.updateSuccess') || "Commission updated successfully");
             }
         } catch (error) {
             console.error("Failed to update commission", error);
+            toast.error(t('errors.updateFailed') || "Failed to update commission");
         }
     };
 
@@ -428,7 +473,8 @@ const PitchOwnerDetails = () => {
     // Table Column Definitions
     const pitchColumns = [
         { header: t('pitches.table.code'), accessor: 'id', align: 'left', render: (pitch) => <span className="text-sm font-semibold text-primary-600">{`P${pitch.id}`}</span> },
-        { header: t('pitches.table.name'), accessor: 'translations.name', render: (pitch) => (
+        {
+            header: t('pitches.table.name'), accessor: 'translations.name', render: (pitch) => (
                 <div className="flex items-center gap-3">
                     {pitch.image ? (
                         <img
@@ -437,13 +483,14 @@ const PitchOwnerDetails = () => {
                             className="w-10 h-10 rounded-lg object-cover"
                             onError={(e) => { e.target.onerror = null; e.target.src = PLACEHOLDER_SVG; }}
                         />
-                    ) : ( <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center"><LayoutGrid className="w-5 h-5 text-primary-600" /></div> )}
+                    ) : (<div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center"><LayoutGrid className="w-5 h-5 text-primary-600" /></div>)}
                     <div>
                         <p className="text-sm font-semibold text-gray-900">{pitch.translations?.name || t('bookings.unknown')}</p>
                         <p className="text-xs text-gray-500">{t('pitches.table.size')}: {pitch.size}</p>
                     </div>
                 </div>
-            )},
+            )
+        },
         { header: t('pitches.table.pricePerHour'), accessor: 'price_per_hour', align: 'center', render: (pitch) => <span className="text-sm font-semibold text-primary-600">{formatAmount(pitch.price_per_hour)}</span> },
         { header: t('pitches.table.bookings'), accessor: 'num_of_bookings', align: 'center', render: (pitch) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{pitch.num_of_bookings}</span> },
         { header: t('pitches.table.status'), accessor: 'is_active', align: 'center', render: (pitch) => <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${pitch.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{pitch.is_active ? t('profile.status.active') : t('profile.status.inactive')}</span> }
@@ -452,21 +499,27 @@ const PitchOwnerDetails = () => {
     const actionColumns = [
         { header: t('staffActions.table.srNo'), accessor: 'id', align: 'left', render: (row, index) => <span className="text-gray-500">{index + 1}</span> },
         { header: t('staffActions.table.description'), accessor: 'description', align: 'left', render: (row) => <span className="text-gray-700 text-sm truncate max-w-[200px] block" title={row.description}>{row.description}</span> },
-        { header: t('staffActions.table.type'), accessor: 'kind', align: 'center', render: (row) => {
+        {
+            header: t('staffActions.table.type'), accessor: 'kind', align: 'center', render: (row) => {
                 const isPositive = ['add', 'addition'].includes(row.kind?.toLowerCase());
                 return (<div className={`flex items-center justify-center gap-2 font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>{isPositive ? <TrendingUp size={16} /> : <TrendingDown size={16} />}<span className="capitalize">{row.kind}</span></div>);
-            }},
-        { header: t('staffActions.table.amount'), accessor: 'amount', align: 'center', render: (row) => {
+            }
+        },
+        {
+            header: t('staffActions.table.amount'), accessor: 'amount', align: 'center', render: (row) => {
                 const isPositive = ['add', 'addition'].includes(row.kind?.toLowerCase());
                 return (<span className={`font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>{isPositive ? '+' : '-'} {formatAmount(row.amount)}</span>);
-            }},
-        { header: t('staffActions.table.balance'), accessor: 'balance', align: 'center', render: (row) => {
+            }
+        },
+        {
+            header: t('staffActions.table.balance'), accessor: 'balance', align: 'center', render: (row) => {
                 const isPositive = ['add', 'addition'].includes(row.kind?.toLowerCase());
                 const amount = parseFloat(row.amount || 0);
                 const lastTotal = parseFloat(row.last_total || 0);
                 const currentBalance = isPositive ? lastTotal + amount : lastTotal - amount;
                 return <span className="text-sm font-bold text-gray-800">{formatAmount(currentBalance)}</span>
-            }},
+            }
+        },
         { header: t('staffActions.table.date'), accessor: 'created_at', align: 'right', render: (row) => <span className="text-gray-500 text-sm">{formatDateTime(row.created_at, currentLang === 'ar' ? 'ar-EG' : 'en-US')}</span> }
     ];
 
@@ -606,10 +659,23 @@ const PitchOwnerDetails = () => {
                                     <FileText className="w-5 h-5 text-gray-700" />
                                     <h3 className="text-lg font-bold text-gray-900">{t('staffActions.title')}</h3>
                                 </div>
-                                <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 rounded-full border border-primary-100">
-                                    <Wallet className="w-4 h-4 text-primary-600" />
-                                    <span className="text-sm text-primary-700">{t('staffActions.totalBalance')}:</span>
-                                    <span className="text-sm font-bold text-primary-800">{formatAmount(actionsTotalBalance)}</span>
+                                <div className="flex items-center gap-3">
+                                    {/* Total Gross Balance */}
+                                    <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full border border-gray-200">
+                                        <span className="text-sm text-gray-600">{t('staffActions.totalBalance')}:</span>
+                                        <span className="text-sm font-bold text-gray-800">{formatAmount(actionsTotalBalance)}</span>
+                                    </div>
+
+                                    {/* Net Staff Balance (After Commission) */}
+                                    <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 rounded-full border border-primary-100">
+                                        <Wallet className="w-4 h-4 text-primary-600" />
+                                        <span className="text-sm text-primary-700 font-medium">
+                                            {t('staffActions.netBalance') || "Net Balance"}:
+                                        </span>
+                                        <span className="text-sm font-bold text-primary-800">
+                                            {formatAmount(staffCurrentBalance)}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">

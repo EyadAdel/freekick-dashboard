@@ -848,7 +848,6 @@ const BookingCalendar = () => {
     return (
         <div className="min-h-screen shadow-sm bg-white rounded-lg lg:px-6 px-2 relative">
             {isLoading && <LoadingOverlay />}
-
             <div className={`xl:max-w-8xl xl:p-5 mx-auto ${isLoading ? 'opacity-50' : ''}`}>
                 <CalendarHeader
                     bookingCount={filteredBookings.length}
