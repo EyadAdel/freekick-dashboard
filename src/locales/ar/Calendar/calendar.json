@@ -3,25 +3,25 @@
     "pageTitle": "التقويم",
     "header": {
       "regular": "عادي: {{count}}",
-      "walkIns": "فوري: {{count}}",
+      "walkIns": "حضور فوري: {{count}}",
       "totalBookings": "إجمالي الحجوزات",
       "today": "اليوم",
-      "selectVenue": "اختر الموقع",
-      "allVenues": "جميع المواقع"
+      "selectVenue": "اختر المكان",
+      "allVenues": "كل الأماكن"
     },
     "datePicker": {
       "yesterday": "أمس",
       "tomorrow": "غداً",
-      "close": "✕",
-      "previousDay": "Previous day",
-      "nextDay": "Next day"
+      "close": "إغلاق",
+      "previousDay": "اليوم السابق",
+      "nextDay": "اليوم التالي"
     },
     "loading": {
-      "loadingBookings": "جاري تحميل الحجوزات..."
+      "loadingBookings": "جارِ تحميل الحجوزات..."
     },
     "emptyState": {
       "title": "لا توجد حجوزات",
-      "description": "لا توجد حجوزات للتاريخ المحدد."
+      "description": "لا توجد حجوزات في التاريخ المحدد."
     },
     "errorState": {
       "errorLoading": "خطأ في تحميل الحجوزات: {{error}}",
@@ -30,7 +30,7 @@
     "grid": {
       "time": "الوقت",
       "unknownPitch": "ملعب غير معروف",
-      "venueFormat": "الموقع {{id}}"
+      "venueFormat": "المكان {{id}}"
     },
     "bookingCard": {
       "unknownHost": "مضيف غير معروف",
@@ -59,8 +59,7 @@
       "pm": "م"
     },
     "pitchImage": {
-      "alt": "ملعب"
+      "alt": "الملعب"
     }
-
   }
 }
