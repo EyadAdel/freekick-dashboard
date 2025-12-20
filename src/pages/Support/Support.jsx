@@ -271,7 +271,7 @@ const Support = () => {
         <div className="w-full px-2 sm:px-4 py-4">
 
             {/* Statistics Section */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6">
+            <div className="grid grid-cols-4 gap-3 sm:gap-6 mb-6">
                 <StatCard
                     title={t('stats.total')}
                     value={stats.total}

@@ -377,7 +377,7 @@ const VenueEditRequests = () => {
     return (
         <div className="w-full md:px-2 px-0 sm:px-0">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 my-6">
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 my-6">
                 <StatCard
                     title={t('stats.total')}
                     value={stats.total}

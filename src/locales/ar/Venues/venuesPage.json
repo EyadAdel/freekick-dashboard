@@ -40,7 +40,7 @@
   },
   "table": {
     "headers": {
-      "srNo": "م",
+      "srNo": "رقم",
       "venue": "الملعب",
       "contactInfo": "معلومات الاتصال",
       "location": "الموقع",

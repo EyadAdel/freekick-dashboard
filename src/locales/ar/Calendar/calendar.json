@@ -2,6 +2,8 @@
   "calendar": {
     "pageTitle": "التقويم",
     "header": {
+      "regular": "عادي: {{count}}",
+      "walkIns": "فوري: {{count}}",
       "totalBookings": "إجمالي الحجوزات",
       "today": "اليوم",
       "selectVenue": "اختر الموقع",

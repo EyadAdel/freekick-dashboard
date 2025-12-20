@@ -82,7 +82,7 @@ export const pitchOwnersService = {
         try {
             const response = await api.get(ACTIONS_BASE_URL, {
                 params: {
-                    stuff: id,
+                    staff__id: id,
                     page: page,
                     page_limit: actionsLimit
                 }

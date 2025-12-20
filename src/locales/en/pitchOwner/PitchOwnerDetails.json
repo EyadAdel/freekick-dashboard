@@ -3,6 +3,9 @@
     "backButton": "Back to Pitch Owners"
   },
   "profile": {
+    "accountInfo": {
+      "title": "Account Owner"
+    },
     "status": {
       "active": "Active",
       "inactive": "Inactive"
@@ -56,6 +59,7 @@
     }
   },
   "staffActions": {
+    "netBalance": "Net Balance",
     "title": "Staff Actions",
     "totalBalance": "Total Balance",
     "addActionBtn": "Add Action",
