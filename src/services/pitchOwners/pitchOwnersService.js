@@ -78,15 +78,24 @@ export const pitchOwnersService = {
     // ==========================
 
     // GET /user/staff-actions/
-    getAllStaffActions: async (id, page = 1, actionsLimit) => {
+    getAllStaffActions: async (id, page = 1, actionsLimit, startDate, endDate) => {
         try {
-            const response = await api.get(ACTIONS_BASE_URL, {
-                params: {
-                    staff__id: id,
-                    page: page,
-                    page_limit: actionsLimit
-                }
-            });
+            const params = {
+                staff__id: id,
+                page: page,
+                page_limit: actionsLimit,
+            };
+
+            // If both dates exist, use the comma-separated range parameter
+            if (startDate && endDate) {
+                params.created_at__date__range = `${startDate},${endDate}`;
+            } else {
+                // Fallback to individual bounds if only one date is selected
+                if (startDate) params.created_at__date__gte = startDate;
+                if (endDate) params.created_at__date__lte = endDate;
+            }
+
+            const response = await api.get(ACTIONS_BASE_URL, { params });
             return response.data;
         } catch (error) {
             console.error(error);
@@ -94,7 +103,6 @@ export const pitchOwnersService = {
             throw error;
         }
     },
-
     // POST /user/staff-actions/
     createStaffAction: async (data) => {
         try {

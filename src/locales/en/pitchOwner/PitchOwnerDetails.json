@@ -1,11 +1,8 @@
 {
   "header": {
-    "backButton": "Back to Pitch Owners"
+    "backButton": "Back"
   },
   "profile": {
-    "accountInfo": {
-      "title": "Account Owner"
-    },
     "status": {
       "active": "Active",
       "inactive": "Inactive"
@@ -15,10 +12,14 @@
       "pitches": "Pitches",
       "estRevenue": "Est. Revenue",
       "commission": "Commission",
-      "rate": "Rate %"
+      "rate": "Rate",
+      "updateSuccess": "Commission updated successfully"
+    },
+    "accountInfo": {
+      "title": "Account Owner"
     },
     "contact": {
-      "title": "Contact Details",
+      "title": "Contact Information",
       "contactPerson": "Contact Person",
       "noEmail": "No email provided",
       "noPhone": "No phone provided",
@@ -30,16 +31,16 @@
     }
   },
   "bookings": {
-    "title": "Bookings",
+    "title": "Recent Bookings",
+    "user": "User",
+    "unknown": "Unknown",
+    "noBookings": "No bookings found for this owner.",
     "filters": {
-      "all": "All Status",
+      "all": "All Bookings",
       "completed": "Completed",
       "pending": "Pending",
       "cancelled": "Cancelled"
     },
-    "user": "User",
-    "unknown": "Unknown",
-    "noBookings": "No bookings found for this filter.",
     "statusLabels": {
       "completed": "Completed",
       "pending": "Pending",
@@ -47,25 +48,25 @@
     }
   },
   "pitches": {
-    "title": "Registered Pitches",
-    "noPitches": "No pitches registered yet.",
+    "title": "Owned Pitches",
+    "noPitches": "No pitches found.",
     "table": {
-      "code": "Pitch Code",
+      "code": "Code",
       "name": "Pitch Name",
       "size": "Size",
-      "pricePerHour": "Price / Hr",
+      "pricePerHour": "Price/Hr",
       "bookings": "Bookings",
       "status": "Status"
     }
   },
   "staffActions": {
-    "netBalance": "Net Balance",
-    "title": "Staff Actions",
+    "title": "Staff Financial Actions",
     "totalBalance": "Total Balance",
+    "netBalance": "Net Balance",
     "addActionBtn": "Add Action",
-    "perPage": "{{count}} / page",
+    "perPage": "{{count}} per page",
     "table": {
-      "srNo": "SR.No",
+      "srNo": "Sr No.",
       "description": "Description",
       "type": "Type",
       "amount": "Amount",
@@ -73,27 +74,14 @@
       "date": "Date"
     }
   },
-  "actionModal": {
-    "title": "Add Staff Action",
-    "labels": {
-      "actionType": "Action Type",
-      "amount": "Amount",
-      "description": "Description",
-      "descPlaceholder": "Enter details about this action..."
-    },
-    "validation": {
-      "kindRequired": "Action type is required",
-      "amountRequired": "Valid amount is required",
-      "descRequired": "Description is required"
-    },
-    "buttons": {
-      "cancel": "Cancel",
-      "saving": "Saving...",
-      "submit": "Submit Action"
-    }
+  "common": {
+    "loading": "Loading data...",
+    "showing": "Showing",
+    "of": "of"
   },
   "errors": {
-    "notFound": "Pitch Owner data not found",
-    "goBack": "Go Back"
+    "notFound": "Owner details not found.",
+    "goBack": "Go Back",
+    "updateFailed": "Failed to update commission"
   }
 }
