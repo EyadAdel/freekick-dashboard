@@ -1,11 +1,8 @@
 {
   "header": {
-    "backButton": "العودة إلى ملاك الملاعب"
+    "backButton": "رجوع"
   },
   "profile": {
-    "accountInfo": {
-      "title": "مالك الحساب"
-    },
     "status": {
       "active": "نشط",
       "inactive": "غير نشط"
@@ -13,16 +10,20 @@
     "stats": {
       "bookings": "الحجوزات",
       "pitches": "الملاعب",
-      "estRevenue": "الإيرادات المقدرة",
+      "estRevenue": "الإيرادات التقديرية",
       "commission": "العمولة",
-      "rate": "النسبة %"
+      "rate": "النسبة",
+      "updateSuccess": "تم تحديث العمولة بنجاح"
+    },
+    "accountInfo": {
+      "title": "صاحب الحساب"
     },
     "contact": {
-      "title": "تفاصيل الاتصال",
+      "title": "معلومات التواصل",
       "contactPerson": "الشخص المسؤول",
-      "noEmail": "لا يوجد بريد إلكتروني",
-      "noPhone": "لا يوجد رقم هاتف",
-      "emailBtn": "بريد إلكتروني",
+      "noEmail": "البريد الإلكتروني غير متوفر",
+      "noPhone": "رقم الهاتف غير متوفر",
+      "emailBtn": "إرسال إيميل",
       "whatsappBtn": "واتساب",
       "location": "الموقع",
       "addressNA": "العنوان غير متوفر",
@@ -30,16 +31,16 @@
     }
   },
   "bookings": {
-    "title": "الحجوزات",
-    "filters": {
-      "all": "كل الحالات",
-      "completed": "مكتمل",
-      "pending": "قيد الانتظار",
-      "cancelled": "ملغي"
-    },
+    "title": "الحجوزات الأخيرة",
     "user": "المستخدم",
     "unknown": "غير معروف",
-    "noBookings": "لا توجد حجوزات لهذا التصنيف.",
+    "noBookings": "لا توجد حجوزات لهذا المالك.",
+    "filters": {
+      "all": "كل الحجوزات",
+      "completed": "مكتملة",
+      "pending": "قيد الانتظار",
+      "cancelled": "ملغاة"
+    },
     "statusLabels": {
       "completed": "مكتمل",
       "pending": "قيد الانتظار",
@@ -47,25 +48,25 @@
     }
   },
   "pitches": {
-    "title": "الملاعب المسجلة",
-    "noPitches": "لا توجد ملاعب مسجلة حتى الآن.",
+    "title": "الملاعب المملوكة",
+    "noPitches": "لا توجد ملاعب.",
     "table": {
-      "code": "كود الملعب",
+      "code": "الكود",
       "name": "اسم الملعب",
       "size": "الحجم",
-      "pricePerHour": "سعر / ساعة",
+      "pricePerHour": "السعر/ساعة",
       "bookings": "الحجوزات",
       "status": "الحالة"
     }
   },
   "staffActions": {
-    "netBalance": "صافي الرصيد",
-    "title": "إجراءات الموظفين",
+    "title": "الإجراءات المالية للموظفين",
     "totalBalance": "إجمالي الرصيد",
+    "netBalance": "صافي الرصيد",
     "addActionBtn": "إضافة إجراء",
-    "perPage": "{{count}} / صفحة",
+    "perPage": "{{count}} لكل صفحة",
     "table": {
-      "srNo": "ت",
+      "srNo": "م.",
       "description": "الوصف",
       "type": "النوع",
       "amount": "المبلغ",
@@ -73,27 +74,14 @@
       "date": "التاريخ"
     }
   },
-  "actionModal": {
-    "title": "إضافة إجراء موظف",
-    "labels": {
-      "actionType": "نوع الإجراء",
-      "amount": "المبلغ",
-      "description": "الوصف",
-      "descPlaceholder": "أدخل تفاصيل حول هذا الإجراء..."
-    },
-    "validation": {
-      "kindRequired": "نوع الإجراء مطلوب",
-      "amountRequired": "مبلغ صالح مطلوب",
-      "descRequired": "الوصف مطلوب"
-    },
-    "buttons": {
-      "cancel": "إلغاء",
-      "saving": "جاري الحفظ...",
-      "submit": "إرسال الإجراء"
-    }
+  "common": {
+    "loading": "جاري تحميل البيانات...",
+    "showing": "عرض",
+    "of": "من"
   },
   "errors": {
-    "notFound": "بيانات مالك الملعب غير موجودة",
-    "goBack": "رجوع"
+    "notFound": "تفاصيل المالك غير موجودة.",
+    "goBack": "الرجوع للخلف",
+    "updateFailed": "فشل تحديث العمولة"
   }
 }

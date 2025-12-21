@@ -14,11 +14,14 @@ import {
     TrendingUp, TrendingDown,
     Wallet, Plus, FileText,
     Percent, Edit2, Save, X,
-    ShieldCheck
+    ShieldCheck, Loader2,
+    ChevronLeft, ChevronRight,
+    FilterX
 } from 'lucide-react';
 
 // --- Services ---
 import { pitchOwnersService } from '../../services/pitchOwners/pitchOwnersService.js';
+import { bookingService } from '../../services/bookings/bookingService.js';
 
 // --- Components ---
 import MainTable from "../../components/MainTable.jsx";
@@ -34,7 +37,6 @@ import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
 // CONSTANTS
 // ============================================================================
 
-// Static SVG Placeholder
 const PLACEHOLDER_SVG = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect fill='%23f3f4f6' width='400' height='300'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='20' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ENo Image%3C/text%3E%3C/svg%3E";
 
 // ============================================================================
@@ -61,7 +63,6 @@ const formatAmount = (amount) => {
 // SUB-COMPONENTS
 // ============================================================================
 
-// --- Header Component ---
 const Header = ({ onBack, t }) => (
     <div className="bg-white shadow-sm top-0">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -78,19 +79,15 @@ const Header = ({ onBack, t }) => (
     </div>
 );
 
-// --- OwnerProfileCard Component ---
 const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookingsCount, onEmail, onWhatsapp, isAdmin, onUpdateCommission, t, currentLang }) => {
 
-    // Logic: Use cover_image for background, profile_image for logo
     const coverImage = getImageUrl(ownerData.cover_image) || getImageUrl(ownerData.profile_image) || PLACEHOLDER_SVG;
     const logoImage = getImageUrl(ownerData.profile_image) || PLACEHOLDER_SVG;
 
-    // Editable Commission State
     const [isEditing, setIsEditing] = useState(false);
     const [tempCommission, setTempCommission] = useState(ownerData.commission_rate ?? 0);
     const [isSaving, setIsSaving] = useState(false);
 
-    // Extract User Info safely
     const userInfo = ownerData.user_info || {};
     const userImage = getImageUrl(userInfo.image);
 
@@ -108,9 +105,7 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group h-full flex flex-col">
-            {/* Image & Overlay */}
             <div className="relative h-48 sm:h-56 w-full shrink-0">
-                {/* Background Cover */}
                 <img
                     src={coverImage}
                     alt="Cover"
@@ -119,7 +114,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
 
-                {/* Status Badge */}
                 <div className="absolute top-4 right-4 rtl:right-auto rtl:left-4 z-10">
                     <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md shadow-sm ${ownerData.is_active ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
                     }`}>
@@ -128,7 +122,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                     </span>
                 </div>
 
-                {/* Logo Overlay */}
                 <div className="absolute -bottom-8 left-4 rtl:left-auto rtl:right-4 z-20">
                     <div className="w-20 h-20 rounded-full border-4 border-white shadow-md overflow-hidden bg-white">
                         <img
@@ -141,7 +134,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                 </div>
             </div>
 
-            {/* Title Section */}
             <div className="pt-10 px-4 sm:px-6 pb-2">
                 <h2 className="text-xl sm:text-2xl font-bold leading-tight text-gray-900 mb-1">
                     {ownerData.pitch_name}
@@ -152,7 +144,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                 </div>
             </div>
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-2 border-y border-gray-100 divide-x divide-gray-100 rtl:divide-x-reverse mt-2">
                 <div className="p-3 sm:p-4 flex flex-col items-center justify-center text-center">
                     <span className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">{t('profile.stats.bookings')}</span>
@@ -164,10 +155,8 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                 </div>
             </div>
 
-            {/* Financial Highlight */}
             <div className="px-4 p-3 sm:px-6 bg-gray-50/50 border-b border-gray-100">
                 <div className="flex flex-col gap-4">
-                    {/* Est Revenue */}
                     <div className="text-center">
                         <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">{t('profile.stats.estRevenue')}</p>
                         <div className="text-2xl sm:text-3xl font-extrabold text-primary-600 flex items-center justify-center gap-1">
@@ -175,7 +164,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                         </div>
                     </div>
 
-                    {/* Commission Rate (Admin Only & Editable) */}
                     {isAdmin && (
                         <div className="flex flex-col items-center justify-center gap-2">
                             {!isEditing ? (
@@ -225,13 +213,9 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                 </div>
             </div>
 
-            {/* --- Info Row / Actions --- */}
             <div className="px-4 pt-4 pb-2 sm:px-6 bg-white flex-grow">
-
-                {/* 1. Account Owner Info (With Image Preview) */}
                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('profile.accountInfo.title') || "Account Owner"}</h4>
                 <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 border border-gray-100 mb-4 hover:border-primary-200 transition-colors">
-                    {/* User Image Preview Section */}
                     <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 border border-gray-200 overflow-hidden shadow-sm">
                         {userImage ? (
                             <img
@@ -239,13 +223,11 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                                 alt={userInfo.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                    // Fallback to icon if image fails to load
                                     e.target.style.display = 'none';
                                     e.target.nextSibling.style.display = 'flex';
                                 }}
                             />
                         ) : null}
-                        {/* Fallback Icon (displayed if no image or error) */}
                         <div className={`w-full h-full flex items-center justify-center bg-purple-50 ${userImage ? 'hidden' : 'flex'}`}>
                             <ShieldCheck className="w-5 h-5 text-purple-600" />
                         </div>
@@ -257,7 +239,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                     </div>
                 </div>
 
-                {/* 2. Contact Person Info */}
                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('profile.contact.title')}</h4>
                 <div className="flex items-center gap-3 p-2 rounded-lg">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
@@ -269,7 +250,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                     </div>
                 </div>
 
-                {/* Email Action */}
                 <div className="flex items-center gap-3 p-2 rounded-lg">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                         <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
@@ -281,7 +261,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                     </div>
                 </div>
 
-                {/* Phone Action */}
                 <div className="flex items-center gap-3 p-2 rounded-lg">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
                         <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
@@ -294,9 +273,7 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                 </div>
             </div>
 
-            {/* --- Buttons & Details --- */}
             <div className="px-4 sm:px-6 sm:pb-6 space-y-4 bg-white flex-grow">
-                {/* Contact Buttons */}
                 <div className="space-y-2 pt-2 border-t border-gray-100">
                     <div className="grid grid-cols-2 gap-2 mt-4">
                         {ownerData.email && (
@@ -322,7 +299,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
 
                 <div className="w-full h-px bg-gray-100"></div>
 
-                {/* Address */}
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
                         <MapPin className="w-4 h-4 text-gray-500" />
@@ -333,7 +309,6 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
                     </div>
                 </div>
 
-                {/* Joined Date */}
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
                         <Calendar className="w-4 h-4 text-gray-500" />
@@ -354,38 +329,42 @@ const OwnerProfileCard = ({ ownerData, totalRevenue, totalPitches, totalBookings
 // MAIN COMPONENT
 // ============================================================================
 const PitchOwnerDetails = () => {
-    const { t, i18n } = useTranslation('pitchOwnerDetails'); // Load namespace
+    const { t, i18n } = useTranslation('pitchOwnerDetails');
     const location = useLocation();
-    const dispatch = useDispatch();
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.auth);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
     const currentLang = i18n.language;
 
-    // 1. Retrieve Data & Local State Management
     const [currentOwnerData, setCurrentOwnerData] = useState(location.state?.ownerData?.data || {});
-    console.log(currentOwnerData, "fffffffffffffffffffffffff")
 
-
-    // State
+    // --- Bookings State ---
+    const [bookings, setBookings] = useState([]);
+    const [totalBookings, setTotalBookings] = useState(0);
+    const [currentBookingPage, setCurrentBookingPage] = useState(1);
+    const [loadingBookings, setLoadingBookings] = useState(false);
     const [bookingStatus, setBookingStatus] = useState('all');
+    const bookingsPerPage = 10;
+
     const [currentPitchPage, setCurrentPitchPage] = useState(1);
     const pitchesPerPage = 5;
 
-    // Staff Actions State
+    // --- Actions State ---
     const [actionsData, setActionsData] = useState([]);
     const [totalActions, setTotalActions] = useState(0);
-    const [actionsTotalBalance, setActionsTotalBalance] = useState(0); // Gross Total
-    const [staffCurrentBalance, setStaffCurrentBalance] = useState(0); // NEW: Net Total after commission
+    const [actionsTotalBalance, setActionsTotalBalance] = useState(0);
+    const [staffCurrentBalance, setStaffCurrentBalance] = useState(0);
     const [currentActionPage, setCurrentActionPage] = useState(1);
     const [loadingActions, setLoadingActions] = useState(false);
     const [actionsLimit, setActionsLimit] = useState(10);
 
-    // Modal and Refresh State
+    // --- Added Date Range State ---
+    const [actionStartDate, setActionStartDate] = useState('');
+    const [actionEndDate, setActionEndDate] = useState('');
+
     const [isActionModalOpen, setIsActionModalOpen] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-    // Helper for Status Badge inside component to use translations
     const getStatusBadge = (status) => {
         const statusConfig = {
             completed: { color: 'bg-green-100 text-green-700', label: t('bookings.statusLabels.completed') },
@@ -400,36 +379,54 @@ const PitchOwnerDetails = () => {
         );
     };
 
-    // 2. Filter Bookings Logic
-    const filteredBookings = useMemo(() => {
-        if (!currentOwnerData.booking) return [];
-        return currentOwnerData.booking.filter(b => {
-            return bookingStatus === 'all' || b.status === bookingStatus;
-        });
-    }, [currentOwnerData.booking, bookingStatus]);
+    // 1. Fetch Bookings Effect
+    useEffect(() => {
+        if (!currentOwnerData.id) return;
+        const fetchBookings = async () => {
+            setLoadingBookings(true);
+            try {
+                const params = {
+                    pitch__venue__owner__id: currentOwnerData.id,
+                    page: currentBookingPage,
+                    status: bookingStatus === 'all' ? undefined : bookingStatus
+                };
+                const response = await bookingService.getAll(params);
+                if (response) {
+                    setBookings(response.results || []);
+                    setTotalBookings(response.count || 0);
+                }
+            } catch (error) {
+                console.error("Error fetching bookings:", error);
+            } finally {
+                setLoadingBookings(false);
+            }
+        };
+        fetchBookings();
+    }, [currentOwnerData.id, currentBookingPage, bookingStatus, refreshTrigger]);
 
-    // 3. Pagination for Pitches
     const paginatedPitches = useMemo(() => {
         const startIndex = (currentPitchPage - 1) * pitchesPerPage;
         return (currentOwnerData.my_pitches || []).slice(startIndex, startIndex + pitchesPerPage);
     }, [currentOwnerData.my_pitches, currentPitchPage]);
 
-    // 4. Fetch Actions Effect
+    // 2. Fetch Actions Effect (Updated with date range)
     useEffect(() => {
         if (!currentOwnerData.id) return;
         const fetchActions = async () => {
             setLoadingActions(true);
             try {
+                // Pass date range parameters to the service
                 const response = await pitchOwnersService.getAllStaffActions(
                     currentOwnerData.id,
                     currentActionPage,
-                    actionsLimit
+                    actionsLimit,
+                    actionStartDate, // Map to created_at__date__gte
+                    actionEndDate    // Map to created_at__date__lte
                 );
                 if (response && response.status) {
                     setActionsData(response.results);
                     setTotalActions(response.count);
                     setActionsTotalBalance(response.total);
-                    // Update the staff current balance (net after commission)
                     setStaffCurrentBalance(response.staff_current_balance || 0);
                 }
             } catch (error) {
@@ -439,15 +436,13 @@ const PitchOwnerDetails = () => {
             }
         };
         fetchActions();
-    }, [currentOwnerData.id, currentActionPage, actionsLimit, refreshTrigger]);
+    }, [currentOwnerData.id, currentActionPage, actionsLimit, refreshTrigger, actionStartDate, actionEndDate]);
 
-    // Handlers
     const handleContactEmail = () => { if (currentOwnerData.email) handleEmailClick(currentOwnerData.email, `Inquiry regarding ${currentOwnerData.pitch_name}`, "Hello,"); };
     const handleContactPhone = () => { if (currentOwnerData.contact_phone) handleWhatsAppClick(currentOwnerData.contact_phone, "Hello, I have a question regarding your venue."); };
     const handleAddAction = () => setIsActionModalOpen(true);
     const handleActionSuccess = () => { setRefreshTrigger(prev => prev + 1); setCurrentActionPage(1); };
 
-    // Update Commission Handler
     const handleUpdateCommission = async (newRate) => {
         try {
             const response = await pitchOwnersService.updateStaff(currentOwnerData.id, {
@@ -455,7 +450,6 @@ const PitchOwnerDetails = () => {
             });
             if (response) {
                 setCurrentOwnerData(prev => ({ ...prev, commission_rate: newRate }));
-                // Trigger refresh so API is called again and staff_current_balance updates
                 setRefreshTrigger(prev => prev + 1);
                 toast.success(t('profile.stats.updateSuccess') || "Commission updated successfully");
             }
@@ -465,12 +459,10 @@ const PitchOwnerDetails = () => {
         }
     };
 
-    // Derived Stats
-    const totalRevenue = (currentOwnerData.booking || []).reduce((acc, curr) => acc + parseFloat(curr.total_price || 0), 0);
+    const totalRevenue = bookings.reduce((acc, curr) => acc + parseFloat(curr.total_price || 0), 0);
     const totalPitches = currentOwnerData.my_pitches?.length || 0;
-    const totalBookingsCount = currentOwnerData.booking?.length || 0;
+    const totalBookingsCount = totalBookings;
 
-    // Table Column Definitions
     const pitchColumns = [
         { header: t('pitches.table.code'), accessor: 'id', align: 'left', render: (pitch) => <span className="text-sm font-semibold text-primary-600">{`P${pitch.id}`}</span> },
         {
@@ -523,7 +515,6 @@ const PitchOwnerDetails = () => {
         { header: t('staffActions.table.date'), accessor: 'created_at', align: 'right', render: (row) => <span className="text-gray-500 text-sm">{formatDateTime(row.created_at, currentLang === 'ar' ? 'ar-EG' : 'en-US')}</span> }
     ];
 
-    // Validation
     if (!currentOwnerData || !currentOwnerData.id) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
@@ -536,14 +527,11 @@ const PitchOwnerDetails = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-10">
-            {/* --- Header --- */}
             <Header onBack={() => navigate(-1)} t={t} />
 
             <div className="mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {/* --- Grid Layout (Top Section) --- */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 
-                    {/* --- Left Column: Profile Card (Sticky) --- */}
                     <div className="col-span-1">
                         <div className="lg:sticky lg:top-24 h-fit space-y-6">
                             <OwnerProfileCard
@@ -561,21 +549,23 @@ const PitchOwnerDetails = () => {
                         </div>
                     </div>
 
-                    {/* --- Right Column: Details & Tables --- */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Bookings Section */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[600px]">
+                            {/* Fixed Header */}
+                            <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center shrink-0">
                                 <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
                                     <Clock className="w-5 h-5 text-primary-500" /> {t('bookings.title')}
                                     <span className="text-xs font-normal text-gray-500 bg-white px-2 py-0.5 rounded-full border border-gray-200">
-                                        {filteredBookings.length}
+                                        {totalBookings}
                                     </span>
                                 </h3>
-                                {/* Filter Dropdown */}
                                 <select
                                     value={bookingStatus}
-                                    onChange={(e) => setBookingStatus(e.target.value)}
+                                    onChange={(e) => {
+                                        setBookingStatus(e.target.value);
+                                        setCurrentBookingPage(1);
+                                    }}
                                     className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white cursor-pointer"
                                 >
                                     <option value="all">{t('bookings.filters.all')}</option>
@@ -585,10 +575,16 @@ const PitchOwnerDetails = () => {
                                 </select>
                             </div>
 
-                            <div className="p-4 sm:p-6 max-h-[400px] overflow-y-auto custom-scrollbar space-y-3">
-                                {filteredBookings.length > 0 ? (
-                                    filteredBookings.map((booking) => (
-                                        <div key={booking.id} className="border border-gray-100 rounded-lg p-4 hover:border-primary-300 transition-colors bg-white shadow-sm group">
+                            {/* Scrollable Content Area */}
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-3">
+                                {loadingBookings ? (
+                                    <div className="h-full flex flex-col items-center justify-center gap-3">
+                                        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+                                        <p className="text-sm text-gray-400">{t('common.loading') || "Fetching bookings..."}</p>
+                                    </div>
+                                ) : bookings.length > 0 ? (
+                                    bookings.map((booking) => (
+                                        <div key={booking.id} className="border border-gray-100 rounded-lg p-4 hover:border-primary-300 transition-colors bg-white shadow-sm">
                                             <div className="flex items-start justify-between mb-2">
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-1">
@@ -617,11 +613,39 @@ const PitchOwnerDetails = () => {
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="text-center py-8">
+                                    <div className="h-full flex items-center justify-center">
                                         <p className="text-gray-400 text-sm">{t('bookings.noBookings')}</p>
                                     </div>
                                 )}
                             </div>
+
+                            {/* Fixed Pagination Footer */}
+                            {totalBookings > 0 && (
+                                <div className="p-4 border-t border-gray-100 bg-gray-50/30 flex items-center justify-between shrink-0">
+                                    <p className="text-xs text-gray-500">
+                                        {t('common.showing') || "Showing"} {bookings.length} {t('common.of') || "of"} {totalBookings}
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            disabled={currentBookingPage === 1}
+                                            onClick={() => setCurrentBookingPage(prev => prev - 1)}
+                                            className="p-1.5 rounded-lg border border-gray-200 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            <ChevronLeft size={16} className="rtl:rotate-180" />
+                                        </button>
+                                        <span className="text-xs font-bold px-3 py-1 bg-white border border-gray-200 rounded-md">
+                                            {currentBookingPage}
+                                        </span>
+                                        <button
+                                            disabled={currentBookingPage * bookingsPerPage >= totalBookings}
+                                            onClick={() => setCurrentBookingPage(prev => prev + 1)}
+                                            className="p-1.5 rounded-lg border border-gray-200 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            <ChevronRight size={16} className="rtl:rotate-180" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Pitches Table Section */}
@@ -650,23 +674,53 @@ const PitchOwnerDetails = () => {
                     </div>
                 </div>
 
-                {/* 3. Staff Actions Section (Admin Only) */}
+                {/* Staff Actions Section (Admin Only) */}
                 {user.role.is_admin && (
                     <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full">
                         <div className="p-4 sm:p-5 border-b border-gray-100 bg-gray-50/50 flex flex-wrap justify-between items-center gap-3">
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4 flex-wrap">
                                 <div className="flex items-center gap-2">
                                     <FileText className="w-5 h-5 text-gray-700" />
                                     <h3 className="text-lg font-bold text-gray-900">{t('staffActions.title')}</h3>
                                 </div>
+
+                                {/* Date Filter Section */}
+                                <div className="flex items-center gap-2 bg-white p-1 rounded-lg border border-gray-200">
+                                    <div className="flex items-center gap-1.5 px-2">
+                                        <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                                        <input
+                                            type="date"
+                                            value={actionStartDate}
+                                            onChange={(e) => { setActionStartDate(e.target.value); setCurrentActionPage(1); }}
+                                            className="text-xs focus:outline-none border-none bg-transparent cursor-pointer"
+                                            title="Start Date"
+                                        />
+                                        <span className="text-gray-300">|</span>
+                                        <input
+                                            type="date"
+                                            value={actionEndDate}
+                                            onChange={(e) => { setActionEndDate(e.target.value); setCurrentActionPage(1); }}
+                                            className="text-xs focus:outline-none border-none bg-transparent cursor-pointer"
+                                            title="End Date"
+                                        />
+                                        {(actionStartDate || actionEndDate) && (
+                                            <button
+                                                onClick={() => { setActionStartDate(''); setActionEndDate(''); setCurrentActionPage(1); }}
+                                                className="ml-1 p-1 hover:bg-gray-100 rounded-full text-red-400 transition-colors"
+                                                title="Clear Filters"
+                                            >
+                                                <FilterX size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
                                 <div className="flex items-center gap-3">
-                                    {/* Total Gross Balance */}
                                     <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full border border-gray-200">
                                         <span className="text-sm text-gray-600">{t('staffActions.totalBalance')}:</span>
                                         <span className="text-sm font-bold text-gray-800">{formatAmount(actionsTotalBalance)}</span>
                                     </div>
 
-                                    {/* Net Staff Balance (After Commission) */}
                                     <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 rounded-full border border-primary-100">
                                         <Wallet className="w-4 h-4 text-primary-600" />
                                         <span className="text-sm text-primary-700 font-medium">
@@ -679,22 +733,19 @@ const PitchOwnerDetails = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-2">
-                                    <select
-                                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-700 cursor-pointer"
-                                        value={actionsLimit}
-                                        onChange={(e) => {
-                                            setActionsLimit(Number(e.target.value));
-                                            setCurrentActionPage(1);
-                                        }}
-                                    >
-                                        <option value={10}>{t('staffActions.perPage', { count: 10 })}</option>
-                                        <option value={20}>{t('staffActions.perPage', { count: 20 })}</option>
-                                        <option value={50}>{t('staffActions.perPage', { count: 50 })}</option>
-                                        <option value={100}>{t('staffActions.perPage', { count: 100 })}</option>
-                                        <option value={200}>{t('staffActions.perPage', { count: 200 })}</option>
-                                    </select>
-                                </div>
+                                <select
+                                    className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-700 cursor-pointer"
+                                    value={actionsLimit}
+                                    onChange={(e) => {
+                                        setActionsLimit(Number(e.target.value));
+                                        setCurrentActionPage(1);
+                                    }}
+                                >
+                                    <option value={10}>{t('staffActions.perPage', { count: 10 })}</option>
+                                    <option value={20}>{t('staffActions.perPage', { count: 20 })}</option>
+                                    <option value={50}>{t('staffActions.perPage', { count: 50 })}</option>
+                                    <option value={100}>{t('staffActions.perPage', { count: 100 })}</option>
+                                </select>
                                 <button
                                     onClick={handleAddAction}
                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
@@ -721,7 +772,6 @@ const PitchOwnerDetails = () => {
                 )}
             </div>
 
-            {/* Modal */}
             <AddActionModal
                 isOpen={isActionModalOpen}
                 onClose={() => setIsActionModalOpen(false)}
