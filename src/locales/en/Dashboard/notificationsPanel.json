@@ -5,7 +5,7 @@
   "defaultTitle": "Notification",
   "defaultBody": "No message content",
   "new": "New",
-  "viewAll": "View all {{count}} notifications",
+  "viewAll": "View all  notifications",
   "time": {
     "justNow": "Just now",
     "minutesAgo": "{{count}}m ago",

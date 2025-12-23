@@ -22,7 +22,8 @@ const PrintableReceipt = React.forwardRef(({ booking, logo }, ref) => {
         return date.toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
-            year: 'numeric'
+            year: 'numeric',
+            timeZone: 'UTC'  // Add this line
         });
     };
 
@@ -32,7 +33,9 @@ const PrintableReceipt = React.forwardRef(({ booking, logo }, ref) => {
         return date.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: true
+            hour12: true,
+            timeZone: 'UTC'  // Add this line
+
         });
     };
 

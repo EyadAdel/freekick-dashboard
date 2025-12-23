@@ -1,11 +1,11 @@
 // components/NotificationsPanel.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next'; // Import Translation Hook
+import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../../hooks/useNotifications.js';
 
 const NotificationsPanel = () => {
-    const { t, i18n } = useTranslation('notificationsPanel'); // Initialize translation
+    const { t, i18n } = useTranslation('notificationsPanel');
     const navigate = useNavigate();
     const {
         notifications,
@@ -13,6 +13,9 @@ const NotificationsPanel = () => {
         markAsRead,
         refreshNotifications
     } = useNotifications();
+
+    // State to control showing all notifications
+    const [showAll, setShowAll] = useState(false);
 
     const getNotificationIcon = (notification) => {
         const title = notification.title?.toLowerCase() || '';
@@ -83,32 +86,55 @@ const NotificationsPanel = () => {
         }
     };
 
+    // Toggle between showing all and limited notifications
+    const toggleShowAll = () => {
+        setShowAll(!showAll);
+    };
+
+    // Determine which notifications to display
+    const notificationsToShow = showAll ? notifications : notifications.slice(0, 5);
+
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-3">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-900">{t('title')}</h2>
-                <button
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                    onClick={refreshNotifications}
-                    disabled={isLoading}
-                >
-                    <svg
-                        className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                <div className="flex items-center gap-2">
+                    <button
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                        onClick={refreshNotifications}
+                        disabled={isLoading}
+                        title={t('refresh')}
                     >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                        />
-                    </svg>
-                </button>
+                        <svg
+                            className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            />
+                        </svg>
+                    </button>
+                    {showAll && (
+                        <button
+                            onClick={() => setShowAll(false)}
+                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                            title={t('collapse')}
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
             </div>
 
-            <div className="space-y-4">
+            {/* Scrollable notifications container */}
+            <div className={`space-y-4 ${showAll ? 'max-h-[400px] overflow-y-auto custom-scrollbar pr-2' : ''}`}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -121,7 +147,7 @@ const NotificationsPanel = () => {
                         <p className="text-gray-500 text-sm">{t('empty')}</p>
                     </div>
                 ) : (
-                    notifications.slice(0, 5).map((notification, index) => (
+                    notificationsToShow.map((notification, index) => (
                         <div
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
@@ -131,8 +157,11 @@ const NotificationsPanel = () => {
                                     : 'hover:bg-gray-50'
                             }`}
                         >
-                            {/* Vertical dashed line connecting icons */}
-                            {index < Math.min(notifications.length, 5) - 1 && (
+                            {/* Vertical dashed line connecting icons - only show when not showing all or for first 4 items */}
+                            {!showAll && index < Math.min(notifications.length, 5) - 1 && (
+                                <div className="absolute left-8 rtl:right-8 rtl:left-auto top-[52px] h-[calc(100%+16px)] w-0 border-l border-dashed border-gray-300"></div>
+                            )}
+                            {showAll && index < notificationsToShow.length - 1 && (
                                 <div className="absolute left-8 rtl:right-8 rtl:left-auto top-[52px] h-[calc(100%+16px)] w-0 border-l border-dashed border-gray-300"></div>
                             )}
 
@@ -160,12 +189,13 @@ const NotificationsPanel = () => {
                 )}
             </div>
 
-            {notifications.length > 0 && (
+            {/* Show All / Show Less button */}
+            {notifications.length > 5 && (
                 <button
-                    onClick={() => navigate('/notifications')}
-                    className="w-full mt-4 text-center text-sm text-primary-600 hover:text-primary-700 font-medium py-2"
+                    onClick={toggleShowAll}
+                    className="w-full  text-center text-sm text-primary-600 hover:text-primary-700 font-medium py-2 border-t border-gray-100 pt-3"
                 >
-                    {t('viewAll', { count: notifications.length })}
+                    {showAll ? t('showLess') : t('viewAll')}
                 </button>
             )}
         </div>
