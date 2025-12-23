@@ -86,7 +86,7 @@ const MainTable = ({
 
     // Common styling
     const muiInputStyles = {
-        width: 180,
+        width: { xs: '100%', md: 180 },
         backgroundColor: 'white',
         '& .MuiOutlinedInput-root': {
             borderRadius: '6px',
@@ -112,9 +112,9 @@ const MainTable = ({
             <div className="flex flex-col xl:flex-row justify-between items-start  mb-6 gap-4 px-2">
 
                 {/* Dynamic Filters */}
-                <div className="flex flex-wrap gap-3 items-center w-full ">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-center  w-full ">
                     {filters.map((filter, index) => (
-                        <div key={index} className=''>
+                        <div key={index} className='md:w-auto w-full'>
                             {/* CASE 1: SELECT DROPDOWN */}
                             {filter.type === 'select' ? (
                                 <TextField
@@ -124,8 +124,8 @@ const MainTable = ({
                                     label={filter.label}
                                     value={filterValues[filter.key] || ''}
                                     onChange={(e) => handleFilterInput(filter.key, e.target.value)}
-                                    sx={muiInputStyles}
-                                    className="text-secondary-600 "
+                                    className="text-secondary-600  w-full"
+
                                 >
                                     <MenuItem value="">
                                         <span className="text-gray-400">All</span>
@@ -146,8 +146,7 @@ const MainTable = ({
                                     label={filter.label}
                                     value={filterValues[filter.key] || ''}
                                     onChange={(e) => handleFilterInput(filter.key, e.target.value)}
-                                    sx={muiInputStyles}
-                                    className="text-secondary-600"
+                                    className="text-secondary-600 w-full"
                                     // Optional: Pass min/max/step if defined in your filter config
                                     InputProps={{
                                         inputProps: {

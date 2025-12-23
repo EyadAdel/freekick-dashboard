@@ -209,7 +209,7 @@ const MainInput = ({
             onChange={handleInputChange}
             disabled={disabled}
             placeholder={placeholder}
-            className={`${baseStyles} ${stateStyles} ${Icon ? 'pl-10' : ''}`}
+            className={`${baseStyles} ${stateStyles} ${Icon ? 'pl-10' : ''} w-full`}
             {...props}
         />
     );

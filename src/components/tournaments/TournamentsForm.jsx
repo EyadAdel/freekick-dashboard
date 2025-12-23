@@ -319,7 +319,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                 {/* --- 1. Basic Info --- */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center gap-2">
-                        <FileText size={20} /> {t('sections.basic_info')}
+                        <FileText size={20}/> {t('sections.basic_info')}
                     </h3>
 
                     <div className='flex md:flex-row flex-col gap-5'>
@@ -348,7 +348,8 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                     </div>
 
                     <div className="flex flex-col">
-                        <label className="text-sm font-medium text-gray-700 mb-1">{t('fields.description.label')}</label>
+                        <label
+                            className="text-sm font-medium text-gray-700 mb-1">{t('fields.description.label')}</label>
                         <textarea
                             name="description"
                             value={formData.description}
@@ -363,11 +364,12 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                 {/* --- 2. Cover Image --- */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center gap-2">
-                        <ImageIcon size={20} /> {t('sections.cover_image')}
+                        <ImageIcon size={20}/> {t('sections.cover_image')}
                     </h3>
                     <div className="w-full">
                         {coverImage ? (
-                            <div className="relative group w-full h-64 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm">
+                            <div
+                                className="relative group w-full h-64 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm">
                                 <img
                                     src={coverImage.preview}
                                     alt="Cover"
@@ -375,26 +377,29 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                                 />
                                 {coverImage.uploading && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                        <Loader2 className="animate-spin text-white w-8 h-8" />
+                                        <Loader2 className="animate-spin text-white w-8 h-8"/>
                                     </div>
                                 )}
                                 {!coverImage.uploading && (coverImage.serverUrl || coverImage.uniqueName) && (
                                     <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1">
-                                        <Check size={14} />
+                                        <Check size={14}/>
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all cursor-pointer" onClick={(e) => removeCoverImage(e)}>
+                                <div
+                                    className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all cursor-pointer"
+                                    onClick={(e) => removeCoverImage(e)}>
                                     <button
                                         type="button"
                                         onClick={(e) => removeCoverImage(e)}
                                         className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full transform hover:scale-110 transition-transform"
                                     >
-                                        <Trash2 size={24} />
+                                        <Trash2 size={24}/>
                                     </button>
                                 </div>
                             </div>
                         ) : (
-                            <label className={`w-full h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 cursor-pointer bg-white hover:bg-teal-50 hover:shadow-sm ${errors.cover_image ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-teal-500'}`}>
+                            <label
+                                className={`w-full h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 cursor-pointer bg-white hover:bg-teal-50 hover:shadow-sm ${errors.cover_image ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-teal-500'}`}>
                                 <input
                                     type="file"
                                     hidden
@@ -403,9 +408,10 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                                     onChange={handleCoverSelect}
                                 />
                                 <div className="p-4 bg-teal-100 rounded-full mb-4 text-teal-600">
-                                    <UploadCloud className="w-10 h-10" />
+                                    <UploadCloud className="w-10 h-10"/>
                                 </div>
-                                <span className="text-base text-gray-700 font-semibold">{t('images.click_to_upload')}</span>
+                                <span
+                                    className="text-base text-gray-700 font-semibold">{t('images.click_to_upload')}</span>
                                 <span className="text-sm text-gray-500 mt-1">{t('images.formats')}</span>
                             </label>
                         )}
@@ -421,38 +427,44 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                             onClick={() => galleryInputRef.current.click()}
                             className="flex items-center gap-1 text-teal-600 hover:text-teal-700 text-xs font-semibold bg-teal-50 px-2 py-1 rounded border border-teal-200"
                         >
-                            <Plus size={14} /> {t('images.add_photos')}
+                            <Plus size={14}/> {t('images.add_photos')}
                         </button>
                     </div>
 
-                    <input type="file" hidden ref={galleryInputRef} accept="image/*" multiple onChange={handleGallerySelect} />
+                    <input type="file" hidden ref={galleryInputRef} accept="image/*" multiple
+                           onChange={handleGallerySelect}/>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
                         {galleryImages.map((img) => (
-                            <div key={img.id} className="relative aspect-square border rounded-lg overflow-hidden group bg-gray-50 shadow-sm">
+                            <div key={img.id}
+                                 className="relative aspect-square border rounded-lg overflow-hidden group bg-gray-50 shadow-sm">
                                 <img
                                     src={img.preview}
                                     alt="Gallery"
                                     className={`w-full h-full object-cover ${img.uploading ? 'opacity-50' : 'opacity-100'}`}
-                                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/150x150?text=Error'; }}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = 'https://placehold.co/150x150?text=Error';
+                                    }}
                                 />
                                 {img.uploading && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                                        <Loader2 className="w-6 h-6 text-teal-500 animate-spin" />
+                                        <Loader2 className="w-6 h-6 text-teal-500 animate-spin"/>
                                     </div>
                                 )}
                                 {!img.uploading && (
                                     <div className="absolute top-1 right-1 bg-green-500 text-white rounded-full p-0.5">
-                                        <Check size={10} />
+                                        <Check size={10}/>
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+                                <div
+                                    className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
                                     <button
                                         type="button"
                                         onClick={() => removeGalleryImage(img.id)}
                                         className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full"
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={16}/>
                                     </button>
                                 </div>
                             </div>
@@ -462,7 +474,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                             onClick={() => galleryInputRef.current.click()}
                             className="aspect-square border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition-all text-gray-400 hover:text-teal-600"
                         >
-                            <Plus size={24} />
+                            <Plus size={24}/>
                             <span className="text-xs mt-1 font-medium">{t('images.add_more')}</span>
                         </div>
                     </div>
@@ -471,40 +483,53 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                 {/* --- 4. Date & Time --- */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center gap-2">
-                        <Calendar size={20} /> {t('sections.schedule')}
+                        <Calendar size={20}/> {t('sections.schedule')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <MainInput type="date" label={t('fields.start_date')} name="start_date" value={formData.start_date} onChange={handleChange} error={errors.start_date} required />
-                        <MainInput type="date" label={t('fields.end_date')} name="end_date" value={formData.end_date} onChange={handleChange} error={errors.end_date} required />
-                        <MainInput type="date" label={t('fields.registration_deadline')} name="registration_deadline" value={formData.registration_deadline} onChange={handleChange} error={errors.registration_deadline} required />
+                        <MainInput type="date" label={t('fields.start_date')} name="start_date"
+                                   value={formData.start_date} onChange={handleChange} error={errors.start_date}
+                                   required/>
+                        <MainInput type="date" label={t('fields.end_date')} name="end_date" value={formData.end_date}
+                                   onChange={handleChange} error={errors.end_date} required/>
+                        <MainInput type="date" label={t('fields.registration_deadline')} name="registration_deadline"
+                                   value={formData.registration_deadline} onChange={handleChange}
+                                   error={errors.registration_deadline} required/>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <MainInput type="time" label={t('fields.start_time')} name="start_time" value={formData.start_time} onChange={handleChange} icon={Clock} error={errors.start_time} required />
-                        <MainInput type="time" label={t('fields.end_time')} name="end_time" value={formData.end_time} onChange={handleChange} icon={Clock} error={errors.end_time} required />
+                        <MainInput type="time" label={t('fields.start_time')} name="start_time"
+                                   value={formData.start_time} onChange={handleChange} icon={Clock}
+                                   error={errors.start_time} required/>
+                        <MainInput type="time" label={t('fields.end_time')} name="end_time" value={formData.end_time}
+                                   onChange={handleChange} icon={Clock} error={errors.end_time} required/>
                     </div>
                 </div>
 
                 {/* --- 5. Game Details --- */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center gap-2">
-                        <Activity size={20} /> {t('sections.game_details')}
+                        <Activity size={20}/> {t('sections.game_details')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700 mb-1">{t('fields.venue.label')} <span className='text-red-500'>*</span></label>
+                            <label className="text-sm font-medium text-gray-700 mb-1">{t('fields.venue.label')} <span
+                                className='text-red-500'>*</span></label>
                             <div className="relative">
-                                <select name="venue" value={formData.venue} onChange={handleChange} className="w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-teal-500">
+                                <select name="venue" value={formData.venue} onChange={handleChange}
+                                        className="w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-teal-500">
                                     <option value="">{t('fields.venue.placeholder')}</option>
-                                    {venuesList && venuesList.map((item, index) => <option key={index} value={item.value}>{item.label}</option>)}
+                                    {venuesList && venuesList.map((item, index) => <option key={index}
+                                                                                           value={item.value}>{item.label}</option>)}
                                 </select>
-                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                                <ChevronDown size={16}
+                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"/>
                             </div>
                             {errors.venue && <p className="text-red-500 text-xs mt-1">{errors.venue}</p>}
                         </div>
 
                         {/* --- SPORT SELECTION --- */}
                         <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700 mb-1">{t('fields.sport.label')} <span className='text-red-500'>*</span></label>
+                            <label className="text-sm font-medium text-gray-700 mb-1">{t('fields.sport.label')} <span
+                                className='text-red-500'>*</span></label>
                             <div className="relative">
                                 <select
                                     name="sport"
@@ -513,89 +538,111 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                                     className={`w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-teal-500 ${errors.sport ? 'border-red-500' : ''}`}
                                 >
                                     <option value="">{t('fields.sport.placeholder')}</option>
-                                    {activeSportsList.map((item, index) => <option key={index} value={item.value}>{item.label}</option>)}
+                                    {activeSportsList.map((item, index) => <option key={index}
+                                                                                   value={item.value}>{item.label}</option>)}
                                 </select>
-                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                                <ChevronDown size={16}
+                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"/>
                             </div>
                             {errors.sport && <p className="text-red-500 text-xs mt-1">{errors.sport}</p>}
                         </div>
 
                         <div className="flex flex-col">
-                            <label className="text-sm font-medium text-gray-700 mb-1">{t('fields.scoring_system')}</label>
+                            <label
+                                className="text-sm font-medium text-gray-700 mb-1">{t('fields.scoring_system')}</label>
                             <div className="relative">
-                                <select name="scoring_system" value={formData.scoring_system} onChange={handleChange} className="w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-teal-500">
-                                    {scoringOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                <select name="scoring_system" value={formData.scoring_system} onChange={handleChange}
+                                        className="w-full pl-3 pr-10 py-2 border rounded-lg bg-white outline-none focus:border-teal-500">
+                                    {scoringOptions.map(opt => <option key={opt.value}
+                                                                       value={opt.value}>{opt.label}</option>)}
                                 </select>
-                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                                <ChevronDown size={16}
+                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"/>
                             </div>
                         </div>
 
-                        <MainInput label={t('fields.max_teams')} name="max_teams" type="number" value={formData.max_teams} onChange={handleChange} error={errors.max_teams} icon={Users} required />
-                        <MainInput label={t('fields.entry_fee')} name="entry_fee" type="number" value={formData.entry_fee} onChange={handleChange} icon={DollarSign} />
+                        <MainInput label={t('fields.max_teams')} name="max_teams" type="number"
+                                   value={formData.max_teams} onChange={handleChange} error={errors.max_teams}
+                                   icon={Users} required/>
+                        <MainInput label={t('fields.entry_fee')} name="entry_fee" type="number"
+                                   value={formData.entry_fee} onChange={handleChange} icon={DollarSign}/>
                     </div>
                 </div>
 
                 {/* --- Tournament Visibility --- */}
-                <div className="space-y-4">
+                <div className="space-y-4 ">
                     <div className="flex flex-col">
                         <h3 className="text-lg font-semibold text-gray-800">{t('visibility.title')}</h3>
                         <p className="text-sm text-gray-500">{t('visibility.subtitle')}</p>
                     </div>
 
-                    <div className="flex flex-col gap-4">
-                        <div className="flex flex-wrap gap-4">
-                            {/* Public Option */}
-                            <button
-                                type="button"
-                                onClick={() => setFormData(prev => ({...prev, is_private: false}))}
-                                className={`flex items-center justify-center gap-3 px-8 py-4 rounded-xl border-2 transition-all min-w-[200px] ${
-                                    !formData.is_private
-                                        ? 'bg-teal-600 border-teal-600 text-white hover:bg-teal-700 hover:border-teal-700 shadow-md'
-                                        : 'bg-white border-gray-200 text-gray-600 hover:border-teal-200'
-                                }`}
-                            >
-                                {!formData.is_private && <Check size={18} className="text-teal-200"/>}
-                                <Globe size={20}/>
-                                <span className="font-bold">{t('visibility.public')}</span>
-                            </button>
-
-                            {/* Private Option */}
-                            <button
-                                type="button"
-                                onClick={() => setFormData(prev => ({...prev, is_private: true}))}
-                                className={`flex items-center justify-center gap-3 px-8 py-4 rounded-xl border-2 transition-all min-w-[200px] ${
-                                    formData.is_private
-                                        ? 'bg-orange-500 border-orange-500 text-white shadow-md'
-                                        : 'bg-white border-gray-200 text-gray-600 hover:border-orange-200'
-                                }`}
-                            >
-                                {formData.is_private && <Check size={18} className="text-orange-200"/>}
-                                <Lock size={20}/>
-                                <span className="font-bold">{t('visibility.private')}</span>
-                            </button>
-                        </div>
-
-                        {/* Description Box */}
-                        {!formData.is_private ? (
-                            <div
-                                className="flex items-center gap-3 p-4 bg-teal-50 border border-teal-100 rounded-lg text-teal-700 text-sm animate-in fade-in slide-in-from-top-1">
-                                <CheckCircle2 size={20} className="text-teal-600"/>
-                                <span>{t('visibility.public_desc')}</span>
+                    <div className="flex sm:flex-row flex-col gap-3 w-full ">
+                        {/* Public Option */}
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({...prev, is_private: false}))}
+                            className={`group flex items-start w-full gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                                !formData.is_private
+                                    ? 'bg-primary-50/50 border-primary-500 shadow-sm'
+                                    : 'bg-white border-gray-100 hover:border-gray-200'
+                            }`}
+                        >
+                            <div className={`mt-1 p-2 rounded-lg transition-colors ${
+                                !formData.is_private ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'
+                            }`}>
+                                <Globe size={18}/>
                             </div>
-                        ) : (
-                            <div
-                                className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-100 rounded-lg text-orange-700 text-sm animate-in fade-in slide-in-from-top-1">
-                                <Info size={20} className="text-orange-500"/>
-                                <span>{t('visibility.private_desc')}</span>
+
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                <span className={`font-bold ${!formData.is_private ? 'text-primary-700' : 'text-gray-700'}`}>
+                    {t('visibility.public')}
+                </span>
+                                    {!formData.is_private &&
+                                        <Check size={18} className="text-primary-500" strokeWidth={3}/>}
+                                </div>
+                                <p className={`text-sm mt-0.5 ${!formData.is_private ? 'text-primary-600/80' : 'text-gray-500'}`}>
+                                    {t('visibility.public_desc')}
+                                </p>
                             </div>
-                        )}
+                        </button>
+
+                        {/* Private Option */}
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({...prev, is_private: true}))}
+                            className={`group w-full flex items-start gap-4 p-4 rounded-xl border-2 transition-all text-left ${
+                                formData.is_private
+                                    ? 'bg-orange-50/50 border-orange-400 shadow-sm'
+                                    : 'bg-white border-gray-100 hover:border-gray-200'
+                            }`}
+                        >
+                            <div className={`mt-1 p-2 rounded-lg transition-colors ${
+                                formData.is_private ? 'bg-orange-400 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'
+                            }`}>
+                                <Lock size={18}/>
+                            </div>
+
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                <span className={`font-bold ${formData.is_private ? 'text-orange-700' : 'text-gray-700'}`}>
+                    {t('visibility.private')}
+                </span>
+                                    {formData.is_private &&
+                                        <Check size={18} className="text-orange-500" strokeWidth={3}/>}
+                                </div>
+                                <p className={`text-sm mt-0.5 ${formData.is_private ? 'text-orange-600/80' : 'text-gray-500'}`}>
+                                    {t('visibility.private_desc')}
+                                </p>
+                            </div>
+                        </button>
                     </div>
                 </div>
 
                 {/* --- 6. Rules & Prizes --- */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center gap-2">
-                        <FileText size={20} /> {t('sections.details')}
+                        <FileText size={20}/> {t('sections.details')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="flex flex-col">
@@ -626,16 +673,25 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                 {/* --- 7. Status --- */}
                 <div className="bg-primary-50 p-6 rounded-lg space-y-4 border border-gray-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <MainInput type="checkbox" label={t('fields.is_active')} name="is_active" value={formData.is_active} onChange={handleChange} />
+                        <MainInput type="checkbox" label={t('fields.is_active')} name="is_active"
+                                   value={formData.is_active} onChange={handleChange}/>
                     </div>
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-4 pt-4">
-                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors">{t('buttons.cancel')}</button>
-                    <button type="submit" disabled={isSubmitting || coverImage?.uploading || galleryImages.some(img => img.uploading)} className="flex-1 flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? t('buttons.update') : t('buttons.save')}</>}
+
+                <div className="md:flex gap-4 pt-6 border-t">
+                    <button type="button" onClick={onCancel}
+                            className="md:flex items-center justify-center hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800  font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
                     </button>
+                    <button type="submit"  disabled={isSubmitting || coverImage?.uploading || galleryImages.some(img => img.uploading)}
+                            className=" flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base">{isSubmitting ?
+                        <Loader2 size={20} className="animate-spin"/> : <><Save
+                            size={20}/>{initialData ? t('buttons.update') : t('buttons.save')}</>}</button>
+                    <button type="button" onClick={onCancel}
+                            className="flex-1 md:hidden bg-gray-100 w-full mt-3 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
+                    </button>
+
                 </div>
             </form>
         </div>
