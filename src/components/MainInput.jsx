@@ -205,11 +205,11 @@ const MainInput = ({
             max={max}
             min={min}
             value={value}
-            // Use the new handler instead of passing props.onChange directly
             onChange={handleInputChange}
             disabled={disabled}
             placeholder={placeholder}
-            className={`${baseStyles} ${stateStyles} ${Icon ? 'pl-10' : ''} w-full`}
+            // Added !w-full to force override and block display
+            className={`${baseStyles} ${stateStyles} ${Icon ? 'pl-10' : ''} w-full block min-w-full`}
             {...props}
         />
     );
