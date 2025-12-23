@@ -295,6 +295,21 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
                 </div>
 
                 {/* Actions */}
+                <div className="md:flex gap-4 pt-6 border-t">
+                    <button type="button" onClick={onCancel}
+                            className="md:flex items-center justify-center hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800  font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
+                    </button>
+                    <button type="submit"
+                            disabled={isSubmitting}
+
+                            className=" flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base">{isSubmitting ?
+                        <Loader2 size={20} className="animate-spin"/> : <><Save
+                            size={20}/>{initialData ? t('buttons.update') : t('buttons.save')}</>}</button>
+                    <button type="button" onClick={onCancel}
+                            className="flex-1 md:hidden bg-gray-100 w-full mt-3 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
+                    </button>
+
+                </div>
                 <div className="flex gap-4 pt-4 border-t border-gray-100">
                     <button
                         type="button"
@@ -309,10 +324,10 @@ const SurfaceTypesForm = ({ onCancel, onSuccess, initialData = null }) => {
                         className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? (
-                            <Loader2 size={20} className="animate-spin" />
+                            <Loader2 size={20} className="animate-spin"/>
                         ) : (
                             <>
-                                <Save size={20} />
+                                <Save size={20}/>
                                 {initialData ? t('buttons.update') : t('buttons.save')}
                             </>
                         )}

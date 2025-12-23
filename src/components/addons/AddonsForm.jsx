@@ -297,7 +297,7 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                 {/* Names with Auto Translation */}
                 <div className="space-y-6">
-                    <SectionHeader title={t('sections.basicInfo')} icon={Globe} />
+                    <SectionHeader title={t('sections.basicInfo')} icon={Globe}/>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                         {/* English */}
@@ -342,10 +342,11 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                 {/* Icon Upload (Full Width) */}
                 <div className="space-y-4">
-                    <SectionHeader title={t('sections.addonIcon')} icon={ImageIcon} />
+                    <SectionHeader title={t('sections.addonIcon')} icon={ImageIcon}/>
                     <div className="w-full">
                         {formData.icon ? (
-                            <div className="relative group w-full h-64 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm">
+                            <div
+                                className="relative group w-full h-64 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm">
                                 <img
                                     src={formData.icon.preview}
                                     alt="Preview"
@@ -354,24 +355,26 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                                 {formData.icon.uploading && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                        <Loader2 className="animate-spin text-white w-8 h-8" />
+                                        <Loader2 className="animate-spin text-white w-8 h-8"/>
                                     </div>
                                 )}
 
                                 {/* Success Checkmark - Direction Aware */}
                                 {!formData.icon.uploading && (
-                                    <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} bg-green-500 text-white rounded-full p-1 z-10 shadow-sm`}>
-                                        <Check size={14} />
+                                    <div
+                                        className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} bg-green-500 text-white rounded-full p-1 z-10 shadow-sm`}>
+                                        <Check size={14}/>
                                     </div>
                                 )}
 
-                                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all z-20">
+                                <div
+                                    className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all z-20">
                                     <button
                                         type="button"
                                         onClick={removeImage}
                                         className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transform hover:scale-105 transition-all"
                                     >
-                                        <Trash2 size={24} />
+                                        <Trash2 size={24}/>
                                     </button>
                                 </div>
                             </div>
@@ -382,11 +385,13 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 className={`w-full h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 cursor-pointer 
                                 ${errors.icon ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-primary-500 hover:bg-primary-50 hover:shadow-sm'}`}
                             >
-                                <input type="file" hidden ref={fileInputRef} accept="image/*" onChange={handleImageSelect} />
+                                <input type="file" hidden ref={fileInputRef} accept="image/*"
+                                       onChange={handleImageSelect}/>
                                 <div className="p-4 bg-primary-100 rounded-full mb-4 text-primary-600">
-                                    <UploadCloud className="w-10 h-10" />
+                                    <UploadCloud className="w-10 h-10"/>
                                 </div>
-                                <span className="text-base text-gray-700 font-semibold">{t('labels.clickToUpload')}</span>
+                                <span
+                                    className="text-base text-gray-700 font-semibold">{t('labels.clickToUpload')}</span>
                                 <span className="text-sm text-gray-500 mt-1">{t('labels.dragAndDrop')}</span>
                             </label>
                         )}
@@ -394,14 +399,22 @@ const AddonsForm = ({ onCancel, onSuccess, initialData = null }) => {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-4 pt-4 border-t">
-                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors">
-                        {t('buttons.cancel')}
+                <div className="md:flex gap-4 pt-6 border-t">
+                    <button type="button" onClick={onCancel}
+                            className="md:flex items-center justify-center hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800  font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
                     </button>
-                    <button type="submit" disabled={isSubmitting || formData.icon?.uploading} className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm">
-                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? t('buttons.update') : t('buttons.save')}</>}
+                    <button type="submit"
+                            disabled={isSubmitting || formData.icon?.uploading}
+                            className=" flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base">
+                        {isSubmitting ?
+                        <Loader2 size={20} className="animate-spin"/> : <><Save
+                            size={20}/>{initialData ? t('buttons.update') : t('buttons.save')}</>}</button>
+                    <button type="button" onClick={onCancel}
+                            className="flex-1 md:hidden bg-gray-100 w-full mt-3 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
                     </button>
+
                 </div>
+
             </form>
         </div>
     );

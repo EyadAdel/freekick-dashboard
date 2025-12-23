@@ -172,6 +172,7 @@ const SurfaceTypes = () => {
                     onSuccess={handleFormSuccess}
                 />
             )}
+            {!showForm && (
             <MainTable
                 columns={columns}
                 data={filteredData}
@@ -184,6 +185,7 @@ const SurfaceTypes = () => {
                 topActions={topActions}
                 filters={[]}
             />
+                )}
         </div>
     );
 };

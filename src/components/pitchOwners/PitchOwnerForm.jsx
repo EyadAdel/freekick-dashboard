@@ -536,7 +536,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 {/* Section 1: User Association */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
-                        <User size={20} /> {t('pitchOwnerForm:sections.user.title')}
+                        <User size={20}/> {t('pitchOwnerForm:sections.user.title')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -561,13 +561,15 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 />
 
                                 <div className="absolute right-3 top-3.5 text-gray-500 pointer-events-none">
-                                    {loadingUsers ? <Loader2 size={18} className="animate-spin" /> : <ChevronDown size={18} />}
+                                    {loadingUsers ? <Loader2 size={18} className="animate-spin"/> :
+                                        <ChevronDown size={18}/>}
                                 </div>
                             </div>
 
                             {/* Dropdown List */}
                             {isUserDropdownOpen && (
-                                <div className="absolute z-50 top-[calc(100%+4px)] left-0 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-96 overflow-hidden">
+                                <div
+                                    className="absolute z-50 top-[calc(100%+4px)] left-0 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-96 overflow-hidden">
                                     {/* User List */}
                                     <div className="overflow-y-auto max-h-60" ref={userListRef}>
                                         {/* Show loader only if explicitly loading */}
@@ -587,14 +589,17 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                                             className={`px-4 py-3 cursor-pointer hover:bg-primary-50 flex items-center justify-between group ${isSelected ? 'bg-primary-50' : ''}`}
                                                         >
                                                             <div className="flex flex-col">
-                                    <span className={`font-medium ${isSelected ? 'text-primary-700' : 'text-gray-800'}`}>
+                                    <span
+                                        className={`font-medium ${isSelected ? 'text-primary-700' : 'text-gray-800'}`}>
                                         {user.name}
                                     </span>
-                                                                <span className="text-xs text-gray-500 flex items-center gap-1">
-                                        <Phone size={10} /> {user.phone}
+                                                                <span
+                                                                    className="text-xs text-gray-500 flex items-center gap-1">
+                                        <Phone size={10}/> {user.phone}
                                     </span>
                                                             </div>
-                                                            {isSelected && <Check size={16} className="text-primary-600" />}
+                                                            {isSelected &&
+                                                                <Check size={16} className="text-primary-600"/>}
                                                         </li>
                                                     );
                                                 })}
@@ -630,7 +635,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 {/* Section 2: Pitch Details */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
-                        <MapPin size={20} /> {t('pitchOwnerForm:sections.pitch.title')}
+                        <MapPin size={20}/> {t('pitchOwnerForm:sections.pitch.title')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <MainInput
@@ -653,7 +658,8 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                         />
 
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm font-medium text-gray-700">{t('pitchOwnerForm:sections.pitch.cityLabel')}</label>
+                            <label
+                                className="text-sm font-medium text-gray-700">{t('pitchOwnerForm:sections.pitch.cityLabel')}</label>
                             <div className="relative">
                                 <select
                                     name="city"
@@ -748,7 +754,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 {/* Section 4: Images */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
-                        <ImageIcon size={20} /> {t('pitchOwnerForm:sections.media.title')}
+                        <ImageIcon size={20}/> {t('pitchOwnerForm:sections.media.title')}
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -770,19 +776,25 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                                 {isImageUploading ? (
                                     <div className="flex flex-col items-center justify-center">
-                                        <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
+                                        <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2"/>
                                         <p className="text-sm font-medium text-gray-600">{t('pitchOwnerForm:sections.media.uploading')}</p>
                                     </div>
                                 ) : imagePreview ? (
                                     <div className="relative w-full h-full p-2 group">
-                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-contain rounded-md" />
-                                        <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
-                                            <button type="button" onClick={removeImage} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"><Trash2 size={20} /></button>
+                                        <img src={imagePreview} alt="Preview"
+                                             className="w-full h-full object-contain rounded-md"/>
+                                        <div
+                                            className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
+                                            <button type="button" onClick={removeImage}
+                                                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full">
+                                                <Trash2 size={20}/></button>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="text-center p-4">
-                                        <div className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3"><UploadCloud size={24} /></div>
+                                        <div
+                                            className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                                            <UploadCloud size={24}/></div>
                                         <p className="text-sm font-medium text-gray-700">{t('pitchOwnerForm:sections.media.uploadLogo')}</p>
                                     </div>
                                 )}
@@ -793,7 +805,8 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                         {/* 2. Cover Image (OPTIONAL) */}
                         <div className="space-y-4">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                {t('pitchOwnerForm:sections.media.profileLabel')} <span className="text-gray-400 font-normal">{t('pitchOwnerForm:sections.media.optional')}</span>
+                                {t('pitchOwnerForm:sections.media.profileLabel')} <span
+                                className="text-gray-400 font-normal">{t('pitchOwnerForm:sections.media.optional')}</span>
                             </label>
                             <div
                                 onClick={() => !isCoverImageUploading && coverInputRef.current.click()}
@@ -802,24 +815,31 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 className={`relative w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors border-gray-300 hover:border-primary-500
                                 ${isCoverImageUploading ? 'cursor-wait bg-gray-50' : 'cursor-pointer'}`}
                             >
-                                <input type="file" hidden ref={coverInputRef} accept="image/*" onChange={onCoverFileChange}
+                                <input type="file" hidden ref={coverInputRef} accept="image/*"
+                                       onChange={onCoverFileChange}
                                        disabled={isCoverImageUploading}/>
 
                                 {isCoverImageUploading ? (
                                     <div className="flex flex-col items-center justify-center">
-                                        <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
+                                        <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2"/>
                                         <p className="text-sm font-medium text-gray-600">{t('pitchOwnerForm:sections.media.uploading')}</p>
                                     </div>
                                 ) : coverImagePreview ? (
                                     <div className="relative w-full h-full p-2 group">
-                                        <img src={coverImagePreview} alt="Cover Preview" className="w-full h-full object-cover rounded-md" />
-                                        <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
-                                            <button type="button" onClick={removeCoverImage} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"><Trash2 size={20} /></button>
+                                        <img src={coverImagePreview} alt="Cover Preview"
+                                             className="w-full h-full object-cover rounded-md"/>
+                                        <div
+                                            className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center rounded-md transition-all">
+                                            <button type="button" onClick={removeCoverImage}
+                                                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full">
+                                                <Trash2 size={20}/></button>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="text-center p-4">
-                                        <div className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3"><UploadCloud size={24} /></div>
+                                        <div
+                                            className="bg-primary-100 text-primary-600 rounded-full p-3 w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                                            <UploadCloud size={24}/></div>
                                         <p className="text-sm font-medium text-gray-700">{t('pitchOwnerForm:sections.media.uploadCover')}</p>
                                     </div>
                                 )}
@@ -829,12 +849,21 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-4 pt-4">
-                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg">{t('pitchOwnerForm:buttons.cancel')}</button>
-                    <button type="submit" disabled={isSubmitting || isImageUploading || isCoverImageUploading} className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg">
-                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? t('pitchOwnerForm:buttons.update') : t('pitchOwnerForm:buttons.save')}</>}
+                <div className="md:flex gap-4 pt-6 border-t">
+                    <button type="button" onClick={onCancel}
+                            className="md:flex items-center justify-center hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800  font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('pitchOwnerForm:buttons.cancel')}
                     </button>
+                    <button type="submit"
+                            disabled={isSubmitting || isImageUploading || isCoverImageUploading}
+                            className=" flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base">{isSubmitting ?
+                        <Loader2 size={20} className="animate-spin"/> : <><Save
+                            size={20}/>{initialData ? t('pitchOwnerForm:buttons.update') : t('pitchOwnerForm:buttons.save')}</>}</button>
+                    <button type="button" onClick={onCancel}
+                            className="flex-1 md:hidden bg-gray-100 w-full mt-3 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('pitchOwnerForm:buttons.cancel')}
+                    </button>
+
                 </div>
+
             </form>
         </div>
     );
