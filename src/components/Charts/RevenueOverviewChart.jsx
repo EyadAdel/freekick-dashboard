@@ -21,7 +21,7 @@ const RevenueOverviewChart = ({
     const [isLoading, setIsLoading] = useState(true);
 
     const { t } = useTranslation(['revenueOverview', 'common']);
-
+    console.log(analytics,'lllllllllllll')
     // Fetch analytics data
     const fetchAnalytics = async () => {
         setIsLoading(true);
@@ -30,9 +30,9 @@ const RevenueOverviewChart = ({
 
             if (response?.data) {
                 setAnalytics({
-                    total_income: response.data.total_income || 0,
-                    total_expense: response.data.total_expense || 0,
-                    total: response.data.total || 0,
+                    total_income: parseFloat(response.data.total_income) || 0,
+                    total_expense: parseFloat(response.data.total_expense) || 0,
+                    total: parseFloat(response.data.total) || 0,
                     revenue_overview: response.data.revenue_overview || {}
                 });
             }
@@ -48,24 +48,44 @@ const RevenueOverviewChart = ({
     }, []);
 
     // Transform revenue overview data for chart
+    // const transformData = () => {
+    //     const revenueData = analytics?.revenue_overview;
+    //     if (!revenueData || Object.keys(revenueData).length === 0) {
+    //         return [];
+    //     }
+    //     // Currently using monthly as fallback
+    //     return Object.entries(revenueData).map(([month, amount]) => ({
+    //         month: month.substring(0, 3),
+    //         revenue: amount || 0,
+    //         fullMonth: month
+    //     }));
+    // };
+
     const transformData = () => {
-        const revenueData = analytics.revenue_overview;
+        const revenueData = analytics?.revenue_overview;
         if (!revenueData || Object.keys(revenueData).length === 0) {
             return [];
         }
-        // Currently using monthly as fallback
-        return Object.entries(revenueData).map(([month, amount]) => ({
-            month: month.substring(0, 3),
-            revenue: amount || 0,
-            fullMonth: month
-        }));
-    };
 
+        return Object.entries(revenueData).map(([month, amount]) => {
+            // Handle null, undefined, or string values
+            const revenueValue = amount === null || amount === undefined ? 0 : parseFloat(amount);
+
+            return {
+                month: month.substring(0, 3),
+                revenue: isNaN(revenueValue) ? 0 : revenueValue, // Ensure it's a number
+                fullMonth: month
+            };
+        });
+    };
     const chartData = transformData();
 
     // Calculate total revenue from the data
     const totalRevenue = chartData.reduce((sum, item) => sum + (item.revenue || 0), 0);
-
+    useEffect(() => {
+        console.log('Revenue overview data:', analytics.revenue_overview);
+        console.log('Transformed chart data:', chartData);
+    }, [analytics.revenue_overview, chartData]);
     // Calculate trend
     const calculateTrend = () => {
         const values = chartData.map(item => item.revenue);
@@ -178,15 +198,15 @@ const RevenueOverviewChart = ({
                         </div>
                     </div>
                     <p className="text-gray-500 text-sm mt-1">
-                        {t('revenueOverview:netBalance')}: ${analytics.total?.toFixed(2) || '0.00'}
-                        ({t('revenueOverview:income')}: ${analytics.total_income?.toFixed(2) || '0.00'} | {t('revenueOverview:expense')}: ${analytics.total_expense?.toFixed(2) || '0.00'})
+                        {t('revenueOverview:netBalance')}: ${analytics?.total?.toFixed(2) || '0.00'}
+                        ({t('revenueOverview:income')}: ${analytics?.total_income?.toFixed(2) || '0.00'} | {t('revenueOverview:expense')}: ${analytics?.total_expense?.toFixed(2) || '0.00'})
                     </p>
                 </div>
             </div>
 
             {/* Chart */}
             <div className="h-64">
-                {chartData.length > 0 ? (
+                {chartData?.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                             data={chartData}

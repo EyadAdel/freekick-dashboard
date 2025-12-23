@@ -5,12 +5,28 @@
   "defaultTitle": "إشعار",
   "defaultBody": "لا يوجد محتوى للرسالة",
   "new": "جديد",
-  "viewAll": "عرض جميع {{count}} الإشعارات",
+  "viewAll": "عرض جميع الإشعارات",
+  "showLess": "عرض أقل",
+  "markAllRead": "تحديد الكل كمقروء",
+  "clearAll": "مسح الكل",
+  "noNotifications": "لا توجد إشعارات بعد",
+  "notificationHint": "سنخطرك عند وصول أي شيء جديد",
+  "recently": "مؤخراً",
+  "actions": {
+    "markAsRead": "تحديد كمقروء",
+    "delete": "حذف",
+    "close": "إغلاق"
+  },
+  "emptyState": {
+    "title": "لا توجد إشعارات بعد",
+    "description": "سنخطرك عند وصول أي شيء جديد"
+  },
   "time": {
     "justNow": "الآن",
     "minutesAgo": "منذ {{count}} دقيقة",
     "hoursAgo": "منذ {{count}} ساعة",
     "yesterday": "أمس",
-    "daysAgo": "منذ {{count}} يوم"
+    "daysAgo": "منذ {{count}} يوم",
+    "recently": "مؤخراً"
   }
 }
