@@ -2,29 +2,38 @@
   "header": {
     "create_title": "Create New Tournament",
     "edit_title": "Edit Tournament",
-    "create_subtitle": "Fill in the details to launch a new tournament.",
-    "edit_subtitle": "Update the details for this tournament."
+    "create_subtitle": "Fill in the details below to host a new tournament",
+    "edit_subtitle": "Update the tournament information and settings"
   },
   "sections": {
     "basic_info": "Basic Information",
     "cover_image": "Cover Image",
-    "gallery": "Tournament Gallery (Optional)",
-    "schedule": "Schedule",
+    "gallery": "Tournament Gallery",
+    "schedule": "Schedule & Deadlines",
     "game_details": "Game Details",
-    "details": "Details"
+    "details": "Rules & Prizes",
+    "visibility": "Tournament Visibility"
+  },
+  "visibility": {
+    "title": "Tournament Visibility",
+    "subtitle": "Choose who can see and join your tournament",
+    "public": "Public",
+    "private": "Private",
+    "public_desc": "Anyone can discover and join this tournament",
+    "private_desc": "Only invited users can see and join this tournament"
   },
   "fields": {
     "name": {
       "label": "Tournament Name",
-      "placeholder": "Enter tournament name..."
+      "placeholder": "e.g. Summer Championship 2024"
     },
     "subtitle": {
       "label": "Subtitle",
-      "placeholder": "e.g. The biggest summer event"
+      "placeholder": "Short catchphrase or slogan"
     },
     "description": {
       "label": "Description",
-      "placeholder": "Describe the tournament..."
+      "placeholder": "Describe what this tournament is about..."
     },
     "start_date": "Start Date",
     "end_date": "End Date",
@@ -32,33 +41,33 @@
     "start_time": "Start Time",
     "end_time": "End Time",
     "venue": {
-      "label": "Venue",
-      "placeholder": "Select Venue"
+      "label": "Venue / Location",
+      "placeholder": "Select a venue"
     },
     "sport": {
-      "label": "Sport",
-      "placeholder": "Select Sport"
+      "label": "Sport Type",
+      "placeholder": "Select sport"
     },
     "scoring_system": "Scoring System",
-    "max_teams": "Max Teams",
+    "max_teams": "Maximum Teams",
     "entry_fee": "Entry Fee",
     "rules": {
-      "label": "Rules",
-      "placeholder": "Enter tournament rules..."
+      "label": "Tournament Rules",
+      "placeholder": "List the rules and regulations..."
     },
     "prizes": {
       "label": "Prizes",
-      "placeholder": "Enter prize details..."
+      "placeholder": "What will the winners receive?"
     },
-    "is_active": "Is Active?"
+    "is_active": "Active / Visible on platform"
   },
   "options": {
     "knockout": "Knockout",
-    "league": "League"
+    "league": "League / Points"
   },
   "images": {
-    "click_to_upload": "Click to upload cover",
-    "formats": "SVG, PNG, JPG or GIF",
+    "click_to_upload": "Click to upload image",
+    "formats": "PNG, JPG or WEBP (Max 5MB)",
     "add_photos": "Add Photos",
     "add_more": "Add More"
   },
@@ -68,24 +77,24 @@
     "update": "Update Tournament"
   },
   "messages": {
-    "invalid_image": "Please upload a valid image file",
-    "cover_uploaded": "Cover image uploaded",
-    "cover_failed": "Cover image upload failed",
-    "gallery_failed": "Failed to upload {{fileName}}",
-    "wait_cover": "Please wait for cover image to finish uploading.",
+    "invalid_image": "Please select a valid image file.",
+    "cover_uploaded": "Cover image uploaded successfully.",
+    "cover_failed": "Failed to upload cover image.",
+    "gallery_failed": "Failed to upload {{fileName}}.",
+    "wait_cover": "Please wait for the cover image to finish uploading.",
     "wait_gallery": "Please wait for gallery images to finish uploading.",
     "fill_required": "Please fill in all required fields.",
-    "submission_error": "Something went wrong during submission."
+    "submission_error": "An error occurred during submission."
   },
   "errors": {
-    "name_required": "Tournament Name is required",
-    "start_date_required": "Start Date is required",
-    "end_date_required": "End Date is required",
-    "venue_required": "Venue is required",
-    "max_teams_required": "Max Teams is required",
-    "sport_required": "Sport is required",
-    "start_time_required": "Start Time is required",
-    "end_time_required": "End Time is required",
-    "reg_deadline_required": "Registration Deadline is required"
+    "name_required": "Name is required",
+    "start_date_required": "Start date is required",
+    "end_date_required": "End date is required",
+    "venue_required": "Venue selection is required",
+    "max_teams_required": "Max teams is required",
+    "sport_required": "Sport selection is required",
+    "start_time_required": "Start time is required",
+    "end_time_required": "End time is required",
+    "reg_deadline_required": "Registration deadline is required"
   }
 }

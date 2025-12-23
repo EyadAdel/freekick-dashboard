@@ -2,63 +2,72 @@
   "header": {
     "create_title": "إنشاء بطولة جديدة",
     "edit_title": "تعديل البطولة",
-    "create_subtitle": "املأ التفاصيل لبدء بطولة جديدة.",
-    "edit_subtitle": "تحديث تفاصيل هذه البطولة."
+    "create_subtitle": "املأ التفاصيل أدناه لاستضافة بطولة جديدة",
+    "edit_subtitle": "تحديث معلومات وإعدادات البطولة"
   },
   "sections": {
     "basic_info": "المعلومات الأساسية",
     "cover_image": "صورة الغلاف",
-    "gallery": "معرض صور البطولة (اختياري)",
-    "schedule": "الجدول الزمني",
+    "gallery": "معرض صور البطولة",
+    "schedule": "الجدول الزمني والمواعيد النهائية",
     "game_details": "تفاصيل اللعبة",
-    "details": "التفاصيل"
+    "details": "القواعد والجوائز",
+    "visibility": "ظهور البطولة"
+  },
+  "visibility": {
+    "title": "ظهور البطولة",
+    "subtitle": "اختر من يمكنه رؤية والانضمام إلى بطولتك",
+    "public": "عام",
+    "private": "خاص",
+    "public_desc": "يمكن للجميع اكتشاف هذه البطولة والانضمام إليها",
+    "private_desc": "يمكن للمستخدمين المدعوين فقط رؤية هذه البطولة والانضمام إليها"
   },
   "fields": {
     "name": {
       "label": "اسم البطولة",
-      "placeholder": "أدخل اسم البطولة..."
+      "placeholder": "مثال: بطولة الصيف 2024"
     },
     "subtitle": {
-      "label": "العنوان الفرعي",
-      "placeholder": "مثال: أكبر حدث صيفي"
+      "label": "عنوان فرعي",
+      "placeholder": "شعار قصير أو عبارة جذابة"
     },
     "description": {
       "label": "الوصف",
-      "placeholder": "صف البطولة..."
+      "placeholder": "صف موضوع هذه البطولة..."
     },
     "start_date": "تاريخ البدء",
     "end_date": "تاريخ الانتهاء",
-    "registration_deadline": "الموعد النهائي للتسجيل",
+    "registration_deadline": "موعد نهائي للتسجيل",
     "start_time": "وقت البدء",
     "end_time": "وقت الانتهاء",
     "venue": {
-      "label": "المنشأة",
-      "placeholder": "اختر المنشأة"
+      "label": "المكان / الموقع",
+      "placeholder": "اختر الموقع"
     },
     "sport": {
-      "label": "الرياضة",
+      "label": "نوع الرياضة",
       "placeholder": "اختر الرياضة"
     },
-    "scoring_system": "نظام البطولة",
-    "max_teams": "أقصى عدد للفرق",
-    "entry_fee": "رسوم الاشتراك",
+    "scoring_system": "نظام النقاط",
+    "max_teams": "الحد الأقصى للفرق",
+    "entry_fee": "رسوم الدخول",
     "rules": {
-      "label": "القواعد",
-      "placeholder": "أدخل قواعد البطولة..."
+      "label": "قواعد البطولة",
+      "placeholder": "اذكر القواعد واللوائح..."
     },
     "prizes": {
       "label": "الجوائز",
-      "placeholder": "أدخل تفاصيل الجوائز..."
+      "placeholder": "ماذا سيحصل الفائزون؟"
     },
-    "is_active": "هل هي نشطة؟"
+    "is_active": "نشط / مرئي على المنصة"
   },
   "options": {
     "knockout": "خروج المغلوب",
-    "league": "دوري"
+    "league": "دوري / نقاط"
   },
   "images": {
-    "click_to_upload": "اضغط لرفع الغلاف",
-    "formats": "SVG, PNG, JPG أو GIF",
+    "click_to_upload": "اضغط لرفع صورة",
+    "formats": "PNG, JPG أو WEBP (بحد أقصى 5 ميجابايت)",
     "add_photos": "إضافة صور",
     "add_more": "إضافة المزيد"
   },
@@ -68,22 +77,22 @@
     "update": "تحديث البطولة"
   },
   "messages": {
-    "invalid_image": "يرجى رفع ملف صورة صالح",
-    "cover_uploaded": "تم رفع صورة الغلاف",
-    "cover_failed": "فشل رفع صورة الغلاف",
-    "gallery_failed": "فشل رفع {{fileName}}",
+    "invalid_image": "يرجى اختيار ملف صورة صالح.",
+    "cover_uploaded": "تم رفع صورة الغلاف بنجاح.",
+    "cover_failed": "فشل رفع صورة الغلاف.",
+    "gallery_failed": "فشل رفع {{fileName}}.",
     "wait_cover": "يرجى الانتظار حتى ينتهي رفع صورة الغلاف.",
     "wait_gallery": "يرجى الانتظار حتى ينتهي رفع صور المعرض.",
     "fill_required": "يرجى ملء جميع الحقول المطلوبة.",
-    "submission_error": "حدث خطأ ما أثناء الإرسال."
+    "submission_error": "حدث خطأ أثناء الإرسال."
   },
   "errors": {
-    "name_required": "اسم البطولة مطلوب",
+    "name_required": "الاسم مطلوب",
     "start_date_required": "تاريخ البدء مطلوب",
     "end_date_required": "تاريخ الانتهاء مطلوب",
-    "venue_required": "المنشأة مطلوبة",
-    "max_teams_required": "أقصى عدد للفرق مطلوب",
-    "sport_required": "الرياضة مطلوبة",
+    "venue_required": "اختيار الموقع مطلوب",
+    "max_teams_required": "الحد الأقصى للفرق مطلوب",
+    "sport_required": "اختيار الرياضة مطلوب",
     "start_time_required": "وقت البدء مطلوب",
     "end_time_required": "وقت الانتهاء مطلوب",
     "reg_deadline_required": "الموعد النهائي للتسجيل مطلوب"
