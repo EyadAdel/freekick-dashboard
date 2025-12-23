@@ -18,11 +18,12 @@ const StatCard = ({
                 <div className={`w-10 h-10 bg-gradient-to-br from-[#84FAA4] via-primary-500 to-[#2ACEF2] rounded-xl flex items-center justify-center`}>
                     <Icon className={iconColor} size={24} />
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-white border-2 border-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                <div className="absolute -bottom-1.5 -right-1.5 px-0.5 bg-white border-2 border-white rounded-full min-w-5 h-5 w-fit flex items-center justify-center shadow-sm">
                         <span className="text-xs font-bold text-secondary-600">
                             {typeof value === 'number' ?
                                 (value > 999 ? `${(value/1000).toFixed(0)}k` : value) :
                                 value}
+
                         </span>
                 </div>
             </div>
