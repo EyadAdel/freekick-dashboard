@@ -9,7 +9,8 @@ import { useTranslation } from 'react-i18next'; // Import Hook
 import {
     Type, DollarSign, Calendar, Trophy, Save, X,
     UploadCloud, Trash2, ChevronDown, Users, Loader2, Edit,
-    Clock, AlignLeft, FileText, Activity, Image as ImageIcon, Plus, Check
+    Clock, AlignLeft, FileText, Activity, Image as ImageIcon, Plus, Check,
+    Globe, Lock, Info, CheckCircle2 // Added for Visibility section
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -34,6 +35,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
         sport: '',
         venue: '',
         is_active: true,
+        is_private: false, // Added for Visibility
     });
 
     // --- IMAGE STATE ---
@@ -73,6 +75,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                 sport: initialData.sport || '',
                 venue: initialData.venue || '',
                 is_active: initialData.is_active ?? true,
+                is_private: initialData.private ?? false, // Handle initial private status
             });
 
             if (initialData.cover_image) {
@@ -259,6 +262,7 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
                 entry_fee: parseFloat(formData.entry_fee || 0).toFixed(2),
                 scoring_system: formData.scoring_system,
                 is_active: formData.is_active,
+                private: formData.is_private, // Added key as requested
                 sport: formData.sport ? parseInt(formData.sport, 10) : null,
                 venue: parseInt(formData.venue, 10),
                 cover_image: finalCoverImage,
@@ -528,6 +532,63 @@ const TournamentsForm = ({ venuesList = [], sportsList = [], onCancel, onSuccess
 
                         <MainInput label={t('fields.max_teams')} name="max_teams" type="number" value={formData.max_teams} onChange={handleChange} error={errors.max_teams} icon={Users} required />
                         <MainInput label={t('fields.entry_fee')} name="entry_fee" type="number" value={formData.entry_fee} onChange={handleChange} icon={DollarSign} />
+                    </div>
+                </div>
+
+                {/* --- Tournament Visibility --- */}
+                <div className="space-y-4">
+                    <div className="flex flex-col">
+                        <h3 className="text-lg font-semibold text-gray-800">{t('visibility.title')}</h3>
+                        <p className="text-sm text-gray-500">{t('visibility.subtitle')}</p>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-wrap gap-4">
+                            {/* Public Option */}
+                            <button
+                                type="button"
+                                onClick={() => setFormData(prev => ({...prev, is_private: false}))}
+                                className={`flex items-center justify-center gap-3 px-8 py-4 rounded-xl border-2 transition-all min-w-[200px] ${
+                                    !formData.is_private
+                                        ? 'bg-teal-600 border-teal-600 text-white hover:bg-teal-700 hover:border-teal-700 shadow-md'
+                                        : 'bg-white border-gray-200 text-gray-600 hover:border-teal-200'
+                                }`}
+                            >
+                                {!formData.is_private && <Check size={18} className="text-teal-200"/>}
+                                <Globe size={20}/>
+                                <span className="font-bold">{t('visibility.public')}</span>
+                            </button>
+
+                            {/* Private Option */}
+                            <button
+                                type="button"
+                                onClick={() => setFormData(prev => ({...prev, is_private: true}))}
+                                className={`flex items-center justify-center gap-3 px-8 py-4 rounded-xl border-2 transition-all min-w-[200px] ${
+                                    formData.is_private
+                                        ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                                        : 'bg-white border-gray-200 text-gray-600 hover:border-orange-200'
+                                }`}
+                            >
+                                {formData.is_private && <Check size={18} className="text-orange-200"/>}
+                                <Lock size={20}/>
+                                <span className="font-bold">{t('visibility.private')}</span>
+                            </button>
+                        </div>
+
+                        {/* Description Box */}
+                        {!formData.is_private ? (
+                            <div
+                                className="flex items-center gap-3 p-4 bg-teal-50 border border-teal-100 rounded-lg text-teal-700 text-sm animate-in fade-in slide-in-from-top-1">
+                                <CheckCircle2 size={20} className="text-teal-600"/>
+                                <span>{t('visibility.public_desc')}</span>
+                            </div>
+                        ) : (
+                            <div
+                                className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-100 rounded-lg text-orange-700 text-sm animate-in fade-in slide-in-from-top-1">
+                                <Info size={20} className="text-orange-500"/>
+                                <span>{t('visibility.private_desc')}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
