@@ -506,8 +506,8 @@ const PitchOwners = () => {
                             const cleanCover = (item.cover_photo && item.cover_photo !== "Null" && item.cover_photo !== "null") ? item.cover_photo : null;
                             const imageUrl = getImageUrl(cleanCover);
                             return imageUrl ? (
-                                <img src={imageUrl} alt="Cover" className="w-full h-full object-cover rounded-lg" />
-                            ) : <ImageIcon className="text-white w-5 h-5" />;
+                                <img src={imageUrl} alt="Cover" className="w-full h-full object-cover rounded-lg"/>
+                            ) : <ImageIcon className="text-white w-5 h-5"/>;
                         }}
                         renderHeader={(item) => (
                             <div className="flex flex-col">
@@ -517,9 +517,12 @@ const PitchOwners = () => {
                         )}
                         renderMeta={(item) => (
                             <>
-                                <div className="flex items-center gap-1"><Mail size={12} /> {item.contact_email}</div>
-                                {item.contact_phone && <div className="flex items-center gap-1"><Phone size={12} /> {item.contact_phone}</div>}
-                                {item.city && <div className="flex items-center gap-1"><MapPin size={12} /> {item.city}</div>}
+                                <div className="flex items-center gap-1"><Mail size={12}/> {item.contact_email}</div>
+                                {item.contact_phone &&
+                                    <div className="flex items-center gap-1"><Phone size={12}/> {item.contact_phone}
+                                    </div>}
+                                {item.city &&
+                                    <div className="flex items-center gap-1"><MapPin size={12}/> {item.city}</div>}
                             </>
                         )}
                     />
@@ -527,23 +530,28 @@ const PitchOwners = () => {
             )}
 
             {/* View Tabs */}
-            <div className="bg-gradient-to-br from-white to-primary-50/30 rounded-lg shadow-sm border border-primary-100 p-1.5 mt-5 mb-6">
-                <div className="flex space-x-1">
+            <div className="bg-gradient-to-br from-white to-primary-50/30 rounded-xl shadow-sm border border-primary-100 p-1 sm:p-1.5 mt-4 sm:mt-5 mb-4 sm:mb-6">
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-1.5">
                     {[
-                        { key: 'all', label: t('pitchOwnerPage:tabs.all') },
-                        { key: 'active', label: t('pitchOwnerPage:tabs.active') },
-                        { key: 'inactive', label: t('pitchOwnerPage:tabs.inactive') }
+                        {key: 'all', label: t('pitchOwnerPage:tabs.all')},
+                        {key: 'active', label: t('pitchOwnerPage:tabs.active')},
+                        {key: 'inactive', label: t('pitchOwnerPage:tabs.inactive')}
                     ].map((tab) => (
                         <button
                             key={tab.key}
                             onClick={() => handleViewChange(tab.key)}
-                            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-semibold text-sm capitalize transition-all duration-200 ${
-                                currentView === tab.key
-                                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
-                                    : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
-                            }`}
+                            className={`
+                    flex-1 flex items-center justify-center gap-2 
+                    px-3 py-2.5 sm:py-2 
+                    rounded-lg font-semibold text-xs sm:text-sm 
+                    transition-all duration-200
+                    ${currentView === tab.key
+                                ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
+                                : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
+                            }
+                `}
                         >
-                            {tab.label}
+                            <span className="truncate">{tab.label}</span>
                         </button>
                     ))}
                 </div>

@@ -379,7 +379,7 @@ const Bookings = () => {
             </div>
 
             <div className={'py-5'}>
-                <h1 className="px-8 text-primary-700 lg:-mb-10 lg:text-xl lg:mt-8 font-bold">
+                <h1 className="px-3 text-primary-700 my-4 lg:text-xl font-bold">
                     {t('listTitle')}
                 </h1>
 

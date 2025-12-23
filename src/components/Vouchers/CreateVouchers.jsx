@@ -169,7 +169,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                                 name="code"
                                 control={control}
                                 rules={{
-                                    required: t('createEditVoucher:form.messages.errors.required', { field: t('createEditVoucher:form.labels.code') }),
+                                    required: t('createEditVoucher:form.messages.errors.required', {field: t('createEditVoucher:form.labels.code')}),
                                     minLength: {
                                         value: 3,
                                         message: t('createEditVoucher:form.messages.errors.minLength', {
@@ -178,7 +178,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                                         })
                                     }
                                 }}
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <MainInput
                                         label={t('createEditVoucher:form.labels.code')}
                                         type="text"
@@ -205,7 +205,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                             name="name"
                             control={control}
                             rules={{
-                                required: t('createEditVoucher:form.messages.errors.required', { field: t('createEditVoucher:form.labels.name') }),
+                                required: t('createEditVoucher:form.messages.errors.required', {field: t('createEditVoucher:form.labels.name')}),
                                 minLength: {
                                     value: 3,
                                     message: t('createEditVoucher:form.messages.errors.minLength', {
@@ -214,7 +214,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                                     })
                                 }
                             }}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('createEditVoucher:form.labels.name')}
                                     type="text"
@@ -233,7 +233,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                         <Controller
                             name="description"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('createEditVoucher:form.labels.description')}
                                     type="textarea"
@@ -254,13 +254,13 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                             name="discount_type"
                             control={control}
                             rules={{
-                                required: t('createEditVoucher:form.messages.errors.required', { field: t('createEditVoucher:form.labels.discountType') })
+                                required: t('createEditVoucher:form.messages.errors.required', {field: t('createEditVoucher:form.labels.discountType')})
                             }}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('createEditVoucher:form.labels.discountType')}
                                     type="select"
-                                    options={t('createEditVoucher:form.options.discountTypes', { returnObjects: true })}
+                                    options={t('createEditVoucher:form.options.discountTypes', {returnObjects: true})}
                                     required
                                     error={errors.discount_type?.message}
                                     disabled={loading}
@@ -273,7 +273,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                             name="discount_amount"
                             control={control}
                             rules={{
-                                required: t('createEditVoucher:form.messages.errors.required', { field: getDiscountTypeLabel() }),
+                                required: t('createEditVoucher:form.messages.errors.required', {field: getDiscountTypeLabel()}),
                                 min: {
                                     value: 0,
                                     message: t('createEditVoucher:form.messages.errors.positive')
@@ -285,7 +285,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                                     return true;
                                 }
                             }}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={getDiscountTypeLabel()}
                                     type="number"
@@ -318,7 +318,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                                         message: t('createEditVoucher:form.messages.errors.positive')
                                     }
                                 }}
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <MainInput
                                         label={t('createEditVoucher:form.labels.maxDiscountAmount')}
                                         type="number"
@@ -340,7 +340,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                         <Controller
                             name="valid_from"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('createEditVoucher:form.labels.validFrom')}
                                     type="date"
@@ -355,7 +355,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                         <Controller
                             name="valid_to"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('createEditVoucher:form.labels.validTo')}
                                     type="date"
@@ -379,7 +379,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                                     message: t('createEditVoucher:form.messages.errors.minUsage')
                                 }
                             }}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('createEditVoucher:form.labels.usageLimit')}
                                     type="number"
@@ -399,7 +399,7 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                         <Controller
                             name="is_active"
                             control={control}
-                            render={({ field: { value, onChange, ...field } }) => (
+                            render={({field: {value, onChange, ...field}}) => (
                                 <MainInput
                                     label={t('createEditVoucher:form.labels.activeStatus')}
                                     type="checkbox"
@@ -415,27 +415,63 @@ const CreateVouchers = ({ onBack, editVoucher = null }) => {
                     </div>
 
                     {/* Form Actions */}
-                    <div className={`flex items-center justify-end gap-4 pt-6 border-t border-gray-200 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className={`md:flex gap-4 pt-6 border-t ${isRTL ? 'md:flex-row-reverse' : ''}`}>
+                        {/* Desktop Cancel Button (Hidden on Mobile) */}
                         <button
                             type="button"
                             onClick={onBack}
                             disabled={loading}
-                            className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
+                            className="hidden md:flex items-center justify-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base disabled:opacity-50"
                         >
                             {t('createEditVoucher:form.buttons.cancel')}
                         </button>
+
+                        {/* Primary Action Button (Full width on all screens) */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="lg:px-6 text-sm lg:text-base px-2 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
+                            className="flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base disabled:opacity-50"
                         >
-                            {loading && <Loader2 size={18} className="animate-spin" />}
-                            {editVoucher
-                                ? t('createEditVoucher:form.buttons.submit.edit')
-                                : t('createEditVoucher:form.buttons.submit.create')
-                            }
+                            {loading ? (
+                                <Loader2 size={20} className="animate-spin"/>
+                            ) : (
+                                editVoucher
+                                    ? t('createEditVoucher:form.buttons.submit.edit')
+                                    : t('createEditVoucher:form.buttons.submit.create')
+                            )}
+                        </button>
+
+                        {/* Mobile Cancel Button (Hidden on Desktop) */}
+                        <button
+                            type="button"
+                            onClick={onBack}
+                            disabled={loading}
+                            className="md:hidden flex items-center justify-center w-full mt-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base disabled:opacity-50"
+                        >
+                            {t('createEditVoucher:form.buttons.cancel')}
                         </button>
                     </div>
+                    {/*<div className={`flex items-center justify-end gap-4 pt-6 border-t border-gray-200 ${isRTL ? 'flex-row-reverse' : ''}`}>*/}
+                    {/*    <button*/}
+                    {/*        type="button"*/}
+                    {/*        onClick={onBack}*/}
+                    {/*        disabled={loading}*/}
+                    {/*        className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"*/}
+                    {/*    >*/}
+                    {/*        {t('createEditVoucher:form.buttons.cancel')}*/}
+                    {/*    </button>*/}
+                    {/*    <button*/}
+                    {/*        type="submit"*/}
+                    {/*        disabled={loading}*/}
+                    {/*        className="lg:px-6 text-sm lg:text-base px-2 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"*/}
+                    {/*    >*/}
+                    {/*        {loading && <Loader2 size={18} className="animate-spin"/>}*/}
+                    {/*        {editVoucher*/}
+                    {/*            ? t('createEditVoucher:form.buttons.submit.edit')*/}
+                    {/*            : t('createEditVoucher:form.buttons.submit.create')*/}
+                    {/*        }*/}
+                    {/*    </button>*/}
+                    {/*</div>*/}
                 </div>
             </form>
         </div>

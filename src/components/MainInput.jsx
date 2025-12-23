@@ -209,7 +209,7 @@ const MainInput = ({
             disabled={disabled}
             placeholder={placeholder}
             // Added !w-full to force override and block display
-            className={`${baseStyles} ${stateStyles} ${Icon ? 'pl-10' : ''} w-full block min-w-full min-h-14`}
+            className={`${baseStyles} ${stateStyles} ${Icon ? 'pl-10' : ''} w-full block min-w-full h-12`}
             {...props}
         />
     );

@@ -245,9 +245,9 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                             control={control}
                             rules={{
                                 required: t('form.eventName.required'),
-                                minLength: { value: 3, message: t('form.eventName.minLength') }
+                                minLength: {value: 3, message: t('form.eventName.minLength')}
                             }}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('form.eventName.label')}
                                     type="text"
@@ -264,8 +264,8 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                         <Controller
                             name="date"
                             control={control}
-                            rules={{ required: t('form.date.required') }}
-                            render={({ field }) => (
+                            rules={{required: t('form.date.required')}}
+                            render={({field}) => (
                                 <MainInput
                                     label={t('form.date.label')}
                                     type="date"
@@ -281,8 +281,8 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                         <Controller
                             name="city"
                             control={control}
-                            rules={{ required: t('form.city.required') }}
-                            render={({ field }) => (
+                            rules={{required: t('form.city.required')}}
+                            render={({field}) => (
                                 <MainInput
                                     label={t('form.city.label')}
                                     type="select"
@@ -300,8 +300,8 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                         <Controller
                             name="place"
                             control={control}
-                            rules={{ required: t('form.place.required') }}
-                            render={({ field }) => (
+                            rules={{required: t('form.place.required')}}
+                            render={({field}) => (
                                 <MainInput
                                     label={t('form.place.label')}
                                     type="text"
@@ -320,9 +320,9 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                             control={control}
                             rules={{
                                 required: t('form.price.required'),
-                                min: { value: 0, message: t('form.price.min') }
+                                min: {value: 0, message: t('form.price.min')}
                             }}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('form.price.label')}
                                     type="number"
@@ -339,7 +339,7 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                         <Controller
                             name="description"
                             control={control}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('form.description.label')}
                                     type="textarea"
@@ -362,7 +362,7 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                                     message: t('form.url.pattern')
                                 }
                             }}
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <MainInput
                                     label={t('form.url.label')}
                                     type="text"
@@ -379,7 +379,7 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                         <Controller
                             name="is_active"
                             control={control}
-                            render={({ field: { value, onChange, ...field } }) => (
+                            render={({field: {value, onChange, ...field}}) => (
                                 <MainInput
                                     label={t('form.activeStatus.label')}
                                     type="checkbox"
@@ -415,10 +415,11 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                                             className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                                             title={t('buttons.removeImage')}
                                         >
-                                            <X size={16} />
+                                            <X size={16}/>
                                         </button>
                                         {editTicket?.image && !uploadedFileName && (
-                                            <div className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                                            <div
+                                                className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
                                                 {t('form.image.existingImage')}
                                             </div>
                                         )}
@@ -432,12 +433,12 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                                     >
                                         {uploading ? (
                                             <>
-                                                <Loader2 size={40} className="text-primary-500 mb-2 animate-spin" />
+                                                <Loader2 size={40} className="text-primary-500 mb-2 animate-spin"/>
                                                 <p className="text-sm text-gray-500">{t('form.image.uploading')}</p>
                                             </>
                                         ) : (
                                             <>
-                                                <Upload size={40} className="text-gray-400 mb-2" />
+                                                <Upload size={40} className="text-gray-400 mb-2"/>
                                                 <p className="text-sm text-gray-500">
                                                     {t('form.image.dragDrop')}
                                                 </p>
@@ -470,13 +471,13 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                                             (uploading || loading) ? 'opacity-50 cursor-not-allowed' : ''
                                         }`}
                                     >
-                                        <Upload size={18} />
+                                        <Upload size={18}/>
                                         {imagePreview ? t('form.image.change') : t('form.image.choose')}
                                     </label>
 
                                     {uploading && (
                                         <div className="flex items-center gap-2">
-                                            <Loader2 size={18} className="animate-spin text-primary-500" />
+                                            <Loader2 size={18} className="animate-spin text-primary-500"/>
                                             <span className="text-sm text-gray-600">{t('form.image.uploading')}</span>
                                         </div>
                                     )}
@@ -527,24 +528,40 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
                     </div>
 
                     {/* Form Actions */}
-                    <div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
-                        <button
-                            type="button"
-                            onClick={onBack}
-                            disabled={loading || uploading}
-                            className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"
-                        >
-                            {t('buttons.cancel')}
+                    <div className="md:flex gap-4 pt-6 border-t">
+                        <button type="button" onClick={onBack}
+                                disabled={loading || uploading}
+                                className="md:flex items-center justify-center hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800  font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
                         </button>
-                        <button
-                            type="submit"
-                            disabled={loading || uploading}
-                            className="lg:px-6 text-sm lg:text-base px-2 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
-                        >
-                            {loading && <Loader2 size={18} className="animate-spin" />}
+                        <button type="submit"
+                                disabled={loading || uploading}
+                                className=" flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base">
+                            {loading && <Loader2 size={18} className="animate-spin"/>}
                             {editTicket ? t('buttons.update') : t('buttons.create')}
+                    </button>
+                        <button type="button" disabled={loading || uploading}  onClick={onBack}
+                                className="flex-1 md:hidden bg-gray-100 w-full mt-3 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
                         </button>
+
                     </div>
+                    {/*<div className="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">*/}
+                    {/*    <button*/}
+                    {/*        type="button"*/}
+                    {/*        onClick={onBack}*/}
+                    {/*        disabled={loading || uploading}*/}
+                    {/*        className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium disabled:opacity-50"*/}
+                    {/*    >*/}
+                    {/*        {t('buttons.cancel')}*/}
+                    {/*    </button>*/}
+                    {/*    <button*/}
+                    {/*        type="submit"*/}
+                    {/*        disabled={loading || uploading}*/}
+                    {/*        className="lg:px-6 text-sm lg:text-base px-2 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 flex items-center gap-2"*/}
+                    {/*    >*/}
+                    {/*        {loading && <Loader2 size={18} className="animate-spin"/>}*/}
+                    {/*        {editTicket ? t('buttons.update') : t('buttons.create')}*/}
+                    {/*    </button>*/}
+                    {/*</div>*/}
                 </div>
             </form>
         </div>

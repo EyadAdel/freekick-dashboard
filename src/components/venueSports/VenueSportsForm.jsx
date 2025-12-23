@@ -307,7 +307,7 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                 {/* 1. Translations Section */}
                 <div className="space-y-6">
-                    <SectionHeader title={t('basic_info.title')} icon={Globe} />
+                    <SectionHeader title={t('basic_info.title')} icon={Globe}/>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                         {/* English */}
@@ -353,12 +353,13 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
 
                 {/* 2. Full Width Image Upload Section */}
                 <div className="space-y-4">
-                    <SectionHeader title={t('images.title')} icon={ImageIcon} />
+                    <SectionHeader title={t('images.title')} icon={ImageIcon}/>
 
                     <div className="w-full">
                         {imageState ? (
                             // Image Preview Container
-                            <div className="relative group w-full h-64 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm">
+                            <div
+                                className="relative group w-full h-64 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm">
                                 <img
                                     src={imageState.preview}
                                     alt="Sport Icon"
@@ -368,25 +369,27 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 {/* Loading Spinner */}
                                 {imageState.uploading && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                        <Loader2 className="animate-spin text-white w-8 h-8" />
+                                        <Loader2 className="animate-spin text-white w-8 h-8"/>
                                     </div>
                                 )}
 
                                 {/* Success Checkmark */}
                                 {!imageState.uploading && (imageState.serverUrl || imageState.uniqueName) && (
-                                    <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} bg-green-500 text-white rounded-full p-1 shadow-sm`}>
-                                        <Check size={14} />
+                                    <div
+                                        className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} bg-green-500 text-white rounded-full p-1 shadow-sm`}>
+                                        <Check size={14}/>
                                     </div>
                                 )}
 
                                 {/* Delete Button (Hover) */}
-                                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+                                <div
+                                    className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
                                     <button
                                         type="button"
                                         onClick={removeImage}
                                         className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-transform"
                                     >
-                                        <Trash2 size={18} />
+                                        <Trash2 size={18}/>
                                     </button>
                                 </div>
                             </div>
@@ -403,7 +406,7 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
                                     onChange={handleImageSelect}
                                 />
                                 <div className="p-3 bg-primary-100 rounded-full mb-3 text-primary-600">
-                                    <UploadCloud className="w-8 h-8" />
+                                    <UploadCloud className="w-8 h-8"/>
                                 </div>
                                 <span className="text-sm text-gray-600 font-semibold">{t('images.upload_label')}</span>
                                 <span className="text-xs text-gray-500 mt-1">{t('images.click_to_select')}</span>
@@ -413,18 +416,21 @@ const VenueSportsForm = ({ onCancel, onSuccess, initialData = null }) => {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-4 pt-4 border-t">
-                    <button type="button" onClick={onCancel} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors">
-                        {t('buttons.cancel')}
+                <div className="md:flex gap-4 pt-6 border-t">
+                    <button type="button" onClick={onCancel}
+                            className="md:flex items-center justify-center hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800  font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
                     </button>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting || imageState?.uploading}
-                        className="flex-1 flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg shadow-sm transition-colors"
-                    >
-                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><Save size={20} /> {initialData ? t('buttons.update') : t('buttons.save')}</>}
+                    <button type="submit"
+                            disabled={isSubmitting || imageState?.uploading}
+                            className=" flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base">{isSubmitting ?
+                        <Loader2 size={20} className="animate-spin"/> : <><Save
+                            size={20}/>{initialData ? t('buttons.update') : t('buttons.save')}</>}</button>
+                    <button type="button" onClick={onCancel}
+                            className="flex-1 md:hidden bg-gray-100 w-full mt-3 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
                     </button>
+
                 </div>
+
             </form>
         </div>
     );
