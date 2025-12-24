@@ -418,17 +418,17 @@ const Tournaments = () => {
             ],
             value: activeFilters.status
         },
-        {
-            key: 'venue', label: t('filters.venue_label'), type: 'select',
-            options: [
-                { label: t('filters.venue_all'), value: 'all' },
-                ...venuesData.map(v => ({
-                    label: v.translations?.[i18n.language]?.name || v.translations?.name || v.name,
-                    value: v.id
-                }))
-            ],
-            value: activeFilters.venue
-        }
+        // {
+        //     key: 'venue', label: t('filters.venue_label'), type: 'select',
+        //     options: [
+        //         { label: t('filters.venue_all'), value: 'all' },
+        //         ...venuesData.map(v => ({
+        //             label: v.translations?.[i18n.language]?.name || v.translations?.name || v.name,
+        //             value: v.id
+        //         }))
+        //     ],
+        //     value: activeFilters.venue
+        // }
     ], [t, activeFilters, venuesData, i18n.language]);
 
     return (

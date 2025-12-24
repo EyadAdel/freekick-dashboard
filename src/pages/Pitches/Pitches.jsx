@@ -312,13 +312,13 @@ const Pitches = () => {
             options: [{ label: t('filters.allVenues', 'All Venues'), value: 'all' }, ...venuesData],
             value: filters.venue || 'all'
         },
-        {
-            key: 'price',
-            label: t('filters.pricePerHour', 'Price Per Hour'),
-            type: 'number',
-            placeholder: t('filters.pricePlaceholder', 'e.g. 200'),
-            value: filters.price
-        }
+        // {
+        //     key: 'price',
+        //     label: t('filters.pricePerHour', 'Price Per Hour'),
+        //     type: 'number',
+        //     placeholder: t('filters.pricePlaceholder', 'e.g. 200'),
+        //     value: filters.price
+        // }
     ];
 
     const ActionButtons = ({ pitch }) => (
