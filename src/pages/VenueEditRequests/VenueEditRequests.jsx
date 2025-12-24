@@ -223,17 +223,17 @@ const VenueEditRequests = () => {
     // --- FILTER CONFIGURATION (Dropdowns) ---
     // Defined inside component to access 't'
     const filterConfig = [
-        {
-            key: 'status',
-            label: t('filters.statusLabel'),
-            type: 'select',
-            options: [
-                { label: t('filters.all'), value: 'all' },
-                { label: t('filters.approved'), value: 'true' },
-                { label: t('filters.pending'), value: 'false' }
-            ],
-            value: filters.status
-        }
+        // {
+        //     key: 'status',
+        //     label: t('filters.statusLabel'),
+        //     type: 'select',
+        //     options: [
+        //         { label: t('filters.all'), value: 'all' },
+        //         { label: t('filters.approved'), value: 'true' },
+        //         { label: t('filters.pending'), value: 'false' }
+        //     ],
+        //     value: filters.status
+        // }
     ];
 
     // --- TABLE COLUMNS ---
