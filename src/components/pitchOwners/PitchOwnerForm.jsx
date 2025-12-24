@@ -21,7 +21,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
 
     // --- STATE ---
     const [formData, setFormData] = useState({
-        user_id: '',
+        user: '',
         user_info: '',
         name: '',
         address: '',
@@ -183,7 +183,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
             const data = initialData.data || initialData;
 
             setFormData({
-                user_id: data.user_id || data.user || data.user_info?.id || '',
+                user: data.user || data.user_id || data.user_info?.id || '',
                 user_info: data.user_info?.name || '',
                 name: data.pitch_name || data.name || (data.translations?.en?.name) || '',
                 address: data.pitch_address || data.address || '',
@@ -228,13 +228,13 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
     const handleSelectUser = (user) => {
         setFormData(prev => ({
             ...prev,
-            user_id: user.id,
+            user: user.id,
             user_info: user.name || user.username || `User ${user.id}`
         }));
         setIsUserDropdownOpen(false);
         setUserSearchTerm('');
 
-        if (errors.user_id) setErrors(prev => ({ ...prev, user_id: '' }));
+        if (errors.user) setErrors(prev => ({ ...prev, user: '' }));
     };
     // --- GET DISPLAY NAME ---
     const getSelectedUserDisplay = () => {
@@ -242,18 +242,18 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (isUserDropdownOpen) return userSearchTerm;
 
         // If closed, try to find the name based on the ID
-        if (formData.user_id) {
+        if (formData.user) {
             // Check the currently loaded users list
-            const selected = users.find(u => u.id === formData.user_id);
+            const selected = users.find(u => u.id === formData.user);
             if (selected) return `${selected.name} (${selected.phone})`;
 
             // Check initial data fallback (in case the selected user isn't in the current API page)
-            if (initialData && initialData.user_info && (initialData.user_info.id === formData.user_id || initialData.user || initialData.user_id)) {
+            if (initialData && initialData.user_info && (initialData.user_info.id === formData.user || initialData.user || initialData.user)) {
                 return initialData.user_info.name || initialData.user_info;
             }
 
             // Fallback: If we have an ID but no name loaded, show ID or a placeholder
-            return formData.user_info || formData.user_id; // Added formData.user_info as fallback
+            return formData.user_info || formData.user; // Added formData.user_info as fallback
         }
         return '';
     };
@@ -362,7 +362,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
         e.preventDefault();
 
         const newErrors = {};
-        if (!formData.user_id) newErrors.user_id = t('pitchOwnerForm:validation.userRequired');
+        if (!formData.user) newErrors.user = t('pitchOwnerForm:validation.userRequired');
         if (!formData.name) newErrors.name = t('pitchOwnerForm:validation.nameRequired');
         if (!formData.email) newErrors.email = t('pitchOwnerForm:validation.emailRequired');
         if (!formData.contact_phone) newErrors.contact_phone = t('pitchOwnerForm:validation.phoneRequired');
@@ -556,7 +556,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                         setIsUserDropdownOpen(true);
                                     }}
                                     placeholder={loadingUsers ? t('pitchOwnerForm:sections.user.loading') : t('pitchOwnerForm:sections.user.defaultOption')}
-                                    className={`w-full p-3 pr-10 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all ${errors.user_id ? 'border-red-500' : 'border-gray-200'}`}
+                                    className={`w-full p-3 pr-10 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all ${errors.user ? 'border-red-500' : 'border-gray-200'}`}
                                     autoComplete="off"
                                 />
 
@@ -581,7 +581,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                         ) : users.length > 0 ? (
                                             <ul className="py-1">
                                                 {users.map(user => {
-                                                    const isSelected = formData.user_id === user.id;
+                                                    const isSelected = formData.user === user.id;
                                                     return (
                                                         <li
                                                             key={user.id}
@@ -618,7 +618,7 @@ const PitchOwnerForm = ({ onCancel, onSuccess, initialData = null }) => {
                                     {renderPagination()}
                                 </div>
                             )}
-                            {errors.user_id && <p className="text-xs text-red-500 mt-1">{errors.user_id}</p>}
+                            {errors.user && <p className="text-xs text-red-500 mt-1">{errors.user}</p>}
                         </div>
 
                         <MainInput
