@@ -236,18 +236,18 @@ const Support = () => {
     };
 
     const filterConfig = [
-        {
-            key: 'status',
-            label: t('filters.label'),
-            type: 'select',
-            options: [
-                { label: t('filters.all'), value: 'all' },
-                { label: t('status.pending'), value: 'pending' },
-                { label: t('status.in_progress'), value: 'in_progress' },
-                { label: t('status.resolved'), value: 'resolved' }
-            ],
-            value: filters.status
-        }
+        // {
+        //     key: 'status',
+        //     label: t('filters.label'),
+        //     type: 'select',
+        //     options: [
+        //         { label: t('filters.all'), value: 'all' },
+        //         { label: t('status.pending'), value: 'pending' },
+        //         { label: t('status.in_progress'), value: 'in_progress' },
+        //         { label: t('status.resolved'), value: 'resolved' }
+        //     ],
+        //     value: filters.status
+        // }
     ];
 
     const columns = [

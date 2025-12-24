@@ -331,17 +331,17 @@ const PitchOwners = () => {
     // ================= TABLE CONFIG =================
 
     const filterConfig = [
-        {
-            key: 'status',
-            label: t('pitchOwnerPage:table.headers.status'),
-            type: 'select',
-            options: [
-                { label: t('pitchOwnerPage:tabs.all'), value: 'all' },
-                { label: t('pitchOwnerPage:table.content.active'), value: 'true' },
-                { label: t('pitchOwnerPage:table.content.inactive'), value: 'false' }
-            ],
-            value: filters.status || 'all'
-        }
+        // {
+        //     key: 'status',
+        //     label: t('pitchOwnerPage:table.headers.status'),
+        //     type: 'select',
+        //     options: [
+        //         { label: t('pitchOwnerPage:tabs.all'), value: 'all' },
+        //         { label: t('pitchOwnerPage:table.content.active'), value: 'true' },
+        //         { label: t('pitchOwnerPage:table.content.inactive'), value: 'false' }
+        //     ],
+        //     value: filters.status || 'all'
+        // }
     ];
 
     const columns = [
@@ -530,32 +530,32 @@ const PitchOwners = () => {
             )}
 
             {/* View Tabs */}
-            <div className="bg-gradient-to-br from-white to-primary-50/30 rounded-xl shadow-sm border border-primary-100 p-1 sm:p-1.5 mt-4 sm:mt-5 mb-4 sm:mb-6">
-                <div className="flex flex-col sm:flex-row gap-1 sm:gap-1.5">
-                    {[
-                        {key: 'all', label: t('pitchOwnerPage:tabs.all')},
-                        {key: 'active', label: t('pitchOwnerPage:tabs.active')},
-                        {key: 'inactive', label: t('pitchOwnerPage:tabs.inactive')}
-                    ].map((tab) => (
-                        <button
-                            key={tab.key}
-                            onClick={() => handleViewChange(tab.key)}
-                            className={`
-                    flex-1 flex items-center justify-center gap-2 
-                    px-3 py-2.5 sm:py-2 
-                    rounded-lg font-semibold text-xs sm:text-sm 
-                    transition-all duration-200
-                    ${currentView === tab.key
-                                ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
-                                : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'
-                            }
-                `}
-                        >
-                            <span className="truncate">{tab.label}</span>
-                        </button>
-                    ))}
-                </div>
-            </div>
+            {/*<div className="bg-gradient-to-br from-white to-primary-50/30 rounded-xl shadow-sm border border-primary-100 p-1 sm:p-1.5 mt-4 sm:mt-5 mb-4 sm:mb-6">*/}
+            {/*    <div className="flex flex-col sm:flex-row gap-1 sm:gap-1.5">*/}
+            {/*        {[*/}
+            {/*            {key: 'all', label: t('pitchOwnerPage:tabs.all')},*/}
+            {/*            {key: 'active', label: t('pitchOwnerPage:tabs.active')},*/}
+            {/*            {key: 'inactive', label: t('pitchOwnerPage:tabs.inactive')}*/}
+            {/*        ].map((tab) => (*/}
+            {/*            <button*/}
+            {/*                key={tab.key}*/}
+            {/*                onClick={() => handleViewChange(tab.key)}*/}
+            {/*                className={`*/}
+            {/*        flex-1 flex items-center justify-center gap-2 */}
+            {/*        px-3 py-2.5 sm:py-2 */}
+            {/*        rounded-lg font-semibold text-xs sm:text-sm */}
+            {/*        transition-all duration-200*/}
+            {/*        ${currentView === tab.key*/}
+            {/*                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'*/}
+            {/*                    : 'text-gray-600 hover:text-primary-600 hover:bg-primary-50'*/}
+            {/*                }*/}
+            {/*    `}*/}
+            {/*            >*/}
+            {/*                <span className="truncate">{tab.label}</span>*/}
+            {/*            </button>*/}
+            {/*        ))}*/}
+            {/*    </div>*/}
+            {/*</div>*/}
 
             {/* Main Table */}
             <div className='bg-white rounded-lg shadow-sm p-5'>
