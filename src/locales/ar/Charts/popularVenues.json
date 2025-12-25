@@ -25,5 +25,23 @@
   "venueTypes": {
     "indoor": "داخلي",
     "outdoor": "خارجي"
+  },
+  "cities": {
+    "Abu Dhabi": "أبو ظبي",
+    "Dubai": "دبي",
+    "Sharjah": "الشارقة",
+    "Ajman": "عجمان",
+    "Ras Al Khaimah": "رأس الخيمة",
+    "Fujairah": "الفجيرة",
+    "Umm Al Quwain": "أم القيوين"
+  },
+  "venue": {
+    "unknown": "غير معروف",
+    "indoor": "داخلي",
+    "outdoor": "خارجي"
+  },
+  "chart": {
+    "bookings": "{count} حجز",
+    "inCity": "في {city}"
   }
 }

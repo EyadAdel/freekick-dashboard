@@ -1,0 +1,23 @@
+{
+  "topTeams": {
+    "title": "أفضل 5 فرق",
+    "subtitle": "هذه هي الفرق التي لديها أعلى معدل حجوزات",
+    "tableHeaders": {
+      "teamName": "اسم الفريق",
+      "players": "اللاعبون",
+      "matchesPlayed": "المباريات الملعوبة",
+      "points": "النقاط"
+    },
+    "periodOptions": {
+      "thisWeek": "هذا الأسبوع",
+      "lastWeek": "الأسبوع الماضي",
+      "thisMonth": "هذا الشهر",
+      "lastMonth": "الشهر الماضي"
+    },
+    "loading": "جاري تحميل بيانات الفرق...",
+    "noData": "لا توجد بيانات للفرق",
+    "teamLeader": "قائد الفريق",
+    "membersCount": "{count} عضو",
+    "viewProfile": "عرض الملف الشخصي"
+  }
+}
