@@ -1,0 +1,23 @@
+{
+  "topTeams": {
+    "title": "Top 5 Teams",
+    "subtitle": "Here are the venues that were booked the most",
+    "tableHeaders": {
+      "teamName": "Team Name",
+      "players": "Players",
+      "matchesPlayed": "Matches played",
+      "points": "Points"
+    },
+    "periodOptions": {
+      "thisWeek": "This Week",
+      "lastWeek": "Last Week",
+      "thisMonth": "This Month",
+      "lastMonth": "Last Month"
+    },
+    "loading": "Loading teams data...",
+    "noData": "No team data available",
+    "teamLeader": "Team Leader",
+    "membersCount": "{count} members",
+    "viewProfile": "View Profile"
+  }
+}

@@ -26,9 +26,9 @@ export const fetchRevenueTrend = createAsyncThunk(
 
 export const fetchTopEmirates = createAsyncThunk(
     'analytics/fetchTopEmirates',
-    async (period = 'this_week', { rejectWithValue }) => {
+    async (kind = 'this_week', { rejectWithValue }) => {
         try {
-            return await analyticsService.getTopEmirates(period);
+            return await analyticsService.getTopEmirates(kind);
         } catch (error) {
             return rejectWithValue(error.response?.data || error.message);
         }

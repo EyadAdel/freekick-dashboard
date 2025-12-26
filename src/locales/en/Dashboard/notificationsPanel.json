@@ -12,5 +12,22 @@
     "hoursAgo": "{{count}}h ago",
     "yesterday": "Yesterday",
     "daysAgo": "{{count}}d ago"
+  },
+  "header": {
+    "total": "Total",
+    "unread": "Unread"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "markAsRead": "Mark as read"
+  },
+  "search": {
+    "placeholder": "Search notifications...",
+    "noResults": "Try adjusting your search"
+  },
+  "filters": {
+    "all": "All",
+    "unread": "Unread",
+    "read": "Read"
   }
 }

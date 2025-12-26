@@ -41,7 +41,7 @@ const EmiratesChart = ({
 
     // State for dropdown
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+    console.log(data,'lllllllllll')
     const transformData = () => {
         if (!data || typeof data !== 'object') {
             return EMIRATES.map(emirate => ({

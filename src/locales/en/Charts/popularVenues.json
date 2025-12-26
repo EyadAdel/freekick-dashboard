@@ -25,5 +25,23 @@
   "venueTypes": {
     "indoor": "Indoor",
     "outdoor": "Outdoor"
+  },
+  "cities": {
+    "Abu Dhabi": "Abu Dhabi",
+    "Dubai": "Dubai",
+    "Sharjah": "Sharjah",
+    "Ajman": "Ajman",
+    "Ras Al Khaimah": "Ras Al Khaimah",
+    "Fujairah": "Fujairah",
+    "Umm Al Quwain": "Umm Al Quwain"
+  },
+  "venue": {
+    "unknown": "unknown",
+    "indoor": "indoor",
+    "outdoor": "outdoor"
+  },
+  "chart": {
+    "bookings": "{count} bookings",
+    "inCity": "in {city}"
   }
 }

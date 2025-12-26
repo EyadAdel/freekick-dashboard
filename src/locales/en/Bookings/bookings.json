@@ -23,6 +23,7 @@
   },
   "status": {
     "pending": "Pending",
+    "pending approval": "Pending ",
     "confirmed": "Confirmed",
     "completed": "Completed",
     "cancelled": "Cancelled"

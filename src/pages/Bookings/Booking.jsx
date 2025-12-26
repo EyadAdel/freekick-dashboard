@@ -36,6 +36,7 @@ const Bookings = () => {
     };
 
     const { bookings, isLoading, error, refetch } = useBookings(apiFilters);
+    console.log(bookings)
     const navigate = useNavigate();
     // title
     useEffect(() => {

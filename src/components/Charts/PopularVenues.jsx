@@ -19,7 +19,6 @@ const PopularVenues = () => {
     const { t } = useTranslation('popularVenues'); // Initialize translation
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
     const CITIES = useMemo(() => [
         { value: 'Abu Dhabi', label: t('cities.Abu Dhabi') },
         { value: 'Dubai', label: t('cities.Dubai') },
@@ -299,7 +298,7 @@ const PopularVenues = () => {
                                                 {'☆'.repeat(5 - Math.floor(venue.rate || 0))}
                                             </div>
                                             <span className="text-[10px] text-gray-500">
-                                                {venue.venue_type === 'indoor' ? t('venue.indoor') : t('venue.outdoor')}
+                                          {venue.venue_type === 'indoor' ? t('venueType.indoor') : t('venueType.outdoor')}
                                             </span>
                                         </div>
                                     </div>
