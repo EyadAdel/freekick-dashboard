@@ -43,6 +43,7 @@ import PlayerDetailView from "../pages/players/playerDetailView.jsx";
 import TeamDetailsView from "../pages/Teams/TeamDetailsView.jsx";
 import AccessDenied from "../pages/AccessDenied.jsx";
 import NotFound from "../pages/NotFound.jsx";
+import NotificationsPage from "../pages/NotificationsPage.jsx";
 
 
 const router = createBrowserRouter([
@@ -308,6 +309,10 @@ const router = createBrowserRouter([
             {
                 path: '/access-denied',
                 element: <AccessDenied />,
+            },
+            {
+                path: '/my-notifications',
+                element: <NotificationsPage />,
             },
 
         ],

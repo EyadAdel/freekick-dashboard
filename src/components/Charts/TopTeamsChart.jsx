@@ -19,20 +19,12 @@ const TopTeamsChart = ({
     const [period, setPeriod] = useState('this_week');
     const navigate = useNavigate();
 
-    const periodOptions = [
-        { value: 'this_week', label: t('topTeams.periodOptions.thisWeek') },
-        { value: 'last_week', label: t('topTeams.periodOptions.lastWeek') },
-        { value: 'this_month', label: t('topTeams.periodOptions.thisMonth') },
-        { value: 'last_month', label: t('topTeams.periodOptions.lastMonth') },
-    ];
 
     useEffect(() => {
         getTopTeams({ period, limit });
     }, [period, limit, getTopTeams]);
 
-    const handlePeriodChange = (e) => {
-        setPeriod(e.target.value);
-    };
+
 
     // Generate mock rating (since it's not in API response)
     const generateRating = (team) => {

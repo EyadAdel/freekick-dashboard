@@ -1,4 +1,3 @@
-// components/charts/BookingChart.jsx
 import React, { useEffect, useState } from 'react';
 import { Calendar, TrendingUp, ChevronDown } from 'lucide-react';
 import {
@@ -12,6 +11,7 @@ import {
     Cell
 } from 'recharts';
 import useAnalytics from '../../hooks/useAnalytics';
+import { useTranslation } from 'react-i18next';
 
 const BookingChart = ({
                           title = "Total Bookings",
@@ -19,6 +19,7 @@ const BookingChart = ({
                           showPeriodSelector = true,
                           className = ""
                       }) => {
+    const { t } = useTranslation('bookingChart');
     const {
         bookingChartData,
         currentBookingPeriod,
@@ -32,10 +33,10 @@ const BookingChart = ({
     const [trend, setTrend] = useState({ value: 12, isPositive: true });
 
     const periodOptions = [
-        { value: 'this_week', label: 'This Week' },
-        { value: 'last_week', label: 'Last Week' },
-        { value: 'this_month', label: 'This Month' },
-        { value: 'last_month', label: 'Last Month' },
+        { value: 'this_week', label: t('thisWeek') },
+        { value: 'last_week', label: t('lastWeek') },
+        { value: 'this_month', label: t('thisMonth') },
+        { value: 'last_month', label: t('lastMonth') },
     ];
 
     useEffect(() => {
@@ -62,33 +63,51 @@ const BookingChart = ({
         getBookingChartAnalytics(newPeriod);
     };
 
-    // Function to get short day name
     const getShortDayName = (dayString) => {
         const dayMapping = {
-            'monday': 'Mon',
-            'tuesday': 'Tue',
-            'wednesday': 'Wed',
-            'thursday': 'Thu',
-            'friday': 'Fri',
-            'saturday': 'Sat',
-            'sunday': 'Sun',
-            'mon': 'Mon',
-            'tue': 'Tue',
-            'wed': 'Wed',
-            'thu': 'Thu',
-            'fri': 'Fri',
-            'sat': 'Sat',
-            'sun': 'Sun',
-            'week_1': 'Wk 1',
-            'week_2': 'Wk 2',
-            'week_3': 'Wk 3',
-            'week_4': 'Wk 4',
-            'week_5': 'Wk 5'
+            'monday': t('monday'),
+            'tuesday': t('tuesday'),
+            'wednesday': t('wednesday'),
+            'thursday': t('thursday'),
+            'friday': t('friday'),
+            'saturday': t('saturday'),
+            'sunday': t('sunday'),
+            'mon': t('monday'),
+            'tue': t('tuesday'),
+            'wed': t('wednesday'),
+            'thu': t('thursday'),
+            'fri': t('friday'),
+            'sat': t('saturday'),
+            'sun': t('sunday'),
+            'week_1': t('week_1'),
+            'week_2': t('week_2'),
+            'week_3': t('week_3'),
+            'week_4': t('week_4'),
+            'week_5': t('week_5')
         };
 
-        // Convert to lowercase and remove any whitespace
         const key = dayString.toLowerCase().trim().replace(/\s+/g, '_');
-        return dayMapping[key] || dayString.substring(0, 3); // Fallback: first 3 chars
+        return dayMapping[key] || dayString.substring(0, 3);
+    };
+
+    const getFullDayName = (dayString) => {
+        const fullDayMapping = {
+            'monday': t('mondayFull'),
+            'tuesday': t('tuesdayFull'),
+            'wednesday': t('wednesdayFull'),
+            'thursday': t('thursdayFull'),
+            'friday': t('fridayFull'),
+            'saturday': t('saturdayFull'),
+            'sunday': t('sundayFull'),
+            'week_1': t('week1Full'),
+            'week_2': t('week2Full'),
+            'week_3': t('week3Full'),
+            'week_4': t('week4Full'),
+            'week_5': t('week5Full')
+        };
+
+        const key = dayString.toLowerCase().trim().replace(/\s+/g, '_');
+        return fullDayMapping[key] || dayString.charAt(0).toUpperCase() + key.slice(1);
     };
 
     const transformData = () => {
@@ -101,28 +120,23 @@ const BookingChart = ({
         const data = bookingChartData.data;
 
         if (isMonthly) {
-            // For monthly view - show weeks
             return Object.entries(data).map(([key, value]) => ({
                 period: key,
                 bookings: Number(value) || 0,
-                day: getShortDayName(key), // Use short names for weeks
-                fullDay: key.replace('_', ' ').replace('week', 'Week ') // Full name for tooltip
+                day: getShortDayName(key),
+                fullDay: getFullDayName(key)
             }));
         } else {
-            // For weekly view - show days
             return Object.entries(data).map(([key, value]) => ({
                 period: key,
                 bookings: Number(value) || 0,
-                day: getShortDayName(key), // Short day name for X-axis
-                fullDay: key.charAt(0).toUpperCase() + key.slice(1) // Full day name for tooltip
+                day: getShortDayName(key),
+                fullDay: getFullDayName(key)
             }));
         }
     };
 
     const chartData = transformData();
-    console.log('Transformed Chart Data:', chartData);
-
-    // Rest of your component remains the same...
 
     const CustomTooltip = ({ active, payload, coordinate }) => {
         if (active && payload && payload.length) {
@@ -130,22 +144,20 @@ const BookingChart = ({
             const dotX = coordinate?.x || 0;
             const dotY = coordinate?.y || 0;
 
-            // Calculate tooltip position to start from the dot
-            const dotRadius = 6; // Active dot radius
-            const tooltipHeight = 70; // Approximate height of your tooltip
-            const pointerHeight = 8; // Height of the triangle pointer
+            const dotRadius = 6;
+            const tooltipHeight = 70;
+            const pointerHeight = 8;
 
             return (
                 <div
                     className="absolute pointer-events-none"
                     style={{
                         left: dotX,
-                        top: dotY - tooltipHeight, // Position above so dot is at bottom of tooltip
+                        top: dotY - tooltipHeight,
                         transform: 'translateX(-50%)',
                     }}
                 >
                     <div className="relative">
-                        {/* Triangle pointer pointing down to the dot */}
                         <div
                             className="absolute z-50 border-[#06B6D4] left-1/2 bottom-0 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px]"
                             style={{
@@ -156,13 +168,12 @@ const BookingChart = ({
                             }}
                         ></div>
 
-                        {/* Tooltip content */}
                         <div className="bg-[#06B6D4] text-white text-sm p-3 rounded-lg shadow-lg whitespace-nowrap mb-1">
                             <p className="font-semibold text-xs mb-1">
                                 {data?.fullDay || data?.day}
                             </p>
                             <p className="font-bold text-xs">
-                                {payload[0]?.value?.toLocaleString() || '0'} bookings
+                                {payload[0]?.value?.toLocaleString() || '0'} {t('bookings')}
                             </p>
                         </div>
                     </div>
@@ -172,7 +183,6 @@ const BookingChart = ({
         return null;
     };
 
-    // Custom YAxis tick
     const CustomYAxisTick = ({ x, y, payload }) => {
         return (
             <g transform={`translate(${x},${y})`}>
@@ -203,15 +213,10 @@ const BookingChart = ({
         );
     }
 
-    // Find max value for YAxis domain
     const maxBookings = Math.max(...chartData.map(item => item.bookings), 1);
-
-    // Calculate dynamic Y-axis max that's close to the largest value
-    // Add 20% padding above the max value for better visualization
     const padding = maxBookings * 0.2;
     const rawMax = maxBookings + padding;
 
-    // Round to a nice number based on the scale
     let yAxisMax;
     if (rawMax <= 10) {
         yAxisMax = Math.ceil(rawMax);
@@ -225,27 +230,23 @@ const BookingChart = ({
 
     const yAxisTicks = Array.from({ length: 5 }, (_, i) => (yAxisMax / 4) * i);
 
-    // Function to get bar color based on value
     const getBarColor = (value) => {
         if (value < maxBookings * 0.33) return '#b3e6e6';
         if (value < maxBookings * 0.66) return '#2ACEF2';
         if (value > maxBookings * 0.66) return '#00bfbf';
-
-        // return '#00bfbf';
+        return '#00bfbf';
     };
 
-    // Determine bar width based on number of data points
     const getBarSize = () => {
-        if (chartData.length <= 7) return 25; // Week view
-        return 20; // Month view (more data points)
+        if (chartData.length <= 7) return 25;
+        return 20;
     };
 
     return (
         <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
-            {/* Header with title and stats */}
-            <div className="flex  items-start justify-between mb-4">
+            <div className="flex items-start justify-between mb-4">
                 <div>
-                    <h2 className="xl:text-xl font-bold text-gray-800 mb-2">{title}</h2>
+                    <h2 className="xl:text-xl font-bold text-gray-800 mb-2">{t('totalBookings')}</h2>
                     <div className="flex items-center">
                         <span className="xl:text-xl font-bold text-gray-900">{totalBookings.toLocaleString()}</span>
                         <div className={`ml-3 px-2 py-1 rounded-full flex items-center ${trend.isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
@@ -255,11 +256,11 @@ const BookingChart = ({
                             </span>
                         </div>
                     </div>
-                    <p className="text-gray-500 text-sm mt-1">Match played</p>
+                    <p className="text-gray-500 text-sm mt-1">{t('matchPlayed')}</p>
                 </div>
 
                 {showPeriodSelector && (
-                    <div className=" lg:mt-0">
+                    <div className="lg:mt-0">
                         <div className="relative">
                             <select
                                 value={currentBookingPeriod}
@@ -279,7 +280,6 @@ const BookingChart = ({
                 )}
             </div>
 
-            {/* Chart */}
             <div className="h-64">
                 {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
@@ -301,7 +301,7 @@ const BookingChart = ({
                             />
 
                             <XAxis
-                                dataKey="day"  // Use the 'day' field which contains short names
+                                dataKey="day"
                                 axisLine={false}
                                 tickLine={false}
                                 tick={{ fill: '#64748b', fontSize: 12, fontWeight: 500 }}
@@ -341,27 +341,26 @@ const BookingChart = ({
                     <div className="flex items-center justify-center h-full">
                         <div className="text-center">
                             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                            <p className="text-gray-500">No chart data available</p>
+                            <p className="text-gray-500">{t('noChartData')}</p>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Bar chart legend */}
             <div className="mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-center">
                     <div className="flex items-center space-x-4">
-                        <div className="flex items-center">
+                        <div className="flex gap-2 items-center">
                             <div className="w-3 h-3 rounded-sm bg-[#b3e6e6] mr-2"></div>
-                            <span className="text-xs text-gray-600">Low bookings</span>
+                            <span className="text-xs text-gray-600">{t('lowBookings')}</span>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex gap-2 items-center">
                             <div className="w-3 h-3 rounded-sm bg-[#2ACEF2] mr-2"></div>
-                            <span className="text-xs text-gray-600">Medium bookings</span>
+                            <span className="text-xs text-gray-600">{t('mediumBookings')}</span>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex gap-2 items-center">
                             <div className="w-3 h-3 rounded-sm bg-[#00bfbf] mr-2"></div>
-                            <span className="text-xs text-gray-600">High bookings</span>
+                            <span className="text-xs text-gray-600">{t('highBookings')}</span>
                         </div>
                     </div>
                 </div>

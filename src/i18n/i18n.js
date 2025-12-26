@@ -107,7 +107,10 @@ import enLogin from '../locales/en/login.json';
 import arLogin from '../locales/ar/login.json';
 import arTopTeams from '../locales/ar/Charts/topTeams.json';
 import enTopTeams from '../locales/en/Charts/topTeams.json';
-
+import enBookingChart from '../locales/en/Charts/bookingChart.json';
+import arBookingChart from '../locales/ar/Charts/bookingChart.json';
+import enRevenueTrendChart from '../locales/en/Charts/revenueTrendChart.json';
+import arRevenueTrendChart from '../locales/ar/Charts/revenueTrendChart.json';
 // Translation resources
 const resources = {
     en: {
@@ -163,6 +166,8 @@ const resources = {
         surfaceTypeForm: enSurfaceTypeForm,
         login: enLogin,
         topTeams:enTopTeams,
+        bookingChart: enBookingChart,
+        revenueTrendChart: enRevenueTrendChart,
 
 
     },
@@ -218,6 +223,8 @@ const resources = {
         surfaceTypeForm: arSurfaceTypeForm,
         login: arLogin,
         topTeams:arTopTeams,
+        bookingChart: arBookingChart,
+        revenueTrendChart: arRevenueTrendChart,
 
 
 
@@ -296,6 +303,8 @@ i18n
             'surfaceTypeForm',
             'login',
             'topTeams',
+            'bookingChart',
+            'revenueTrendChart'
         ],
         debug: process.env.NODE_ENV === 'development',
         interpolation: {

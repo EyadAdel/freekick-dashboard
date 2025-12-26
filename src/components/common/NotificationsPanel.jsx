@@ -1,5 +1,5 @@
 // components/NotificationsPanel.jsx
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../../hooks/useNotifications.js';
@@ -13,9 +13,6 @@ const NotificationsPanel = () => {
         markAsRead,
         refreshNotifications
     } = useNotifications();
-
-    // State to control showing all notifications
-    const [showAll, setShowAll] = useState(false);
 
     const getNotificationIcon = (notification) => {
         const title = notification.title?.toLowerCase() || '';
@@ -86,13 +83,12 @@ const NotificationsPanel = () => {
         }
     };
 
-    // Toggle between showing all and limited notifications
-    const toggleShowAll = () => {
-        setShowAll(!showAll);
+    const handleViewAllClick = () => {
+        navigate('/my-notifications');
     };
 
-    // Determine which notifications to display
-    const notificationsToShow = showAll ? notifications : notifications.slice(0, 5);
+    // Show only the first 5 notifications in the panel
+    const notificationsToShow = notifications.slice(0, 5);
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-3">
@@ -119,22 +115,11 @@ const NotificationsPanel = () => {
                             />
                         </svg>
                     </button>
-                    {showAll && (
-                        <button
-                            onClick={() => setShowAll(false)}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
-                            title={t('collapse')}
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
-                            </svg>
-                        </button>
-                    )}
                 </div>
             </div>
 
             {/* Scrollable notifications container */}
-            <div className={`space-y-4 ${showAll ? 'max-h-[400px] overflow-y-auto custom-scrollbar pr-2' : ''}`}>
+            <div className="space-y-4">
                 {isLoading ? (
                     <div className="flex items-center justify-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -157,11 +142,8 @@ const NotificationsPanel = () => {
                                     : 'hover:bg-gray-50'
                             }`}
                         >
-                            {/* Vertical dashed line connecting icons - only show when not showing all or for first 4 items */}
-                            {!showAll && index < Math.min(notifications.length, 5) - 1 && (
-                                <div className="absolute left-8 rtl:right-8 rtl:left-auto top-[52px] h-[calc(100%+16px)] w-0 border-l border-dashed border-gray-300"></div>
-                            )}
-                            {showAll && index < notificationsToShow.length - 1 && (
+                            {/* Vertical dashed line connecting icons - only show for first 4 items */}
+                            {index < Math.min(notifications.length, 5) - 1 && (
                                 <div className="absolute left-8 rtl:right-8 rtl:left-auto top-[52px] h-[calc(100%+16px)] w-0 border-l border-dashed border-gray-300"></div>
                             )}
 
@@ -189,13 +171,13 @@ const NotificationsPanel = () => {
                 )}
             </div>
 
-            {/* Show All / Show Less button */}
-            {notifications.length > 5 && (
+            {/* View All button - Always shows if there are notifications */}
+            {notifications.length > 0 && (
                 <button
-                    onClick={toggleShowAll}
-                    className="w-full  text-center text-sm text-primary-600 hover:text-primary-700 font-medium py-2 border-t border-gray-100 pt-3"
+                    onClick={handleViewAllClick}
+                    className="w-full text-center text-sm text-primary-600 hover:text-primary-700 font-medium py-2 border-t border-gray-100 pt-3 mt-2"
                 >
-                    {showAll ? t('showLess') : t('viewAll')}
+                    {t('viewAll')}
                 </button>
             )}
         </div>

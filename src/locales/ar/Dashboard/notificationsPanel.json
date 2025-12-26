@@ -15,7 +15,8 @@
   "actions": {
     "markAsRead": "تحديد كمقروء",
     "delete": "حذف",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "refresh": "تحديث"
   },
   "emptyState": {
     "title": "لا توجد إشعارات بعد",
@@ -28,5 +29,18 @@
     "yesterday": "أمس",
     "daysAgo": "منذ {{count}} يوم",
     "recently": "مؤخراً"
+  },
+  "header": {
+    "total": "الكل ",
+    "unread": "غير مقروء"
+  },
+  "filters": {
+    "all": "الكل",
+    "unread": "غير مقروء",
+    "read": "مقروء"
   }
+, "search": {
+  "placeholder": "ابدا البحث...... ",
+  "noResults": "حاول تعديل البحث "
+}
 }

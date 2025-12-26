@@ -301,7 +301,7 @@ const BookingDetailView = () => {
                             booking.mark_as_paid ? (
                                 <div className=" px-2 py-2 bg-green-100 border border-green-300 text-green-700 rounded-2xl flex items-center justify-center gap-2">
                                     <CheckCircle className="w-4 h-4" />
-                                    <span className="font-medium">{t('actions.fullPaid')}</span>
+                                    <span className=" text-sm ">{t('actions.fullPaid')}</span>
                                 </div>
                             ) : (
                                 <button
@@ -416,21 +416,21 @@ const BookingDetailView = () => {
                                         <span className={`text-xs sm:text-sm font-semibold px-2 py-1 rounded ${
                                             booking.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                                         }`}>
-                                            {booking.is_active ? 'Active' : 'Inactive'}
+                         {booking.is_active ? t('status.active') : t('status.inactive')}
                                         </span>
                                     </div>
                                     {booking.is_recurring && (
                                         <>
                                             <div className="flex items-center justify-between">
-                                                <span className="text-xs sm:text-sm text-gray-600">Recurring</span>
+                                                <span className="text-xs sm:text-sm text-gray-600">{t('bookingInfo.recurring')}</span>
                                                 <span className="text-xs sm:text-sm font-semibold text-teal-600 flex items-center gap-1">
-                                                    <RefreshCcw size={14} />
-                                                    Yes
-                                                </span>
+                                                 <RefreshCcw size={14} />
+                                                    {t('bookingInfo.yes')}
+                                                  </span>
                                             </div>
                                             {booking.recurring_end_date && (
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-xs sm:text-sm text-gray-600">Ends On</span>
+                                                    <span className="text-xs sm:text-sm text-gray-600">{t('bookingInfo.endsOn')}</span>
                                                     <span className="text-xs sm:text-sm font-semibold text-gray-900">
                                                         {formatDate(booking.recurring_end_date)}
                                                     </span>
@@ -497,13 +497,13 @@ const BookingDetailView = () => {
                                         </div>
                                     </div>
                                     <div className="hidden sm:block h-8 w-px bg-teal-200"></div>
-                                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                                    <div  className="flex items-center gap-3 w-full sm:w-auto">
                                         <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
                                             <Clock className="text-teal-600" size={20} />
                                         </div>
-                                        <div className={'flex gap-5'}>
-                                            <p className="text-xs text-gray-600 font-medium">{t('bookingTime.time')}</p>
-                                            <p className="text-sm font-bold text-gray-900">
+                                        <div  className={'flex gap-5'}>
+                                            <p dir={'ltr'} className="text-xs text-gray-600 font-medium">{t('bookingTime.time')}</p>
+                                            <p dir={'ltr'} className="text-sm font-bold text-gray-900">
                                                 {booking.start_time && booking.end_time
                                                     ? `${formatTime(booking.start_time)} - ${formatTime(booking.end_time)}`
                                                     : t('bookingTime.notSet')}
@@ -586,7 +586,7 @@ const BookingDetailView = () => {
                             <div className="border-t border-gray-100 pt-4 p-4 sm:pt-6">
                                 <h4 className="font-semibold text-gray-900 mb-6 flex items-center gap-2 text-sm sm:text-base">
                                     <Trophy size={18} className="text-teal-600" />
-                                    Team Match
+                                    {t('teamMatch.title')}
                                 </h4>
 
                                 <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-0 border border-teal-200">
@@ -600,9 +600,9 @@ const BookingDetailView = () => {
                                         </div>
 
                                         <div className="relative flex justify-center">
-                    <span className="px-6 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
+                    <span className="px-6 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full text-sm sm:text-base font-bold shadow-lg flex items-center gap-2">
                         <Trophy size={14} />
-                        TEAM VS TEAM
+                        {t('teamMatch.vs')}
                     </span>
                                         </div>
                                     </div>
@@ -619,14 +619,14 @@ const BookingDetailView = () => {
                                                             onError={() => handleImageError('team1-logo')}
                                                         />
                                                     ) : (
-                                                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 flex items-center justify-center">
-                                <span className="text-white text-lg font-bold">
-                                    {getInitials(booking.teams[0]?.name || "Team 1")}
+                                                        <div className="lg:w-12 lg:h-12 w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 flex items-center justify-center">
+                                <span className="text-white text-sm lg:text-lg font-bold">
+                                   {getInitials(booking.teams[0]?.name || t('teamMatch.team1'))}
                                 </span>
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <h5 className="font-bold text-lg text-teal-800">
+                                                        <h5 className="font-bold text-sm lg:text-lg text-teal-800">
                                                             {booking.teams[0]?.name || "Team 1"}
                                                         </h5>
                                                         {/*<p className="text-sm text-gray-600">*/}
@@ -636,7 +636,7 @@ const BookingDetailView = () => {
                                                 </div>
                                             </div>
 
-                                        <div className="text-center flex flex-col  justify-center items-center">
+                                        <div dir={'ltr'} className="text-center flex flex-col  justify-center items-center">
                                             <div className="px-3 py-1 bg-teal-100 text-teal-800 rounded-full text-xs font-semibold mb-2">
                                                 {booking.num_of_players_per_team || booking.max_players || 0} vs {booking.num_of_players_per_team || booking.max_players || 0}
                                             </div>
@@ -655,14 +655,13 @@ const BookingDetailView = () => {
                                                         onError={() => handleImageError('team2-logo')}
                                                     />
                                                 ) : (
-                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-                                    <span className="text-white text-lg font-bold">
-                                        {getInitials(booking.teams[1]?.name || "Team 2")}
-                                    </span>
+                                                    <div className="lg:w-12 lg:h-12 w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+                                    <span className="text-white text-sm lg:text-lg font-bold">
+                                        {getInitials(booking.teams[1]?.name || t('teamMatch.team2'))}                                    </span>
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <h5 className="font-bold text-lg text-blue-800">
+                                                    <h5 className="font-bold text-sm lg:text-lg text-blue-800">
                                                         {booking.teams[1]?.name || "Team 2"}
                                                     </h5>
                                                     {/*<p className="text-sm text-gray-600">*/}
@@ -679,7 +678,7 @@ const BookingDetailView = () => {
                                 {booking.booking_action?.some(action => action.join_team?.id === booking.team_player?.id) && (
                                     <div className="mt-6">
                                         <h5 className="font-semibold text-gray-900 mb-3 text-sm">
-                                            Team Members in Booking
+                                            {t('teamMatch.members')}
                                         </h5>
                                         <div className="flex flex-wrap gap-2">
                                             {booking.booking_action
@@ -733,25 +732,31 @@ const BookingDetailView = () => {
                             {/* Payment Summary Cards */}
 
                             {/* Table Headers */}
-                            <div className="grid grid-cols-12 sm:gap-2 pb-3 border-b-2 border-gray-200 mb-3">
+                            <div className="grid px-2 grid-cols-12 sm:gap-2 pb-3 border-b-2 border-gray-200 mb-3">
                                 <div className="col-span-3 min-w-[80px]">
-                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">User</span>
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">        {t('orderSummary.user')}
+</span>
                                 </div>
                                 <div className="col-span-2 min-w-[70px] text-center">
-                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">Subscript</span>
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">
+                                        {t('orderSummary.subscription')}
+                                   </span>
                                 </div>
                                 <div className="col-span-2 min-w-[60px] text-center">
-                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">Fees</span>
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">        {t('orderSummary.fees')}
+</span>
                                 </div>
                                 <div className="col-span-2 min-w-[70px] text-center">
-                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">Discount</span>
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">        {t('orderSummary.discount')}
+</span>
                                 </div>
                                 <div className="col-span-3 min-w-[90px] text-right">
-                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">Amount</span>
+                                    <span className="text-[10px] lg:text-sm font-semibold text-gray-600">        {t('orderSummary.amount')}
+</span>
                                 </div>
                             </div>
 
-                            <div className="space-y-2 mb-4 sm:mb-6">
+                            <div className="space-y-2 px-2 mb-4 sm:mb-6">
                                 {booking.booking_action?.map((action, idx) => (
                                     <div key={idx} className="border-b border-gray-100 pb-3 mb-3">
                                         {/* User Info Row */}
@@ -827,33 +832,14 @@ const BookingDetailView = () => {
                                 ))}
                             </div>
 
-                            {/*<div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2.5 mb-4 sm:mb-6">*/}
-                            {/*    <div className="flex justify-between text-xs sm:text-sm">*/}
-                            {/*        <span className="text-gray-600">{t('orderSummary.subtotal')}</span>*/}
-                            {/*        <span className="font-semibold text-gray-900">{totalAmount.toFixed(0)} AED</span>*/}
-                            {/*    </div>*/}
-                            {/*    <div className="flex justify-between text-xs sm:text-sm">*/}
-                            {/*        <span className="text-gray-600">{t('orderSummary.tax')}</span>*/}
-                            {/*        <span className="font-semibold text-gray-900">0 AED</span>*/}
-                            {/*    </div>*/}
-                            {/*    <div className="flex justify-between text-xs sm:text-sm">*/}
-                            {/*        <span className="text-gray-600">{t('orderSummary.discount')}</span>*/}
-                            {/*        <span className="font-semibold text-red-600">-0 AED</span>*/}
-                            {/*    </div>*/}
-                            {/*</div>*/}
+
                             <div className="grid lg:grid-cols-2 gap-3 mb-6">
-                                {/*<div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg p-4 border border-teal-200">*/}
-                                {/*    <div className="flex items-center justify-between mb-2">*/}
-                                {/*        <span className="text-xs text-teal-600 font-semibold uppercase tracking-wide">Total Price</span>*/}
-                                {/*        <CreditCard size={16} className="text-teal-600" />*/}
-                                {/*    </div>*/}
-                                {/*    <p className="text-2xl font-bold text-teal-700">{totalAmount.toFixed(2)} AED</p>*/}
-                                {/*</div>*/}
+
 
                                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg px-4 py-3 flex items-center justify-between border border-green-200">
                                     <div className="flex items-center gap-2  ">
                                         <CheckCircle size={16} className="text-green-600" />
-                                        <span className="text-sm text-green-600 font-semibold uppercase tracking-wide">Collected</span>
+                                        <span className="text-sm text-green-600 font-semibold uppercase tracking-wide">{t('payment.collected')}</span>
 
                                     </div>
                                     <p className="text-xl font-bold text-green-700">{totalCollected.toFixed(2)} AED</p>
@@ -863,7 +849,7 @@ const BookingDetailView = () => {
                                     <div className="flex items-center gap-2 mb-2">
                                         <Clock size={16} className="text-amber-600" />
 
-                                        <span className="text-sm text-amber-600 font-semibold uppercase tracking-wide">Pending</span>
+                                        <span className="text-sm text-amber-600 font-semibold uppercase tracking-wide">{t('payment.pending')}</span>
                                     </div>
                                     <p className="text-xl font-bold text-amber-700">{totalPending.toFixed(2)} AED</p>
                                 </div>
@@ -889,7 +875,7 @@ const BookingDetailView = () => {
                                         disabled={isActionLoading}
                                         className="w-full px-4 py-2.5 text-xs sm:text-sm bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium flex items-center justify-center gap-2"
                                     >
-                                        Accept
+                                        {t('actions.accept')}
                                     </button>
                                 }
                                 <button

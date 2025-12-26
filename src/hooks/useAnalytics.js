@@ -33,13 +33,13 @@ const useAnalytics = () => {
         dispatch(fetchCardAnalytics());
     }, [dispatch]);
 
-    const getRevenueTrend = useCallback((period = 'this_week') => {
-        dispatch(fetchRevenueTrend(period));
+    const getRevenueTrend = useCallback((kind = 'this_week') => {
+        dispatch(fetchRevenueTrend(kind));
     }, [dispatch]);
 
-    const getTopEmirates = useCallback((period = 'this_week') => {
-        dispatch(setEmiratesPeriod(period));
-        dispatch(fetchTopEmirates(period));
+    const getTopEmirates = useCallback((kind = 'this_week') => {
+        dispatch(setEmiratesPeriod(kind));
+        dispatch(fetchTopEmirates(kind));
     }, [dispatch]);
 
     const getWeeklyBookingAnalytics = useCallback((params) => {

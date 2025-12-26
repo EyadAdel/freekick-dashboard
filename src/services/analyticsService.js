@@ -12,10 +12,10 @@ const analyticsService = {
     },
 
     // Get revenue trend data
-    getRevenueTrend: async (period = 'this_week') => {
+    getRevenueTrend: async (kind = 'this_week') => {
         try {
             const response = await api.get('/booking/analytics/revenue-trend/', {
-                params: { kind: period }
+                params: { kind: kind }
             });
             return response.data.data;
         } catch (error) {
@@ -24,10 +24,10 @@ const analyticsService = {
     },
 
     // Get top emirates by bookings
-    getTopEmirates: async (period = 'this_week') => {
+    getTopEmirates: async (kind = 'this_week') => {
         try {
             const response = await api.get('/booking/analytics/top-emirates/', {
-                params: { period }
+                params: { kind }
             });
             return response.data.data;
         } catch (error) {

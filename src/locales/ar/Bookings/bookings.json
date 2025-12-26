@@ -23,6 +23,7 @@
   },
   "status": {
     "pending": "قيد الانتظار",
+    "pending approval": "قيد الانتظار ",
     "confirmed": "مؤكد",
     "completed": "مكتمل",
     "cancelled": "ملغى"

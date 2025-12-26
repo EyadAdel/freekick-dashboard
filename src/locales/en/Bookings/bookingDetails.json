@@ -7,7 +7,9 @@
     "pending": "PENDING",
     "confirmed": "CONFIRMED",
     "completed": "COMPLETED",
-    "cancelled": "CANCELLED"
+    "cancelled": "CANCELLED",
+    "active": "Active",
+    "inactive": "Inactive"
   },
   "contact": {
     "title": "Contact Details",
@@ -30,7 +32,10 @@
     "teamMatch": "Team Match",
     "matchType": "Match Type",
     "teamVsTeam": "Team vs Team",
-    "regular": "Regular"
+    "regular": "Regular",
+    "recurring": "Recurring",
+    "yes": "Yes",
+    "endsOn": "Ends On"
   },
   "actions": {
     "email": "Email",
@@ -40,7 +45,9 @@
     "processing": "Processing...",
     "cancel": "Cancel",
     "sendInvoice": "Send Invoice",
-    "fullPaid": "Full Paid"
+    "fullPaid": "Full Paid",
+    "accept": "Accept"
+
   },
   "header": {
     "bookingId": "Booking ID:",
@@ -71,7 +78,11 @@
     "totalAmount": "Total Amount",
     "pitchBooking": "Pitch Booking",
     "venue": "Venue",
-    "addon": "Add-on"
+    "addon": "Add-on",
+    "user": "User",
+    "subscription": "Subscription",
+    "fees": "Fees",
+    "amount": "Amount"
   },
   "confirm": {
     "cancel": {
@@ -102,5 +113,17 @@
     "type": "Type: {{type}}",
     "indoor": "Indoor",
     "outdoor": "Outdoor"
+  },
+  "teamMatch": {
+  "title": "Team Match",
+  "vs": "TEAM VS TEAM",
+  "team1": "Team 1",
+  "team2": "Team 2",
+  "members": "Team Members in Booking"
+},
+  "payment": {
+    "collected": "Collected",
+    "pending": "Pending"
   }
+
 }

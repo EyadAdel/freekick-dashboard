@@ -4,7 +4,8 @@
 import React, { useState } from 'react';
 import { Bell, Check, Trash2, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import {useTranslation} from "react-i18next";
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const NotificationDropdown = ({
                                   notifications,
@@ -19,6 +20,7 @@ const NotificationDropdown = ({
                               }) => {
     const [showAll, setShowAll] = useState(false);
     const { t, i18n } = useTranslation('notificationsPanel');
+    const navigate = useNavigate(); // Initialize navigate
 
     // Determine which notifications to display
     const displayedNotifications = showAll
@@ -33,6 +35,12 @@ const NotificationDropdown = ({
         } catch {
             return t('time.recently');
         }
+    };
+
+    // Handler for navigating to notifications page
+    const handleViewAllNotifications = () => {
+        onClose(); // Close the dropdown
+        navigate('/my-notifications'); // Navigate to notifications page
     };
 
     return (
@@ -168,25 +176,37 @@ const NotificationDropdown = ({
             </div>
 
             {/* Footer */}
-            {/* Show All/Show Less Button */}
-            {notifications.length > 5 && (
-                <div className="p-3 border-t border-gray-100">
+            {/* Show All/Show Less Button and View All Notifications */}
+            {notifications.length > 0 && (
+                <div className="p-3 border-t border-gray-100 space-y-2">
+                    {/* View All Notifications Button */}
                     <button
-                        onClick={() => setShowAll(!showAll)}
+                        onClick={handleViewAllNotifications}
                         className="w-full flex items-center justify-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium py-2 hover:bg-gray-50 rounded-lg transition-colors"
                     >
-                        {showAll ? (
-                            <>
-                                <ChevronUp className="w-4 h-4" />
-                                {t('showLess')}
-                            </>
-                        ) : (
-                            <>
-                                <ChevronDown className="w-4 h-4" />
-                                {t('viewAll')}
-                            </>
-                        )}
+                        <Bell className="w-4 h-4" />
+                        {t('viewAll')}
                     </button>
+
+                    {/* Show All/Show Less Button - Only show if there are more than 5 notifications */}
+                    {/*{notifications.length > 5 && (*/}
+                    {/*    <button*/}
+                    {/*        onClick={() => setShowAll(!showAll)}*/}
+                    {/*        className="w-full flex items-center justify-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium py-2 hover:bg-gray-50 rounded-lg transition-colors"*/}
+                    {/*    >*/}
+                    {/*        {showAll ? (*/}
+                    {/*            <>*/}
+                    {/*                <ChevronUp className="w-4 h-4" />*/}
+                    {/*                {t('showLess')}*/}
+                    {/*            </>*/}
+                    {/*        ) : (*/}
+                    {/*            <>*/}
+                    {/*                /!*<ChevronDown className="w-4 h-4" />*!/*/}
+                    {/*                /!*{t('viewAllInDropdown')}*!/*/}
+                    {/*            </>*/}
+                    {/*        )}*/}
+                    {/*    </button>*/}
+                    {/*)}*/}
                 </div>
             )}
         </div>

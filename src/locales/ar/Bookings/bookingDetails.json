@@ -7,7 +7,9 @@
     "pending": "قيد الانتظار",
     "confirmed": "مؤكد",
     "completed": "مكتمل",
-    "cancelled": "ملغى"
+    "cancelled": "ملغى",
+    "active": "نشط",
+    "inactive": "غير نشط"
   },
   "contact": {
     "title": "تفاصيل الاتصال",
@@ -25,7 +27,11 @@
     "solo": "دفع فردي",
     "individual": "فردي",
     "online": "أونلاين",
-    "group": "مجموعة"
+    "group": "مجموعة",
+    "recurring": "متكرر",
+    "yes": "نعم",
+    "endsOn": "ينتهي في",
+    "regular": "فردي"
   },
   "actions": {
     "email": "بريد إلكتروني",
@@ -35,7 +41,9 @@
     "processing": "جاري المعالجة...",
     "cancel": "إلغاء",
     "sendInvoice": "إرسال الفاتورة",
-    "fullPaid": "مدفوع بالكامل"
+    "fullPaid": "مدفوع بالكامل",
+    "accept": "قبول"
+
   },
   "header": {
     "bookingId": "رقم الحجز:",
@@ -66,7 +74,11 @@
     "totalAmount": "المبلغ الإجمالي",
     "pitchBooking": "حجز الملعب",
     "venue": "الملعب",
-    "addon": "إضافة"
+    "addon": "إضافة",
+    "user": "المستخدم",
+    "subscription": "الاشتراك",
+    "fees": "الرسوم",
+    "amount": "المبلغ"
   },
   "confirm": {
     "cancel": {
@@ -97,5 +109,16 @@
     "type": "النوع: {{type}}",
     "indoor": "داخلي",
     "outdoor": "خارجي"
+  },
+  "teamMatch": {
+    "title": "مباراة الفريق",
+    "vs": "فريق ضد فريق",
+    "team1": "الفريق 1",
+    "team2": "الفريق 2",
+    "members": "أعضاء الفريق في الحجز"
+  },
+  "payment": {
+    "collected": "المجموع",
+    "pending": "المعلق"
   }
 }
