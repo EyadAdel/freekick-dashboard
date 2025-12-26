@@ -3,7 +3,7 @@
     "backToTeams": "العودة للفرق"
   },
   "sidebar": {
-    "teamId": "معرف الفريق: {{id}}",
+    "teamId": "رقم الفريق: {{id}}",
     "status": {
       "active": "نشط",
       "inactive": "غير نشط",

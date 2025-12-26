@@ -168,20 +168,20 @@ function Players() {
                 </div>
             )
         },
-        {
-            header: t('playersPage.email'),
-            accessor: 'email',
-            sortable: true,
-            sortKey: 'email',
-            render: (row) => (
-                <div className="flex items-center gap-2">
-                    <Mail size={14} className="text-gray-400" />
-                    <span className="text-gray-900 truncate max-w-[180px]">
-                        {row.email || t('playersPage.noEmail')}
-                    </span>
-                </div>
-            )
-        },
+        // {
+        //     header: t('playersPage.email'),
+        //     accessor: 'email',
+        //     sortable: true,
+        //     sortKey: 'email',
+        //     render: (row) => (
+        //         <div className="flex items-center gap-2">
+        //             <Mail size={14} className="text-gray-400" />
+        //             <span className="text-gray-900 truncate max-w-[180px]">
+        //                 {row.email || t('playersPage.noEmail')}
+        //             </span>
+        //         </div>
+        //     )
+        // },
         {
             header: t('playersPage.bookings'),
             accessor: 'num_of_booking',
