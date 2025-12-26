@@ -83,5 +83,25 @@
     "notFound": "تفاصيل المالك غير موجودة.",
     "goBack": "الرجوع للخلف",
     "updateFailed": "فشل تحديث العمولة"
+  },
+  "actionModal": {
+    "title": "إضافة إجراء للموظف",
+    "labels": {
+      "actionType": "نوع الإجراء",
+      "amount": "المبلغ",
+      "description": "الوصف",
+      "descPlaceholder": "أدخل تفاصيل حول هذا الإجراء..."
+    },
+    "validation": {
+      "kindRequired": "نوع الإجراء مطلوب",
+      "amountRequired": "يرجى إدخال مبلغ صحيح أكبر من 0",
+      "descRequired": "الوصف مطلوب"
+    },
+    "buttons": {
+      "cancel": "إلغاء",
+      "submit": "حفظ الإجراء",
+      "saving": "جاري الحفظ..."
+    }
   }
+
 }
