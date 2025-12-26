@@ -24,7 +24,7 @@
       "next": "Next",
       "showing": "Showing {from} to {to} of {total} results"
     },
-    "playerId": "ID: PL{id}",
+    "playerId": "ID: PL{{id}}",
     "noEmail": "N/A",
     "noPhone": "N/A",
     "noDate": "N/A",
@@ -168,7 +168,7 @@
     "phone": "+1 XXX XXX XXXX",
     "currency": "$0,0.00",
     "wallet": "${amount}",
-    "id": "PL{id}"
+    "id": "PL{{id}}"
   },
   "status": {
     "active": "Active",

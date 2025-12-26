@@ -22,9 +22,9 @@
     "pagination": {
       "previous": "السابق",
       "next": "التالي",
-      "showing": "عرض {from} إلى {to} من {total} نتيجة"
+      "showing": "عرض {{from}} إلى {{to}} من {{total}} نتيجة"
     },
-    "playerId": "الرقم: PL{id}",
+    "playerId": "الرقم: PL{{id}}",
     "noEmail": "غير متوفر",
     "noPhone": "غير متوفر",
     "noDate": "غير متوفر",

@@ -12,8 +12,8 @@
   },
   "stats": {
     "totalVouchers": "إجمالي القسائم",
-    "activeVouchers": "الق سائم النشطة",
-    "inactiveVouchers": "الق سائم غير النشطة",
+    "activeVouchers": "القسائم النشطة",
+    "inactiveVouchers": "القسائم غير النشطة",
     "totalUsage": "إجمالي الاستخدام"
   },
   "table": {
