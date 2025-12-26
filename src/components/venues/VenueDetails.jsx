@@ -32,9 +32,11 @@ const getTrans = (obj, lang = 'en') => {
 const SimpleToggle = ({ isActive, onToggle, isLoading, t }) => {
     return (
         <div className="flex items-center gap-3">
+            {/* The flex layout and gap automatically swap order and spacing in RTL */}
             <span className={`text-sm font-medium transition-colors ${isActive ? 'text-green-600' : 'text-gray-500'}`}>
                 {isActive ? t('status.active', 'Active') : t('status.inactive', 'Inactive')}
             </span>
+
             <button
                 type="button"
                 onClick={onToggle}
@@ -47,14 +49,15 @@ const SimpleToggle = ({ isActive, onToggle, isLoading, t }) => {
                 <span
                     aria-hidden="true"
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        isActive ? 'translate-x-5' : 'translate-x-0'
+                        isActive
+                            ? 'translate-x-5 rtl:-translate-x-5' // Moves right in LTR, moves left in RTL
+                            : 'translate-x-0'
                     }`}
                 />
             </button>
         </div>
     );
 };
-
 // --- Updated Header Component (Normal Scroll, Simple Design) ---
 const Header = ({ onBack, onUpdate, isEditing, t, isActive, onToggleStatus, isToggling }) => (
     <div className="bg-white shadow-sm mb-6 z-10 relative">
@@ -216,7 +219,7 @@ const VenueProfileCard = ({ venue, daysList, t }) => {
                     </div>
                     <div>
                         <p className="text-xs text-gray-500">{t('card.phone')}</p>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p dir={'ltr'} className="text-sm font-medium text-gray-900">
                             {venue.phone_number || venue.owner_info?.contact_phone}
                         </p>
                     </div>

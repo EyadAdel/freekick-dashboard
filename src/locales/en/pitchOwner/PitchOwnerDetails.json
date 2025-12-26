@@ -83,5 +83,27 @@
     "notFound": "Owner details not found.",
     "goBack": "Go Back",
     "updateFailed": "Failed to update commission"
+  },
+
+  "actionModal": {
+    "title": "Add Staff Action",
+    "labels": {
+      "actionType": "Action Type",
+      "amount": "Amount",
+      "description": "Description",
+      "descPlaceholder": "Enter details about this action..."
+    },
+    "validation": {
+      "kindRequired": "Action type is required",
+      "amountRequired": "Please enter a valid amount greater than 0",
+      "descRequired": "Description is required"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "submit": "Save Action",
+      "saving": "Saving..."
+    }
   }
+
+
 }

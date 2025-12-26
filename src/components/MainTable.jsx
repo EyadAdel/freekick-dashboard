@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import SortableTableHeader from '../components/common/SortableTableHeader.jsx';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TextField, MenuItem, InputAdornment } from '@mui/material';
+import {useTranslation} from "react-i18next";
 
 /**
  * MainTable Component - Enhanced with Optional Sorting
@@ -47,6 +48,7 @@ const MainTable = ({
 
     const [searchTerm, setSearchTerm] = useState('');
     const [filterValues, setFilterValues] = useState({});
+    const { t } = useTranslation('common');
 
     // Handle Global Search
     const handleSearch = (e) => {
@@ -286,7 +288,8 @@ const MainTable = ({
                                     colSpan={columns.length}
                                     className="text-center py-10 text-gray-500"
                                 >
-                                    No data found matching your filters.
+                                    {t('common:tableNoData')}
+
                                 </td>
                             </tr>
                         )}

@@ -4,6 +4,7 @@
     "arabic": "Arabic"
   },
   "selectLanguage": "Select Language",
-  "search": "Search"
+  "search": "Search",
+  "tableNoData": "No data found matching your filters."
 
 }

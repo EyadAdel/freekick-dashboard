@@ -60,13 +60,16 @@ const formatTimeLabel = (hour) => {
 const SimpleToggle = ({ isActive, onToggle, isLoading, t }) => {
     return (
         <div className="flex items-center gap-3">
+            {/* Label color and text updates automatically */}
             <span className={`text-sm font-medium transition-colors ${isActive ? 'text-green-600' : 'text-gray-500'}`}>
                 {isActive ? t('status.active', 'Active') : t('status.inactive', 'Inactive')}
             </span>
+
             <button
                 type="button"
                 onClick={onToggle}
                 disabled={isLoading}
+                // Logical positioning: 'flex' with 'gap' handles the swap of label/button automatically in RTL
                 className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 ${
                     isActive ? 'bg-green-600' : 'bg-gray-200'
                 } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -75,7 +78,9 @@ const SimpleToggle = ({ isActive, onToggle, isLoading, t }) => {
                 <span
                     aria-hidden="true"
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        isActive ? 'translate-x-5' : 'translate-x-0'
+                        isActive
+                            ? 'translate-x-5 rtl:-translate-x-5' // Positive X for LTR, Negative X for RTL
+                            : 'translate-x-0'
                     }`}
                 />
             </button>
