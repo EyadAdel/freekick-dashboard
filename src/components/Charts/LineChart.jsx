@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     LineChart,
     AreaChart,
@@ -11,6 +11,7 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
+import { FaInfoCircle } from 'react-icons/fa';
 
 const CustomTooltipComponent = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -31,12 +32,15 @@ const CustomLineChart = ({
                              colors = ['#ffff'],
                              height = 180,
                              title,
+                             description, // New prop for tooltip description
                              showGrid = true,
                              showLegend = false,
                              showGradientFill = true,
                              gradientOpacity = 0.3,
                              chartType = 'line' // 'line' or 'area'
                          }) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+
     // Safety checks
     const safeData = Array.isArray(data) ? data : [];
     const safeLineKeys = Array.isArray(lineKeys) ? lineKeys : ['clicks'];
@@ -60,10 +64,30 @@ const CustomLineChart = ({
     const ChartComponent = chartType === 'area' ? AreaChart : LineChart;
 
     return (
-        <div className="bg-white rounded-lg shadow p-3 px-5">
+        <div dir={'ltr'} className="bg-white rounded-lg shadow p-3 px-5">
             {title && (
                 <div className="mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+                            {description && (
+                                <div className="relative">
+                                    <FaInfoCircle
+                                        className="text-gray-400 hover:text-gray-600 cursor-help transition-colors duration-200"
+                                        size={14}
+                                        onMouseEnter={() => setShowTooltip(true)}
+                                        onMouseLeave={() => setShowTooltip(false)}
+                                    />
+                                    {showTooltip && (
+                                        <div className="absolute left-0 top-6 z-50 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl rtl:right-0 rtl:left-auto">
+                                            <div className="absolute -top-1 left-2 w-2 h-2 bg-gray-900 transform rotate-45 rtl:left-auto rtl:right-2"></div>
+                                            {description}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     <div className="flex items-center mt-1">
                         <div className="h-1 w-8 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full mr-2"></div>
                         <span className="text-sm text-gray-500">Monthly trend</span>

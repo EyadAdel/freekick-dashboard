@@ -9,12 +9,17 @@
   },
   "stats": {
     "totalIncome": "Total Income",
+    "totalIncomeTooltip": "Total revenue received from sports venue and pitch bookings",
     "totalExpense": "Total Expense",
-    "netBalance": "Net Balance"
+    "totalExpenseTooltip": "Total amount paid out to venue and pitch owners",
+    "netBalance": "Net Balance",
+    "netBalanceTooltip": "Platform net profit (Total Income - Payouts to Venue Owners)"
   },
   "charts": {
-    "monthlyRevenue": "Monthly Revenue",
-    "monthlyTransfers": "Monthly Transfers"
+    "monthlyRevenue": "Monthly Booking Revenue",
+    "monthlyRevenueDescription": "Detailed view of monthly revenue collected from sports venue and pitch bookings throughout the year",
+    "monthlyTransfers": "Monthly Transfers to Venue Owners",
+    "monthlyTransfersDescription": "Total amount transferred monthly to venue and pitch owners as payment for bookings received"
   },
   "transactions": "Transactions",
   "income": "Inc",

@@ -5,7 +5,7 @@ import MainTable from '../../components/MainTable.jsx';
 import analyticsService from '../../services/analyticsService.js';
 import TransactionReceipt from '../../components/common/TransactionReceipt.jsx';
 import logo from '../../assets/logo.svg';
-import { FaFilePdf, FaArrowUp, FaArrowDown, FaDollarSign, FaMoneyBillWave, FaBalanceScale } from "react-icons/fa";
+import { FaFilePdf, FaArrowUp, FaArrowDown, FaDollarSign, FaMoneyBillWave, FaBalanceScale, FaInfoCircle } from "react-icons/fa";
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import StatCard from "../../components/Charts/StatCards.jsx";
 import { setPageTitle } from "../../features/pageTitle/pageTitleSlice.js";
@@ -138,34 +138,37 @@ function RevenueOverview() {
                     {/* Total Income */}
                     <StatCard
                         title={t('revenueOverview:stats.totalIncome')}
-                        value={analytics.total_income}
+                        value={(Math.round(analytics.total_income * 100) / 100).toFixed(2)}
                         percentChange={analytics.total_income > 0 ? 12.5 : 0}
                         icon={FaArrowUp}
                         iconColor="text-green-600"
+                        tooltip={t('revenueOverview:stats.totalIncomeTooltip', 'Total revenue received from all bookings and transactions')}
                     />
 
                     {/* Total Expense */}
                     <StatCard
                         title={t('revenueOverview:stats.totalExpense')}
-                        value={analytics.total_expense}
+                        value={(Math.round(analytics.total_expense * 100) / 100).toFixed(2)}
                         percentChange={analytics.total_expense > 0 ? -8.2 : 0}
                         icon={FaArrowDown}
                         iconColor="text-red-600"
+                        tooltip={t('revenueOverview:stats.totalExpenseTooltip', 'Total amount spent on operational costs and transfers')}
                     />
 
                     {/* Net Balance */}
                     <StatCard
                         title={t('revenueOverview:stats.netBalance')}
-                        value={analytics.total}
+                        value={(Math.round(analytics.total * 100) / 100).toFixed(2)}
                         percentChange={analytics.total > 0 ? 5.7 : -5.7}
                         icon={FaBalanceScale}
                         iconColor={analytics.total >= 0 ? "text-green-600" : "text-red-600"}
+                        tooltip={t('revenueOverview:stats.netBalanceTooltip', 'Net profit or loss (Total Income - Total Expense)')}
                     />
                 </div>
             </div>
 
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div  className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <CustomLineChart
                     data={revenueData}
                     xAxisKey="month"
@@ -173,6 +176,7 @@ function RevenueOverview() {
                     colors={['#2ACEF2']}
                     height={180}
                     title={t('revenueOverview:charts.monthlyRevenue')}
+                    description={t('revenueOverview:charts.monthlyRevenueDescription')}
                     showGrid={true}
                     showLegend={false}
                     showGradientFill={true}
@@ -187,6 +191,7 @@ function RevenueOverview() {
                     colors={['#84FAA4']}
                     height={180}
                     title={t('revenueOverview:charts.monthlyTransfers')}
+                    description={t('revenueOverview:charts.monthlyTransfersDescription')}
                     showGrid={true}
                     showLegend={false}
                     showGradientFill={true}
@@ -194,6 +199,7 @@ function RevenueOverview() {
                     chartType="area"
                 />
             </div>
+
 
             {/* Transactions Table Section */}
             <Transactions />
