@@ -21,7 +21,7 @@
       "quickActions": "إجراءات سريعة"
     },
     "types": {
-      "venue": "الملاعب",
+      "venue": "الملاعب رئيسية",
       "text": "نص",
       "link": "رابط",
       "tournaments": "البطولات"
@@ -38,7 +38,7 @@
       "type": {
         "label": "النوع",
         "options": {
-          "venue": "الملاعب",
+          "venue": "الملاعب رئيسية",
           "text": "نص",
           "link": "رابط",
           "tournaments": "البطولات"
@@ -80,7 +80,7 @@
       "placeholder": "اختر النوع",
       "required": "الرجاء اختيار نوع اللافتة",
       "options": {
-        "venue": "الملاعب",
+        "venue": "الملاعب رئيسية",
         "text": "نص",
         "link": "رابط",
         "tournaments": "البطولات"
