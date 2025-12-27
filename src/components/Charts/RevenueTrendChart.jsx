@@ -204,18 +204,18 @@ const RevenueTrendChart = ({
                         <span className="xl:text-xl font-bold text-gray-900">
                             ${totalRevenue.toLocaleString()}
                         </span>
-                        <div className={`ml-3 px-2 py-1 rounded-full flex items-center ${
-                            trend.isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                        }`}>
-                            {trend.isPositive ? (
-                                <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
-                            ) : (
-                                <ChevronDown className="w-3 h-3 mr-1 text-red-600" />
-                            )}
-                            <span className="text-sm font-medium">
-                                {trend.isPositive ? '+' : '-'}{trend.value}%
-                            </span>
-                        </div>
+                        {/*<div className={`ml-3 px-2 py-1 rounded-full flex items-center ${*/}
+                        {/*    trend.isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'*/}
+                        {/*}`}>*/}
+                        {/*    {trend.isPositive ? (*/}
+                        {/*        <TrendingUp className="w-3 h-3 mr-1 text-green-600" />*/}
+                        {/*    ) : (*/}
+                        {/*        <ChevronDown className="w-3 h-3 mr-1 text-red-600" />*/}
+                        {/*    )}*/}
+                        {/*    <span className="text-sm font-medium">*/}
+                        {/*        {trend.isPositive ? '+' : '-'}{trend.value}%*/}
+                        {/*    </span>*/}
+                        {/*</div>*/}
                     </div>
                     <p className="text-gray-500 text-sm mt-1">{t('totalRevenue')}</p>
                 </div>

@@ -249,12 +249,12 @@ const BookingChart = ({
                     <h2 className="xl:text-xl font-bold text-gray-800 mb-2">{t('totalBookings')}</h2>
                     <div className="flex items-center">
                         <span className="xl:text-xl font-bold text-gray-900">{totalBookings.toLocaleString()}</span>
-                        <div className={`ml-3 px-2 py-1 rounded-full flex items-center ${trend.isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                            <TrendingUp className={`w-3 h-3 mr-1 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`} />
-                            <span className="text-sm font-medium">
-                                {trend.isPositive ? '+' : '-'}{trend.value}%
-                            </span>
-                        </div>
+                        {/*<div className={`ml-3 px-2 py-1 rounded-full flex items-center ${trend.isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>*/}
+                        {/*    <TrendingUp className={`w-3 h-3 mr-1 ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`} />*/}
+                        {/*    <span className="text-sm font-medium">*/}
+                        {/*        {trend.isPositive ? '+' : '-'}{trend.value}%*/}
+                        {/*    </span>*/}
+                        {/*</div>*/}
                     </div>
                     <p className="text-gray-500 text-sm mt-1">{t('matchPlayed')}</p>
                 </div>

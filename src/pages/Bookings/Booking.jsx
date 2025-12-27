@@ -292,28 +292,28 @@ const Bookings = () => {
         {
             title: t('stats.confirmed'),
             value: confirmedCount,
-            percentChange: 12,
+            // percentChange: 12,
             icon: CheckCircle,
             iconColor: 'text-green-600'
         },
         {
             title: t('stats.pending'),
             value: pendingCount,
-            percentChange: -5,
+            // percentChange: -5,
             icon: Clock,
             iconColor: 'text-yellow-600'
         },
         {
             title: t('stats.cancelled'),
             value: cancelledCount,
-            percentChange: 8,
+            // percentChange: 8,
             icon: XCircle,
             iconColor: 'text-red-600'
         },
         {
             title: t('stats.total'),
             value: totalItems,
-            percentChange: 18,
+            // percentChange: 18,
             icon: DollarSign,
             iconColor: 'text-blue-600'
         }

@@ -78,28 +78,24 @@ const Dashboard = () => {
         {
             title: t('stats.completed'),
             value: confirmedCount,
-            percentChange: 135,
             icon: CheckCircle,
             iconColor: 'text-secondary-600 opacity-80'
         },
         ...(permissions.admin ? [{
             title: t('stats.active'),
             value: total_earnings,
-            percentChange: 3.68,
             icon: Clock,
             iconColor: 'text-secondary-600 opacity-80'
         }] : []),
         {
             title: t('stats.cancelled'),
             value: cancelledCount,
-            percentChange: -1.45,
             icon: XCircle,
             iconColor: 'text-red-500'
         },
         {
             title: t('stats.revenue'),
             value: TotalRevenue,
-            percentChange: 5.94,
             icon: DollarSign,
             iconColor: 'text-secondary-600 opacity-80'
         }
