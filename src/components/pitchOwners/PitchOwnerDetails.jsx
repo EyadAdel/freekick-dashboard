@@ -348,6 +348,7 @@ const PitchOwnerDetails = () => {
 
     const [currentPitchPage, setCurrentPitchPage] = useState(1);
     const pitchesPerPage = 5;
+    const dispatch=useDispatch()
 
     // --- Actions State ---
     const [actionsData, setActionsData] = useState([]);
@@ -364,7 +365,6 @@ const PitchOwnerDetails = () => {
 
     const [isActionModalOpen, setIsActionModalOpen] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-
     const getStatusBadge = (status) => {
         const statusConfig = {
             completed: { color: 'bg-green-100 text-green-700', label: t('bookings.statusLabels.completed') },
@@ -378,7 +378,9 @@ const PitchOwnerDetails = () => {
             </span>
         );
     };
-
+    useEffect(() => {
+        dispatch(setPageTitle(t('title')));
+    }, [dispatch, t]);
     // 1. Fetch Bookings Effect
     useEffect(() => {
         if (!currentOwnerData.id) return;
@@ -467,7 +469,11 @@ const PitchOwnerDetails = () => {
         { header: t('pitches.table.code'), accessor: 'id', align: 'left', render: (pitch) => <span className="text-sm font-semibold text-primary-600">{`P${pitch.id}`}</span> },
         {
             header: t('pitches.table.name'), accessor: 'translations.name', render: (pitch) => (
-                <div className="flex items-center gap-3">
+                <div onClick={ () => {
+                    navigate('/pitches/pitch-details', {
+                        state: { pitchId: pitch.id  }})
+                }}
+                    className="flex cursor-pointer items-center gap-3 ">
                     {pitch.image ? (
                         <img
                             src={getImageUrl(pitch.image)}
@@ -584,7 +590,12 @@ const PitchOwnerDetails = () => {
                                     </div>
                                 ) : bookings.length > 0 ? (
                                     bookings.map((booking) => (
-                                        <div key={booking.id} className="border border-gray-100 rounded-lg p-4 hover:border-primary-300 transition-colors bg-white shadow-sm">
+                                        <div onClick={() => {
+                                            navigate('/bookings/book-details', {
+                                                state: { booking, from: '/bookings' }
+                                            });
+                                        }}
+                                            key={booking.id} className="border cursor-pointer border-gray-100 rounded-lg p-4 hover:border-primary-300 transition-colors bg-white shadow-sm">
                                             <div className="flex items-start justify-between mb-2">
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-1">
