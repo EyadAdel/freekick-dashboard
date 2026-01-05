@@ -203,12 +203,12 @@ const CreateTicket = ({ onBack, editTicket = null }) => {
 
     // Get city options for select
     const cityOptions = Object.entries({
-        'Abu_Dhabi': t('form.city.options.Abu_Dhabi'),
+        'Abu Dhabi': t('form.city.options.Abu_Dhabi'),
         'Dubai': t('form.city.options.Dubai'),
         'Sharjah': t('form.city.options.Sharjah'),
         'Ajman': t('form.city.options.Ajman'),
-        'Umm_Al_Quwain': t('form.city.options.Umm_Al_Quwain'),
-        'Ras_Al_Khaimah': t('form.city.options.Ras_Al_Khaimah'),
+        'Umm Al Quwain': t('form.city.options.Umm_Al_Quwain'),
+        'Ras Al Khaimah': t('form.city.options.Ras_Al_Khaimah'),
         'Fujairah': t('form.city.options.Fujairah')
     }).map(([value, label]) => ({ value, label }));
 
