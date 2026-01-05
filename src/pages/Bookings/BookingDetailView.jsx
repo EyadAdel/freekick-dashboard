@@ -337,7 +337,10 @@ const BookingDetailView = () => {
                         <div className="bg-white rounded-xl shadow-md lg:sticky lg:top-6">
                             {/* Profile Avatar */}
                             <div className="flex bg-primary-50 pt-8 flex-col items-center text-center mb-6 pb-6 border-b border-gray-100">
-                                <div className="relative mb-4">
+                                <div className="relative mb-4 cursor-pointer"   onClick={() => (role?.is_admin || role?.is_sub_admin) ?
+                                    navigate('/players/player-profile', { state: { player: booking.user_info }}) :
+                                    undefined
+                                }>
                                     {booking.user_info?.image && !imageErrors['customer-profile'] ? (
                                         <img
                                             src={getImageUrl(booking.user_info?.image)}
@@ -554,7 +557,7 @@ const BookingDetailView = () => {
                                                 <img
                                                     src={getImageUrl(user.image)}
                                                     alt={user.name || 'Player'}
-                                                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-3 border-white shadow-md hover:scale-110 transition-transform"
+                                                    className="w-10 h-10 cursor-pointer sm:w-12 sm:h-12 rounded-full object-cover border-3 border-white shadow-md hover:scale-110 transition-transform"
                                                     onClick={() => (role?.is_admin || role?.is_sub_admin) ?
                                                         navigate('/players/player-profile', { state: { player: user } }) :
                                                         undefined
@@ -567,7 +570,7 @@ const BookingDetailView = () => {
                                                         navigate('/players/player-profile', { state: { player: user } }) :
                                                         undefined
                                                     }
-                                                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${getAvatarColor(user.name)} flex items-center justify-center text-white text-xs sm:text-sm font-bold border-3 border-white shadow-md hover:scale-110 transition-transform`}>
+                                                    className={`w-10 cursor-pointer h-10 sm:w-12 sm:h-12 rounded-full ${getAvatarColor(user.name)} flex items-center justify-center text-white text-xs sm:text-sm font-bold border-3 border-white shadow-md hover:scale-110 transition-transform`}>
                                                     {getInitials(user.name)}
                                                 </div>
                                             )}
