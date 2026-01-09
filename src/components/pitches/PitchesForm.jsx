@@ -584,7 +584,7 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, pitchDetail
                                     {displayPitches && displayPitches
                                         // Prevent self-selection if editing
                                         .filter(p => p.value !== initialData?.id)
-                                        .map((item, index) => <option key={index} value={item.value}>{item.label}</option>)}
+                                        .map((item, index) => <option key={index} value={item.value}>{item.label} - {item.venueName}</option>)}
                                 </select>
                                 <ChevronDown size={16} className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none`} />
                             </div>
