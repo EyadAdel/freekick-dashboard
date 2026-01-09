@@ -285,11 +285,25 @@ const Pitches = () => {
     const globalInactivePitches = useMemo(() => allPitches.filter(p => !p.is_active), [allPitches]);
 
     const formattedPitchesList = useMemo(() => {
-        return allPitches.map(pitch => ({
-            label: getTrans(pitch.translations, currentLang) || `Pitch #${pitch.id}`,
-            value: pitch.id
-        }));
-    }, [allPitches, currentLang]);
+        if (!venuesData || venuesData.length === 0) {
+            return allPitches.map(pitch => ({
+                label: getTrans(pitch.translations, currentLang) || `Pitch #${pitch.id}`,
+                value: pitch.id,
+                venueName: 'Loading venue...'
+            }));
+        }
+
+        return allPitches.map(pitch => {
+            const venueInfo = venuesData.find(v => v.value === pitch.venue);
+            const venueName = venueInfo ? venueInfo.label : `Venue #${pitch.venue}`;
+
+            return {
+                label: getTrans(pitch.translations, currentLang) || `Pitch #${pitch.id}`,
+                value: pitch.id,
+                venueName: venueName
+            };
+        });
+    }, [allPitches, currentLang, venuesData]);
 
     // ================= TABLE CONFIG =================
 
