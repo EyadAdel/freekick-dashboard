@@ -8,7 +8,10 @@
   "stats": {
     "totalFiltered": "Total Venues (Filtered)",
     "active": "Active Venues",
-    "inactive": "Inactive Venues"
+    "inactive": "Inactive Venues",
+    "pending": "Pending Approval",
+    "accepted": "Accepted Venues",
+    "rejected": "Rejected Venues"
   },
   "statusSection": {
     "activeTitle": "Active Venues",
@@ -18,10 +21,28 @@
     "btnActivate": "Activate",
     "btnDeactivate": "Deactivate"
   },
+  "adminSection": {
+    "pendingTitle": "Pending Approval",
+    "acceptedTitle": "Accepted Venues",
+    "rejectedTitle": "Rejected Venues",
+    "noPending": "No pending venues",
+    "noAccepted": "No accepted venues",
+    "noRejected": "No rejected venues",
+    "btnAccept": "Accept",
+    "btnReject": "Reject"
+  },
+  "adminStatus": {
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "rejected": "Rejected"
+  },
   "viewTabs": {
     "all": "All Venues",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "rejected": "Rejected"
   },
   "filters": {
     "searchPlaceholder": "Search venue",
@@ -36,6 +57,13 @@
       "all": "All Venue Types",
       "indoor": "Indoor",
       "outdoor": "Outdoor"
+    },
+    "adminStatus": {
+      "label": "Admin Status",
+      "all": "All Statuses",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
     }
   },
   "table": {
@@ -45,6 +73,7 @@
       "contactInfo": "Contact Info",
       "location": "Location",
       "playTypes": "Play Types",
+      "adminStatus": "Admin Status",
       "status": "Status",
       "actions": "Actions"
     },
@@ -63,7 +92,11 @@
   },
   "messages": {
     "errorLoad": "Error loading venues",
-    "errorDetails": "Failed to load venue details"
+    "errorDetails": "Failed to load venue details",
+    "acceptSuccess": "Venue accepted successfully",
+    "acceptError": "Failed to accept venue",
+    "rejectSuccess": "Venue rejected successfully",
+    "rejectError": "Failed to reject venue"
   },
   "confirm": {
     "activate": {
@@ -75,6 +108,16 @@
       "title": "Deactivate \"{{name}}\"?",
       "text": "This venue will be hidden from users.",
       "btn": "Yes, Deactivate it"
+    },
+    "accept": {
+      "title": "Accept \"{{name}}\"?",
+      "text": "Are you sure you want to accept this venue?",
+      "btn": "Yes, Accept it"
+    },
+    "reject": {
+      "title": "Reject \"{{name}}\"?",
+      "text": "Are you sure you want to reject this venue?",
+      "btn": "Yes, Reject it"
     },
     "delete": {
       "title": "Delete \"{{name}}\"?",
