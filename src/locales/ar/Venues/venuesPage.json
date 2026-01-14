@@ -1,5 +1,5 @@
 {
-  "pageTitle": "الملاعب رئيسية",
+  "pageTitle": "الملاعب الرئيسية",
   "loading": "جاري التحميل...",
   "entity": {
     "venue": "ملعب رئيسي",
@@ -8,20 +8,41 @@
   "stats": {
     "totalFiltered": "إجمالي الملاعب الرئيسية (مصفاة)",
     "active": "الملاعب الرئيسية النشطة",
-    "inactive": "الملاعب الرئيسية غير النشطة"
+    "inactive": "الملاعب الرئيسية غير النشطة",
+    "pending": "قيد الموافقة",
+    "accepted": "الملاعب المقبولة",
+    "rejected": "الملاعب المرفوضة"
   },
   "statusSection": {
-    "activeTitle": "الملاعب رالئيسية النشطة",
+    "activeTitle": "الملاعب الرئيسية النشطة",
     "inactiveTitle": "الملاعب الرئيسية غير النشطة",
     "noActive": "لا توجد ملاعب رئيسية نشطة",
     "noInactive": "لا توجد ملاعب رئيسية غير نشطة",
     "btnActivate": "تفعيل",
     "btnDeactivate": "تعطيل"
   },
+  "adminSection": {
+    "pendingTitle": "قيد الموافقة",
+    "acceptedTitle": "الملاعب المقبولة",
+    "rejectedTitle": "الملاعب المرفوضة",
+    "noPending": "لا توجد ملاعب قيد الموافقة",
+    "noAccepted": "لا توجد ملاعب مقبولة",
+    "noRejected": "لا توجد ملاعب مرفوضة",
+    "btnAccept": "قبول",
+    "btnReject": "رفض"
+  },
+  "adminStatus": {
+    "pending": "قيد الانتظار",
+    "accepted": "مقبول",
+    "rejected": "مرفوض"
+  },
   "viewTabs": {
     "all": "كل الملاعب الرئيسية",
     "active": "نشط",
-    "inactive": "غير نشط"
+    "inactive": "غير نشط",
+    "pending": "قيد الانتظار",
+    "accepted": "مقبول",
+    "rejected": "مرفوض"
   },
   "filters": {
     "searchPlaceholder": "بحث عن ملعب رئيسي",
@@ -36,6 +57,13 @@
       "all": "كل الأنواع",
       "indoor": "داخلي",
       "outdoor": "خارجي"
+    },
+    "adminStatus": {
+      "label": "حالة الموافقة",
+      "all": "كل الحالات",
+      "pending": "قيد الانتظار",
+      "accepted": "مقبول",
+      "rejected": "مرفوض"
     }
   },
   "table": {
@@ -45,6 +73,7 @@
       "contactInfo": "معلومات الاتصال",
       "location": "الموقع",
       "playTypes": "أنواع اللعب",
+      "adminStatus": "حالة الموافقة",
       "status": "الحالة",
       "actions": "الإجراءات"
     },
@@ -63,7 +92,11 @@
   },
   "messages": {
     "errorLoad": "خطأ في تحميل الملاعب الرئيسية",
-    "errorDetails": "فشل تحميل تفاصيل الملعب الرئيسي"
+    "errorDetails": "فشل تحميل تفاصيل الملعب الرئيسي",
+    "acceptSuccess": "تم قبول الملعب بنجاح",
+    "acceptError": "فشل قبول الملعب",
+    "rejectSuccess": "تم رفض الملعب بنجاح",
+    "rejectError": "فشل رفض الملعب"
   },
   "confirm": {
     "activate": {
@@ -75,6 +108,16 @@
       "title": "تعطيل \"{{name}}\"؟",
       "text": "سيتم إخفاء هذا الملعب الرئيسي عن المستخدمين.",
       "btn": "نعم، قم بالتعطيل"
+    },
+    "accept": {
+      "title": "قبول \"{{name}}\"؟",
+      "text": "هل أنت متأكد من قبول هذا الملعب؟",
+      "btn": "نعم، قم بالقبول"
+    },
+    "reject": {
+      "title": "رفض \"{{name}}\"؟",
+      "text": "هل أنت متأكد من رفض هذا الملعب؟",
+      "btn": "نعم، قم بالرفض"
     },
     "delete": {
       "title": "حذف \"{{name}}\"؟",
