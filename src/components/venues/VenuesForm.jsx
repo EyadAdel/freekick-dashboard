@@ -378,11 +378,13 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     return val ? { image: val } : null;
                 }).filter(Boolean)
             };
+            console.log(payload)
             let response;
             if (data && data.id) response = RoleIsAdmin ? await venuesService.updateVenue(data.id, payload) : await venuesService.venueUpdateRequest(data.id, payload);
             else response = await venuesService.createVenue(payload);
 
             const responseData = response?.data || response;
+            console.log(responseData,'lllllllllll')
             if (responseData?.images) setFormData(prev => ({ ...prev, images: responseData.images.map(processImage).filter(Boolean) }));
             if (onSuccess) onSuccess();
             toast.success(t('messages.saveSuccess'));
