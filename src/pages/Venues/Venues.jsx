@@ -191,12 +191,7 @@ const Venues = () => {
     // CRUD Handlers
     const handleViewVenue = async (venue) => {
         try {
-            navigate('/venues/venue-details', {
-                state: {
-                    venueId: venue.id,
-                    daysList: daysList
-                }
-            });
+            navigate(`/venues/venue-details/${venue.id}`);
         } catch (error) {
             console.error("Failed to fetch venue details:", error);
             toast.error(t('messages.errorDetails'));

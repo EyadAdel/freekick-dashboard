@@ -101,7 +101,7 @@ function Players() {
     };
 
     const handleViewPlayer = (player) => {
-        navigate(`/players/player-profile`, {
+        navigate(`/players/player-profile/${player.id}`, {
             state: {player:player}
         });
     };

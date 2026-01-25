@@ -269,15 +269,7 @@ const PitchOwners = () => {
     };
 
     const handleViewOwner = async (id) => {
-        setIsLoading(true);
-        try {
-            const response = await pitchOwnersService.getStaffById(id);
-            navigate('/pitch-owner/pitch-owner-details', { state: { ownerData: response } });
-        } catch (error) {
-            toast.error(t('pitchOwnerPage:messages.detailsError'));
-        } finally {
-            setIsLoading(false);
-        }
+        navigate(`/pitch-owner/pitch-owner-details/${id}`);
     };
 
     const handleDeleteStaff = async (id, name) => {

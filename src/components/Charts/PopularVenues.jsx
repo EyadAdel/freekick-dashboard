@@ -273,7 +273,7 @@ const PopularVenues = () => {
                         {sortedVenues.map((venue, index) => (
                             <div key={venue.id || index} className="flex items-start justify-between">
                                 <div
-                                    onClick={() => navigate('/venues/venue-details', {
+                                    onClick={() => navigate(`/venues/venue-details/${venue.id}`, {
                                         state: {
                                             venueId: venue.id,
                                             daysList: daysList

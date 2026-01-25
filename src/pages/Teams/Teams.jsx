@@ -91,9 +91,7 @@ function Teams() {
     };
 
     const handleViewTeam = (team) => {
-        navigate(`/teams/team-profile`, {
-            state: { team: team }
-        });
+        navigate(`/teams/team-profile/${team.id}`);
     };
 
     const handleBackToList = () => {
@@ -115,7 +113,7 @@ function Teams() {
     };
 
     const handleViewLeader = (player) => {
-        navigate('/players/player-profile', {
+        navigate(`/players/player-profile/${player.id}`, {
             state: {
                 player,
                 from: '/bookings'

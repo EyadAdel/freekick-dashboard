@@ -68,6 +68,9 @@ const PermissionRoute = ({ children, permission }) => {
     if (hasPermission(permission)) {
         return children;
     }
+    if (user?.role?.is_sub_pitch_owner && permission === 'except_sub_pitch') {
+        return <Navigate to="/bookings" replace />;
+    }
 
     // Redirect to dashboard if no permission
     return <Navigate to="/access-denied" replace />;

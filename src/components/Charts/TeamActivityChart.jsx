@@ -106,7 +106,7 @@ function TeamLeaderboardActivity() {
 
     // Function to handle image click navigation
     const handleImageClick = (team) => {
-        navigate('/teams/team-profile', { state: { team } });
+        navigate(`/teams/team-profile/${team.id}`);
     };
 
     // Function to handle logo error

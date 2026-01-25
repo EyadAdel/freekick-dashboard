@@ -95,7 +95,7 @@ const TopTeamsChart = ({
                             {/* Team Name */}
                             <div className="col-span-4 flex items-center">
                                 <div
-                                    onClick={() => navigate('/teams/team-profile', { state: { team: team } })}
+                                    onClick={() => navigate(`/teams/team-profile/${team.id}`)}
                                     className="flex cursor-pointer items-center justify-center w-8 h-8 rounded-full bg-gray-100 mr-3 flex-shrink-0"
                                     title={t('topTeams.viewProfile')}
                                 >

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next'; // Import hook
 import ArrowIcon from "../../components/common/ArrowIcon.jsx";
 import { venuesEditRequestsService } from "../../services/venuesEditRequests/venuesEditRequestsService.js";
@@ -466,11 +466,12 @@ const RequestPoliciesSection = ({ request, displayData, t }) => {
 
 const VenueEditRequestDetails = () => {
     const { t, i18n } = useTranslation('venueEditRequestDetails');
-    const location = useLocation();
+    const { id } = useParams();
     const navigate = useNavigate();
 
-    // 1. Get data from useLocation
-    const request = location.state?.data?.requestData || location.state?.requestData;
+    // 1. State for request data
+    const [request, setRequest] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
     const [activeImage, setActiveImage] = useState(null);
 
@@ -478,7 +479,25 @@ const VenueEditRequestDetails = () => {
     const [surfaceTypes, setSurfaceTypes] = useState([]);
     const [playTypes, setPlayTypes] = useState([]);
 
-    // 3. Effect to fetch surface and play types
+    // 3. Effect to fetch request data
+    useEffect(() => {
+        const fetchRequestData = async () => {
+            if (!id) return;
+            setIsLoading(true);
+            try {
+                const response = await venuesEditRequestsService.getRequestById(id);
+                setRequest(response);
+            } catch (error) {
+                console.error("Failed to fetch request data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchRequestData();
+    }, [id]);
+
+    // 4. Effect to fetch surface and play types
     useEffect(() => {
         const fetchMetaData = async () => {
             try {
@@ -563,6 +582,15 @@ const VenueEditRequestDetails = () => {
     };
 
     // --- Loading/Error State ---
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+                <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mb-4"></div>
+                <p className="text-gray-500">{t('alerts.loading')}</p>
+            </div>
+        );
+    }
+
     if (!request) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">

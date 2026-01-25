@@ -79,7 +79,15 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'bookings/book-details',
+                path: 'bookings/book-details/:id',
+                element: (
+                    <PermissionRoute permission="can_view_bookings">
+                        <BookingDetailView />
+                    </PermissionRoute>
+                ),
+            },
+            {
+                path: 'bookings/walk-in-details/:id',
                 element: (
                     <PermissionRoute permission="can_view_bookings">
                         <BookingDetailView />
@@ -103,7 +111,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'venues/venue-details',
+                path: 'venues/venue-details/:id',
                 element: (
                     <PermissionRoute permission="can_view_venues">
                         <VenueDetails />
@@ -119,7 +127,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'venue-edit-requests/venue-request-details',
+                path: 'venue-edit-requests/venue-request-details/:id',
                 element: (
                     <PermissionRoute permission="can_view_venue_requests">
                         <VenueEditRequestDetails />
@@ -135,7 +143,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'pitches/pitch-details',
+                path: 'pitches/pitch-details/:id',
                 element: (
                     <PermissionRoute permission="can_view_pitches">
                         <PitchDetails />
@@ -183,7 +191,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'tournaments/tournament-details',
+                path: 'tournaments/tournament-details/:id',
                 element: (
                     <PermissionRoute permission="can_view_tournaments">
                         <TournamentDetails />
@@ -231,7 +239,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'players/player-profile',
+                path: 'players/player-profile/:id',
                 element: (
                     <PermissionRoute permission="can_view_players">
                         <PlayerDetailView />
@@ -247,7 +255,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'teams/team-profile',
+                path: 'teams/team-profile/:id',
                 element: (
                     <PermissionRoute permission="can_view_teams">
                         <TeamDetailsView />
@@ -263,7 +271,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'pitch-owner/pitch-owner-details',
+                path: 'pitch-owner/pitch-owner-details/:id',
                 element: (
                     <PermissionRoute permission="can_view_pitch_owners">
                         <PitchOwnerDetails />

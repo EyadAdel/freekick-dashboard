@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
     MapPin, CheckCircle2, XCircle,
@@ -91,7 +91,7 @@ const SimpleToggle = ({ isActive, onToggle, isLoading, t }) => {
 // ==========================================
 // COMPONENT: LiveSlotCalendar
 // ==========================================
-const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
+const LiveSlotCalendar = ({ id, t, currentLang }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [viewMode, setViewMode] = useState('day'); // 'day' | 'week'
     const [activeTab, setActiveTab] = useState('booked');
@@ -125,7 +125,7 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
     // --- Fetch Data ---
     useEffect(() => {
         const fetchData = async () => {
-            if (!pitchId) return;
+            if (!id) return;
             setLoading(true);
             try {
                 let startDateRange = new Date(selectedDate);
@@ -140,7 +140,7 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
                 endDateRange.setHours(23, 59, 59, 999);
 
                 const bookingsParams = {
-                    pitch__id: pitchId,
+                    pitch__id: id,
                     start_time__gte: startDateRange.toISOString(),
                     start_time__lte: endDateRange.toISOString(),
                     page_size: 1000
@@ -150,7 +150,7 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
 
                 const [bookingsRes, availabilityRes] = await Promise.all([
                     bookingService.getAll(bookingsParams),
-                    pitchesService.getPitchAvailableTime(pitchId, queryDateForAvailability)
+                    pitchesService.getPitchAvailableTime(id, queryDateForAvailability)
                 ]);
 
                 const bookingData = bookingsRes.results || bookingsRes || [];
@@ -167,7 +167,7 @@ const LiveSlotCalendar = ({ pitchId, t, currentLang }) => {
         };
 
         fetchData();
-    }, [selectedDate, pitchId, viewMode]);
+    }, [selectedDate, id, viewMode]);
 
     // --- Calculate Slots Logic ---
     const slots = [];
@@ -817,7 +817,8 @@ const PitchDetails = () => {
     const { t, i18n } = useTranslation('pitchDetails');
     const currentLang = i18n.language;
 
-    const { pitchId } = location.state || {};
+    // const { pitchId } = location.state || {};
+    const { id } = useParams();
 
     const [pitch, setPitch] = useState(null);
     const [venueName, setVenueName] = useState(null);
@@ -831,13 +832,13 @@ const PitchDetails = () => {
 
     useEffect(() => {
         const fetchPitchDetails = async () => {
-            if (!pitchId) {
+            if (!id) {
                 setLoading(false);
                 return;
             }
             setLoading(true);
             try {
-                const response = await pitchesService.getPitchById(pitchId);
+                const response = await pitchesService.getPitchById(id);
                 if (response && response.data) {
                     const pitchData = response.data;
                     setPitch(pitchData);
@@ -872,7 +873,7 @@ const PitchDetails = () => {
         };
 
         fetchPitchDetails();
-    }, [pitchId, refreshKey, currentLang]);
+    }, [id, refreshKey, currentLang]);
 
     const handleUpdateSuccess = () => {
         setIsEditing(false);
@@ -909,7 +910,7 @@ const PitchDetails = () => {
         );
     }
 
-    if (!pitchId || !pitch) {
+    if (!id || !pitch) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
                 <p className="text-gray-500 mb-4">{t('messages.notFound', 'Pitch not found')}</p>
