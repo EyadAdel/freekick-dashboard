@@ -156,15 +156,8 @@ const VenueEditRequests = () => {
 
     // --- HANDLERS ---
 
-    const handleViewRequest = async (row) => {
-        try {
-            const response = await venuesEditRequestsService.getRequestById(row.id);
-            navigate(`/venue-edit-requests/venue-request-details`, {
-                state: { requestData: response }
-            });
-        } catch (error) {
-            console.error("Error fetching request details:", error);
-        }
+    const handleViewRequest = (row) => {
+        navigate(`/venue-edit-requests/venue-request-details/${row.id}`);
     };
 
     const handleApprove = async (id, name) => {

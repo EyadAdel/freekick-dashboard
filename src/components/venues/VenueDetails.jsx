@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next'; // Import Translation Hook
 
 import {
@@ -520,9 +520,10 @@ const VenuePoliciesSection = ({ venue, t }) => {
 const VenueDetails = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { id } = useParams();
     const { t } = useTranslation('venueDetails'); // Initialize translation namespace
 
-    const { venueId } = location.state || {};
+    const venueId = id;
 
     // --- State ---
     const [venue, setVenue] = useState(null);

@@ -150,13 +150,7 @@ const Tournaments = () => {
     // --- ACTION HANDLERS ---
 
     const handleViewDetails = (tournament) => {
-        const resolvedVenueName = getVenueName(tournament.venue);
-        navigate(`/tournaments/tournament-details`, {
-            state: {
-                tournamentData: tournament,
-                venueName: resolvedVenueName
-            }
-        });
+        navigate(`/tournaments/tournament-details/${tournament.id}`);
     };
 
     const handleCreateTournament = () => {

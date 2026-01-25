@@ -52,6 +52,7 @@ const Sidebar = ({ onToggle }) => {
 
         const { role } = user;
 
+
         // Define permission mapping based on roles
         const permissions = {
             // Admin permissions

@@ -347,6 +347,65 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
     };
     const removeImage = (index) => setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
 
+// Add this useEffect after the options fetching useEffect
+    useEffect(() => {
+        // Auto-fill owner for non-admin users
+        if (!RoleIsAdmin && user?.id && !formData.owner) {
+            setFormData(prev => ({
+                ...prev,
+                owner: user.id
+            }));
+        }
+    }, [RoleIsAdmin, user, formData.owner]);
+
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     if (formData.images.some(img => typeof img === 'object' && img.uploading)) return toast.warning(t('messages.uploadWait'));
+    //     const newErrors = {};
+    //     if (!formData.translations.en.name) newErrors.enName = t('messages.required');
+    //     if (!formData.venue_type) newErrors.venue_type = t('messages.required');
+    //     if (!formData.city) newErrors.city = t('messages.required');
+    //     if (!formData.owner) newErrors.owner = t('messages.required');
+    //     if (!formData.price_per_hour) newErrors.price_per_hour = t('messages.required');
+    //     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return toast.error(t('messages.fillRequired')); }
+    //     if (RoleIsAdmin && !formData.owner) newErrors.owner = t('messages.required');
+    //
+    //     setIsSubmitting(true);
+    //     try {
+    //         const data = initialData?.data || initialData;
+    //         const payload = {
+    //             venue: data ? data.id : null, city: formData.city, address: formData.address,
+    //             owner: RoleIsAdmin ? formData.owner : user?.id, // ✅ Use current user's ID for non-admins
+    //             contact_name: formData.contact_name, phone_number: `+${formData.phone_number}`, email: formData.email,
+    //             venue_type: formData.venue_type, surface_type: formData.surface_type || null, price_per_hour: formData.price_per_hour,
+    //             advance_booking_days: formData.advance_booking_days || 0, minimum_cancellation_hours: formData.minimum_cancellation_hours || 0,
+    //             available_from: formData.available_from, available_to: formData.available_to,
+    //             allow_split_booking: formData.allow_split_booking, allow_recurring_booking: formData.allow_recurring_booking, is_active: formData.is_active,
+    //             latitude: formData.latitude, longitude: formData.longitude, translations: formData.translations,
+    //             amenities: formData.amenities, venue_play_type: formData.venue_play_type, closed_days: formData.closed_days,
+    //             venue_addons: formData.venue_addons.map(a => ({ addon: a.addon, price: a.price.toString(), min_number: parseInt(a.min_number, 10) || 0 })),
+    //             images: formData.images.map(item => {
+    //                 let val = null;
+    //                 if (typeof item === 'string') val = item.includes('/') ? item.split('/').pop() : item;
+    //                 else if (item.uniqueName || item.serverUrl) val = item.uniqueName || item.serverUrl.split('/').pop();
+    //                 return val ? { image: val } : null;
+    //             }).filter(Boolean)
+    //         };
+    //         console.log(payload,'payload')
+    //         let response;
+    //         if (data && data.id) response = RoleIsAdmin ? await venuesService.updateVenue(data.id, payload) : await venuesService.venueUpdateRequest(data.id, payload);
+    //         else response = await venuesService.createVenue(payload);
+    //
+    //         const responseData = response?.data || response;
+    //         console.log(responseData,'response')
+    //         if (responseData?.images) setFormData(prev => ({ ...prev, images: responseData.images.map(processImage).filter(Boolean) }));
+    //         if (onSuccess) onSuccess();
+    //         toast.success(t('messages.saveSuccess'));
+    //     } catch (error) {
+    //         console.error("Submit error", error);
+    //         toast.error(t('messages.saveFail'));
+    //     } finally { setIsSubmitting(false); }
+    // };
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.images.some(img => typeof img === 'object' && img.uploading)) return toast.warning(t('messages.uploadWait'));
@@ -354,22 +413,41 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (!formData.translations.en.name) newErrors.enName = t('messages.required');
         if (!formData.venue_type) newErrors.venue_type = t('messages.required');
         if (!formData.city) newErrors.city = t('messages.required');
-        if (!formData.owner) newErrors.owner = t('messages.required');
         if (!formData.price_per_hour) newErrors.price_per_hour = t('messages.required');
+
+        // Only validate owner field for admin/sub-admin
+        if (RoleIsAdmin && !formData.owner) newErrors.owner = t('messages.required');
+
         if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return toast.error(t('messages.fillRequired')); }
 
         setIsSubmitting(true);
         try {
             const data = initialData?.data || initialData;
+
+            // Base payload without owner
             const payload = {
-                venue: data ? data.id : null, owner: formData.owner, city: formData.city, address: formData.address,
-                contact_name: formData.contact_name, phone_number: `+${formData.phone_number}`, email: formData.email,
-                venue_type: formData.venue_type, surface_type: formData.surface_type || null, price_per_hour: formData.price_per_hour,
-                advance_booking_days: formData.advance_booking_days || 0, minimum_cancellation_hours: formData.minimum_cancellation_hours || 0,
-                available_from: formData.available_from, available_to: formData.available_to,
-                allow_split_booking: formData.allow_split_booking, allow_recurring_booking: formData.allow_recurring_booking, is_active: formData.is_active,
-                latitude: formData.latitude, longitude: formData.longitude, translations: formData.translations,
-                amenities: formData.amenities, venue_play_type: formData.venue_play_type, closed_days: formData.closed_days,
+                venue: data ? data.id : null,
+                city: formData.city,
+                address: formData.address,
+                contact_name: formData.contact_name,
+                phone_number: `+${formData.phone_number}`,
+                email: formData.email,
+                venue_type: formData.venue_type,
+                surface_type: formData.surface_type || null,
+                price_per_hour: formData.price_per_hour,
+                advance_booking_days: formData.advance_booking_days || 0,
+                minimum_cancellation_hours: formData.minimum_cancellation_hours || 0,
+                available_from: formData.available_from,
+                available_to: formData.available_to,
+                allow_split_booking: formData.allow_split_booking,
+                allow_recurring_booking: formData.allow_recurring_booking,
+                is_active: formData.is_active,
+                latitude: formData.latitude,
+                longitude: formData.longitude,
+                translations: formData.translations,
+                amenities: formData.amenities,
+                venue_play_type: formData.venue_play_type,
+                closed_days: formData.closed_days,
                 venue_addons: formData.venue_addons.map(a => ({ addon: a.addon, price: a.price.toString(), min_number: parseInt(a.min_number, 10) || 0 })),
                 images: formData.images.map(item => {
                     let val = null;
@@ -378,11 +456,19 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     return val ? { image: val } : null;
                 }).filter(Boolean)
             };
+
+            // Only include owner field if user is admin or sub-admin
+            if (RoleIsAdmin) {
+                payload.owner = formData.owner;
+            }
+
+            console.log(payload,'payload')
             let response;
             if (data && data.id) response = RoleIsAdmin ? await venuesService.updateVenue(data.id, payload) : await venuesService.venueUpdateRequest(data.id, payload);
             else response = await venuesService.createVenue(payload);
 
             const responseData = response?.data || response;
+            console.log(responseData,'response')
             if (responseData?.images) setFormData(prev => ({ ...prev, images: responseData.images.map(processImage).filter(Boolean) }));
             if (onSuccess) onSuccess();
             toast.success(t('messages.saveSuccess'));
@@ -391,7 +477,6 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
             toast.error(t('messages.saveFail'));
         } finally { setIsSubmitting(false); }
     };
-
     const SectionHeader = ({ title, icon: Icon }) => (
         <h3 className="text-base md:text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
             {Icon && <Icon size={20} />} {title}

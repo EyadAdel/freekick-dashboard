@@ -16,7 +16,7 @@ import { showConfirm } from '../../components/showConfirm';
 
 import { formatDate, calculateAge, formatAmount } from '../../hooks/players/formatters.js';
 import { getTournamentColumns } from '../../hooks/players/tournamentColumns.jsx';
-import {useLocation, useNavigate} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 
@@ -53,7 +53,9 @@ const PlayerDetailView = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const playerFromState = location.state?.player;
-    const playerId = playerFromState?.id || 1;
+    // const playerId = playerFromState?.id || 1;
+    const {id} = useParams()
+    const playerId = id 
 
     const [bookingDate, setBookingDate] = useState(new Date());
     const [bookingStatus, setBookingStatus] = useState('all');

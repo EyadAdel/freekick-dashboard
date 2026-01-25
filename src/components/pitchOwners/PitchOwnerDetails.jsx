@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 
@@ -332,11 +332,12 @@ const PitchOwnerDetails = () => {
     const { t, i18n } = useTranslation('pitchOwnerDetails');
     const location = useLocation();
     const navigate = useNavigate();
+    const { id } = useParams();
     const { user } = useSelector((state) => state.auth);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
     const currentLang = i18n.language;
 
-    const [currentOwnerData, setCurrentOwnerData] = useState(location.state?.ownerData?.data || {});
+    const [currentOwnerData, setCurrentOwnerData] = useState({});
 
     // --- Bookings State ---
     const [bookings, setBookings] = useState([]);
@@ -381,6 +382,21 @@ const PitchOwnerDetails = () => {
     useEffect(() => {
         dispatch(setPageTitle(t('title')));
     }, [dispatch, t]);
+
+    // Fetch owner data based on id
+    useEffect(() => {
+        if (!id) return;
+        const fetchOwnerData = async () => {
+            try {
+                const response = await pitchOwnersService.getStaffById(id);
+                console.log(response,'kkkkkkkkkk')
+                setCurrentOwnerData(response.data);
+            } catch (error) {
+                console.error("Failed to fetch owner data:", error);
+            }
+        };
+        fetchOwnerData();
+    }, [id]);
     // 1. Fetch Bookings Effect
     useEffect(() => {
         if (!currentOwnerData.id) return;
@@ -470,8 +486,7 @@ const PitchOwnerDetails = () => {
         {
             header: t('pitches.table.name'), accessor: 'translations.name', render: (pitch) => (
                 <div onClick={ () => {
-                    navigate('/pitches/pitch-details', {
-                        state: { pitchId: pitch.id  }})
+                    navigate(`/pitches/pitch-details/${pitch.id}`);
                 }}
                     className="flex cursor-pointer items-center gap-3 ">
                     {pitch.image ? (
@@ -591,9 +606,7 @@ const PitchOwnerDetails = () => {
                                 ) : bookings.length > 0 ? (
                                     bookings.map((booking) => (
                                         <div onClick={() => {
-                                            navigate('/bookings/book-details', {
-                                                state: { booking, from: '/bookings' }
-                                            });
+                                            navigate(`/bookings/book-details/${booking.id}`);
                                         }}
                                             key={booking.id} className="border cursor-pointer border-gray-100 rounded-lg p-4 hover:border-primary-300 transition-colors bg-white shadow-sm">
                                             <div className="flex items-start justify-between mb-2">

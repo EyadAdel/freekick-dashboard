@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from "react-redux";
 import {
     Calendar, Clock, MapPin, Trophy,
@@ -324,16 +324,14 @@ const TournamentParticipantsSection = ({ joinedData, joinedUserData, t }) => {
 
     // Navigation handler for players
     const handlePlayerClick = (player) => {
-        navigate('/players/player-profile', {
+        navigate(`/players/player-profile/${player.id}`, {
             state: { player: player }
         });
     };
 
     // Navigation handler for teams
     const handleTeamClick = (team) => {
-        navigate('/teams/team-profile', {
-            state: { team: team }
-        });
+        navigate(`/teams/team-profile/${team.id}`);
     };
 
     return (
@@ -516,12 +514,12 @@ const TournamentDetails = () => {
     const { t, i18n } = useTranslation('tournamentDetails');
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const location = useLocation();
+    const params = useParams();
 
     // Use Contact Hook
     const { handleWhatsAppClick } = useContact();
 
-    const tournamentId = location.state?.id || location.state?.tournamentData?.id;
+    const tournamentId = params.id;
 
     const [tournament, setTournament] = useState(null);
     const [venueName, setVenueName] = useState('');

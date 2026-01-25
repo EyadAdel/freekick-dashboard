@@ -247,9 +247,7 @@ const Pitches = () => {
     };
 
     const handleViewPitch = (pitch) => {
-        navigate('/pitches/pitch-details', {
-            state: { pitchId: pitch.id }
-        });
+        navigate(`/pitches/pitch-details/${pitch.id}`);
     };
 
     const handleEditPitch = async (pitch) => {

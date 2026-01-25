@@ -89,21 +89,11 @@ const Bookings = () => {
         });
     };
     const handleViewBooking = (booking) => {
-        navigate('/bookings/book-details', {
-            state: {
-                booking,
-                from: '/bookings'
-            }
-        });
+        navigate(`/bookings/book-details/${booking.id}`);
     };
     const handleViewCustomer = (player) => {
-        navigate('/players/player-profile', {
-            state: {
-                player,
-                from: '/bookings'            }
-        });
+        navigate(`/players/player-profile/${player.id}`);
     };
-
     const handleBackToList = () => {
         setViewMode('list');
         setSelectedBooking(null);

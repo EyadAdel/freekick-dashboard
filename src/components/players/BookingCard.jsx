@@ -73,9 +73,7 @@ const BookingCard = ({ booking }) => {
     };
 
     const handleViewBooking = () => {
-        navigate('/bookings/book-details', {
-            state: { booking, from: '/bookings' }
-        });
+        navigate(`/bookings/book-details/${booking.id}`);
     };
 
     return (

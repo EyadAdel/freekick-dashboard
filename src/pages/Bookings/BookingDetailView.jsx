@@ -16,7 +16,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {  clearCancelStatus } from "../../features/bookings/bookingSlice";
 import { showConfirm } from "../../components/showConfirm.jsx";
 import {toast} from "react-toastify";
-import {useLocation, useNavigate} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import { getImageUrl } from '../../utils/imageUtils.js';
 import {daysOfWeekService} from "../../services/daysOfWeek/daysOfWeekService.js";
 import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
@@ -24,11 +24,12 @@ import {setPageTitle} from "../../features/pageTitle/pageTitleSlice.js";
 const BookingDetailView = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { id } = useParams();
     const { t, i18n } = useTranslation('bookingDetails');
     const { user } = useSelector((state) => state.auth);
     const { role } = user;
     const bookingFromState = location.state?.booking;
-    const bookingId = bookingFromState?.id || location.state?.bookingId;
+    const bookingId = id || bookingFromState?.id || location.state?.bookingId;
     const isRTL = i18n.language === 'ar';
 
     const {
@@ -338,7 +339,7 @@ const BookingDetailView = () => {
                             {/* Profile Avatar */}
                             <div className="flex bg-primary-50 pt-8 flex-col items-center text-center mb-6 pb-6 border-b border-gray-100">
                                 <div className="relative mb-4 cursor-pointer"   onClick={() => (role?.is_admin || role?.is_sub_admin) ?
-                                    navigate('/players/player-profile', { state: { player: booking.user_info }}) :
+                                    navigate(`/players/player-profile/${booking.user_info.id}`) :
                                     undefined
                                 }>
                                     {booking.user_info?.image && !imageErrors['customer-profile'] ? (
@@ -516,11 +517,7 @@ const BookingDetailView = () => {
                                 </div>
                             </div>
                             <div className={'grid bg-primary-50 p-4 m-4 gap-5 rounded-xl sm:grid-cols-2'}>
-                                <div onClick={()=>navigate('/venues/venue-details', {
-                                    state: {
-                                        venueId: booking.venue_info.id,
-                                        daysList: daysList
-                                    }})}
+                                <div onClick={()=>navigate(`/venues/venue-details/${booking.venue_info.id}`)}
                                      className="relative cursor-pointer rounded-lg h-48 md:h-64">
                                     {booking.venue_info?.images?.[0]?.image ? (
                                         <img
@@ -559,7 +556,7 @@ const BookingDetailView = () => {
                                                     alt={user.name || 'Player'}
                                                     className="w-10 h-10 cursor-pointer sm:w-12 sm:h-12 rounded-full object-cover border-3 border-white shadow-md hover:scale-110 transition-transform"
                                                     onClick={() => (role?.is_admin || role?.is_sub_admin) ?
-                                                        navigate('/players/player-profile', { state: { player: user } }) :
+                                                        navigate(`/players/player-profile/${user.id}`) :
                                                         undefined
                                                     }
                                                     onError={() => handleImageError(`player-${idx}`)}
@@ -567,7 +564,7 @@ const BookingDetailView = () => {
                                             ) : (
                                                 <div
                                                     onClick={() => (role?.is_admin || role?.is_sub_admin) ?
-                                                        navigate('/players/player-profile', { state: { player: user } }) :
+                                                        navigate(`/players/player-profile/${user.id}`) :
                                                         undefined
                                                     }
                                                     className={`w-10 cursor-pointer h-10 sm:w-12 sm:h-12 rounded-full ${getAvatarColor(user.name)} flex items-center justify-center text-white text-xs sm:text-sm font-bold border-3 border-white shadow-md hover:scale-110 transition-transform`}>

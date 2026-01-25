@@ -205,7 +205,7 @@ const TeamDetailView = () => {
     };
 
     const handleViewPlayer = (player) => {
-        navigate('/players/player-profile', {
+        navigate(`/players/player-profile/${player.id}`, {
             state: { player, from: '/bookings' }
         });
     };
