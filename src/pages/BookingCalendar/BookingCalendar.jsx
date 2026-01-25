@@ -596,7 +596,7 @@ const BookingItem = React.memo(({ booking, calculator }) => {
         if (isWalkIn) {
             navigate('/bookings/walk-in-details', { state: { walkIn: booking } });
         } else {
-            navigate('/bookings/book-details', { state: { booking: booking } });
+            navigate(`/bookings/book-details/${booking.id}`);
         }
     };
 

@@ -89,9 +89,8 @@ const Bookings = () => {
         });
     };
     const handleViewBooking = (booking) => {
-        navigate('/bookings/book-details', {
+        navigate(`/bookings/book-details/${booking.id}`, {
             state: {
-                booking,
                 from: '/bookings'
             }
         });

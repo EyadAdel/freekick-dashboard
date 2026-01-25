@@ -79,7 +79,7 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: 'bookings/book-details',
+                path: 'bookings/book-details/:id',
                 element: (
                     <PermissionRoute permission="can_view_bookings">
                         <BookingDetailView />
