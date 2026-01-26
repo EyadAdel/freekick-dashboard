@@ -105,6 +105,7 @@ const Header = ({ onBack, onUpdate, isEditing, t, isActive, onToggleStatus, isTo
 
 // --- VenueProfileCard Component ---
 const VenueProfileCard = ({ venue, daysList, t }) => {
+    console.log(venue,"venuevenuevenue")
     const backendTrans = getTrans(venue.translations);
     const mainImage = venue.images?.[0]?.image
         ? `${IMAGE_BASE_URL}${venue.images[0].image}`

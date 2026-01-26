@@ -57,7 +57,8 @@
     "selectType": "اختر النوع",
     "selectSurface": "اختر الأرضية",
     "selectMap": "حدد على الخريطة",
-    "pricePlaceholder": "٠.٠٠"
+    "pricePlaceholder": "٠.٠٠",
+    "searchLocation": "ابحث عن موقع..."
   },
   "badges": {
     "english": "الإنجليزية",
