@@ -37,7 +37,7 @@ import { useSelector } from "react-redux";
 
 // --- GOOGLE MAPS CONFIG ---
 const GOOGLE_MAPS_API_KEY = "AIzaSyAeWD187O4GPg0j8V-gEOlHLmPqUPp-TeA";
-const LIBRARIES = ['places']; // Required for search/autocomplete
+const LIBRARIES = ['places'];
 
 const DEFAULT_CENTER = { lat: 24.4539, lng: 54.3773 }; // Abu Dhabi
 
@@ -58,28 +58,22 @@ const TranslationInput = ({
                               error,
                               isTextArea = false,
                               rows = 3,
-                              placeholder
+                              placeholder,
+                              required = false
                           }) => {
-    const getAppLanguage = () => {
-        if (typeof window === 'undefined') return 'en';
-        try {
-            return localStorage.getItem('appLanguage') || 'en';
-        } catch (error) {
-            console.error('Error accessing localStorage:', error);
-            return 'en';
-        }
-    };
+    const { t, i18n } = useTranslation('venueForm');
+    const isRTL = i18n.language === 'ar';
 
-    const appLanguage = getAppLanguage();
-    const isRTL = appLanguage === 'ar';
+    // Logic to determine if this specific field is the Arabic version
+    const isArField = label.includes('(AR)') || label.includes('(العربية)');
 
     const getButtonPosition = () => {
-        if (label.includes('(AR)') || isRTL) return 'left-0 ml-1';
+        if (isArField || isRTL) return 'left-0 ml-1';
         return 'right-0 mr-1';
     };
 
     const getLoadingPosition = () => {
-        if (label.includes('(AR)') || isRTL) return 'left-0 ml-1';
+        if (isArField || isRTL) return 'left-0 ml-1';
         return 'right-0 mr-1';
     };
 
@@ -88,7 +82,7 @@ const TranslationInput = ({
             {isTextArea ? (
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {label}
+                        {label} {required && <span className="text-red-500">*</span>}
                     </label>
                     <textarea
                         rows={rows}
@@ -98,16 +92,17 @@ const TranslationInput = ({
                         placeholder={placeholder}
                         value={value}
                         onChange={onChange}
-                        dir={isRTL ? 'rtl' : 'ltr'}
+                        dir={isArField ? 'rtl' : 'ltr'}
                     />
+                    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
                 </div>
             ) : (
                 <MainInput
-                    label={label}
+                    label={`${label} ${required ? '*' : ''}`}
                     value={value}
                     onChange={onChange}
                     error={error}
-                    dir={isRTL ? 'rtl' : 'ltr'}
+                    dir={isArField ? 'rtl' : 'ltr'}
                 />
             )}
 
@@ -115,7 +110,7 @@ const TranslationInput = ({
                 <span
                     className={`absolute top-0 ${getLoadingPosition()} text-xs text-blue-500 mt-2 animate-pulse`}
                 >
-                    Translating...
+                    {t('messages.translating')}
                 </span>
             )}
 
@@ -124,9 +119,9 @@ const TranslationInput = ({
                     type="button"
                     onClick={onReset}
                     className={`absolute top-0 ${getButtonPosition()} mt-1 text-xs text-gray-400 hover:text-primary-600 flex items-center gap-1 bg-white px-2 py-0.5 rounded shadow-sm border border-gray-100 z-10 transition-colors`}
-                    title="Reset to Auto-Translation"
+                    title={t('toggles.auto')}
                 >
-                    <RefreshCw size={10} /> Auto
+                    <RefreshCw size={10} /> {t('toggles.auto')}
                 </button>
             )}
         </div>
@@ -140,7 +135,10 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
 
     // --- STATE ---
     const [formData, setFormData] = useState({
-        translations: { en: { name: "", description: "", address: "", rules_and_regulations: "", cancellation_policy: "" }, ar: { name: "", description: "", address: "", rules_and_regulations: "", cancellation_policy: "" } },
+        translations: {
+            en: { name: "", description: "", address: "", rules_and_regulations: "", cancellation_policy: "" },
+            ar: { name: "", description: "", address: "", rules_and_regulations: "", cancellation_policy: "" }
+        },
         owner: "", city: "", address: "", contact_name: "", phone_number: "", email: "",
         venue_type: "", surface_type: "", price_per_hour: "", advance_booking_days: "", minimum_cancellation_hours: "",
         latitude: "", longitude: "", available_from: "", available_to: "",
@@ -167,9 +165,7 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         libraries: LIBRARIES
     });
     const [map, setMap] = useState(null);
-    const [searchResult, setSearchResult] = useState(null);
     const autocompleteRef = useRef(null);
-
     const fileInputRef = useRef(null);
 
     // --- HELPER: PROCESS SERVER IMAGES ---
@@ -184,14 +180,22 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         const fetchAllOptions = async () => {
             try {
                 const [amenitiesRes, playTypesRes, surfaceRes, addonsRes, daysRes, ownersRes] = await Promise.all([
-                    amenitiesService.getAllAmenities(), venueSportsService.getAll({ all_languages: true }), surfaceTypesService.getAllSurfaceTypes(),
-                    addonsService.getAll({ all_languages: true }), daysOfWeekService.getAll({ all_languages: true }), stuffTypeListService.getStuffListByType('pitch_owner')
+                    amenitiesService.getAllAmenities(),
+                    venueSportsService.getAll({ all_languages: true }),
+                    surfaceTypesService.getAllSurfaceTypes(),
+                    addonsService.getAll({ all_languages: true }),
+                    daysOfWeekService.getAll({ all_languages: true }),
+                    stuffTypeListService.getStuffListByType('pitch_owner')
                 ]);
                 const citiesRes = citiesListService.getAll();
                 setOptions({
-                    amenities: amenitiesRes.results || amenitiesRes || [], playTypes: playTypesRes.results || playTypesRes || [],
-                    surfaceTypes: surfaceRes.results || surfaceRes || [], addons: addonsRes.results || addonsRes || [],
-                    days: daysRes.results || daysRes || [], owners: ownersRes.results || ownersRes || [], cities: citiesRes
+                    amenities: amenitiesRes.results || amenitiesRes || [],
+                    playTypes: playTypesRes.results || playTypesRes || [],
+                    surfaceTypes: surfaceRes.results || surfaceRes || [],
+                    addons: addonsRes.results || addonsRes || [],
+                    days: daysRes.results || daysRes || [],
+                    owners: ownersRes.results || ownersRes || [],
+                    cities: citiesRes
                 });
             } catch (error) {
                 console.error("Failed to load form options", error);
@@ -207,23 +211,49 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (data) {
             setFormData({
                 translations: {
-                    en: { name: data.translations?.en?.name || "", description: data.translations?.en?.description || "", address: data.translations?.en?.address || "", rules_and_regulations: data.translations?.en?.rules_and_regulations || "", cancellation_policy: data.translations?.en?.cancellation_policy || "" },
-                    ar: { name: data.translations?.ar?.name || "", description: data.translations?.ar?.description || "", address: data.translations?.ar?.address || "", rules_and_regulations: data.translations?.ar?.rules_and_regulations || "", cancellation_policy: data.translations?.ar?.cancellation_policy || "" }
+                    en: {
+                        name: data.translations?.en?.name || "",
+                        description: data.translations?.en?.description || "",
+                        address: data.translations?.en?.address || "",
+                        rules_and_regulations: data.translations?.en?.rules_and_regulations || "",
+                        cancellation_policy: data.translations?.en?.cancellation_policy || ""
+                    },
+                    ar: {
+                        name: data.translations?.ar?.name || "",
+                        description: data.translations?.ar?.description || "",
+                        address: data.translations?.ar?.address || "",
+                        rules_and_regulations: data.translations?.ar?.rules_and_regulations || "",
+                        cancellation_policy: data.translations?.ar?.cancellation_policy || ""
+                    }
                 },
-                owner: data.owner?.id || data.owner || "", city: data.city || "", address: data.translations?.en?.address || data.address || "",
-                contact_name: data.contact_name || data.owner_info?.contact_name || "", phone_number: data.phone_number || data.owner_info?.contact_phone || "", email: data.email || data.owner_info?.email || "",
-                venue_type: data.venue_type || "", surface_type: data.surface_type?.id || data.surface_type || "", price_per_hour: data.price_per_hour || "",
-                advance_booking_days: data.advance_booking_days || "", minimum_cancellation_hours: data.minimum_cancellation_hours || "",
-                available_from: data.available_from || "", available_to: data.available_to || "",
-                allow_split_booking: data.allow_split_booking ?? false, allow_recurring_booking: data.allow_recurring_booking ?? false, is_active: data.is_active ?? false,
-                latitude: data.latitude ? parseFloat(data.latitude) : "", longitude: data.longitude ? parseFloat(data.longitude) : "",
+                owner: data.owner?.id || data.owner || "",
+                city: data.city || "",
+                address: data.translations?.en?.address || data.address || "",
+                contact_name: data.contact_name || data.owner_info?.contact_name || "",
+                phone_number: data.phone_number || data.owner_info?.contact_phone || "",
+                email: data.email || data.owner_info?.email || "",
+                venue_type: data.venue_type || "",
+                surface_type: data.surface_type?.id || data.surface_type || "",
+                price_per_hour: data.price_per_hour || "",
+                advance_booking_days: data.advance_booking_days || "",
+                minimum_cancellation_hours: data.minimum_cancellation_hours || "",
+                available_from: data.available_from || "",
+                available_to: data.available_to || "",
+                allow_split_booking: data.allow_split_booking ?? false,
+                allow_recurring_booking: data.allow_recurring_booking ?? false,
+                is_active: data.is_active ?? false,
+                latitude: data.latitude ? parseFloat(data.latitude) : "",
+                longitude: data.longitude ? parseFloat(data.longitude) : "",
                 images: data.images ? data.images.map(processImage).filter(Boolean) : [],
                 venue_play_type: data.venue_play_type?.map(i => (typeof i === 'object' ? i.id : i)) || [],
                 amenities: data.amenities?.map(i => (typeof i === 'object' ? i.id : i)) || [],
                 closed_days: data.closed_days?.map(i => (typeof i === 'object' ? i.id : i)) || [],
                 venue_addons: data.venue_addons?.map(item => ({ addon: item.addon?.id || item.addon, price: item.price, min_number: item.min_number })) || []
             });
-            setManualEdits({ en: { name: true, description: true, address: true, rules_and_regulations: true, cancellation_policy: true }, ar: { name: true, description: true, address: true, rules_and_regulations: true, cancellation_policy: true } });
+            setManualEdits({
+                en: { name: true, description: true, address: true, rules_and_regulations: true, cancellation_policy: true },
+                ar: { name: true, description: true, address: true, rules_and_regulations: true, cancellation_policy: true }
+            });
         }
     }, [initialData]);
 
@@ -243,10 +273,17 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         useEffect(() => {
             const sourceLang = targetLang === 'en' ? 'ar' : 'en';
             if (activeField === sourceLang && text && !manualEdits[targetLang][field]) {
-                setFormData(prev => ({ ...prev, translations: { ...prev.translations, [targetLang]: { ...prev.translations[targetLang], [field]: text } } }));
+                setFormData(prev => ({
+                    ...prev,
+                    translations: {
+                        ...prev.translations,
+                        [targetLang]: { ...prev.translations[targetLang], [field]: text }
+                    }
+                }));
             }
         }, [text, activeField, manualEdits, targetLang, field]);
     };
+
     useSyncTranslation('ar', 'name', arName); useSyncTranslation('en', 'name', enName);
     useSyncTranslation('ar', 'description', arDesc); useSyncTranslation('en', 'description', enDesc);
     useSyncTranslation('ar', 'address', arAddr); useSyncTranslation('en', 'address', enAddr);
@@ -256,74 +293,80 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
     // --- HANDLERS ---
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        if (name === 'price_per_hour') {
+            if (value !== "" && !/^\d*\.?\d*$/.test(value)) return;
+        }
+        if (['advance_booking_days', 'minimum_cancellation_hours'].includes(name)) {
+            if (value !== "" && !/^\d*$/.test(value)) return;
+        }
         setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
         if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
+
     const handleTranslationChange = (lang, field, value) => {
         setActiveField(lang);
         setManualEdits(prev => ({ ...prev, [lang]: { ...prev[lang], [field]: true } }));
         setFormData(prev => ({ ...prev, translations: { ...prev.translations, [lang]: { ...prev.translations[lang], [field]: value } } }));
+
+        // Clear specific errors
+        const errorKey = lang === 'en' ? `en${field.charAt(0).toUpperCase() + field.slice(1)}` : `ar${field.charAt(0).toUpperCase() + field.slice(1)}`;
+        if (errors[errorKey]) setErrors(p => ({...p, [errorKey]: ''}));
     };
+
     const resetManualEdit = (lang, field) => {
         setManualEdits(prev => ({ ...prev, [lang]: { ...prev[lang], [field]: false } }));
         const otherLang = lang === 'en' ? 'ar' : 'en';
         setActiveField(otherLang);
     };
-    const handleMultiSelectToggle = (field, id) => setFormData(prev => ({ ...prev, [field]: (prev[field] || []).includes(id) ? prev[field].filter(x => x !== id) : [...(prev[field] || []), id] }));
-    const handleAddonToggle = (addonId, checked) => setFormData(prev => ({ ...prev, venue_addons: checked ? [...prev.venue_addons, { addon: addonId, price: "", min_number: 0 }] : prev.venue_addons.filter(item => item.addon !== addonId) }));
-    const handleAddonDetailChange = (addonId, key, value) => setFormData(prev => ({ ...prev, venue_addons: prev.venue_addons.map(item => item.addon === addonId ? { ...item, [key]: value } : item) }));
+
+    const handleMultiSelectToggle = (field, id) => {
+        setFormData(prev => ({ ...prev, [field]: (prev[field] || []).includes(id) ? prev[field].filter(x => x !== id) : [...(prev[field] || []), id] }));
+        if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
+    };
+
+    const handleAddonToggle = (addonId, checked) => {
+        setFormData(prev => ({ ...prev, venue_addons: checked ? [...prev.venue_addons, { addon: addonId, price: "", min_number: 0 }] : prev.venue_addons.filter(item => item.addon !== addonId) }));
+        if (errors.venue_addons) setErrors(prev => ({ ...prev, venue_addons: '' }));
+    };
+
+    const handleAddonDetailChange = (addonId, key, value) => {
+        if (key === 'price') { if (value !== "" && !/^\d*\.?\d*$/.test(value)) return; }
+        if (key === 'min_number') { if (value !== "" && !/^\d*$/.test(value)) return; }
+        setFormData(prev => ({ ...prev, venue_addons: prev.venue_addons.map(item => item.addon === addonId ? { ...item, [key]: value } : item) }));
+    };
 
     // --- GOOGLE MAP HANDLERS ---
-    const onLoadMap = useCallback(function callback(map) {
-        setMap(map);
-    }, []);
-
-    const onUnmountMap = useCallback(function callback(map) {
-        setMap(null);
-    }, []);
+    const onLoadMap = useCallback(function callback(map) { setMap(map); }, []);
+    const onUnmountMap = useCallback(function callback(map) { setMap(null); }, []);
 
     const handleMapClick = (e) => {
         const lat = e.latLng.lat();
         const lng = e.latLng.lng();
-        setFormData(prev => ({
-            ...prev,
-            latitude: lat,
-            longitude: lng
-        }));
+        setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+        if (errors.latitude || errors.longitude) setErrors(prev => ({ ...prev, latitude: '', longitude: '' }));
     };
 
-    const onLoadAutocomplete = (autocomplete) => {
-        autocompleteRef.current = autocomplete;
-    };
+    const onLoadAutocomplete = (autocomplete) => { autocompleteRef.current = autocomplete; };
 
     const onPlaceChanged = () => {
         if (autocompleteRef.current !== null) {
             const place = autocompleteRef.current.getPlace();
             const location = place.geometry?.location;
-
             if (location) {
                 const lat = location.lat();
                 const lng = location.lng();
-
-                // Update form data with new location and address
                 setFormData(prev => ({
                     ...prev,
                     latitude: lat,
                     longitude: lng,
-                    address: place.formatted_address || prev.address, // Optional: auto-fill general address
+                    address: place.formatted_address || prev.address,
                     translations: {
                         ...prev.translations,
                         en: { ...prev.translations.en, address: place.formatted_address || prev.translations.en.address }
                     }
                 }));
-
-                // Pan map
-                if (map) {
-                    map.panTo({ lat, lng });
-                    map.setZoom(15);
-                }
-            } else {
-                console.log("Autocomplete: No geometry available");
+                if (map) { map.panTo({ lat, lng }); map.setZoom(15); }
+                if (errors.latitude || errors.longitude) setErrors(prev => ({ ...prev, latitude: '', longitude: '' }));
             }
         }
     };
@@ -331,7 +374,14 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
     const handleImageSelect = (e) => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
-        const newImages = files.filter(f => f.type.startsWith('image/')).map(file => ({ id: Date.now() + Math.random(), file, preview: URL.createObjectURL(file), uploading: true, serverUrl: null, uniqueName: null }));
+        const newImages = files.filter(f => f.type.startsWith('image/')).map(file => ({
+            id: Date.now() + Math.random(),
+            file,
+            preview: URL.createObjectURL(file),
+            uploading: true,
+            serverUrl: null,
+            uniqueName: null
+        }));
         setFormData(prev => ({ ...prev, images: [...prev.images, ...newImages] }));
         newImages.forEach(async (imgObj) => {
             try {
@@ -345,90 +395,49 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         });
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
+
     const removeImage = (index) => setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
 
-// Add this useEffect after the options fetching useEffect
     useEffect(() => {
-        // Auto-fill owner for non-admin users
-        if (!RoleIsAdmin && user?.id && !formData.owner) {
-            setFormData(prev => ({
-                ...prev,
-                owner: user.id
-            }));
-        }
+        if (!RoleIsAdmin && user?.id && !formData.owner) { setFormData(prev => ({ ...prev, owner: user.id })); }
     }, [RoleIsAdmin, user, formData.owner]);
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     if (formData.images.some(img => typeof img === 'object' && img.uploading)) return toast.warning(t('messages.uploadWait'));
-    //     const newErrors = {};
-    //     if (!formData.translations.en.name) newErrors.enName = t('messages.required');
-    //     if (!formData.venue_type) newErrors.venue_type = t('messages.required');
-    //     if (!formData.city) newErrors.city = t('messages.required');
-    //     if (!formData.owner) newErrors.owner = t('messages.required');
-    //     if (!formData.price_per_hour) newErrors.price_per_hour = t('messages.required');
-    //     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return toast.error(t('messages.fillRequired')); }
-    //     if (RoleIsAdmin && !formData.owner) newErrors.owner = t('messages.required');
-    //
-    //     setIsSubmitting(true);
-    //     try {
-    //         const data = initialData?.data || initialData;
-    //         const payload = {
-    //             venue: data ? data.id : null, city: formData.city, address: formData.address,
-    //             owner: RoleIsAdmin ? formData.owner : user?.id, // ✅ Use current user's ID for non-admins
-    //             contact_name: formData.contact_name, phone_number: `+${formData.phone_number}`, email: formData.email,
-    //             venue_type: formData.venue_type, surface_type: formData.surface_type || null, price_per_hour: formData.price_per_hour,
-    //             advance_booking_days: formData.advance_booking_days || 0, minimum_cancellation_hours: formData.minimum_cancellation_hours || 0,
-    //             available_from: formData.available_from, available_to: formData.available_to,
-    //             allow_split_booking: formData.allow_split_booking, allow_recurring_booking: formData.allow_recurring_booking, is_active: formData.is_active,
-    //             latitude: formData.latitude, longitude: formData.longitude, translations: formData.translations,
-    //             amenities: formData.amenities, venue_play_type: formData.venue_play_type, closed_days: formData.closed_days,
-    //             venue_addons: formData.venue_addons.map(a => ({ addon: a.addon, price: a.price.toString(), min_number: parseInt(a.min_number, 10) || 0 })),
-    //             images: formData.images.map(item => {
-    //                 let val = null;
-    //                 if (typeof item === 'string') val = item.includes('/') ? item.split('/').pop() : item;
-    //                 else if (item.uniqueName || item.serverUrl) val = item.uniqueName || item.serverUrl.split('/').pop();
-    //                 return val ? { image: val } : null;
-    //             }).filter(Boolean)
-    //         };
-    //         console.log(payload,'payload')
-    //         let response;
-    //         if (data && data.id) response = RoleIsAdmin ? await venuesService.updateVenue(data.id, payload) : await venuesService.venueUpdateRequest(data.id, payload);
-    //         else response = await venuesService.createVenue(payload);
-    //
-    //         const responseData = response?.data || response;
-    //         console.log(responseData,'response')
-    //         if (responseData?.images) setFormData(prev => ({ ...prev, images: responseData.images.map(processImage).filter(Boolean) }));
-    //         if (onSuccess) onSuccess();
-    //         toast.success(t('messages.saveSuccess'));
-    //     } catch (error) {
-    //         console.error("Submit error", error);
-    //         toast.error(t('messages.saveFail'));
-    //     } finally { setIsSubmitting(false); }
-    // };
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.images.some(img => typeof img === 'object' && img.uploading)) return toast.warning(t('messages.uploadWait'));
+
         const newErrors = {};
         if (!formData.translations.en.name) newErrors.enName = t('messages.required');
+        if (!formData.translations.en.description) newErrors.enDescription = t('messages.required');
+        if (!formData.translations.ar.description) newErrors.arDescription = t('messages.required');
+        if (!formData.translations.en.address) newErrors.enAddress = t('messages.required');
+        if (!formData.translations.ar.address) newErrors.arAddress = t('messages.required');
         if (!formData.venue_type) newErrors.venue_type = t('messages.required');
         if (!formData.city) newErrors.city = t('messages.required');
+        if (!formData.phone_number) newErrors.phone_number = t('messages.required');
         if (!formData.price_per_hour) newErrors.price_per_hour = t('messages.required');
-
-        // Only validate owner field for admin/sub-admin
+        if (!formData.available_from) newErrors.available_from = t('messages.required');
+        if (!formData.available_to) newErrors.available_to = t('messages.required');
+        if (!formData.surface_type) newErrors.surface_type = t('messages.required');
+        if (formData.minimum_cancellation_hours === "" || formData.minimum_cancellation_hours === null) newErrors.minimum_cancellation_hours = t('messages.required');
+        if (formData.advance_booking_days === "" || formData.advance_booking_days === null) newErrors.advance_booking_days = t('messages.required');
+        if (!formData.latitude) newErrors.latitude = t('messages.required');
+        if (!formData.longitude) newErrors.longitude = t('messages.required');
         if (RoleIsAdmin && !formData.owner) newErrors.owner = t('messages.required');
+        if (!formData.venue_play_type || formData.venue_play_type.length === 0) newErrors.venue_play_type = t('messages.required');
+
+        const hasInvalidAddons = formData.venue_addons.some(addon => addon.price === "" || addon.price === null || addon.min_number === "" || addon.min_number === null);
+        if (hasInvalidAddons) newErrors.venue_addons = true;
 
         if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return toast.error(t('messages.fillRequired')); }
 
         setIsSubmitting(true);
         try {
             const data = initialData?.data || initialData;
-
-            // Base payload without owner
             const payload = {
                 venue: data ? data.id : null,
                 city: formData.city,
-                address: formData.address,
+                address: formData.translations.en.address,
                 contact_name: formData.contact_name,
                 phone_number: `+${formData.phone_number}`,
                 email: formData.email,
@@ -456,20 +465,11 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     return val ? { image: val } : null;
                 }).filter(Boolean)
             };
+            if (RoleIsAdmin) { payload.owner = formData.owner; }
 
-            // Only include owner field if user is admin or sub-admin
-            if (RoleIsAdmin) {
-                payload.owner = formData.owner;
-            }
+            if (data && data.id) RoleIsAdmin ? await venuesService.updateVenue(data.id, payload) : await venuesService.venueUpdateRequest(data.id, payload);
+            else await venuesService.createVenue(payload);
 
-            console.log(payload,'payload')
-            let response;
-            if (data && data.id) response = RoleIsAdmin ? await venuesService.updateVenue(data.id, payload) : await venuesService.venueUpdateRequest(data.id, payload);
-            else response = await venuesService.createVenue(payload);
-
-            const responseData = response?.data || response;
-            console.log(responseData,'response')
-            if (responseData?.images) setFormData(prev => ({ ...prev, images: responseData.images.map(processImage).filter(Boolean) }));
             if (onSuccess) onSuccess();
             toast.success(t('messages.saveSuccess'));
         } catch (error) {
@@ -477,6 +477,7 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
             toast.error(t('messages.saveFail'));
         } finally { setIsSubmitting(false); }
     };
+
     const SectionHeader = ({ title, icon: Icon }) => (
         <h3 className="text-base md:text-lg font-semibold text-secondary-600 border-b pb-2 flex items-center gap-2">
             {Icon && <Icon size={20} />} {title}
@@ -509,19 +510,17 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     <div className="space-y-6">
                         <SectionHeader title={t('titles.basicInfo')} icon={Globe} />
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                            {/* English */}
                             <div className="space-y-4">
                                 <span className="badge bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">{t('badges.english')}</span>
-                                <TranslationInput label={t('labels.venueNameEn')} value={formData.translations.en.name} onChange={(e) => handleTranslationChange('en', 'name', e.target.value)} loading={loadEnName} isManual={manualEdits.en.name} onReset={() => resetManualEdit('en', 'name')} error={errors.enName} />
-                                <TranslationInput label={t('labels.descriptionEn')} value={formData.translations.en.description} onChange={(e) => handleTranslationChange('en', 'description', e.target.value)} loading={loadEnDesc} isManual={manualEdits.en.description} onReset={() => resetManualEdit('en', 'description')} isTextArea={true} placeholder={t('placeholders.descEn')} />
-                                <TranslationInput label={t('labels.addressTextEn')} value={formData.translations.en.address} onChange={(e) => handleTranslationChange('en', 'address', e.target.value)} loading={loadEnAddr} isManual={manualEdits.en.address} onReset={() => resetManualEdit('en', 'address')} />
+                                <TranslationInput label={t('labels.venueNameEn')} value={formData.translations.en.name} onChange={(e) => handleTranslationChange('en', 'name', e.target.value)} loading={loadEnName} isManual={manualEdits.en.name} onReset={() => resetManualEdit('en', 'name')} error={errors.enName} required={true} />
+                                <TranslationInput label={t('labels.descriptionEn')} value={formData.translations.en.description} onChange={(e) => handleTranslationChange('en', 'description', e.target.value)} loading={loadEnDesc} isManual={manualEdits.en.description} onReset={() => resetManualEdit('en', 'description')} isTextArea={true} placeholder={t('placeholders.descEn')} error={errors.enDescription} required={true} />
+                                <TranslationInput label={t('labels.addressTextEn')} value={formData.translations.en.address} onChange={(e) => handleTranslationChange('en', 'address', e.target.value)} loading={loadEnAddr} isManual={manualEdits.en.address} onReset={() => resetManualEdit('en', 'address')} error={errors.enAddress} required={true} />
                             </div>
-                            {/* Arabic */}
                             <div className="space-y-4" dir="rtl">
                                 <span className="badge bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">{t('badges.arabic')}</span>
-                                <TranslationInput label={t('labels.venueNameAr')} value={formData.translations.ar.name} onChange={(e) => handleTranslationChange('ar', 'name', e.target.value)} loading={loadArName} isManual={manualEdits.ar.name} onReset={() => resetManualEdit('ar', 'name')} error={errors.arName} />
-                                <TranslationInput label={t('labels.descriptionAr')} value={formData.translations.ar.description} onChange={(e) => handleTranslationChange('ar', 'description', e.target.value)} loading={loadArDesc} isManual={manualEdits.ar.description} onReset={() => resetManualEdit('ar', 'description')} isTextArea={true} placeholder={t('placeholders.descAr')} />
-                                <TranslationInput label={t('labels.addressTextAr')} value={formData.translations.ar.address} onChange={(e) => handleTranslationChange('ar', 'address', e.target.value)} loading={loadArAddr} isManual={manualEdits.ar.address} onReset={() => resetManualEdit('ar', 'address')} />
+                                <TranslationInput label={t('labels.venueNameAr')} value={formData.translations.ar.name} onChange={(e) => handleTranslationChange('ar', 'name', e.target.value)} loading={loadArName} isManual={manualEdits.ar.name} onReset={() => resetManualEdit('ar', 'name')} />
+                                <TranslationInput label={t('labels.descriptionAr')} value={formData.translations.ar.description} onChange={(e) => handleTranslationChange('ar', 'description', e.target.value)} loading={loadArDesc} isManual={manualEdits.ar.description} onReset={() => resetManualEdit('ar', 'description')} isTextArea={true} placeholder={t('placeholders.descAr')} error={errors.arDescription} required={true} />
+                                <TranslationInput label={t('labels.addressTextAr')} value={formData.translations.ar.address} onChange={(e) => handleTranslationChange('ar', 'address', e.target.value)} loading={loadArAddr} isManual={manualEdits.ar.address} onReset={() => resetManualEdit('ar', 'address')} error={errors.arAddress} required={true} />
                             </div>
                         </div>
                     </div>
@@ -548,106 +547,66 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                         <SectionHeader title={t('titles.locationContact')} icon={MapPin} />
                         {RoleIsAdmin && (
                             <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.owner')} <span
-                                    className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.owner')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-
-                                    <select name="owner" value={formData.owner} onChange={handleChange}
-                                            className="w-full pl-3 pr-10 py-2.5 border rounded-lg bg-white outline-none focus:border-primary-500 appearance-none text-sm text-gray-700">
+                                    <select name="owner" value={formData.owner} onChange={handleChange} className={`w-full pl-3 pr-10 py-2.5 border rounded-lg bg-white outline-none focus:border-primary-500 appearance-none text-sm text-gray-700 ${errors.owner ? 'border-red-500' : 'border-gray-300'}`}>
                                         <option value="">{t('placeholders.selectOwner')}</option>
-                                        {options.owners.map(owner => (<option key={owner.id}
-                                                                              value={owner.id}>{owner.contact_name || owner.user_info?.name || t('options.unknown')} - {owner.pitch_name || t('options.noPitch')} ({owner.email})</option>))}
+                                        {options.owners.map(owner => (<option key={owner.id} value={owner.id}>{owner.contact_name || owner.user_info?.name || t('options.unknown')} - {owner.pitch_name || t('options.noPitch')} ({owner.email})</option>))}
                                     </select>
-                                    <ChevronDown size={16}
-                                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"/>
+                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"/>
                                 </div>
                                 {errors.owner && <p className="text-red-500 text-xs mt-1">{errors.owner}</p>}
                             </div>
                         )}
-
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.city')} <span
-                                    className="text-red-500">*</span></label>
+                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.city')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-                                    <select name="city" value={formData.city} onChange={handleChange}
-                                            className="w-full pl-3 pr-10 py-2.5 border rounded-lg bg-white outline-none focus:border-primary-500 appearance-none text-sm text-gray-700">
+                                    <select name="city" value={formData.city} onChange={handleChange} className={`w-full pl-3 pr-10 py-2.5 border rounded-lg bg-white outline-none focus:border-primary-500 appearance-none text-sm text-gray-700 ${errors.city ? 'border-red-500' : 'border-gray-300'}`}>
                                         <option value="">{t('placeholders.selectCity')}</option>
-                                        {options.cities.map((city, index) => (
-                                            <option key={index} value={city.value}>{city.label}</option>))}
+                                        {options.cities.map((city, index) => (<option key={index} value={city.value}>{city.label}</option>))}
                                     </select>
-                                    <ChevronDown size={16}
-                                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"/>
+                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"/>
                                 </div>
                                 {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
                             </div>
                             <MainInput label={t('labels.fullAddress')} name="address" value={formData.address} onChange={handleChange} />
                         </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <MainInput label={t('labels.contactName')} name="contact_name" value={formData.contact_name} onChange={handleChange} icon={User} />
                             <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.phone')}</label>
+                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.phone')} <span className="text-red-500">*</span></label>
                                 <MuiPhoneInput value={formData.phone_number} onChange={(phone) => setFormData(prev => ({ ...prev, phone_number: phone }))} error={!!errors.phone_number} />
                                 {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
                             </div>
                             <MainInput label={t('labels.email')} name="email" type="email" value={formData.email} onChange={handleChange} icon={Mail} />
                         </div>
 
-                        {/* GOOGLE MAPS SECTION */}
+                        {/* MAP */}
                         <div className="space-y-4 pt-4 border-t">
                             <div className="flex flex-col gap-2">
-                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                    <Globe size={16} /> {t('labels.mapLocation')}
-                                </label>
-                                {/* SEARCH BOX */}
+                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2"><Globe size={16} /> {t('labels.mapLocation')}</label>
                                 {isLoaded && (
                                     <div className="relative z-10 w-full">
-                                        <Autocomplete
-                                            onLoad={onLoadAutocomplete}
-                                            onPlaceChanged={onPlaceChanged}
-                                        >
+                                        <Autocomplete onLoad={onLoadAutocomplete} onPlaceChanged={onPlaceChanged}>
                                             <div className="relative">
-                                                <input
-                                                    type="text"
-                                                    placeholder={t('placeholders.searchLocation') || "Search for a location"}
-                                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
-                                                />
+                                                <input type="text" placeholder={t('placeholders.searchLocation')} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm" />
                                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                                             </div>
                                         </Autocomplete>
                                     </div>
                                 )}
                             </div>
-
-                            <div className="border rounded-xl overflow-hidden shadow-sm h-[300px] md:h-[400px] w-full relative">
+                            <div className={`border rounded-xl overflow-hidden shadow-sm h-[300px] md:h-[400px] w-full relative ${errors.latitude || errors.longitude ? 'border-red-500 ring-2 ring-red-500' : 'border-gray-200'}`}>
                                 {isLoaded ? (
-                                    <GoogleMap
-                                        mapContainerStyle={mapContainerStyle}
-                                        center={formData.latitude && formData.longitude ? { lat: Number(formData.latitude), lng: Number(formData.longitude) } : DEFAULT_CENTER}
-                                        zoom={formData.latitude ? 15 : 10}
-                                        onLoad={onLoadMap}
-                                        onUnmount={onUnmountMap}
-                                        onClick={handleMapClick}
-                                    >
-                                        {formData.latitude && formData.longitude && (
-                                            <Marker
-                                                position={{ lat: Number(formData.latitude), lng: Number(formData.longitude) }}
-                                                animation={2} // DROP animation
-                                            />
-                                        )}
+                                    <GoogleMap mapContainerStyle={mapContainerStyle} center={formData.latitude && formData.longitude ? { lat: Number(formData.latitude), lng: Number(formData.longitude) } : DEFAULT_CENTER} zoom={formData.latitude ? 15 : 10} onLoad={onLoadMap} onUnmount={onUnmountMap} onClick={handleMapClick}>
+                                        {formData.latitude && formData.longitude && (<Marker position={{ lat: Number(formData.latitude), lng: Number(formData.longitude) }} animation={2} />)}
                                     </GoogleMap>
-                                ) : (
-                                    <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                                        <Loader2 className="animate-spin text-gray-400" />
-                                    </div>
-                                )}
+                                ) : (<div className="h-full w-full flex items-center justify-center bg-gray-100"><Loader2 className="animate-spin text-gray-400" /></div>)}
                             </div>
-
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 bg-gray-50 p-4 rounded-lg">
-                                <MainInput label={t('labels.latitude')} name="latitude" value={formData.latitude} onChange={handleChange} icon={Crosshair} readOnly placeholder={t('placeholders.selectMap')} />
-                                <MainInput label={t('labels.longitude')} name="longitude" value={formData.longitude} onChange={handleChange} icon={Crosshair} readOnly placeholder={t('placeholders.selectMap')} />
+                                <MainInput label={t('labels.latitude') + " *"} name="latitude" value={formData.latitude} onChange={handleChange} icon={Crosshair} readOnly placeholder={t('placeholders.selectMap')} error={errors.latitude} />
+                                <MainInput label={t('labels.longitude') + " *"} name="longitude" value={formData.longitude} onChange={handleChange} icon={Crosshair} readOnly placeholder={t('placeholders.selectMap')} error={errors.longitude} />
                             </div>
                         </div>
                     </div>
@@ -657,9 +616,9 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                         <SectionHeader title={t('titles.details')} icon={Clock} />
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.venueType')}</label>
+                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.venueType')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-                                    <select name="venue_type" value={formData.venue_type} onChange={handleChange} className="w-full border rounded-lg p-2.5 outline-none focus:border-primary-500 bg-white appearance-none">
+                                    <select name="venue_type" value={formData.venue_type} onChange={handleChange} className={`w-full border rounded-lg p-2.5 outline-none focus:border-primary-500 bg-white appearance-none ${errors.venue_type ? 'border-red-500' : 'border-gray-300'}`}>
                                         <option value="">{t('placeholders.selectType')}</option>
                                         <option value="indoor">{t('options.indoor')}</option>
                                         <option value="outdoor">{t('options.outdoor')}</option>
@@ -669,22 +628,24 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 {errors.venue_type && <p className="text-red-500 text-xs mt-1">{errors.venue_type}</p>}
                             </div>
                             <div className="flex flex-col">
-                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.surfaceType')}</label>
+                                <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.surfaceType')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-                                    <select name="surface_type" value={formData.surface_type} onChange={handleChange} className="w-full border rounded-lg p-2.5 outline-none focus:border-primary-500 bg-white appearance-none">
+                                    <select name="surface_type" value={formData.surface_type} onChange={handleChange} className={`w-full border rounded-lg p-2.5 outline-none focus:border-primary-500 bg-white appearance-none ${errors.surface_type ? 'border-red-500' : 'border-gray-300'}`}>
                                         <option value="">{t('placeholders.selectSurface')}</option>
                                         {options.surfaceTypes.map(st => (<option key={st.id} value={st.id}>{st.translations?.en?.name || st.name}</option>))}
                                     </select>
                                     <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                                 </div>
+                                {errors.surface_type && <p className="text-red-500 text-xs mt-1">{errors.surface_type}</p>}
                             </div>
-                            <MainInput label={t('labels.pricePerHour')} name="price_per_hour" type="number" value={formData.price_per_hour} onChange={handleChange} icon={DollarSign} error={errors.price_per_hour} />
-                            <MainInput label={t('labels.availableFrom')} name="available_from" type="time" value={formData.available_from} onChange={handleChange} />
-                            <MainInput label={t('labels.availableTo')} name="available_to" type="time" value={formData.available_to} onChange={handleChange} />
-                            <MainInput max={7} min={1} label={t('labels.advanceDays')} name="advance_booking_days" type="number" value={formData.advance_booking_days} onChange={handleChange} icon={Calendar} />
-                            <MainInput label={t('labels.minCancellation')} name="minimum_cancellation_hours" type="number" value={formData.minimum_cancellation_hours} onChange={handleChange} icon={AlertCircle} />
+
+                            <MainInput label={t('labels.pricePerHour') + " *"} name="price_per_hour" type="text" value={formData.price_per_hour} onChange={handleChange} icon={DollarSign} error={errors.price_per_hour} />
+                            <MainInput label={t('labels.availableFrom') + " *"} name="available_from" type="time" value={formData.available_from} onChange={handleChange} error={errors.available_from} />
+                            <MainInput label={t('labels.availableTo') + " *"} name="available_to" type="time" value={formData.available_to} onChange={handleChange} error={errors.available_to} />
+                            <MainInput label={t('labels.advanceDays') + " *"} name="advance_booking_days" type="text" value={formData.advance_booking_days} onChange={handleChange} icon={Calendar} error={errors.advance_booking_days} />
+                            <MainInput label={t('labels.minCancellation') + " *"} name="minimum_cancellation_hours" type="text" value={formData.minimum_cancellation_hours} onChange={handleChange} icon={AlertCircle} error={errors.minimum_cancellation_hours} />
                         </div>
-                        <div className="border border-primary-100 bg-primary-50 flex flex-wrap gap-4 md:gap-8 p-6  rounded-lg ">
+                        <div className="border border-primary-100 bg-primary-50 flex flex-wrap gap-4 md:gap-8 p-6 rounded-lg">
                             <label className="flex items-center gap-2 cursor-pointer select-none"><input type="checkbox" name="allow_split_booking" checked={formData.allow_split_booking} onChange={handleChange} className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500" /><span className="text-sm font-medium text-gray-700">{t('toggles.splitBooking')}</span></label>
                             <label className="flex items-center gap-2 cursor-pointer select-none"><input type="checkbox" name="allow_recurring_booking" checked={formData.allow_recurring_booking} onChange={handleChange} className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500" /><span className="text-sm font-medium text-gray-700">{t('toggles.recurringBooking')}</span></label>
                             <label className="flex items-center gap-2 cursor-pointer select-none"><input type="checkbox" name="is_active" checked={formData.is_active} onChange={handleChange} className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500" /><span className="text-sm font-medium text-gray-700">{t('toggles.isActive')}</span></label>
@@ -695,12 +656,13 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     <div className="space-y-6">
                         <SectionHeader title={t('titles.features')} icon={CheckSquare} />
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-3">{t('labels.playTypes')}</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">{t('labels.playTypes')} <span className="text-red-500">*</span></label>
                             <div className="flex flex-wrap gap-2">
                                 {options.playTypes.map(type => (
-                                    <button key={type.id} type="button" onClick={() => handleMultiSelectToggle('venue_play_type', type.id)} className={`px-4 py-2 rounded-full text-sm border transition-all ${formData.venue_play_type.includes(type.id) ? 'bg-primary-100 border-primary-500 text-primary-700 font-bold shadow-sm' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{type.translations?.en?.name || type.name}</button>
+                                    <button key={type.id} type="button" onClick={() => handleMultiSelectToggle('venue_play_type', type.id)} className={`px-4 py-2 rounded-full text-sm border transition-all ${formData.venue_play_type.includes(type.id) ? 'bg-primary-100 border-primary-500 text-primary-700 font-bold shadow-sm' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{type.translations?.[i18n.language]?.name || type.translations?.en?.name || type.name}</button>
                                 ))}
                             </div>
+                            {errors.venue_play_type && <p className="text-red-500 text-xs mt-2">{errors.venue_play_type}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">{t('labels.amenities')}</label>
@@ -710,7 +672,7 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                                     return (
                                         <div key={item.id} onClick={() => handleMultiSelectToggle('amenities', item.id)} className={`cursor-pointer p-3 rounded-lg border flex items-center gap-3 transition-all select-none ${isSelected ? 'bg-primary-50 border-primary-500 shadow-sm' : 'bg-white border-gray-200 hover:border-primary-200 hover:bg-gray-50'}`}>
                                             <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${isSelected ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-400'}`}>{isSelected && <Check size={14} strokeWidth={3} />}</div>
-                                            <span className={`text-sm font-medium ${isSelected ? 'text-primary-800' : 'text-gray-600'}`}>{item.translations?.name || item.name}</span>
+                                            <span className={`text-sm font-medium ${isSelected ? 'text-primary-800' : 'text-gray-600'}`}>{item.translations?.[i18n.language]?.name || item.translations?.en?.name || item.name}</span>
                                         </div>
                                     );
                                 })}
@@ -720,7 +682,7 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                             <label className="block text-sm font-medium text-gray-700 mb-3">{t('labels.closedDays')}</label>
                             <div className="flex flex-wrap gap-2">
                                 {options.days.map(day => (
-                                    <button key={day.id} type="button" onClick={() => handleMultiSelectToggle('closed_days', day.id)} className={`px-4 py-2 rounded-lg text-sm border transition-all ${formData.closed_days.includes(day.id) ? 'bg-red-50 border-red-500 text-red-700 font-bold shadow-sm' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{day.translations?.en?.name || day.day}</button>
+                                    <button key={day.id} type="button" onClick={() => handleMultiSelectToggle('closed_days', day.id)} className={`px-4 py-2 rounded-lg text-sm border transition-all ${formData.closed_days.includes(day.id) ? 'bg-red-50 border-red-500 text-red-700 font-bold shadow-sm' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>{day.translations?.[i18n.language]?.name || day.translations?.en?.name || day.day}</button>
                                 ))}
                             </div>
                         </div>
@@ -733,17 +695,22 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                             {options.addons.map(addon => {
                                 const isSelected = formData.venue_addons.some(a => a.addon === addon.id);
                                 const currentData = formData.venue_addons.find(a => a.addon === addon.id) || {};
+                                const isMissingData = isSelected && (currentData.price === "" || currentData.min_number === "" || currentData.min_number === null);
+
                                 return (
                                     <div key={addon.id} className={`p-4 rounded-xl border transition-all ${isSelected ? 'bg-white border-primary-300 shadow-sm ring-1 ring-primary-100' : 'bg-white/50 border-gray-200'}`}>
                                         <div className="flex items-start gap-4">
                                             <div className="pt-1"><input type="checkbox" checked={isSelected} onChange={(e) => handleAddonToggle(addon.id, e.target.checked)} className="w-5 h-5 text-primary-600 rounded focus:ring-primary-500 border-gray-300 cursor-pointer" /></div>
                                             <div className="flex-1 w-full">
-                                                <h4 className={`font-semibold text-base ${isSelected ? 'text-primary-800' : 'text-gray-700'}`}>{addon.translations?.en?.name || addon.name}</h4>
+                                                <h4 className={`font-semibold text-base ${isSelected ? 'text-primary-800' : 'text-gray-700'}`}>{addon.translations?.[i18n.language]?.name || addon.translations?.en?.name || addon.name}</h4>
                                                 {isSelected && (
                                                     <div className="flex flex-col sm:flex-row gap-4 mt-4 animate-fadeIn">
-                                                        <div className="w-full sm:w-1/2"><MainInput label={t('labels.price')} type="number" icon={DollarSign} value={currentData.price || ''} onChange={(e) => handleAddonDetailChange(addon.id, 'price', e.target.value)} placeholder={t('placeholders.pricePlaceholder')} /></div>
-                                                        <div className="w-full sm:w-1/2"><MainInput label={t('labels.minNumber')} type="number" value={currentData.min_number || 0} onChange={(e) => handleAddonDetailChange(addon.id, 'min_number', e.target.value)} /></div>
+                                                        <div className="w-full sm:w-1/2"><MainInput label={t('labels.price') + " *"} type="text" icon={DollarSign} value={currentData.price || ''} onChange={(e) => handleAddonDetailChange(addon.id, 'price', e.target.value)} placeholder={t('placeholders.pricePlaceholder')} /></div>
+                                                        <div className="w-full sm:w-1/2"><MainInput label={t('labels.minNumber') + " *"} type="text" value={currentData.min_number === 0 ? "0" : (currentData.min_number || '')} onChange={(e) => handleAddonDetailChange(addon.id, 'min_number', e.target.value)} /></div>
                                                     </div>
+                                                )}
+                                                {errors.venue_addons && isMissingData && (
+                                                    <p className="text-red-500 text-xs mt-2">{t('messages.fillRequired')} ({t('labels.price')} & {t('labels.minNumber')})</p>
                                                 )}
                                             </div>
                                         </div>
@@ -756,15 +723,10 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     {/* 7. Images */}
                     <div className="space-y-4">
                         <SectionHeader title={t('titles.images')} icon={ImageIcon}/>
-                        <label
-                            className="aspect-square w-full h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 border-gray-300 hover:border-primary-500 cursor-pointer bg-white hover:bg-primary-50 hover:shadow-sm">
-                            <input type="file" hidden multiple ref={fileInputRef} accept="image/*"
-                                   onChange={handleImageSelect}/>
-                            <div className="p-3 bg-primary-100 rounded-full mb-3 text-primary-600"><UploadCloud
-                                className="w-6 h-6"/></div>
-                            <span
-                                className="text-xs text-gray-600 font-semibold">{t('toggles.clickToUpload')}</span><span
-                            className="text-[10px] text-gray-400 mt-1">{t('toggles.selectMultiple')}</span>
+                        <label className="aspect-square w-full h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-200 border-gray-300 hover:border-primary-500 cursor-pointer bg-white hover:bg-primary-50 hover:shadow-sm">
+                            <input type="file" hidden multiple ref={fileInputRef} accept="image/*" onChange={handleImageSelect}/>
+                            <div className="p-3 bg-primary-100 rounded-full mb-3 text-primary-600"><UploadCloud className="w-6 h-6"/></div>
+                            <span className="text-xs text-gray-600 font-semibold">{t('toggles.clickToUpload')}</span><span className="text-[10px] text-gray-400 mt-1">{t('toggles.selectMultiple')}</span>
                         </label>
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
                             {formData.images.map((item, index) => {
@@ -772,41 +734,25 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 const imgSrc = isObject ? item.preview : item;
                                 const isUploading = isObject && item.uploading;
                                 return (
-                                    <div key={index}
-                                         className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm">
-                                        <img src={imgSrc} alt={`Venue ${index}`}
-                                             className={`w-full h-full object-cover transition-opacity ${isUploading ? 'opacity-50' : 'opacity-100'}`}/>
-                                        {isUploading && (<div
-                                            className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                            <Loader2 className="animate-spin text-white w-8 h-8"/></div>)}
-                                        {isObject && !isUploading && item.serverUrl && (<div
-                                            className="absolute top-1 right-1 bg-green-500 text-white rounded-full p-0.5">
-                                            <Check size={12}/></div>)}
-                                        <div
-                                            className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all z-20">
-                                            <button type="button" onClick={() => removeImage(index)}
-                                                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-transform">
-                                                <Trash2 size={18}/></button>
+                                    <div key={index} className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm">
+                                        <img src={imgSrc} alt={`Venue ${index}`} className={`w-full h-full object-cover transition-opacity ${isUploading ? 'opacity-50' : 'opacity-100'}`}/>
+                                        {isUploading && (<div className="absolute inset-0 flex items-center justify-center bg-black/20"><Loader2 className="animate-spin text-white w-8 h-8"/></div>)}
+                                        {isObject && !isUploading && item.serverUrl && (<div className="absolute top-1 right-1 bg-green-500 text-white rounded-full p-0.5"><Check size={12}/></div>)}
+                                        <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all z-20">
+                                            <button type="button" onClick={() => removeImage(index)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform hover:scale-110 transition-transform"><Trash2 size={18}/></button>
                                         </div>
                                     </div>
                                 );
                             })}
-
                         </div>
                     </div>
 
                     <div className="md:flex gap-4 pt-6 border-t">
-                        <button type="button" onClick={onCancel}
-                                className="md:flex items-center justify-center hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800  font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
+                        <button type="button" onClick={onCancel} className="md:flex items-center justify-center hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}</button>
+                        <button type="submit" disabled={isSubmitting} className="flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base">
+                            {isSubmitting ? <Loader2 size={20} className="animate-spin"/> : <><Save size={20}/> {initialData ? t('buttons.update') : t('buttons.create')}</>}
                         </button>
-                        <button type="submit" disabled={isSubmitting}
-                                className=" flex items-center w-full justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm text-sm md:text-base">{isSubmitting ?
-                            <Loader2 size={20} className="animate-spin"/> : <><Save
-                                size={20}/> {initialData ? t('buttons.update') : t('buttons.create')}</>}</button>
-                        <button type="button" onClick={onCancel}
-                                className="flex-1 md:hidden bg-gray-100 w-full mt-3 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}
-                        </button>
-
+                        <button type="button" onClick={onCancel} className="flex-1 md:hidden bg-gray-100 w-full mt-3 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-colors text-sm md:text-base">{t('buttons.cancel')}</button>
                     </div>
 
                 </form>

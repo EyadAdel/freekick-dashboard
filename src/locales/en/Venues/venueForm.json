@@ -57,7 +57,8 @@
     "selectType": "Select Type",
     "selectSurface": "Select Surface",
     "selectMap": "Select on map",
-    "pricePlaceholder": "0.00"
+    "pricePlaceholder": "0.00",
+    "searchLocation": "Search for a location..."
   },
   "badges": {
     "english": "English",
