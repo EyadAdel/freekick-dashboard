@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useTranslation } from 'react-i18next';
 import { toast } from "react-toastify";
@@ -36,13 +36,14 @@ const TeamDetailView = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const {id}=useParams()
 
     // 1. Resolve Team ID
-    const teamFromState = location.state?.team;
-    const teamId = useMemo(() => {
-        return teamFromState?.id || 1;
-    }, [teamFromState?.id]);
-
+    // const teamFromState = location.state?.team;
+    // const teamId = useMemo(() => {
+    //     return teamFromState?.id || 1;
+    // }, [teamFromState?.id]);
+    const teamId=id
     // 2. Fetch Data
     const { team: fetchedTeam, refetch, isLoading: isFetchingDetails } = useTeam(teamId);
     const { handleEmailClick, handleWhatsAppClick } = useContact();
