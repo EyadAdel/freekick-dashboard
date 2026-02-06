@@ -6,9 +6,10 @@ export const citiesList = [
     { label: "Ras Al Khaimah", value: "Ras Al Khaimah" },
     { label: "Fujairah", value: "Fujairah" },
     { label: "Umm Al Quwain", value: "Umm Al Quwain" },
-    { label: "Alain", value: "Alain" }
+    { label: "Al Ain", value: "Al Ain" }
 ];
 
 export const citiesListService = {
     getAll: () => citiesList
 };
+
