@@ -670,9 +670,13 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                                 {options.amenities.map(item => {
                                     const isSelected = formData.amenities.includes(item.id);
                                     return (
-                                        <div key={item.id} onClick={() => handleMultiSelectToggle('amenities', item.id)} className={`cursor-pointer p-3 rounded-lg border flex items-center gap-3 transition-all select-none ${isSelected ? 'bg-primary-50 border-primary-500 shadow-sm' : 'bg-white border-gray-200 hover:border-primary-200 hover:bg-gray-50'}`}>
-                                            <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${isSelected ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-400'}`}>{isSelected && <Check size={14} strokeWidth={3} />}</div>
-                                            <span className={`text-sm font-medium ${isSelected ? 'text-primary-800' : 'text-gray-600'}`}>{item.translations?.[i18n.language]?.name || item.translations?.en?.name || item.name}</span>
+                                        <div key={item.id} onClick={() => handleMultiSelectToggle('amenities', item.id)}
+                                             className={`cursor-pointer p-3 rounded-lg border flex items-center gap-3 transition-all select-none ${isSelected ? 'bg-primary-50 border-primary-500 shadow-sm' : 'bg-white border-gray-200 hover:border-primary-200 hover:bg-gray-50'}`}>
+                                            <div
+                                                className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${isSelected ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-400'}`}>{isSelected &&
+                                                <Check size={14} strokeWidth={3}/>}</div>
+                                            <span className={`text-sm font-medium ${isSelected ? 'text-primary-800' : 'text-gray-600'}`}>{item.translations?.[i18n.language]?.name || item.translations?.en?.name || item.translations.name}</span>
+
                                         </div>
                                     );
                                 })}
