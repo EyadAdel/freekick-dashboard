@@ -313,22 +313,86 @@ const MainTable = ({
                                 <ChevronLeft size={18} />
                             </button>
 
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                            {(() => {
+                                const pageNumbers = [];
+                                const maxVisible = 7; // Maximum number of page buttons to show
+                                
+                                if (totalPages <= maxVisible) {
+                                    // Show all pages if total is less than or equal to maxVisible
+                                    for (let i = 1; i <= totalPages; i++) {
+                                        pageNumbers.push(i);
+                                    }
+                                } else {
+                                    // Always show first page
+                                    pageNumbers.push(1);
+                                    
+                                    let startPage, endPage;
+                                    
+                                    if (currentPage <= 3) {
+                                        // Near the beginning
+                                        startPage = 2;
+                                        endPage = 5;
+                                    } else if (currentPage >= totalPages - 2) {
+                                        // Near the end
+                                        startPage = totalPages - 4;
+                                        endPage = totalPages - 1;
+                                    } else {
+                                        // In the middle
+                                        startPage = currentPage - 1;
+                                        endPage = currentPage + 1;
+                                    }
+                                    
+                                    // Add ellipsis after first page if needed
+                                    if (startPage > 2) {
+                                        pageNumbers.push('ellipsis-start');
+                                    }
+                                    
+                                    // Add middle pages
+                                    for (let i = startPage; i <= endPage; i++) {
+                                        pageNumbers.push(i);
+                                    }
+                                    
+                                    // Add ellipsis before last page if needed
+                                    if (endPage < totalPages - 1) {
+                                        pageNumbers.push('ellipsis-end');
+                                    }
+                                    
+                                    // Always show last page
+                                    pageNumbers.push(totalPages);
+                                }
+                                
+                                return pageNumbers.map((page, index) => {
+                                    if (typeof page === 'string' && page.startsWith('ellipsis')) {
+                                        return (
+                                            <span key={page} className="px-2 text-gray-400">
+                                                ...
+                                            </span>
+                                        );
+                                    }
+                                    
+                                    return (
+                                        <button
+                                            key={page}
+                                            onClick={() => onPageChange(page)}
+                                            className={`w-8 h-8 rounded-full text-sm transition-all ${
+                                                currentPage === page
+                                                    ? 'bg-primary-500 text-white shadow-md'
+                                                    : 'text-secondary-600 hover:bg-primary-50 hover:text-primary-600'
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    );
+                                });
+                            })()}
 
-                                <button
-                                    key={page}
-                                    onClick={() => onPageChange(page)}
-                                    className={`w-8 h-8 rounded-full text-sm transition-all ${
-                                        currentPage === page
-                                            ? 'bg-primary-500 text-white shadow-md'
-                                            : 'text-secondary-600 hover:bg-primary-50 hover:text-primary-600'
-                                    }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
-
-
+                            <button
+                                onClick={() => onPageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="p-2 disabled:text-gray-300 hover:bg-gray-100 rounded transition-colors disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                            >
+                                <ChevronRight size={18} />
+                            </button>
                         </div>
                     </div>
                 )}
