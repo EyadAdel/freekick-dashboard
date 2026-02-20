@@ -29,7 +29,7 @@ import {
     MapPin, Phone, Mail, User, Clock,
     Layers, Save, X, Globe, UploadCloud, Trash2,
     CheckSquare, DollarSign, Loader2, Edit, Image as ImageIcon,
-    Shield, Check, ChevronDown, Crosshair, Calendar, AlertCircle, Map as MapIcon,
+    Shield, Check, ChevronDown, ChevronLeft, ChevronRight, Crosshair, Calendar, AlertCircle, Map as MapIcon,
     RefreshCw, Search
 } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -147,6 +147,17 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
     });
 
     const [options, setOptions] = useState({ amenities: [], playTypes: [], surfaceTypes: [], addons: [], days: [], owners: [], cities: [] });
+    const [showOwnerDropdown, setShowOwnerDropdown] = useState(false);
+    const [ownerSearchTerm, setOwnerSearchTerm] = useState('');
+    const [fetchingOwners, setFetchingOwners] = useState(false);
+    const [ownersPagination, setOwnersPagination] = useState({
+        currentPage: 1,
+        pageLimit: 20,
+        totalPages: 1,
+        totalCount: 0,
+        hasNext: false,
+        hasPrevious: false
+    });
     const [loadingOptions, setLoadingOptions] = useState(true);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -167,6 +178,16 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
     const [map, setMap] = useState(null);
     const autocompleteRef = useRef(null);
     const fileInputRef = useRef(null);
+    const ownerDropdownRef = useRef(null);
+    const ownerListRef = useRef(null);
+
+    const getOwnerDisplay = (owner) => {
+        if (!owner) return '';
+        const primaryName = owner.contact_name || owner.user_info?.name || t('options.unknown');
+        const pitchName = owner.pitch_name || t('options.noPitch');
+        const email = owner.email ? ` (${owner.email})` : '';
+        return `${primaryName} - ${pitchName}${email}`;
+    };
 
     // --- HELPER: PROCESS SERVER IMAGES ---
     const processImage = (imgObj) => {
@@ -175,17 +196,43 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         return typeof urlString === 'string' ? (urlString.startsWith('http') ? urlString : `${IMAGE_BASE_URL}${urlString}`) : null;
     };
 
+    const fetchOwners = useCallback(async (page = 1, search = '') => {
+        if (!RoleIsAdmin) return;
+        setFetchingOwners(true);
+        try {
+            const response = await stuffTypeListService.getStuffListByType('pitch_owner', {
+                page,
+                page_limit: ownersPagination.pageLimit,
+                search: search || ''
+            });
+            const ownersList = response.results || response.data?.results || response.data || [];
+
+            setOptions(prev => ({ ...prev, owners: Array.isArray(ownersList) ? ownersList : [] }));
+            setOwnersPagination(prev => ({
+                ...prev,
+                currentPage: page,
+                totalPages: Math.max(1, Math.ceil((response.count || 0) / prev.pageLimit)),
+                totalCount: response.count || 0,
+                hasNext: !!response.next,
+                hasPrevious: !!response.previous
+            }));
+        } catch (error) {
+            console.error("Failed to load owners", error);
+        } finally {
+            setFetchingOwners(false);
+        }
+    }, [RoleIsAdmin, ownersPagination.pageLimit]);
+
     // --- FETCH DATA ---
     useEffect(() => {
         const fetchAllOptions = async () => {
             try {
-                const [amenitiesRes, playTypesRes, surfaceRes, addonsRes, daysRes, ownersRes] = await Promise.all([
+                const [amenitiesRes, playTypesRes, surfaceRes, addonsRes, daysRes] = await Promise.all([
                     amenitiesService.getAllAmenities(),
                     venueSportsService.getAll({ all_languages: true }),
                     surfaceTypesService.getAllSurfaceTypes(),
                     addonsService.getAll({ all_languages: true }),
-                    daysOfWeekService.getAll({ all_languages: true }),
-                    stuffTypeListService.getStuffListByType('pitch_owner')
+                    daysOfWeekService.getAll({ all_languages: true })
                 ]);
                 const citiesRes = citiesListService.getAll();
                 setOptions({
@@ -194,7 +241,7 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     surfaceTypes: surfaceRes.results || surfaceRes || [],
                     addons: addonsRes.results || addonsRes || [],
                     days: daysRes.results || daysRes || [],
-                    owners: ownersRes.results || ownersRes || [],
+                    owners: [],
                     cities: citiesRes
                 });
             } catch (error) {
@@ -204,6 +251,31 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         };
         fetchAllOptions();
     }, [t]);
+
+    useEffect(() => {
+        if (!RoleIsAdmin) return;
+        fetchOwners(1, '');
+    }, [RoleIsAdmin, fetchOwners]);
+
+    useEffect(() => {
+        if (!RoleIsAdmin || !showOwnerDropdown) return;
+        const delay = setTimeout(() => {
+            fetchOwners(1, ownerSearchTerm);
+        }, 400);
+        return () => clearTimeout(delay);
+    }, [RoleIsAdmin, showOwnerDropdown, ownerSearchTerm, fetchOwners]);
+
+    useEffect(() => {
+        const onClickOutside = (event) => {
+            if (ownerDropdownRef.current && !ownerDropdownRef.current.contains(event.target)) {
+                setShowOwnerDropdown(false);
+            }
+        };
+        if (showOwnerDropdown) {
+            document.addEventListener('mousedown', onClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', onClickOutside);
+    }, [showOwnerDropdown]);
 
     // --- EDIT MODE POPULATE ---
     useEffect(() => {
@@ -333,6 +405,94 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         if (key === 'price') { if (value !== "" && !/^\d*\.?\d*$/.test(value)) return; }
         if (key === 'min_number') { if (value !== "" && !/^\d*$/.test(value)) return; }
         setFormData(prev => ({ ...prev, venue_addons: prev.venue_addons.map(item => item.addon === addonId ? { ...item, [key]: value } : item) }));
+    };
+
+    const scrollOwnerListToTop = () => {
+        if (ownerListRef.current) ownerListRef.current.scrollTop = 0;
+    };
+
+    const handleOwnerSelect = (ownerId) => {
+        setFormData(prev => ({ ...prev, owner: ownerId }));
+        if (errors.owner) setErrors(prev => ({ ...prev, owner: '' }));
+        setShowOwnerDropdown(false);
+    };
+
+    const handleOwnerNextPage = () => {
+        if (ownersPagination.hasNext && !fetchingOwners) {
+            fetchOwners(ownersPagination.currentPage + 1, ownerSearchTerm);
+            scrollOwnerListToTop();
+        }
+    };
+
+    const handleOwnerPreviousPage = () => {
+        if (ownersPagination.hasPrevious && !fetchingOwners) {
+            fetchOwners(ownersPagination.currentPage - 1, ownerSearchTerm);
+            scrollOwnerListToTop();
+        }
+    };
+
+    const handleOwnerPageClick = (pageNumber) => {
+        if (!fetchingOwners && pageNumber !== ownersPagination.currentPage) {
+            fetchOwners(pageNumber, ownerSearchTerm);
+            scrollOwnerListToTop();
+        }
+    };
+
+    const renderOwnerPagination = () => {
+        const { currentPage, totalPages, totalCount } = ownersPagination;
+        if (totalCount === 0) return null;
+
+        const pageNumbers = [];
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        for (let i = startPage; i <= endPage; i++) pageNumbers.push(i);
+
+        return (
+            <div className="px-3 py-2 border-t border-gray-100 bg-white">
+                <div className="flex items-center justify-between gap-2">
+                    <div className="text-xs text-gray-500">
+                        {totalCount} {t('labels.owner')}
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            type="button"
+                            onClick={handleOwnerPreviousPage}
+                            disabled={!ownersPagination.hasPrevious || fetchingOwners}
+                            className="p-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        {pageNumbers.map(page => (
+                            <button
+                                key={page}
+                                type="button"
+                                onClick={() => handleOwnerPageClick(page)}
+                                disabled={fetchingOwners}
+                                className={`min-w-[30px] h-7 px-2 rounded-md text-xs font-medium transition-colors ${
+                                    currentPage === page
+                                        ? 'bg-primary-600 text-white'
+                                        : 'text-gray-700 hover:bg-gray-100 border border-gray-300'
+                                } ${fetchingOwners ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleOwnerNextPage}
+                            disabled={!ownersPagination.hasNext || fetchingOwners}
+                            className="p-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     // --- GOOGLE MAP HANDLERS ---
@@ -484,6 +644,8 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
         </h3>
     );
 
+    const selectedOwner = options.owners.find(owner => String(owner.id) === String(formData.owner));
+console.log(options.owners,"optionsoptions")
     return (
         <div className="w-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
             <div className="bg-gradient-to-r from-primary-500 to-primary-700 px-4 py-4 md:px-8 md:py-6">
@@ -546,14 +708,73 @@ const VenuesForm = ({ onCancel, onSuccess, initialData = null }) => {
                     <div className="space-y-6">
                         <SectionHeader title={t('titles.locationContact')} icon={MapPin} />
                         {RoleIsAdmin && (
-                            <div className="flex flex-col">
+                            <div className="flex flex-col" ref={ownerDropdownRef}>
                                 <label className="text-sm font-medium text-gray-700 mb-1">{t('labels.owner')} <span className="text-red-500">*</span></label>
                                 <div className="relative">
-                                    <select name="owner" value={formData.owner} onChange={handleChange} className={`w-full pl-3 pr-10 py-2.5 border rounded-lg bg-white outline-none focus:border-primary-500 appearance-none text-sm text-gray-700 ${errors.owner ? 'border-red-500' : 'border-gray-300'}`}>
-                                        <option value="">{t('placeholders.selectOwner')}</option>
-                                        {options.owners.map(owner => (<option key={owner.id} value={owner.id}>{owner.contact_name || owner.user_info?.name || t('options.unknown')} - {owner.pitch_name || t('options.noPitch')} ({owner.email})</option>))}
-                                    </select>
-                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"/>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowOwnerDropdown(prev => !prev)}
+                                        className={`w-full pl-3 pr-10 py-2.5 border rounded-lg bg-white outline-none focus:border-primary-500 text-sm text-left text-gray-700 flex items-center justify-between ${errors.owner ? 'border-red-500' : 'border-gray-300'}`}
+                                    >
+                                        <span className="truncate">
+                                            {selectedOwner ? getOwnerDisplay(selectedOwner) : (formData.owner ? `${t('labels.owner')} #${formData.owner}` : t('placeholders.selectOwner'))}
+                                        </span>
+                                        <ChevronDown size={16} className={`text-gray-500 transition-transform ${showOwnerDropdown ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {showOwnerDropdown && (
+                                        <div className="absolute z-30 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+                                            <div className="p-2 border-b border-gray-100 bg-white sticky top-0 z-10">
+                                                <div className="relative">
+                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                                    <input
+                                                        type="text"
+                                                        value={ownerSearchTerm}
+                                                        onChange={(e) => setOwnerSearchTerm(e.target.value)}
+                                                        className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                                                        placeholder={t('placeholders.searchOwner', 'Search venue owner...')}
+                                                        autoFocus
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="max-h-72 overflow-y-auto" ref={ownerListRef}>
+                                                {fetchingOwners ? (
+                                                    <div className="p-5 text-center">
+                                                        <Loader2 className="w-5 h-5 text-primary-600 animate-spin mx-auto" />
+                                                        <p className="text-xs text-gray-500 mt-2">{t('messages.loading', 'Loading...')}</p>
+                                                    </div>
+                                                ) : options.owners.length === 0 ? (
+                                                    <div className="p-5 text-center text-gray-500 text-sm">
+                                                        {t('messages.noData', 'No owners found')}
+                                                    </div>
+                                                ) : (
+                                                    <div className="divide-y divide-gray-100">
+                                                        {options.owners.map(owner => {
+                                                            const isSelected = String(formData.owner) === String(owner.id);
+                                                            return (
+                                                                <button
+                                                                    key={owner.id}
+                                                                    type="button"
+                                                                    onClick={() => handleOwnerSelect(owner.id)}
+                                                                    className={`w-full text-left px-3 py-2.5 hover:bg-gray-50 transition-colors flex items-start justify-between gap-2 ${
+                                                                        isSelected ? 'bg-primary-50' : ''
+                                                                    }`}
+                                                                >
+                                                                    <span className={`text-sm ${isSelected ? 'text-primary-700 font-medium' : 'text-gray-700'}`}>
+                                                                        {getOwnerDisplay(owner)}
+                                                                    </span>
+                                                                    {isSelected && <Check size={14} className="text-primary-600 mt-0.5 flex-shrink-0" />}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {renderOwnerPagination()}
+                                        </div>
+                                    )}
                                 </div>
                                 {errors.owner && <p className="text-red-500 text-xs mt-1">{errors.owner}</p>}
                             </div>
