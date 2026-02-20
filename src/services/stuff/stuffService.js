@@ -7,13 +7,11 @@ export const stuffTypeListService = {
      * Path: /user/staff/{kind}
      * @param {string} kind - The type of staff (e.g., 'manager', 'employee')
      */
-    getStuffListByType: async (kind) => {
+    getStuffListByType: async (kind, params = {}) => {
         try {
-            // Construct the dynamic path
-            // If kind is provided, append it; otherwise use base path
-            const url = kind ? `/user/staff/?kind=${kind}` : '/user/staff/';
-
-            const response = await api.get(url);
+            const queryParams = { ...params };
+            if (kind) queryParams.kind = kind;
+            const response = await api.get('/user/staff/', { params: queryParams });
 
             // Return the data from the response
             return response.data;

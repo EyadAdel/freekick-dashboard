@@ -416,7 +416,6 @@ function AppsNotifications() {
                                         </span>
                                     )}
                                 </label>
-
                                 {/* Dropdown Trigger Button */}
                                 <button
                                     type="button"
@@ -431,7 +430,6 @@ function AppsNotifications() {
                                     </span>
                                     <ChevronDown className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${showUserSelect ? 'transform rotate-180' : ''}`} />
                                 </button>
-
                                 {/* Dropdown Content */}
                                 {showUserSelect && (
                                     <div className="mt-2 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
