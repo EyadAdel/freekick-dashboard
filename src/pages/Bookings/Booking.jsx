@@ -17,7 +17,10 @@ import { getImageUrl } from '../../utils/imageUtils.js';
 const Bookings = () => {
     const dispatch = useDispatch();
     const { t, i18n } = useTranslation('booking'); // Add this
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(() => {
+        const saved = sessionStorage.getItem('bookings_page');
+        return saved ? parseInt(saved, 10) : 1;
+    });
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [viewMode, setViewMode] = useState('list');
     const [sortConfig, setSortConfig] = useState({
@@ -106,6 +109,7 @@ const Bookings = () => {
         }
         setSortConfig({ key, order });
         setCurrentPage(1);
+        sessionStorage.setItem('bookings_page', 1);
     };
 
     const handleImageError = (e, fallbackContent) => {
@@ -256,15 +260,18 @@ const Bookings = () => {
     const handleSearch = (searchTerm) => {
         setFilters(prev => ({ ...prev, search: searchTerm }));
         setCurrentPage(1);
+        sessionStorage.setItem('bookings_page', 1);
     };
 
     const handleFilterChange = (newFilters) => {
         setFilters(prev => ({ ...prev, ...newFilters }));
         setCurrentPage(1);
+        sessionStorage.setItem('bookings_page', 1);
     };
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
+        sessionStorage.setItem('bookings_page', page);
     };
 
     const handleRefresh = () => {
