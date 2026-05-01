@@ -106,14 +106,25 @@ const Pitches = () => {
 
     const fetchVenuesData = async () => {
         try {
-            const response = await venuesService.getAllVenues({ page_limit: 1000 });
-            if (response && response.results) {
-                const formattedVenues = response.results.map((venue) => ({
-                    label: getTrans(venue.translations, currentLang) || venue.id,
-                    value: venue.id
-                }));
-                setVenuesData(formattedVenues);
+            let allVenues = [];
+            let page = 1;
+            while (true) {
+                const response = await venuesService.getAllVenues({ page_limit: 100, page });
+                if (response && response.results) {
+                    allVenues = [...allVenues, ...response.results];
+                    if (!response.next) break;
+                    page++;
+                } else break;
             }
+            const formattedVenues = allVenues.map((venue) => ({
+                label: venue.translations?.[currentLang]?.name
+                    || venue.translations?.en?.name
+                    || venue.translations?.name
+                    || venue.name
+                    || `Venue #${venue.id}`,
+                value: venue.id
+            }));
+            setVenuesData(formattedVenues);
         } catch (error) {
             console.error("Failed to fetch venues:", error);
         }
@@ -137,10 +148,17 @@ const Pitches = () => {
 
     const fetchGlobalData = async () => {
         try {
-            const response = await pitchesService.getAllPitchess({ page_limit: 10000 });
-            if (response && response.results) {
-                setAllPitches(response.results);
+            let allResults = [];
+            let page = 1;
+            while (true) {
+                const response = await pitchesService.getAllPitchess({ page_limit: 100, page });
+                if (response && response.results) {
+                    allResults = [...allResults, ...response.results];
+                    if (!response.next) break;
+                    page++;
+                } else break;
             }
+            setAllPitches(allResults);
         } catch (error) {
             console.error("Failed to fetch global pitch data:", error);
         }

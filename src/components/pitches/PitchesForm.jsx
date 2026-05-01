@@ -141,10 +141,17 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, pitchDetail
             const fetchVenues = async () => {
                 setIsLoadingVenues(true);
                 try {
-                    const response = await venuesService.getAllVenues({ page_limit: 1000 });
-                    const rawData = response.results || (Array.isArray(response) ? response : []);
+                    let allVenues = [];
+                    let page = 1;
+                    while (true) {
+                        const response = await venuesService.getAllVenues({ page_limit: 100, page });
+                        const results = response.results || (Array.isArray(response) ? response : []);
+                        allVenues = [...allVenues, ...results];
+                        if (!response.next) break;
+                        page++;
+                    }
 
-                    const formattedOptions = rawData.map(v => ({
+                    const formattedOptions = allVenues.map(v => ({
                         value: v.id,
                         label: i18n.language === 'ar'
                             ? (v.translations?.ar?.name || v.translations?.name || v.name)
@@ -169,10 +176,17 @@ const PitchesForm = ({ venuesData, pitchesList, onCancel, onSuccess, pitchDetail
             const fetchPitches = async () => {
                 setIsLoadingPitches(true);
                 try {
-                    const response = await pitchesService.getAllPitchess({ page_limit: 1000 });
-                    const rawData = response.results || (Array.isArray(response) ? response : []);
+                    let allPitches = [];
+                    let page = 1;
+                    while (true) {
+                        const response = await pitchesService.getAllPitchess({ page_limit: 100, page });
+                        const results = response.results || (Array.isArray(response) ? response : []);
+                        allPitches = [...allPitches, ...results];
+                        if (!response.next) break;
+                        page++;
+                    }
 
-                    const formattedOptions = rawData.map(p => ({
+                    const formattedOptions = allPitches.map(p => ({
                         value: p.id,
                         label: i18n.language === 'ar'
                             ? (p.translations?.ar?.name || p.translations?.name || p.name)
