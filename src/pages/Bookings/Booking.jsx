@@ -79,17 +79,25 @@ const Bookings = () => {
         );
     };
 
-    const formatDateTime = (dateTime) => {
+    const formatDate = (dateTime) => {
         if (!dateTime) return 'N/A';
         const date = new Date(dateTime);
         return date.toLocaleDateString(i18n.language, {
-            year: 'numeric',
             month: 'short',
             day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'UTC'  // Add this line
+            year: 'numeric',
+            timeZone: 'UTC'
         });
+    };
+
+    const formatTime = (dateTime) => {
+        if (!dateTime) return 'N/A';
+        const timePart = dateTime.split('T')[1];
+        const [hours, minutes] = timePart.split(':');
+        const hour = parseInt(hours);
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour.toString().padStart(2, '0')}:${minutes} ${period}`;
     };
     const handleViewBooking = (booking) => {
         navigate(`/bookings/book-details/${booking.id}`);
@@ -214,12 +222,32 @@ const Bookings = () => {
             )
         },
         {
-            header: t('table.dateAdded'),
+            header: t('table.createdDate'),
             accessor: 'created_at',
             sortable: true,
             sortKey: 'created_at',
             render: (row) => (
-                <span className="text-gray-600">{formatDateTime(row.created_at)}</span>
+                <span className="text-gray-600">{formatDate(row.created_at)}</span>
+            )
+        },
+        {
+            header: t('table.bookingDate'),
+            accessor: 'start_time',
+            sortable: false,
+            render: (row) => (
+                <span className="text-gray-600">{formatDate(row.start_time)}</span>
+            )
+        },
+        {
+            header: t('table.time'),
+            accessor: 'time',
+            sortable: false,
+            render: (row) => (
+                <span className="text-gray-600 whitespace-nowrap">
+                    {row.start_time && row.end_time
+                        ? `${formatTime(row.start_time)} - ${formatTime(row.end_time)}`
+                        : 'N/A'}
+                </span>
             )
         },
         {
